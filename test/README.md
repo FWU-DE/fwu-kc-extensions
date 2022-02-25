@@ -40,6 +40,10 @@ When no Sector identifier URI is configured for the mapper, the host of the vali
 
 ### Testing
 
+The Keycloak is configured with two test users and four clients with *Pairwise subject identifier* mappers configured. The exact configuration of the mappers can be seen in the followin diagram.
+
+<img src="../docs/pseudo/test_setup.png" width="70%"/>
+
 You can use the [Postman](https://postman.io) collection '[`FWU.postman_collection.json`](FWU.postman_collection.json)' with the environment '[`FWU.postman_environment.json`](FWU.postman_environment.json)' for testing purposes:
 1. `GET` the sector identifiers to see what the mapper will use
 2. `GET` the user ID of a user for later
