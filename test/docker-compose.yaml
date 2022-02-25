@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  keycloak:
+    container_name: keycloak
+    depends_on:
+    - sector_identifiers
+    image: quay.io/keycloak/keycloak:16.1.1
+    ports:
+    - 18080:8080
+    - 8787:8787
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: keycloak
+      KEYCLOAK_IMPORT: /opt/keycloak/imports/fwu-realm.json
+    command: ["-b", "0.0.0.0", "--debug", "*:8787"]
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
+    networks:
+    - fwunet
+  
+  sector_identifiers:
+    container_name: sector_identifiers
+    image: python:3
+    ports:
+    - 8000:8000
+    command: python3 -m http.server 8000
+    volumes:
+    - ./sector_identifiers.json:/sector_identifiers.json
+    networks:
+    - fwunet
+
+networks:
+  fwunet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.18.0.0/16
