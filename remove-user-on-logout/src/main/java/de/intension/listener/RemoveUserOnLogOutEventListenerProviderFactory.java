@@ -1,0 +1,46 @@
+package de.intension.listener;
+
+import org.keycloak.Config.Scope;
+import org.keycloak.events.EventListenerProvider;
+import org.keycloak.events.EventListenerProviderFactory;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
+
+/**
+ * Factory for the remove user on logout event listener.
+ */
+public class RemoveUserOnLogOutEventListenerProviderFactory
+    implements EventListenerProviderFactory
+{
+
+    @Override
+    public EventListenerProvider create(KeycloakSession session)
+    {
+        return new RemoveUserOnLogOutEventListenerProvider(session);
+    }
+
+    @Override
+    public String getId()
+    {
+        return "remove-user-on-logout";
+    }
+
+    @Override
+    public void init(Scope config)
+    {
+        // nothing to do
+    }
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory)
+    {
+        // nothing to do
+    }
+
+    @Override
+    public void close()
+    {
+        // nothing to do
+    }
+
+}
