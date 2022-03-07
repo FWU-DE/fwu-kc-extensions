@@ -79,7 +79,7 @@ public class RemoveUserOnLogOutEventListenerProvider
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation)
     {
-        // no action on Admin events.
+        // no action on admin events.
     }
 
     @Override
