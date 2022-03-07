@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>FWU Keycloak extensions</name>
+
+  <groupId>de.intension</groupId>
+  <artifactId>fwu-kc-extensions</artifactId>
+  <version>${revision}${changelist}</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>remove-user-on-logout</module>
+  </modules>
+
+  <properties>
+    <keycloak.version>16.1.1</keycloak.version>
+    <revision>1.0</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-core</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-server-spi</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-server-spi-private</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-services</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <archive>
+              <manifest>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              </manifest>
+              <manifestEntries>
+                <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi, org.keycloak.keycloak-server-spi-private, org.keycloak.keycloak-services</Dependencies>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <distributionManagement>
+    <repository>
+      <id>repo.fwu.eu</id>
+      <name>Project Repository - Releases</name>
+      <url>https://fwu-nexus.intension.eu/repository/maven-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>repo.fwu.eu</id>
+      <name>Project Repository - Snapshots</name>
+      <url>https://fwu-nexus.intension.eu/repository/maven-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>
