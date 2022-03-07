@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '*/pom.xml'
 
 jobs:
   package:
