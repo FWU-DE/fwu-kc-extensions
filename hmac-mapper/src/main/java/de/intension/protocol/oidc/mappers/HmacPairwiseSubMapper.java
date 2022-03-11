@@ -42,8 +42,9 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
         try {
             var mac = Mac.getInstance(algorithm);
             mac.init(secretKeySpec);
-            var input = sectorIdentifier + localSub;
-            return UUID.nameUUIDFromBytes(mac.doFinal(input.getBytes(UTF_8))).toString();
+            mac.update(sectorIdentifier.getBytes(UTF_8));
+            mac.update(localSub.getBytes(UTF_8));
+            return UUID.nameUUIDFromBytes(mac.doFinal()).toString();
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new IllegalStateException("Generating sub failed", e);
         }
@@ -53,7 +54,9 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
     public List<ProviderConfigProperty> getAdditionalConfigProperties()
     {
         List<ProviderConfigProperty> configProperties = new LinkedList<>();
-        configProperties.add(PairwiseSubMapperHelper.createSaltConfig());
+        var saltConfig = PairwiseSubMapperHelper.createSaltConfig();
+        saltConfig.setSecret(true);
+        configProperties.add(saltConfig);
         configProperties.add(createHashAlgorithmConfig());
         return configProperties;
     }
@@ -101,7 +104,7 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
 
     private static String getHashAlgorithm(ProtocolMapperModel mappingModel)
     {
-        return mappingModel.getConfig().get(HASH_ALGORITHM_PROP_NAME);
+        return mappingModel.getConfig().getOrDefault(HASH_ALGORITHM_PROP_NAME, null);
     }
 
     private static ProviderConfigProperty createHashAlgorithmConfig()
