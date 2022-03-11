@@ -7,7 +7,7 @@
 
   <groupId>de.intension</groupId>
   <artifactId>fwu-kc-extensions</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -17,8 +17,6 @@
 
   <properties>
     <keycloak.version>16.1.1</keycloak.version>
-    <revision>1.0</revision>
-    <changelist>-SNAPSHOT</changelist>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
