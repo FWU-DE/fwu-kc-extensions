@@ -26,10 +26,9 @@ services:
   
   sector_identifiers:
     container_name: sector_identifiers
-    image: python:3
+    image: lipanski/docker-static-website:latest
     ports:
-    - 8000:8000
-    command: python3 -m http.server 8000
+    - 8000:3000
     volumes:
     - ./sector_identifiers.json:/sector_identifiers.json
     networks:
