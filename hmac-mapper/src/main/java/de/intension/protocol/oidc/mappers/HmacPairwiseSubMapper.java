@@ -74,9 +74,6 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
         }
         // Check that hash algorithm is set
         String algorithm = getHashAlgorithm(mapperModel);
-        if (algorithm == null) {
-            throw new ProtocolMapperConfigException("Hash algorithm not available on mappingModel. Please update protocol mapper");
-        }
         try {
             Mac.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
