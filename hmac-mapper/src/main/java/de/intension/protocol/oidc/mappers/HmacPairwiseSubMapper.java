@@ -21,6 +21,9 @@ import org.keycloak.protocol.oidc.mappers.AbstractPairwiseSubMapper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 
+/**
+ * 
+ */
 public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
 {
 
@@ -99,7 +102,7 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
 
     private static String getHashAlgorithm(ProtocolMapperModel mappingModel)
     {
-        return mappingModel.getConfig().getOrDefault(HASH_ALGORITHM_PROP_NAME, null);
+        return mappingModel.getConfig().get(HASH_ALGORITHM_PROP_NAME);
     }
 
     private static ProviderConfigProperty createHashAlgorithmConfig()
