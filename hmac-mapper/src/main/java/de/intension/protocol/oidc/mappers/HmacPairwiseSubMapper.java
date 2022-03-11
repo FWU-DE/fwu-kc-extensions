@@ -54,9 +54,7 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
     public List<ProviderConfigProperty> getAdditionalConfigProperties()
     {
         List<ProviderConfigProperty> configProperties = new LinkedList<>();
-        var saltConfig = PairwiseSubMapperHelper.createSaltConfig();
-        saltConfig.setSecret(true);
-        configProperties.add(saltConfig);
+        configProperties.add(PairwiseSubMapperHelper.createSaltConfig());
         configProperties.add(createHashAlgorithmConfig());
         return configProperties;
     }
