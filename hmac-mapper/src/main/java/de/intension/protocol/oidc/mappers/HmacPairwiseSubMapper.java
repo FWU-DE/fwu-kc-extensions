@@ -22,7 +22,12 @@ import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 
 /**
+ * Pairwise identifier mapper using
+ * <a href="https://datatracker.ietf.org/doc/html/rfc2104">HMAC</a>.
+ * This OIDC mapper will replace the {@code sub} field in the token with a HMAC-hashed user ID
+ * instead of the user ID.
  * 
+ * @see https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#mac-algorithms
  */
 public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
 {
@@ -53,6 +58,9 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
         }
     }
 
+    /**
+     * Adds salt and hash algorithm to the mapper configuration properties.
+     */
     @Override
     public List<ProviderConfigProperty> getAdditionalConfigProperties()
     {
@@ -62,6 +70,9 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
         return configProperties;
     }
 
+    /**
+     * Creates a new salt if missing and checks whether the configured hash algorithm is valid.
+     */
     @Override
     public void validateAdditionalConfig(KeycloakSession session, RealmModel realm, ProtocolMapperContainerModel mapperContainer,
                                          ProtocolMapperModel mapperModel)
@@ -100,11 +111,19 @@ public class HmacPairwiseSubMapper extends AbstractPairwiseSubMapper
         return "Calculates a pairwise subject identifier using a salted HMAC hash. See OpenID Connect specification for more info about pairwise subject identifiers.";
     }
 
+    /**
+     * Get the configured HMAC hash algorithm.
+     */
     private static String getHashAlgorithm(ProtocolMapperModel mappingModel)
     {
         return mappingModel.getConfig().get(HASH_ALGORITHM_PROP_NAME);
     }
 
+    /**
+     * Creates the mapper's configuration property for the HMAC hash algorithm.
+     * 
+     * @return Config property item
+     */
     private static ProviderConfigProperty createHashAlgorithmConfig()
     {
         var property = new ProviderConfigProperty();
