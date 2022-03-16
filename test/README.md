@@ -3,17 +3,17 @@
 Run the script `start_for_testing.sh` in the root directory to start the Keycloak.
 This will start a Keycloak docker container and others specified in the [`docker-compose.yaml`](docker-compose.yaml).
 
-## Pairwise subject identifier
+## HMAC Pairwise subject identifier
 
-The clients `slowpoke` and `drowzee` in the realm `fwu` use a *Pairwise subject identifier* mapper to pseudonymize User IDs when a token is issued. For validating a request, the Sector identifier URI 'http://172.18.0.2:8000/sector_identifiers.json' provided by the docker container [`sector_identifiers`](docker-compose.yaml#L20) is used.
+The clients `slowpoke` and `drowzee` in the realm `fwu` use a *HMAC Pairwise subject identifier* mapper to pseudonymize User IDs when a token is issued. The algorithm used to pseudonymize the ID is part of the [HMAC](https://datatracker.ietf.org/doc/html/rfc2104) family - the exact algorithm can be configured for on the mapper. For validating a request, the Sector identifier URI 'http://172.18.0.2:8000/sector_identifiers.json' provided by the docker container [`sector_identifiers`](docker-compose.yaml#L20) is used.
 
-The client `grimer` also uses a *Pairwise subject identifier* mapper, but doesn't specify a Sector identifier URI. Thus the root URL of the client is used to hash the user ID.
+The client `grimer` also uses a *HMAC Pairwise subject identifier* mapper, but doesn't specify a Sector identifier URI. Thus the root URL of the client is used to hash the user ID.
 
 <img src="../docs/pseudo/ppid_sector_id.svg" width="70%"/>
 
 ### Configuration
 
-Prerequesite is a unique host for the redirect URIs. A client which has multiple host names configured via valid redirect URIs cannot be used for the *Pairwise subject identifier* mapper!
+Prerequesite is a unique host for the redirect URIs. A client which has multiple host names configured via valid redirect URIs cannot be used for the *HMAC Pairwise subject identifier* mapper!
 
 #### Invalid example
 
@@ -33,14 +33,14 @@ Create a mapper for the desired client and enter your desired values.
 
 ### How it's working
 
-The *Pairwise subject identifier* mapper always hashes the user's ID with a host and the configured salt. This value is then mapped to the `sub` attribute in the returned token. 
+The *HMAC Pairwise subject identifier* mapper always hashes the user's ID with a host and the configured salt. This value is then mapped to the `sub` attribute in the returned token.
 Meaning, when two clients have the same host and salt, they will return the same `sub` for a given user ID. 
 
 When no Sector identifier URI is configured for the mapper, the host of the valid redirect URIs configured in the client will be used.
 
 ### Testing
 
-The Keycloak is configured with two test users and four clients with *Pairwise subject identifier* mappers configured. The exact configuration of the mappers can be seen in the followin diagram.
+The Keycloak is configured with two test users and four clients with *HMAC Pairwise subject identifier* mappers configured. The exact configuration of the mappers can be seen in the following diagram.
 
 <img src="../docs/pseudo/test_setup.png" width="70%"/>
 
