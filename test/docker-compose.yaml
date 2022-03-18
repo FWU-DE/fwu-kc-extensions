@@ -19,16 +19,16 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
-    - "../remove-user-on-logout/target/remove-user-on-logout-1.0-SNAPSHOT.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
+    - "../remove-user-on-logout/target/remove-user-on-logout-1.0.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
+    - "../hmac-mapper/target/hmac-mapper-1.0.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
     networks:
     - fwunet
   
   sector_identifiers:
     container_name: sector_identifiers
-    image: python:3
+    image: lipanski/docker-static-website:latest
     ports:
-    - 8000:8000
-    command: python3 -m http.server 8000
+    - 8000:3000
     volumes:
     - ./sector_identifiers.json:/sector_identifiers.json
     networks:

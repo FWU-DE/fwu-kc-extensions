@@ -125,86 +125,6 @@
   },
   "clients": [
     {
-      "id": "264ff312-bad2-4a41-a2e2-34ac016108ba",
-      "clientId": "account",
-      "name": "${client_account}",
-      "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/fwu/account/",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/fwu/account/*"],
-      "webOrigins": [],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {},
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": false,
-      "nodeReRegistrationTimeout": 0,
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
-      "id": "f8d08e93-9009-4ac4-98fe-07b5277617d2",
-      "clientId": "account-console",
-      "name": "${client_account-console}",
-      "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/fwu/account/",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/realms/fwu/account/*"],
-      "webOrigins": [],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {
-        "pkce.code.challenge.method": "S256"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": false,
-      "nodeReRegistrationTimeout": 0,
-      "protocolMappers": [
-        {
-          "id": "c88ff42a-a9e0-4be9-a2a0-508a3138aee3",
-          "name": "audience resolve",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-audience-resolve-mapper",
-          "consentRequired": false,
-          "config": {}
-        }
-      ],
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
       "id": "b7be13fc-aa86-4d0f-b580-a78c57d07d6a",
       "clientId": "admin-cli",
       "name": "${client_admin-cli}",
@@ -321,10 +241,11 @@
           "id": "ee2271aa-5633-4850-a53b-b290888190fb",
           "name": "Hypnosis",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-sha256-pairwise-sub-mapper",
+          "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
             "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
+            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
           }
         }
@@ -389,9 +310,10 @@
           "id": "6099743d-12b7-4ce3-b2c4-ca412ae0fc5d",
           "name": "Smog",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-sha256-pairwise-sub-mapper",
+          "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
+            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
           }
         }
@@ -457,9 +379,10 @@
           "id": "608b8580-9bcd-4723-be12-1affd60bcc3a",
           "name": "Disable",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-sha256-pairwise-sub-mapper",
+          "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
+            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "21c5de01-01c4-4a35-ac06-0094abe2c057"
           }
         }
@@ -610,10 +533,11 @@
           "id": "8456f259-fc07-429d-83ea-e07f444922b3",
           "name": "Amnesia",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-sha256-pairwise-sub-mapper",
+          "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
             "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
+            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
           }
         }
@@ -1188,7 +1112,8 @@
             "saml-user-property-mapper",
             "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-hmac-pairwise-sub-mapper"
           ]
         }
       },
@@ -1211,6 +1136,7 @@
             "oidc-usermodel-attribute-mapper",
             "saml-user-attribute-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "oidc-hmac-pairwise-sub-mapper",
             "oidc-address-mapper",
             "saml-user-property-mapper",
             "saml-role-list-mapper",
