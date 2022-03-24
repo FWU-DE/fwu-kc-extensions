@@ -544,15 +544,15 @@
 				"type": "text/javascript",
 				"exec": [
 					"const echoPostRequest = {",
-					"    url: `${pm.collectionVariables.get('authUrl')}/realms/master/protocol/openid-connect/token`,",
+					"    url: `${pm.environment.get('authUrl')}/realms/master/protocol/openid-connect/token`,",
 					"    method: 'POST',",
 					"    header: 'Content-Type:application/x-www-form-urlencoded',",
 					"    body: {",
 					"        mode: 'urlencoded',",
 					"        urlencoded: [",
 					"            { key: 'grant_type', value: 'password' },",
-					"            { key: 'username', value: pm.collectionVariables.get('adminUsername') },",
-					"            { key: 'password', value: pm.collectionVariables.get('adminPassword') },",
+					"            { key: 'username', value: pm.environment.get('adminUsername') },",
+					"            { key: 'password', value: pm.environment.get('adminPassword') },",
 					"            { key: 'client_id', value: 'admin-cli' },",
 					"        ]",
 					"    }",
@@ -575,20 +575,6 @@
 					""
 				]
 			}
-		}
-	],
-	"variable": [
-		{
-			"key": "authUrl",
-			"value": "http://localhost:18080/auth"
-		},
-		{
-			"key": "adminUsername",
-			"value": "admin"
-		},
-		{
-			"key": "adminPassword",
-			"value": "keycloak"
 		}
 	]
 }
