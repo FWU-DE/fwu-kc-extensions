@@ -19,6 +19,7 @@ Create a mapper for the desired client and enter your desired values.
 1. The **Sector Identifier URI** can be used to group clients and must return a JSON array with all the hosts for the clients which use this URI.
    ![Example array of sector identifiers](../docs/pseudo/sector_identifiers.png)
 2. The **Salt** is the second factor used when hashing the user ID with `SHA-256`. When no salt is configured on creation a random one will be generated.
+3. Finally, the selected algorithm defines the length of the generated hash.
 
 ## How it's working
 
