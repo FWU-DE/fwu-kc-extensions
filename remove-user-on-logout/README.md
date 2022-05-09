@@ -1,4 +1,4 @@
-# remove-user-on-logout
+# Remove user on logout
 
 This extension is to make sure the user is removed from keycloak on the user logout and session expiration.
 

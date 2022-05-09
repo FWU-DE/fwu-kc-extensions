@@ -26,13 +26,21 @@ services:
   
   sector_identifiers:
     container_name: sector_identifiers
-    image: lipanski/docker-static-website:latest
+    image: python:3
     ports:
-    - 8000:3000
+    - 8000:8000
+    command: python3 -m http.server 8000
     volumes:
     - ./sector_identifiers.json:/sector_identifiers.json
     networks:
     - fwunet
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl --fail http://172.18.0.2:8000/sector_identifiers.json"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
     
   postgres:
     container_name: postgres
