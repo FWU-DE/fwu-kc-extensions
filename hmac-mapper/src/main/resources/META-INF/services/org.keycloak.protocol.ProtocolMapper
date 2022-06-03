@@ -1,1 +1,2 @@
 de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper
+de.intension.protocol.oidc.mappers.HmacExtPairwiseSubMapper
