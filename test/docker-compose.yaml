@@ -19,6 +19,7 @@ services:
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
+    - "./config-script.cli:/opt/jboss/startup-scripts/config-script.cli"
     networks:
     - fwunet
   postgres:
