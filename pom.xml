@@ -14,6 +14,7 @@
   <modules>
     <module>remove-user-on-logout</module>
     <module>hmac-mapper</module>
+      <module>whitelist-authenticator</module>
   </modules>
 
   <properties>
