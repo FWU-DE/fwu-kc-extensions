@@ -24,6 +24,7 @@ services:
     - "../whitelist-authenticator/target/whitelist-authenticator-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
     networks:
     - fwunet
+
   postgres:
     container_name: postgres
     image: postgres
