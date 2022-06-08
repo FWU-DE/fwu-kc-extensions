@@ -1,5 +1,6 @@
 package de.intension.validation;
 
+import de.intension.protocol.oidc.mappers.HmacExtPairwiseSubMapper;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.validation.ClientValidationProvider;
 import org.keycloak.validation.ClientValidationProviderFactory;
@@ -9,7 +10,8 @@ import org.keycloak.validation.ClientValidationProviderFactory;
  */
 public class CustomClientValidationProviderFactory implements ClientValidationProviderFactory {
 
-    private final ClientValidationProvider provider = new CustomClientValidationProvider();
+    private final HmacExtPairwiseSubMapper hmacExtPairwiseSubMapper = new HmacExtPairwiseSubMapper();
+    private final ClientValidationProvider provider = new CustomClientValidationProvider(hmacExtPairwiseSubMapper);
 
     @Override
     public ClientValidationProvider create(KeycloakSession session) {

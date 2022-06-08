@@ -16,7 +16,12 @@ import static org.keycloak.protocol.oidc.utils.PairwiseSubMapperValidator.PAIRWI
 
 public class CustomClientValidationProvider extends DefaultClientValidationProvider {
 
-    private final HmacExtPairwiseSubMapper hmacExtPairwiseSubMapper = new HmacExtPairwiseSubMapper();
+    private final HmacExtPairwiseSubMapper hmacExtPairwiseSubMapper;
+
+    public CustomClientValidationProvider(HmacExtPairwiseSubMapper hmacExtPairwiseSubMapper){
+        this.hmacExtPairwiseSubMapper = hmacExtPairwiseSubMapper;
+    }
+
     private static final String PAIRWISE_FIELD_ID = "pairWise";
 
     private static final List<String> REDIRECT_ERRORS_TO_IGNORE =
