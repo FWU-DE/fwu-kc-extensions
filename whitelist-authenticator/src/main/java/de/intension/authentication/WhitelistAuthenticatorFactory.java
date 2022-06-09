@@ -14,12 +14,12 @@ import java.util.List;
  * Factory to create custom {@link WhitelistAuthenticator}.
  */
 public class WhitelistAuthenticatorFactory
-        implements AuthenticatorFactory
+    implements AuthenticatorFactory
 {
 
-    public static final String                 PROVIDER_ID            = "whitelist-authenticator";
-    public static final String                 LIST_OF_ALLOWED_IDP    = "listOfAllowedIdPs";
-    private final       WhitelistAuthenticator whitelistAuthenticator = new WhitelistAuthenticator();
+    public static final String           PROVIDER_ID            = "whitelist-authenticator";
+    public static final String           LIST_OF_ALLOWED_IDP    = "listOfAllowedIdPs";
+    private final WhitelistAuthenticator whitelistAuthenticator = new WhitelistAuthenticator();
 
     @Override
     public Authenticator create(KeycloakSession keycloakSession)
@@ -73,9 +73,8 @@ public class WhitelistAuthenticatorFactory
     public List<ProviderConfigProperty> getConfigProperties()
     {
         return List.of(
-                new ProviderConfigProperty(LIST_OF_ALLOWED_IDP, "Whitelist of IdPs", "Configuration of allowed IdPs for specific clients.",
-                                           ProviderConfigProperty.TEXT_TYPE, null)
-        );
+                       new ProviderConfigProperty(LIST_OF_ALLOWED_IDP, "Whitelist of IdPs", "Configuration of allowed IdPs for specific clients.",
+                               ProviderConfigProperty.TEXT_TYPE, null));
     }
 
     @Override

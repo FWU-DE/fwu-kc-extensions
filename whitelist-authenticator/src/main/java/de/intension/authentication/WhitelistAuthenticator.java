@@ -1,9 +1,11 @@
 package de.intension.authentication;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.authentication.dto.WhitelistEntry;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -15,14 +17,17 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 
-import javax.ws.rs.core.Response;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.intension.authentication.dto.WhitelistEntry;
 
 /**
  * Check KC_IDP_HINT against a configured whitelist.
  */
 public class WhitelistAuthenticator
-        implements Authenticator, AdapterConstants
+    implements Authenticator, AdapterConstants
 {
 
     private static final Logger logger = Logger.getLogger(WhitelistAuthenticator.class);
@@ -81,8 +86,7 @@ public class WhitelistAuthenticator
         if (allowedIdPs != null && !allowedIdPs.isEmpty()) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
-                List<WhitelistEntry> entries = objectMapper.readValue(allowedIdPs, new TypeReference<>()
-                {
+                List<WhitelistEntry> entries = objectMapper.readValue(allowedIdPs, new TypeReference<>() {
 
                 });
                 for (WhitelistEntry entry : entries) {
