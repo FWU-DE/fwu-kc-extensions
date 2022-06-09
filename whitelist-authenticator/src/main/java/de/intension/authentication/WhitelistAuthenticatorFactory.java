@@ -11,73 +11,86 @@ import org.keycloak.provider.ProviderConfigProperty;
 import java.util.List;
 
 /**
- * Check KC_IDP_HINT against a configured whitelist.
+ * Factory to create custom {@link WhitelistAuthenticator}.
  */
-public class WhitelistAuthenticatorFactory implements AuthenticatorFactory {
+public class WhitelistAuthenticatorFactory
+        implements AuthenticatorFactory
+{
 
-    public static final String PROVIDER_ID = "whitelist-authenticator";
-    public static final String LIST_OF_ALLOWED_IDP = "listOfAllowedIdPs";
-    private final WhitelistAuthenticator whitelistAuthenticator = new WhitelistAuthenticator();
+    public static final String                 PROVIDER_ID            = "whitelist-authenticator";
+    public static final String                 LIST_OF_ALLOWED_IDP    = "listOfAllowedIdPs";
+    private final       WhitelistAuthenticator whitelistAuthenticator = new WhitelistAuthenticator();
 
     @Override
-    public Authenticator create(KeycloakSession keycloakSession) {
+    public Authenticator create(KeycloakSession keycloakSession)
+    {
         return whitelistAuthenticator;
     }
 
     @Override
-    public String getId() {
+    public String getId()
+    {
         return PROVIDER_ID;
     }
 
     @Override
-    public String getDisplayType() {
+    public String getDisplayType()
+    {
         return "Whitelist Authenticator";
     }
 
     @Override
-    public String getHelpText() {
+    public String getHelpText()
+    {
         return "Checks selected IdP against a whitelist";
     }
 
     @Override
-    public String getReferenceCategory() {
+    public String getReferenceCategory()
+    {
         return "IdP-whitelist";
     }
 
     @Override
-    public boolean isConfigurable() {
+    public boolean isConfigurable()
+    {
         return true;
     }
 
     @Override
-    public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
+    public AuthenticationExecutionModel.Requirement[] getRequirementChoices()
+    {
         return REQUIREMENT_CHOICES;
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
+    public boolean isUserSetupAllowed()
+    {
         return false;
     }
 
     @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        //TODO validate input
+    public List<ProviderConfigProperty> getConfigProperties()
+    {
         return List.of(
-                new ProviderConfigProperty(LIST_OF_ALLOWED_IDP, "Whitelist of IdPs", "Configuration of allowed IdPs for specific clients.", ProviderConfigProperty.TEXT_TYPE, null)
+                new ProviderConfigProperty(LIST_OF_ALLOWED_IDP, "Whitelist of IdPs", "Configuration of allowed IdPs for specific clients.",
+                                           ProviderConfigProperty.TEXT_TYPE, null)
         );
     }
 
     @Override
-    public void init(Config.Scope scope) {
+    public void init(Config.Scope scope)
+    {
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
+    public void postInit(KeycloakSessionFactory keycloakSessionFactory)
+    {
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
     }
-
 
 }

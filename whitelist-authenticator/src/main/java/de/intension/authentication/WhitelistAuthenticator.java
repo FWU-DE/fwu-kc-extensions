@@ -18,66 +18,82 @@ import org.keycloak.services.ErrorPage;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
-public class WhitelistAuthenticator implements Authenticator, AdapterConstants {
+/**
+ * Check KC_IDP_HINT against a configured whitelist.
+ */
+public class WhitelistAuthenticator
+        implements Authenticator, AdapterConstants
+{
 
     private static final Logger logger = Logger.getLogger(WhitelistAuthenticator.class);
 
     @Override
-    public void authenticate(AuthenticationFlowContext context) {
+    public void authenticate(AuthenticationFlowContext context)
+    {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         String providerId = context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
-        if(!getAllowedIdPs(context, clientId).contains(providerId)){
-            String info = "IdP with providerId=" + providerId + " is not configured for clientId=" + clientId;
+        if (!isAllowedIdP(context, clientId, providerId)) {
+            String info = new Formatter().format("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId).toString();
             logger.info(info);
-            Response response = ErrorPage.error(context.getSession(),context.getAuthenticationSession(), Response.Status.FORBIDDEN, info);
+            Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(), Response.Status.FORBIDDEN, info);
             context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, response);
-        } else {
+        }
+        else {
             context.success();
         }
     }
 
     @Override
-    public void action(AuthenticationFlowContext context) {
+    public void action(AuthenticationFlowContext context)
+    {
     }
 
     @Override
-    public boolean requiresUser() {
+    public boolean requiresUser()
+    {
         return false;
     }
 
     @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
+    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user)
+    {
         return true;
     }
 
     @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
+    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user)
+    {
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
     }
 
     /**
-     * Get all allowed Identity Providers for a given clientId.
+     * Check combination of clientId and providerId against configured whitelist.
      */
-    private List<String> getAllowedIdPs(AuthenticationFlowContext context, String clientId){
+    private boolean isAllowedIdP(AuthenticationFlowContext context, String clientId, String providerId)
+    {
         AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
         Map<String, String> config = authenticatorConfig.getConfig();
         String allowedIdPs = config.get(WhitelistAuthenticatorFactory.LIST_OF_ALLOWED_IDP);
-        if(allowedIdPs != null && !allowedIdPs.isEmpty()){
+        if (allowedIdPs != null && !allowedIdPs.isEmpty()) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
-                List<WhitelistEntry> entries = objectMapper.readValue(allowedIdPs, new TypeReference<>(){});
-                for(WhitelistEntry entry : entries){
-                    if(clientId.equals(entry.getClientId())){
-                        return entry.getListOfIdPs();
+                List<WhitelistEntry> entries = objectMapper.readValue(allowedIdPs, new TypeReference<>()
+                {
+
+                });
+                for (WhitelistEntry entry : entries) {
+                    if (clientId.equals(entry.getClientId())) {
+                        return entry.getListOfIdPs().contains(providerId);
                     }
                 }
             } catch (JsonProcessingException e) {
                 logger.error("Invalid whitelist format for IdP configuration", e);
             }
         }
-       return new ArrayList<>();
+        return false;
     }
 }
