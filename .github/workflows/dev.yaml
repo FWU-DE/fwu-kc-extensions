@@ -22,6 +22,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/target/site/jacoco-aggregate/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: Those are rookie numbers!!
           min-coverage-overall: 60
           min-coverage-changed-files: 80
+          debug-mode: false
