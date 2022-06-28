@@ -1,7 +1,6 @@
 # FWU Keycloak extensions
 
 [![Test and deploy](https://github.com/FWU-DE/fwu-kc-extensions/actions/workflows/main.yaml/badge.svg)](https://github.com/FWU-DE/fwu-kc-extensions/actions/workflows/main.yaml)
-![Coverage](.github/badges/jacoco.svg)
 
 This Java x Maven project holds the Keycloak extensions for customizations of the [FWU](https://fwu.de/) Keycloak.
 The goal of these extensions are to make the authentication more secure and anonymous.
