@@ -42,10 +42,10 @@ jobs:
             echo "Release $TAG already exists!"
           fi
       - name: Publish release
-        if: ${{ steps.check-release.version != '' }}
+        if: ${{ steps.check-release.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.check-release.version }}
-          artifacts: "remove-user-on-logout/target/remove-user-on-logout-${{ steps.check-release.version }}.jar,hmac-mapper/target/hmac-mapper-${{ steps.check-release.version }}.jar"
+          tag: ${{ steps.check-release.outputs.version }}
+          artifacts: "remove-user-on-logout/target/remove-user-on-logout-${{ steps.check-release.outputs.version }}.jar,hmac-mapper/target/hmac-mapper-${{ steps.check-release.outputs.version }}.jar"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
