@@ -109,14 +109,9 @@
 
   <distributionManagement>
     <repository>
-      <id>repo.fwu.eu</id>
-      <name>Project Repository - Releases</name>
-      <url>https://fwu-nexus.intension.eu/repository/maven-releases</url>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/FWU-DE/fwu-kc-extensions</url>
     </repository>
-    <snapshotRepository>
-      <id>repo.fwu.eu</id>
-      <name>Project Repository - Snapshots</name>
-      <url>https://fwu-nexus.intension.eu/repository/maven-snapshots</url>
-    </snapshotRepository>
   </distributionManagement>
 </project>
