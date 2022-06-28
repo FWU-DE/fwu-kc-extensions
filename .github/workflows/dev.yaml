@@ -16,22 +16,3 @@ jobs:
           java-version: 11
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
-      - name: Check release exists
-        id: check-release
-        run: |
-          TAG=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
-          response=$(curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG)
-          message=$(echo $response | jq -r .message)
-          if [ "$message" == "Not Found" ]; then
-            echo "::set-output name=version::$TAG"
-          else
-            echo "Release $TAG already exists!"
-          fi
-      - name: Publish release
-        if: ${{ steps.check-release.outputs.version != '' }}
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.check-release.outputs.version }}
-          artifacts: "remove-user-on-logout/target/remove-user-on-logout-${{ steps.check-release.outputs.version }}.jar,hmac-mapper/target/hmac-mapper-${{ steps.check-release.outputs.version }}.jar"
-          bodyFile: "CHANGELOG.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
