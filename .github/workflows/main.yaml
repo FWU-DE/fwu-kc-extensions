@@ -36,7 +36,7 @@ jobs:
           TAG=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
           response=$(curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG)
           message=$(echo $response | jq -r .message)
-          if [ "$message" != "Not Found" ]; then
+          if [ "$message" == "Not Found" ]; then
             echo "::set-output name=version::$TAG"
           else
             echo "Release $TAG already exists!"
