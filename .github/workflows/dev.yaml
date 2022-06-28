@@ -1,4 +1,4 @@
-name: "Build package keycloak extensions"
+name: "Test feature"
 on:
   push:
     branches-ignore:
