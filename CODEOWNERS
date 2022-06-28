@@ -1,0 +1,10 @@
+# Below is a list of team members' GitHub handles who are suggested reviewers for contributions to this repository.
+#
+# These names are just suggestions. It is fine to have your changes reviewed by someone else.
+
+* @mstreicher @lprakashintension @ingokuba
+/hmac-mapper @ingokuba
+/hmac-mapper/src/main/java/de/intension/protocol/oidc/mappers/HmacExtPairwiseSubMapper.java @mkunz-intension
+/hmac-mapper/src/main/java/de/intension/validation @mkunz-intension
+/remove-user-on-logout @lprakashintension
+/test @ingokuba
