@@ -18,9 +18,9 @@ jobs:
         run: mvn --batch-mode --update-snapshots package
       - name: Add coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.2
+        uses: madrapps/jacoco-report@v1.1
         with:
-          paths: ${{ github.workspace }}/target/site/jacoco-aggregate/jacoco.xml
+          path: ${{ github.workspace }}/target/site/jacoco-aggregate/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Those are rookie numbers!!
           min-coverage-overall: 60
