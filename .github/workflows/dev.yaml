@@ -16,8 +16,12 @@ jobs:
           java-version: 11
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
-      - name: Upload JaCoCo coverage report
-        uses: actions/upload-artifact@v2
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.2
         with:
-          name: jacoco-report
-          path: target/site/jacoco-aggregate/
+          paths: ${{ github.workspace }}/target/site/jacoco/jacoco-aggregate/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Those are rookie numbers!!
+          min-coverage-overall: 60
+          min-coverage-changed-files: 80
