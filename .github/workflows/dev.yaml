@@ -20,7 +20,7 @@ jobs:
         id: jacoco
         uses: madrapps/jacoco-report@v1.2
         with:
-          paths: target/site/jacoco-aggregate/jacoco.xml
+          paths: ${{ github.workspace }}/target/site/jacoco-aggregate/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Those are rookie numbers!!
           min-coverage-overall: 60
