@@ -45,8 +45,8 @@ We use GitHub issues to track public bugs. Report a bug by opening a new issue; 
 
 The project is a multi-module Maven project. When creating a new module, make sure to add:
 
-1. `README.md` explaining the extension.
-2. Add the generated package to `artifacts` in the step "Publish release" of the pipeline defined in [`main.yaml`](.github/workflows/main.yaml).
+1. Make sure the folder has the same name as the module name in the `pom.xml`.
+2. `README.md` explaining the extension.
 
 ## Automatic release process
 
