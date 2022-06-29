@@ -41,6 +41,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.check-release.outputs.version }}
-          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          artifacts: ${{ steps.check-release.outputs.artifacts }}
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
