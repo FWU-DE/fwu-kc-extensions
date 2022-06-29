@@ -7,11 +7,10 @@
   <parent>
     <groupId>de.intension</groupId>
     <artifactId>fwu-kc-extensions</artifactId>
-    <version>1.1</version>
+    <version>${projectVersion}</version>
   </parent>
 
-  <artifactId>remove-user-on-logout</artifactId>
-  <version>1.1</version>
+  <artifactId>remove-user-on-logout</artifactId>  
   
   <description>Extension to remove users on logout or session expiration</description>
   <packaging>jar</packaging>

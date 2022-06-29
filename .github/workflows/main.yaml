@@ -1,4 +1,4 @@
-name: "Build package keycloak extensions"
+name: "Test and deploy"
 on:
   push:
     branches:
@@ -15,10 +15,10 @@ jobs:
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
-          java-version: 11          
+          java-version: 11
       - name: Build with Maven
         run: mvn --batch-mode package
-        
+
   publish:
     needs: package
     runs-on: ubuntu-latest
@@ -28,11 +28,33 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-          server-id: repo.fwu.eu
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
       - name: Build with Maven
-        run: mvn --batch-mode clean deploy --fail-never
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+        run: mvn --batch-mode clean deploy
+      - name: Check release exists
+        id: check-release
+        run: |
+          TAG=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
+          response=$(curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG)
+          message=$(echo $response | jq -r .message)
+          if [ "$message" == "Not Found" ]; then
+            echo "::set-output name=version::$TAG"
+            modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
+            for module in $modules
+            do
+              if [ "$module" != "fwu-kc-extensions" ]; then
+                echo "$module/target/$module-$TAG.jar" >> modules.txt
+              fi
+            done
+            csv=$(paste -s -d , modules.txt)
+            echo "::set-output name=artifacts::$csv"
+          else
+            echo "Release $TAG already exists!"
+          fi
+      - name: Publish release
+        if: ${{ steps.check-release.outputs.version != '' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.check-release.outputs.version }}
+          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          bodyFile: "CHANGELOG.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
