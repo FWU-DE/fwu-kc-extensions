@@ -42,7 +42,7 @@ jobs:
             for module in $modules
             do
               if [ "$module" != "fwu-kc-extensions" ]; then
-                echo "$module/target/$module-${{ steps.check-release.outputs.version }}.jar" >> modules.txt
+                echo "$module/target/$module-$TAG.jar" >> modules.txt
               fi
             done
             csv=$(paste -s -d , modules.txt)
