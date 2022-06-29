@@ -41,6 +41,13 @@ We use GitHub issues to track public bugs. Report a bug by opening a new issue; 
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
 
+## Creating a new module
+
+The project is a multi-module Maven project. When creating a new module, make sure to add:
+
+1. `README.md` explaining the extension.
+2. Add the generated package to `artifacts` in the step "Publish release" of the pipeline defined in [`main.yaml`](.github/workflows/main.yaml).
+
 ## Automatic release process
 
 We use [semantic versioning](https://semver.org/) defined in `projectVersion` in [`pom.xml`](pom.xml).
