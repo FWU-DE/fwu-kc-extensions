@@ -29,3 +29,7 @@ All changes related to the new version are tagged with `#NEW_V2`.
 ### Remove user on logout
 
 It holds the customization to remove the user on logout or session expiration. For more details please check [here](./remove-user-on-logout/README.md).
+
+## Contributing
+
+To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
