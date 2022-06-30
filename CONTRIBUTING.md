@@ -52,4 +52,5 @@ The project is a multi-module Maven project. When creating a new module, make su
 
 We use [semantic versioning](https://semver.org/) defined in `projectVersion` in [`pom.xml`](pom.xml).
 When this version is changed a new release will be created with the next [main](https://github.com/FWU-DE/fwu-kc-extensions/actions/workflows/main.yaml) pipeline.
+The pipeline will deploy the Maven artifacts to GitHub packages aswell as create a GitHub release with the new version and attach the module artifacts to it.
 Make sure to update [`CHANGELOG.md`](CHANGELOG.md) when creating a new release.
