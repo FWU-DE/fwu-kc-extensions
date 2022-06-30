@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - 'pom.xml'
       - '*/pom.xml'
 
 jobs:
@@ -28,10 +29,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Build with Maven
-        run: mvn --batch-mode clean deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check release exists
         id: check-release
         run: |
@@ -52,6 +49,11 @@ jobs:
           else
             echo "Release $TAG already exists!"
           fi
+      - name: Build with Maven
+        if: ${{ steps.check-release.outputs.version != '' }}
+        run: mvn --batch-mode clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish release
         if: ${{ steps.check-release.outputs.version != '' }}
         uses: ncipollo/release-action@v1
