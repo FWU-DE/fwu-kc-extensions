@@ -246,7 +246,8 @@
           "config": {
             "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
+            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
+            "pairwiseLocalSubIdentifier": "username"
           }
         }
       ],
@@ -313,8 +314,10 @@
           "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
-            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
+            "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
+            "pairwiseSubHashAlgorithm": "HmacSHA3-256",
+            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
+            "pairwiseLocalSubIdentifier": "username"
           }
         }
       ],
@@ -382,8 +385,10 @@
           "protocolMapper": "oidc-hmac-pairwise-sub-mapper",
           "consentRequired": false,
           "config": {
+            "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "21c5de01-01c4-4a35-ac06-0094abe2c057"
+            "pairwiseSubAlgorithmSalt": "21c5de01-01c4-4a35-ac06-0094abe2c057",
+            "pairwiseLocalSubIdentifier": "username"
           }
         }
       ],
@@ -538,147 +543,8 @@
           "config": {
             "sectorIdentifierUri": "http://172.18.0.2:8000/sector_identifiers.json",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
-          }
-        }
-      ],
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
-      "id": "ad5a6800-e24b-11ec-8fea-0242ac120002",
-      "clientId": "applicy_ext",
-      "name": "Applicy (ext)",
-      "rootUrl": "https://applicy.org/wiki",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/applicy"],
-      "webOrigins": [],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {
-        "id.token.as.detached.signature": "false",
-        "saml.assertion.signature": "false",
-        "saml.force.post.binding": "false",
-        "saml.multivalued.roles": "false",
-        "saml.encrypt": "false",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "backchannel.logout.revoke.offline.tokens": "false",
-        "saml.server.signature": "false",
-        "saml.server.signature.keyinfo.ext": "false",
-        "use.refresh.tokens": "true",
-        "exclude.session.state.from.auth.response": "false",
-        "oidc.ciba.grant.enabled": "false",
-        "saml.artifact.binding": "false",
-        "backchannel.logout.session.required": "true",
-        "client_credentials.use_refresh_token": "false",
-        "saml_force_name_id_format": "false",
-        "require.pushed.authorization.requests": "false",
-        "saml.client.signature": "false",
-        "tls.client.certificate.bound.access.tokens": "false",
-        "saml.authnstatement": "false",
-        "display.on.consent.screen": "false",
-        "saml.onetimeuse.condition": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "protocolMappers": [
-        {
-          "id": "fdbbb43e-e24b-11ec-8fea-0242ac120002",
-          "name": "Pseudo (ext)",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-hmac-ext-pairwise-sub-mapper",
-          "consentRequired": false,
-          "config": {
-            "sectorIdentifierUri": "http://a-static-url.de/sector_identifiers.json",
-            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
-          }
-        }
-      ],
-      "defaultClientScopes": ["web-origins", "roles", "profile", "email"],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
-      "id": "4aa28538-e24d-11ec-8fea-0242ac120002",
-      "clientId": "progrant_ext",
-      "name": "Progrant (ext)",
-      "rootUrl": "https://progrant.com/index.php",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "redirectUris": ["/progrant"],
-      "webOrigins": [],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {
-        "id.token.as.detached.signature": "false",
-        "saml.assertion.signature": "false",
-        "saml.force.post.binding": "false",
-        "saml.multivalued.roles": "false",
-        "saml.encrypt": "false",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "backchannel.logout.revoke.offline.tokens": "false",
-        "saml.server.signature": "false",
-        "saml.server.signature.keyinfo.ext": "false",
-        "use.refresh.tokens": "true",
-        "exclude.session.state.from.auth.response": "false",
-        "oidc.ciba.grant.enabled": "false",
-        "saml.artifact.binding": "false",
-        "backchannel.logout.session.required": "true",
-        "client_credentials.use_refresh_token": "false",
-        "saml_force_name_id_format": "false",
-        "require.pushed.authorization.requests": "false",
-        "saml.client.signature": "false",
-        "tls.client.certificate.bound.access.tokens": "false",
-        "saml.authnstatement": "false",
-        "display.on.consent.screen": "false",
-        "saml.onetimeuse.condition": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "protocolMappers": [
-        {
-          "id": "5ba39af2-e24d-11ec-8fea-0242ac120002",
-          "name": "Pseudo (ext)",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-hmac-ext-pairwise-sub-mapper",
-          "consentRequired": false,
-          "config": {
-            "sectorIdentifierUri": "http://a-static-url.de/sector_identifiers.json",
-            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
-            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e"
+            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
+            "pairwiseLocalSubIdentifier": "username"
           }
         }
       ],

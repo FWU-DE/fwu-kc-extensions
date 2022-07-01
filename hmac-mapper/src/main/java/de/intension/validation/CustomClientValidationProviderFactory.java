@@ -1,25 +1,31 @@
 package de.intension.validation;
 
-import de.intension.protocol.oidc.mappers.HmacExtPairwiseSubMapper;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.validation.ClientValidationProvider;
 import org.keycloak.validation.ClientValidationProviderFactory;
 
-/**
- * Custom client validation factory to Support {@link de.intension.protocol.oidc.mappers.HmacExtPairwiseSubMapper} feature.
- */
-public class CustomClientValidationProviderFactory implements ClientValidationProviderFactory {
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 
-    private final HmacExtPairwiseSubMapper hmacExtPairwiseSubMapper = new HmacExtPairwiseSubMapper();
-    private final ClientValidationProvider provider = new CustomClientValidationProvider(hmacExtPairwiseSubMapper);
+/**
+ * Custom client validation factory to Support
+ * {@link de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper} feature.
+ */
+public class CustomClientValidationProviderFactory
+    implements ClientValidationProviderFactory
+{
+
+    private final HmacPairwiseSubMapper    hmacPairwiseSubMapper = new HmacPairwiseSubMapper();
+    private final ClientValidationProvider provider              = new CustomClientValidationProvider(hmacPairwiseSubMapper);
 
     @Override
-    public ClientValidationProvider create(KeycloakSession session) {
+    public ClientValidationProvider create(KeycloakSession session)
+    {
         return provider;
     }
 
     @Override
-    public String getId() {
+    public String getId()
+    {
         return "custom-client-validation";
     }
 }
