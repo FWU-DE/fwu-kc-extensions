@@ -2,8 +2,6 @@ version: '3.7'
 services:
   keycloak:
     container_name: keycloak
-    depends_on:
-    - sector_identifiers
     image: quay.io/keycloak/keycloak:16.1.1
     ports:
     - 18080:8080
@@ -21,28 +19,8 @@ services:
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
-    - "./config-script.cli:/opt/jboss/startup-scripts/config-script.cli"
     networks:
     - fwunet
-
-  sector_identifiers:
-    container_name: sector_identifiers
-    image: python:3
-    ports:
-    - 8000:8000
-    command: python3 -m http.server 8000
-    volumes:
-    - ./sector_identifiers.json:/sector_identifiers.json
-    networks:
-    - fwunet
-    healthcheck:
-      test:
-        ["CMD-SHELL", "curl --fail http://172.18.0.2:8000/sector_identifiers.json"]
-      interval: 10s
-      timeout: 30s
-      retries: 5
-      start_period: 10s
-
   postgres:
     container_name: postgres
     image: postgres

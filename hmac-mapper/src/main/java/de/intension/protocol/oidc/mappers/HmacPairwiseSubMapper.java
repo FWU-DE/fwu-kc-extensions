@@ -25,7 +25,6 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
-import org.keycloak.protocol.oidc.mappers.AbstractPairwiseSubMapper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
 import org.keycloak.protocol.oidc.utils.PairwiseSubMapperUtils;
 import org.keycloak.protocol.oidc.utils.PairwiseSubMapperValidator;
@@ -54,6 +53,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     private static final String LOCAL_SUB_IDENTIFIER_PROP_NAME     = "pairwiseLocalSubIdentifier";
     private static final String LOCAL_SUB_IDENTIFIER_PROP_LABEL    = "Local sub identifier";
     private static final String LOCAL_SUB_IDENTIFIER_PROP_HELP     = "Local sub identifier is used when calculating the pairwise subject identifier. The identifier should match the attribute name of the keycloak user";
+
+    private static final String SECTOR_IDENTIFIER_PROP_HELP        = "This is used to group different clients. Should be a valid URL where the hostname of the URL is used for hashing.";
 
     public static final String  PAIRWISE_MISSING_SECTOR_IDENTIFIER = "pairwiseMissingSectorIdentifier";
 
@@ -204,7 +205,9 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     public List<ProviderConfigProperty> getConfigProperties()
     {
         List<ProviderConfigProperty> configProperties = new LinkedList<>();
-        configProperties.add(PairwiseSubMapperHelper.createSectorIdentifierConfig());
+        ProviderConfigProperty sectorIdentifierConfigProperty = PairwiseSubMapperHelper.createSectorIdentifierConfig();
+        sectorIdentifierConfigProperty.setHelpText(SECTOR_IDENTIFIER_PROP_HELP);
+        configProperties.add(sectorIdentifierConfigProperty);
         configProperties.addAll(getAdditionalConfigProperties());
         return configProperties;
     }
@@ -212,7 +215,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     @Override
     public String getId()
     {
-        return "oidc-" + getIdPrefix() + AbstractPairwiseSubMapper.PROVIDER_ID_SUFFIX;
+        return "oidc-" + getIdPrefix() + "-pairwise-subject-mapper";
     }
 
     @Override

@@ -128,7 +128,7 @@ class HmacPairwiseSubMapperTest
     }
 
     /**
-     * GIVEN: a user, same salt, hash algorithm, sector identifier
+     * GIVEN: a user, different salt, hash algorithm, sector identifier
      * WHEN: sub created twice with same user with different local sub value
      * THEN: resulting subject value is not same
      */
@@ -140,6 +140,25 @@ class HmacPairwiseSubMapperTest
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USER_NAME), null,
                                                               mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
         ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, "Azhdfopek", SECTOR_IDENTIFIER);
+        AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), anotherSaltProtocolMapper, null,
+                                                               mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
+
+        assertNotEquals(accessToken.getSubject(), accessToken2.getSubject());
+    }
+    
+    /**
+     * GIVEN: a user, same salt, hash algorithm, sector identifier
+     * WHEN: sub created twice with same user with different sector identifier sub value
+     * THEN: resulting subject value is not same
+     */
+    @Test
+    void should_generate_different_subject_value_when_different_sectorIdentifier()
+    {
+        HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
+
+        AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USER_NAME), null,
+                                                              mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
+        ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT, "http://www.example.de");
         AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), anotherSaltProtocolMapper, null,
                                                                mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
@@ -332,7 +351,7 @@ class HmacPairwiseSubMapperTest
         throws Exception
     {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        assertEquals("oidc-hmac-pairwise-sub-mapper", mapper.getId());
+        assertEquals("oidc-hmac-pairwise-subject-mapper", mapper.getId());
     }
 
     /**
