@@ -26,11 +26,10 @@ This OIDC mapper can be used to pseudonymize one of the attributes of user like 
 
 It holds the customization to remove the user on logout or session expiration. For more details please check [here](./remove-user-on-logout/README.md).
 
-## POC - Whitelist Authenticator
+### Whitelist Authenticator
 
-This Authenticator checks valid combinations of Client ID and KC_IDP_HINT information.
+This Authenticator checks valid combinations of Client ID and `KC_IDP_HINT` information.
 For more details please check [here](./whitelist-authenticator/README.md).
-
 
 ## Contributing
 
