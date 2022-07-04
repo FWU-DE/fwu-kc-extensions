@@ -10,7 +10,7 @@ To simplify the proof of concept, the whitelist will be stored as a simple JSON-
 
 **Structure:**
 
-List of JSON-Objects having to attributes
+List of JSON-Objects having two attributes
 1. `clientId`: Client ID from Keycloak client configuration
 2. `listOfIdPs`: JSON-Array with Identity Provider alias
 
