@@ -7,7 +7,11 @@ All notable changes to this project will be documented here.
 
 ## Version [1.0.1]
 
-- Fixed the issue in generating the sub value based on the configured local sub value
+- Removed old HMAC Pairwise mapper
+- Refactored new HMAC Pairwise mapper
+  - uses hostname of sector identifier URI
+  - sector identifier URI return value not validated anymore
+  - possibility to encode any user property or attribute
 
 ## Version [1.0.0]
 Initial release containing following keycloak extensions
