@@ -12,19 +12,13 @@ This will start a Keycloak docker container and others specified in the [`docker
 
 ## Features
 
-### HMAC Pairwise subject identifier
-
-This OIDC mapper can be used to pseudonymize the user ID for different clients. For more details please check [here](./hmac-mapper/README.md).
-
 ### HMAC Pairwise subject with static sector identifier
 
-This is an extended version of the **HMAC Pairwise subject identifier** with the following additional features:
+This OIDC mapper can be used to pseudonymize one of the attributes of user like `id`, `username` for different clients and has the following features. For more details please check [here](./hmac-mapper/README.md)  
+
 1. Field `sectorIdentifier` is mandatory
 2. Field `sectorIdentifier` has to be still a valid URI but must not link to a JSON-File
 3. If `sectorIdentifier` links to a JSON-File, it's content will be completely ignored
-
-For more details please check [here](./hmac-mapper/README.md).
-All changes related to the new version are tagged with `#NEW_V2`.
 
 ### Remove user on logout
 

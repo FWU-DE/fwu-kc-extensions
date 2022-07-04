@@ -1,5 +1,0 @@
-embed-server --std-out=echo --admin-only=true --server-config=standalone-ha.xml
-    /subsystem=keycloak-server/spi=clientValidation:add()
-    /subsystem=keycloak-server/spi=clientValidation/provider=custom-client-validation:add(enabled=true)
-    /subsystem=keycloak-server/spi=clientValidation/provider=default:add(enabled=false)
-stop-embedded-server
