@@ -9,7 +9,7 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: keycloak
-      KEYCLOAK_IMPORT: /opt/keycloak/imports/fwu-realm.json
+      KEYCLOAK_IMPORT: /opt/keycloak/imports/whitelist_realm.json,/opt/keycloak/imports/fwu-realm.json
       DB_ADDR: postgres
       DB_USER: keycloak
       DB_PASSWORD: password
@@ -17,10 +17,14 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
+    - "./whitelist_realm.json:/opt/keycloak/imports/whitelist_realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
+    - "./config-script.cli:/opt/jboss/startup-scripts/config-script.cli"
+    - "../whitelist-authenticator/target/whitelist-authenticator-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
     networks:
     - fwunet
+
   postgres:
     container_name: postgres
     image: postgres

@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "19a7ef4b-5bef-4852-ba4e-eba3d17aba0a",
+		"name": "FWU - whitelist auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login with valid kc_idp_hint",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Body matches string\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Sign in to your account\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=fullAccess&redirect_uri=http://localhost:18080&kc_idp_hint=facebook",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"realms",
+						"whitelist",
+						"protocol",
+						"openid-connect",
+						"auth"
+					],
+					"query": [
+						{
+							"key": "response_type",
+							"value": "code"
+						},
+						{
+							"key": "client_id",
+							"value": "fullAccess"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "http://localhost:18080"
+						},
+						{
+							"key": "kc_idp_hint",
+							"value": "facebook"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login with invalid kc_idp_hint",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"pm.test(\"Body matches string\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"IdP with providerId=facebook is not configured for clientId=restrictedAccess\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=restrictedAccess&redirect_uri=http://localhost:18080&kc_idp_hint=facebook",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"realms",
+						"whitelist",
+						"protocol",
+						"openid-connect",
+						"auth"
+					],
+					"query": [
+						{
+							"key": "response_type",
+							"value": "code"
+						},
+						{
+							"key": "client_id",
+							"value": "restrictedAccess"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "http://localhost:18080"
+						},
+						{
+							"key": "kc_idp_hint",
+							"value": "facebook"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{currentAccessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const echoPostRequest = {",
+					"    url: `${pm.environment.get('authUrl')}/realms/master/protocol/openid-connect/token`,",
+					"    method: 'POST',",
+					"    header: 'Content-Type:application/x-www-form-urlencoded',",
+					"    body: {",
+					"        mode: 'urlencoded',",
+					"        urlencoded: [",
+					"            { key: 'grant_type', value: 'password' },",
+					"            { key: 'username', value: pm.environment.get('adminUsername') },",
+					"            { key: 'password', value: pm.environment.get('adminPassword') },",
+					"            { key: 'client_id', value: 'admin-cli' },",
+					"        ]",
+					"    }",
+					"};",
+					"pm.sendRequest(echoPostRequest, function (err, res) {",
+					"    console.log(err ? err : res.json());",
+					"    if (err === null) {",
+					"        console.log('Saving the token and expiry date')",
+					"        pm.environment.set('currentAccessToken', res.json().access_token)",
+					"    }",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

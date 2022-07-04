@@ -8,7 +8,9 @@ The goal of these extensions are to make the authentication more secure and anon
 ## Setup for testing
 
 Run the script `start_for_testing.sh` in the root directory to start the Keycloak.
-This will start a Keycloak docker container and others specified in the [`docker-compose.yaml`](test/docker-compose.yaml).
+
+This will start a Keycloak docker container and others specified in the [`docker-compose.yaml`](./test/docker-compose.yaml).
+
 
 ## Features
 
@@ -23,6 +25,12 @@ This OIDC mapper can be used to pseudonymize one of the attributes of user like 
 ### Remove user on logout
 
 It holds the customization to remove the user on logout or session expiration. For more details please check [here](./remove-user-on-logout/README.md).
+
+## POC - Whitelist Authenticator
+
+This Authenticator checks valid combinations of Client ID and KC_IDP_HINT information.
+For more details please check [here](./whitelist-authenticator/README.md).
+
 
 ## Contributing
 

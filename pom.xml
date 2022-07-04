@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <name>FWU Keycloak extensions</name>
@@ -14,10 +14,11 @@
   <modules>
     <module>remove-user-on-logout</module>
     <module>hmac-mapper</module>
+    <module>whitelist-authenticator</module>
   </modules>
 
   <properties>
-    <projectVersion>1.0.1</projectVersion>
+    <projectVersion>1.1.0</projectVersion>
     <keycloak.version>16.1.1</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -31,13 +32,13 @@
       <artifactId>junit-jupiter</artifactId>
       <version>5.8.2</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
     <dependency>
-	  <groupId>org.mockito</groupId>
+      <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <version>4.6.1</version>
       <scope>test</scope>
-	</dependency>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
