@@ -61,7 +61,7 @@
   "failureFactor": 30,
   "defaultRole": {
     "id": "8e8b8f4d-e3f6-470c-89bc-ebf5fb5921b6",
-    "name": "default-roles-myrealm",
+    "name": "default-roles-whitelist",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -169,13 +169,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/myrealm/account/",
+      "baseUrl": "/realms/whitelist/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/myrealm/account/*"
+        "/realms/whitelist/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1033,7 +1033,27 @@
   "enabledEventTypes": [],
   "adminEventsEnabled": false,
   "adminEventsDetailsEnabled": false,
-  "identityProviders": [],
+  "identityProviders": [
+    {
+      "alias": "facebook",
+      "internalId": "3d3892df-8d24-4faa-9952-6968670d9d12",
+      "providerId": "facebook",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "syncMode": "FORCE",
+        "clientSecret": "0aea70d13180fed6353103b0c62dd0cc",
+        "clientId": "182208857276037",
+        "useJwksUrl": "true"
+      }
+    }
+  ],
   "identityProviderMappers": [],
   "components": {
     "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
