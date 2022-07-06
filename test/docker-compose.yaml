@@ -9,18 +9,18 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: keycloak
-      KEYCLOAK_IMPORT: /opt/keycloak/imports/whitelist_realm.json,/opt/keycloak/imports/fwu-realm.json
       KC_DB: postgres
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: password
       KC_DB_URL: 'jdbc:postgresql://postgres/keycloak'
       KC_HOSTNAME_STRICT: 'false'
       KC_HTTP_ENABLED: 'true'
-    command: ["start-dev"]
+      KC_HTTP_RELATIVE_PATH: /auth
+    command: ["start-dev", "--import-realm"]
     volumes:
     - /etc/localtime:/etc/localtime:ro
-    - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
-    - "./whitelist_realm.json:/opt/keycloak/imports/whitelist_realm.json"
+    - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
+    - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-2.0.0.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-2.0.0.jar:/opt/keycloak/providers/hmac-mapper.jar"
     - "../whitelist-authenticator/target/whitelist-authenticator-2.0.0.jar:/opt/keycloak/providers/whitelist-authenticator.jar"
