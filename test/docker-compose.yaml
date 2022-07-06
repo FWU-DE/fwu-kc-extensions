@@ -20,7 +20,6 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
-    - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-2.0.0.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-2.0.0.jar:/opt/keycloak/providers/hmac-mapper.jar"
     - "../whitelist-authenticator/target/whitelist-authenticator-2.0.0.jar:/opt/keycloak/providers/whitelist-authenticator.jar"

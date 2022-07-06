@@ -53,13 +53,12 @@ The `Whitelist Authenticator` is searching for a special query parameter `KC_IDP
 
 ## Testing
 
-The clients `fullAccess` and `restrictedAccess` in the realm `whitelist` use a custom authentication flow `WhiteList` to test the new `Whitelist Authenticator`.
+The clients `fullAccess` and `restrictedAccess` in the realm `fwu` use a custom authentication flow `WhiteList` to test the new `Whitelist Authenticator`.
 
-You can use the [Postman](https://postman.io) collection '[`FWU_whitelist.postman_collection.json`](./../test/FWU_whitelist.postman_collection.json)' with the environment '[`FWU.postman_environment.json`](./../test/FWU.postman_environment.json)' for testing purposes:
+You can use the [Postman](https://postman.io) collection '[`FWU_whitelist.postman_collection.json`](test/FWU_whitelist.postman_collection.json)' with the environment '[`FWU.postman_environment.json`](test/FWU.postman_environment.json)' for testing purposes:
 1. `GET` to login with client_id=`fullAccess` and kc_idp_hint=`facebook`
 2. `GET` to login with client_id=`restrictedAccess` and kc_idp_hint=`facebook`
 
 Outcome:
 1. User will be forwarded to the browser login page, because the combination of `client_id` and `kc_idp_hint` is valid
 2. User will get an error page, because the combination of `client_id` and `kc_idp_hint` is invalid (restrictedAccess is only configured for IdP=google)
-
