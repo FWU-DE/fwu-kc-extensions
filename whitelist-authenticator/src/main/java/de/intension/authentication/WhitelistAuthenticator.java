@@ -1,6 +1,5 @@
 package de.intension.authentication;
 
-import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class WhitelistAuthenticator
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         String providerId = context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
         if (!isAllowedIdP(context, clientId, providerId)) {
-            String info = new Formatter().format("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId).toString();
+            String info = String.format("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
             logger.info(info);
             Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(), Response.Status.FORBIDDEN, info);
             context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, response);
@@ -80,6 +79,9 @@ public class WhitelistAuthenticator
      */
     private boolean isAllowedIdP(AuthenticationFlowContext context, String clientId, String providerId)
     {
+        if (providerId == null || providerId.isEmpty()) {
+            return true;
+        }
         AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
         Map<String, String> config = authenticatorConfig.getConfig();
         String allowedIdPs = config.get(WhitelistAuthenticatorFactory.LIST_OF_ALLOWED_IDP);

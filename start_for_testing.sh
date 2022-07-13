@@ -8,7 +8,7 @@ function cleanup {
 trap cleanup EXIT
 
 # build extension without SNAPSHOT suffix
-mvn clean package -DskipTests
+mvn clean package -DskipTests -DprojectVersion=docker
 if [[ "$?" -ne 0 ]] ; then
   echo 'could not run maven package'; exit $rc
 fi
