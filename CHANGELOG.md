@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.1.1]
+
+- Allowed `kc_idp_hint` to be missing for the whitelist authenticator
+
 ## Version [1.1.0]
 
 - Authenticator extension which rejects authentication if client does not match a whitelist from selected IdP
