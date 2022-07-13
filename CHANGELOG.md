@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [2.0.0]
+
+Updated Keycloak versions for extensions to `18.0.2`.
+
 ## Version [1.1.0]
 
 - Authenticator extension which rejects authentication if client does not match a whitelist from selected IdP

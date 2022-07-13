@@ -6,6 +6,7 @@ on:
     paths:
       - 'pom.xml'
       - '*/pom.xml'
+  workflow_dispatch:
 
 jobs:
   package:
