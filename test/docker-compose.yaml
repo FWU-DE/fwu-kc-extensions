@@ -18,10 +18,9 @@ services:
     - /etc/localtime:/etc/localtime:ro
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
     - "./whitelist_realm.json:/opt/keycloak/imports/whitelist_realm.json"
-    - "../remove-user-on-logout/target/remove-user-on-logout-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
-    - "../hmac-mapper/target/hmac-mapper-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
-    - "./config-script.cli:/opt/jboss/startup-scripts/config-script.cli"
-    - "../whitelist-authenticator/target/whitelist-authenticator-1.0.1.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
+    - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
+    - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
+    - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
     networks:
     - fwunet
 
