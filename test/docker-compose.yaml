@@ -9,7 +9,7 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: keycloak
-      KEYCLOAK_IMPORT: /opt/keycloak/imports/whitelist_realm.json,/opt/keycloak/imports/fwu-realm.json
+      KEYCLOAK_IMPORT: /opt/keycloak/imports/fwu-realm.json
       DB_ADDR: postgres
       DB_USER: keycloak
       DB_PASSWORD: password
@@ -17,7 +17,6 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - "./fwu-realm.json:/opt/keycloak/imports/fwu-realm.json"
-    - "./whitelist_realm.json:/opt/keycloak/imports/whitelist_realm.json"
     - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
     - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
@@ -34,6 +33,21 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    networks:
+    - fwunet
+
+  oidc-idp:
+    container_name: idp
+    image: qlik/simple-oidc-provider
+    ports:
+    - 8080:80
+    - 9000:9000
+    environment:
+      CONFIG_FILE: /tmp/idp-config.json
+      USERS_FILE: /tmp/idp-users.json
+    volumes:
+    - "./idp-config.json:/tmp/idp-config.json"
+    - "./idp-users.json:/tmp/idp-users.json"
     networks:
     - fwunet
 
