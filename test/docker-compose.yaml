@@ -37,7 +37,7 @@ services:
     - fwunet
 
   oidc-idp:
-    container_name: idp
+    container_name: oidc-idp
     image: qlik/simple-oidc-provider
     ports:
     - 8080:80
@@ -48,6 +48,22 @@ services:
     volumes:
     - "./idp-config.json:/tmp/idp-config.json"
     - "./idp-users.json:/tmp/idp-users.json"
+    networks:
+    - fwunet
+
+  oidc-client:
+    container_name: oidc-fool
+    image: beryju/oidc-test-client
+    depends_on:
+    - oidc-idp
+    ports:
+    - 9009:9009
+    environment:
+      OIDC_CLIENT_ID: foo
+      OIDC_CLIENT_SECRET: bar
+      OIDC_PROVIDER: http://172.18.0.1:9000
+      OIDC_TLS_VERIFY: "false"
+      OIDC_DO_INTROSPECTION: "false"
     networks:
     - fwunet
 

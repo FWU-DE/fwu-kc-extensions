@@ -6,7 +6,7 @@
       "client_id": "foo",
       "client_secret": "bar",
       "redirect_uris": [
-        "http://localhost:9055/v1/authenticate/callback"
+        "http://172.18.0.1:9009/auth/callback"
       ]
     }
   ],
