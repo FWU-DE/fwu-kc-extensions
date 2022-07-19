@@ -1,0 +1,26 @@
+{
+  "idp_name": "http://simple-oidc-provider",
+  "port": 9000,
+  "client_config": [
+    {
+      "client_id": "foo",
+      "client_secret": "bar",
+      "redirect_uris": [
+        "http://172.18.0.1:9009/auth/callback"
+      ]
+    }
+  ],
+  "claim_mapping": {
+    "openid": [
+      "sub"
+    ],
+    "email": [
+      "email",
+      "email_verified"
+    ],
+    "profile": [
+      "name",
+      "nickname"
+    ]
+  }
+}
