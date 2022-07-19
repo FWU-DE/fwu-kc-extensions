@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 services:
   keycloak:
     container_name: keycloak
@@ -40,7 +40,6 @@ services:
     container_name: oidc-idp
     image: qlik/simple-oidc-provider
     ports:
-    - 8080:80
     - 9000:9000
     environment:
       CONFIG_FILE: /tmp/idp-config.json
@@ -50,12 +49,19 @@ services:
     - "./idp-users.json:/tmp/idp-users.json"
     networks:
     - fwunet
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9000/.well-known/openid-configuration || exit 1
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
 
   oidc-client:
     container_name: oidc-fool
     image: beryju/oidc-test-client
     depends_on:
-    - oidc-idp
+      oidc-idp:
+        condition: service_healthy
     ports:
     - 9009:9009
     environment:
