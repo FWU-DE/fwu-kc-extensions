@@ -1,6 +1,6 @@
 package de.intension.mapper.oidc;
 
-import static de.intension.mapper.saml.MappedValueUserAttributeMapper.*;
+import static de.intension.mapper.helper.AttributeMapperHelper.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class MappedValueUserAttributeMapper
                                             BrokeredIdentityContext context)
     {
         super.preprocessFederatedIdentity(session, realm, mapperModel, context);
-        de.intension.mapper.saml.MappedValueUserAttributeMapper.setMappedValueInContext(mapperModel, context);
+        setMappedValueInContext(mapperModel, context);
     }
 
     @Override
@@ -77,6 +77,6 @@ public class MappedValueUserAttributeMapper
                                    BrokeredIdentityContext context)
     {
         super.updateBrokeredUser(session, realm, user, mapperModel, context);
-        de.intension.mapper.saml.MappedValueUserAttributeMapper.setMappedValueAsUserAttribute(user, mapperModel, context);
+        setMappedValueAsUserAttribute(user, mapperModel, context);
     }
 }
