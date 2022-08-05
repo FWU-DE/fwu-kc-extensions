@@ -1066,6 +1066,7 @@
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
   "smtpServer": {},
+  "accountTheme": "keycloak",
   "eventsEnabled": false,
   "eventsListeners": ["jboss-logging", "remove-user-on-logout"],
   "enabledEventTypes": [],
@@ -1073,9 +1074,10 @@
   "adminEventsDetailsEnabled": false,
   "identityProviders": [
     {
-      "alias": "facebook",
-      "internalId": "aa8beab9-74c0-4387-b5ab-9d746fa7b2f0",
-      "providerId": "facebook",
+      "alias": "keycloak-oidc",
+      "displayName": "IDP Login",
+      "internalId": "2ab45bba-98ab-4084-921b-76283da2eac7",
+      "providerId": "keycloak-oidc",
       "enabled": true,
       "updateProfileFirstLoginMode": "on",
       "trustEmail": false,
@@ -1083,11 +1085,15 @@
       "addReadTokenRoleOnCreate": false,
       "authenticateByDefault": false,
       "linkOnly": false,
-      "firstBrokerLoginFlowAlias": "vidis first broker login",
+      "firstBrokerLoginFlowAlias": "first broker login",
       "config": {
-        "syncMode": "FORCE",
-        "clientSecret": "0aea70d13180fed6353103b0c62dd0cc",
-        "clientId": "182208857276037",
+        "loginHint": "true",
+        "clientId": "identity-broker",
+        "tokenUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/token",
+        "authorizationUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/auth",
+        "clientAuthMethod": "client_secret_basic",
+        "syncMode": "IMPORT",
+        "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true"
       }
     }
