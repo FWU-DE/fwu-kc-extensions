@@ -21,6 +21,7 @@ services:
     - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
     - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
+    - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper.jar:/opt/jboss/keycloak/standalone/deployments/multi-value-user-attribute-mapper.jar"
     networks:
     - fwunet
 

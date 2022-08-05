@@ -31,6 +31,12 @@ It holds the customization to remove the user on logout or session expiration. F
 This Authenticator checks valid combinations of Client ID and `KC_IDP_HINT` information.
 For more details please check [here](./whitelist-authenticator/README.md).
 
+### User Attribute Mapper with value mapping
+
+This mapper imports user attributes with the ability to translate values.
+It supports SAML- and OIDC- Identity Providers.
+For more details please check [here](./multi-value-user-attribute-mapper/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).

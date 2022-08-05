@@ -15,10 +15,11 @@
     <module>remove-user-on-logout</module>
     <module>hmac-mapper</module>
     <module>whitelist-authenticator</module>
+    <module>multi-value-user-attribute-mapper</module>
   </modules>
 
   <properties>
-    <projectVersion>1.1.1</projectVersion>
+    <projectVersion>1.2.0</projectVersion>
     <keycloak.version>16.1.1</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -67,6 +68,12 @@
         <version>${keycloak.version}</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-saml-core</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -84,7 +91,7 @@
               </manifest>
               <manifestEntries>
                 <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi, org.keycloak.keycloak-server-spi-private,
-                  org.keycloak.keycloak-services
+                  org.keycloak.keycloak-services, org.keycloak.keycloak-saml-core
                 </Dependencies>
               </manifestEntries>
             </archive>
