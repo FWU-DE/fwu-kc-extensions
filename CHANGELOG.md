@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.2.0]
+
+- New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to other values
+
 ## Version [1.1.1]
 
 - Allowed `kc_idp_hint` to be missing for the whitelist authenticator

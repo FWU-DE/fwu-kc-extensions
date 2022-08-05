@@ -11,10 +11,6 @@
 
   <artifactId>multi-value-user-attribute-mapper</artifactId>
 
-  <build>
-    <finalName>${artifactId}</finalName>
-  </build>
-
   <packaging>jar</packaging>
 
   <dependencies>
