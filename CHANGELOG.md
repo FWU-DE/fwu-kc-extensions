@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.2.1]
+
+- Fixed NPE on the remove user on logout SPI
+
 ## Version [1.2.0]
 
 - New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to other values
