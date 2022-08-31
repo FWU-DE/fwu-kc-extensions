@@ -4,6 +4,12 @@ Authenticator extension which rejects authentication if client does not match a 
 
 ## Configuration
 
+### Setting the IdP hint parameter name
+
+The parameter for selecting the IdP (default: `kc_idp_hint`) can be configured in the authenticator config.
+
+<img src="../docs/whitelist/00_set_vidis_idp_hint.png" width="70%"/>
+
 ### Preparing a whitelist (JSON)
 
 The Whitelist will be stored as a simple JSON-Structure in a custom config property inside the Authenticator.
@@ -62,7 +68,7 @@ The following steps are valid for "Browser" and "First Broker Login" authenticat
 
 <img src="../docs/whitelist/06_configure_whitelist.png" width="70%"/>
 
-8. Enter an alias for the config entry
+8. Overwrite the parameter name for the IdP hint if needed
 9. Enter whitelist (JSON-Structure)
 10. Click Button `Save` to save your changes
 
@@ -86,7 +92,7 @@ The following steps are valid for "Browser" and "First Broker Login" authenticat
 ## How it's working
 
 ### Browser Flow
-The `Whitelist Authenticator` is searching for a special query parameter `KC_IDP_HINT`.
+The `Whitelist Authenticator` is searching for a special query parameter which is configurable (default: `kc_idp_hint`).
 - If this parameter is present, then the provider checks it against the whitelist together with the client ID.
 - If not, then this workflow step will be skipped.
 
