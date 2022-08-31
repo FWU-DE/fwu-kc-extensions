@@ -1,4 +1,4 @@
-# POC - Whitelist Authenticator
+# Whitelist Authenticator
 
 Authenticator extension which rejects authentication if client does not match a white list from selected IdP.
 
@@ -6,7 +6,7 @@ Authenticator extension which rejects authentication if client does not match a 
 
 ### Preparing a whitelist (JSON)
 
-To simplify the proof of concept, the whitelist will be stored as a simple JSON-Structure in a custom config property inside the Authenticator.
+The Whitelist will be stored as a simple JSON-Structure in a custom config property inside the Authenticator.
 
 **Structure:**
 
@@ -24,31 +24,75 @@ List of JSON-Objects having two attributes
 ### Set up a new authentication flow
 
 First step of the new authentication flow will be our new `Whitelist Authenticator` followed by a flow step for the standard authentication procedure. 
+The following steps are valid for "Browser" and "First Broker Login" authentication flow.
 
-**1. Click Button "Create" to create a new flow**
+**Step 1. Copy existing authentication flow**
 
-<img src="../docs/whitelist/wl_auth_new.png" width="70%"/>
+<img src="../docs/whitelist/01_select_auth_flow_template.png" width="70%"/>
 
-**2. Enter an `Alias`** for the new top level flow and click save
+1. Click on "Authentication" under "Configure" section from left sidebar tree
+2. Select Authentication flow template, which should be extended
+3. Click Button `Copy` to create a copy of this flow
 
-<img src="../docs/whitelist/wl_auth_create.png" width="70%"/>
+<img src="../docs/whitelist/02_enter_auth_flow_name.png" width="70%"/>
 
-**3. Configure the new flow**
+4. Enter a name for the new flow
+5. Click Button `Save` to save your changes
 
-<img src="../docs/whitelist/wl_auth_flow.png" width="70%"/>
+**Step 2. Add new execution step and configure it**
 
-1. Click Button `Add execution` and select `Whitelist Authenticator` as a `Provider`
-2. Click Button `Add flow` to create "standard" browser flow
-3. Mark both workflow steps as `REQUIRED`
-4. Click `Actions -> Config` to set up the whitelist (see picture below)
-5. Add all other workflow steps for your authentication
+<img src="../docs/whitelist/03_add_new_execution.png" width="70%"/>
 
-<img src="../docs/whitelist/wl_auth_config.png" width="70%"/>
+1. Click Button `Add execution`
+
+<img src="../docs/whitelist/03_1_select_provider.png" width="70%"/>
+
+2. Select `Whitelist Authenticator` as a `Provider`
+3. Click Button `Save` to save your changes
+
+<img src="../docs/whitelist/04_set_required_and_move_excution.png" width="70%"/>
+
+4. Mark workflow step as `REQUIRED`
+5. Move workflow step to the very top by clicking on the `up arrow` button
+
+<img src="../docs/whitelist/05_configure_execution_step.png" width="70%"/>
+
+6. Click Link `Actions`
+7. Choose `Config` entry
+
+<img src="../docs/whitelist/06_configure_whitelist.png" width="70%"/>
+
+8. Enter an alias for the config entry
+9. Enter whitelist (JSON-Structure)
+10. Click Button `Save` to save your changes
+
+**Step 3: Set authentication flow as default**
+
+**Option 1:** Browser Flow
+
+<img src="../docs/whitelist/07_1_set_binding_browser_flow.png" width="70%"/>
+
+1. Select customized authentication flow under (`Bindings`tab)
+2. Click Button `Save` to save your changes
+
+**Option 2:** First Broker Login Flow
+
+<img src="../docs/whitelist/07_2_set_first_broker_login_default.png" width="70%"/>
+
+1. Select Identity Provider to configure ("Configure" section from left sidebar tree)
+2. Choose tab `Settings`
+3. Select customized authentication flow and save your work
 
 ## How it's working
 
+### Browser Flow
 The `Whitelist Authenticator` is searching for a special query parameter `KC_IDP_HINT`.
 - If this parameter is present, then the provider checks it against the whitelist together with the client ID.
+- If not, then this workflow step will be skipped.
+
+### First Broker Login Flow
+The `Whitelist Authenticator` is searching for a selected Identity Provider inside the brokered context.
+- If this information is present, then the provider checks it against the whitelist together with the client ID.
 - If not, then this workflow step will be skipped.
 
 ## Testing

@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.3.0]
+
+- Whitelist Authenticator must also work in the context of First Broker Login Flow
+
 ## Version [1.2.1]
 
 - Fixed NPE on the remove user on logout SPI

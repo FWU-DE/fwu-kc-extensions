@@ -9,12 +9,15 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.utils.StringUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,7 +38,7 @@ public class WhitelistAuthenticator
     public void authenticate(AuthenticationFlowContext context)
     {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
-        String providerId = context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+        String providerId = getProviderIdFromContext(context);
         if (!isAllowedIdP(context, clientId, providerId)) {
             String info = String.format("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
             logger.info(info);
@@ -47,9 +50,30 @@ public class WhitelistAuthenticator
         }
     }
 
+    /**
+     * Get provider id from context.
+     */
+    private String getProviderIdFromContext(AuthenticationFlowContext context)
+    {
+        String providerId = context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+        if (StringUtil.isBlank(providerId)) {
+            try {
+                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                    .readFromAuthenticationSession(context.getAuthenticationSession(), AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+                if (serializedCtx != null) {
+                    providerId = serializedCtx.getIdentityProviderId();
+                }
+            } catch (Exception e) {
+                logger.warn(e.getLocalizedMessage());
+            }
+        }
+        return providerId;
+    }
+
     @Override
     public void action(AuthenticationFlowContext context)
     {
+        //not needed
     }
 
     @Override
@@ -67,11 +91,13 @@ public class WhitelistAuthenticator
     @Override
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user)
     {
+        //not needed
     }
 
     @Override
     public void close()
     {
+        //not needed
     }
 
     /**
