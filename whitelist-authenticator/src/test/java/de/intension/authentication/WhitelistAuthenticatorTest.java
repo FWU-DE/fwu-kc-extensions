@@ -17,7 +17,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -32,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.intension.authentication.dto.WhitelistEntry;
+import de.intension.authentication.test.TestAuthenticationFlowContext;
 
 class WhitelistAuthenticatorTest
 {
@@ -147,16 +147,16 @@ class WhitelistAuthenticatorTest
         assertEquals(expectedSuccess, context.getSuccess());
     }
 
-    private TestContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps)
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps)
         throws JsonProcessingException
     {
         return mockContext(clientId, kcIdpHint, allowedIdps, null);
     }
 
-    private TestContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp)
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp)
         throws JsonProcessingException
     {
-        TestContext context = mock(TestContext.class);
+        var context = mock(TestAuthenticationFlowContext.class);
 
         // clientId return value
         var authSession = mock(AuthenticationSessionModel.class);
@@ -222,27 +222,4 @@ class WhitelistAuthenticatorTest
         new WhitelistAuthenticator().authenticate(context);
     }
 
-    private abstract class TestContext
-        implements AuthenticationFlowContext
-    {
-
-        private Boolean success = null;
-
-        @Override
-        public void success()
-        {
-            success = Boolean.TRUE;
-        }
-
-        @Override
-        public void failure(AuthenticationFlowError error, Response response)
-        {
-            success = Boolean.FALSE;
-        }
-
-        public Boolean getSuccess()
-        {
-            return success;
-        }
-    }
 }

@@ -31,16 +31,16 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
     @Override
     public void authenticate(AuthenticationFlowContext context)
     {
-        context.getAuthenticatorConfig().getConfig().get(WhitelistConstants.IDP_HINT_PARAM_NAME);
-        if (context.getUriInfo().getQueryParameters().containsKey(WhitelistConstants.IDP_HINT_PARAM_NAME)) {
+        String idpHintParamName = context.getAuthenticatorConfig().getConfig().get(WhitelistConstants.IDP_HINT_PARAM_NAME);
+        if (context.getUriInfo().getQueryParameters().containsKey(idpHintParamName)) {
             String providerId = context.getUriInfo().getQueryParameters()
-                .getFirst(WhitelistConstants.IDP_HINT_PARAM_NAME);
+                .getFirst(idpHintParamName);
             if (providerId == null || providerId.equals("")) {
                 LOG.tracef("Skipping: IdP hint query parameter is empty");
                 context.attempted();
             }
             else {
-                LOG.tracef("Redirecting: %s set to %s", WhitelistConstants.IDP_HINT_PARAM_NAME, providerId);
+                LOG.tracef("Redirecting: %s set to %s", idpHintParamName, providerId);
                 redirect(context, providerId);
             }
         }
@@ -63,7 +63,7 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
         }
         else {
             LOG.tracef("No default provider set or %s query parameter provided",
-                       WhitelistConstants.IDP_HINT_PARAM_NAME);
+                       idpHintParamName);
             context.attempted();
         }
     }
@@ -91,7 +91,7 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
             // will forward the request to the IDP with prompt=none if the IDP accepts
             // forwards with prompt=none.
             if ("none".equals(context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.PROMPT_PARAM)) &&
-                    Boolean.valueOf(idp.get().getConfig().get(ACCEPTS_PROMPT_NONE))) {
+                    Boolean.parseBoolean(idp.get().getConfig().get(ACCEPTS_PROMPT_NONE))) {
                 context.getAuthenticationSession().setAuthNote(AuthenticationProcessor.FORWARDED_PASSIVE_LOGIN, "true");
             }
             LOG.debugf("Redirecting to %s", providerId);
