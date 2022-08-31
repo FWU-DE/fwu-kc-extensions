@@ -17,7 +17,7 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Bei Ihrem Konto anmelden\");",
+							"    pm.expect(pm.response.text()).to.include(\"Mock OAuth2 Server Sign-in\");",
 							"});"
 						],
 						"type": "text/javascript"
