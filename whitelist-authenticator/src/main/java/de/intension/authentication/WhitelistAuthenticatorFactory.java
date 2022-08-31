@@ -1,5 +1,7 @@
 package de.intension.authentication;
 
+import java.util.List;
+
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -7,8 +9,6 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
-
-import java.util.List;
 
 /**
  * Factory to create custom {@link WhitelistAuthenticator}.
@@ -80,16 +80,19 @@ public class WhitelistAuthenticatorFactory
     @Override
     public void init(Config.Scope scope)
     {
+        //not needed
     }
 
     @Override
     public void postInit(KeycloakSessionFactory keycloakSessionFactory)
     {
+        //not needed
     }
 
     @Override
     public void close()
     {
+        //not needed
     }
 
 }
