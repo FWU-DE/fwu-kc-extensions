@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a53094e8-285b-423b-b16e-2a94ce13b979",
+		"_postman_id": "d99a6791-762f-47bd-8946-e3be5287b3e9",
 		"name": "FWU - whitelist auth",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "6328296"
@@ -17,7 +17,7 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Sign in to your account\");",
+							"    pm.expect(pm.response.text()).to.include(\"Bei Ihrem Konto anmelden\");",
 							"});"
 						],
 						"type": "text/javascript"
