@@ -72,7 +72,28 @@ The following steps are valid for "Browser" and "First Broker Login" authenticat
 9. Enter whitelist (JSON-Structure)
 10. Click Button `Save` to save your changes
 
-**Step 3: Set authentication flow as default**
+**Step 3: Configure IdP hint parameter name for identity provider authenticator**
+
+*This step is not needed, when IdP hint parameter name is default 'kc_idp_hint'!*
+
+1. Select 'Add execution' on the authentication flow
+2. look for provider 'Identity Provider Redirector W/ Flexible IdP Hint'
+
+<img src="../docs/whitelist/08_1_add_flexible_redirector.png" width="70%"/>
+
+3. Move the flexible redirector up to the original one
+4. Delete the original authenticator
+
+<img src="../docs/whitelist/08_2_replace_redirector.png" width="70%"/>
+
+5. Click on 'Actions' > 'Config' to edit the configuration
+6. Set an alias
+7. Enter the query parameter name that should be used for IdP redirection
+8. Hit 'Save'
+
+<img src="../docs/whitelist/08_3_configure_redirector.png" width="70%"/>
+
+**Step 4: Set authentication flow as default**
 
 **Option 1:** Browser Flow
 
