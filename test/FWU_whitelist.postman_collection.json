@@ -1,12 +1,13 @@
 {
 	"info": {
-		"_postman_id": "19a7ef4b-5bef-4852-ba4e-eba3d17aba0a",
+		"_postman_id": "a53094e8-285b-423b-b16e-2a94ce13b979",
 		"name": "FWU - whitelist auth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6328296"
 	},
 	"item": [
 		{
-			"name": "Login with valid kc_idp_hint",
+			"name": "Login with valid vidis_idp_hint",
 			"event": [
 				{
 					"listen": "test",
@@ -30,7 +31,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=fullAccess&redirect_uri=http://localhost:18080&kc_idp_hint=facebook",
+					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=fullAccess&redirect_uri=http://localhost:18080&vidis_idp_hint=facebook",
 					"host": [
 						"{{authUrl}}"
 					],
@@ -55,7 +56,7 @@
 							"value": "http://localhost:18080"
 						},
 						{
-							"key": "kc_idp_hint",
+							"key": "vidis_idp_hint",
 							"value": "facebook"
 						}
 					]
@@ -64,7 +65,7 @@
 			"response": []
 		},
 		{
-			"name": "Login with invalid kc_idp_hint",
+			"name": "Login with invalid vidis_idp_hint",
 			"event": [
 				{
 					"listen": "test",
@@ -74,7 +75,7 @@
 							"    pm.response.to.have.status(403);",
 							"});",
 							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"IdP with providerId=facebook is not configured for clientId=restrictedAccess\");",
+							"    pm.expect(pm.response.text()).to.include(\"Diese Anwendung ist derzeit nicht für diese Heimatorganisation (IdP) freigegeben\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -88,7 +89,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=restrictedAccess&redirect_uri=http://localhost:18080&kc_idp_hint=facebook",
+					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=restrictedAccess&redirect_uri=http://localhost:18080&vidis_idp_hint=facebook",
 					"host": [
 						"{{authUrl}}"
 					],
@@ -113,7 +114,7 @@
 							"value": "http://localhost:18080"
 						},
 						{
-							"key": "kc_idp_hint",
+							"key": "vidis_idp_hint",
 							"value": "facebook"
 						}
 					]
