@@ -4,7 +4,9 @@ import static de.intension.authentication.WhitelistAuthenticatorFactory.LIST_OF_
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.constants.AdapterConstants.KC_IDP_HINT;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.constants.AdapterConstants;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.ClientModel;
@@ -193,7 +196,8 @@ class WhitelistAuthenticatorTest
         var authConfig = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authConfig);
         var objectMapper = new ObjectMapper();
-        var configMap = Map.of(LIST_OF_ALLOWED_IDP, objectMapper.writeValueAsString(allowedIdps));
+        var configMap = Map.of(WhitelistConstants.IDP_HINT_PARAM_NAME, AdapterConstants.KC_IDP_HINT,
+                               LIST_OF_ALLOWED_IDP, objectMapper.writeValueAsString(allowedIdps));
         when(authConfig.getConfig()).thenReturn(configMap);
 
         // success/failure
