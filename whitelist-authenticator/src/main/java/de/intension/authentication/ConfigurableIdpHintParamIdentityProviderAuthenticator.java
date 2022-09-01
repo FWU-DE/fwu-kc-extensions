@@ -23,71 +23,65 @@ import org.keycloak.services.managers.ClientSessionCode;
  * parameter name instead of the hardcoded 'kc_idp_hint'.
  */
 public class ConfigurableIdpHintParamIdentityProviderAuthenticator
-        extends IdentityProviderAuthenticator
-{
+        extends IdentityProviderAuthenticator implements IdpHintParamName {
 
     private static final Logger LOG = Logger.getLogger(ConfigurableIdpHintParamIdentityProviderAuthenticator.class);
 
     @Override
-    public void authenticate(AuthenticationFlowContext context)
-    {
-        String idpHintParamName = context.getAuthenticatorConfig().getConfig().get(WhitelistConstants.IDP_HINT_PARAM_NAME);
+    public void authenticate(AuthenticationFlowContext context) {
+        String idpHintParamName = getIdpHintParamName(context);
         if (context.getUriInfo().getQueryParameters().containsKey(idpHintParamName)) {
             String providerId = context.getUriInfo().getQueryParameters()
-                .getFirst(idpHintParamName);
+                    .getFirst(idpHintParamName);
             if (providerId == null || providerId.equals("")) {
                 LOG.tracef("Skipping: IdP hint query parameter is empty");
                 context.attempted();
-            }
-            else {
+            } else {
                 LOG.tracef("Redirecting: %s set to %s", idpHintParamName, providerId);
                 redirect(context, providerId);
             }
-        }
-        else if (context.getAuthenticatorConfig() != null
+        } else if (context.getAuthenticatorConfig() != null
                 && context.getAuthenticatorConfig().getConfig()
-                    .containsKey(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER)) {
+                .containsKey(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER)) {
             if (context.getForwardedErrorMessage() != null) {
                 LOG.infof(
-                          "Should redirect to remote IdP but forwardedError has value '%s', skipping this authenticator...",
-                          context.getForwardedErrorMessage());
+                        "Should redirect to remote IdP but forwardedError has value '%s', skipping this authenticator...",
+                        context.getForwardedErrorMessage());
                 context.attempted();
 
                 return;
             }
 
             String defaultProvider = context.getAuthenticatorConfig().getConfig()
-                .get(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER);
+                    .get(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER);
             LOG.tracef("Redirecting: default provider set to %s", defaultProvider);
             redirect(context, defaultProvider);
-        }
-        else {
+        } else {
             LOG.tracef("No default provider set or %s query parameter provided",
-                       idpHintParamName);
+                    idpHintParamName);
             context.attempted();
         }
     }
 
-    private void redirect(AuthenticationFlowContext context, String providerId)
-    {
+    private void redirect(AuthenticationFlowContext context, String providerId) {
         Optional<IdentityProviderModel> idp = context.getRealm().getIdentityProvidersStream()
-            .filter(IdentityProviderModel::isEnabled)
-            .filter(identityProvider -> Objects.equals(providerId, identityProvider.getAlias()))
-            .findFirst();
+                .filter(IdentityProviderModel::isEnabled)
+                .filter(identityProvider -> Objects.equals(providerId, identityProvider.getAlias()))
+                .findFirst();
         if (idp.isPresent()) {
             String accessCode = new ClientSessionCode<>(context.getSession(), context.getRealm(),
                     context.getAuthenticationSession()).getOrGenerateCode();
             String clientId = context.getAuthenticationSession().getClient().getClientId();
             String tabId = context.getAuthenticationSession().getTabId();
             URI location = Urls.identityProviderAuthnRequest(context.getUriInfo().getBaseUri(), providerId,
-                                                             context.getRealm().getName(), accessCode, clientId, tabId);
+                    context.getRealm().getName(), accessCode, clientId, tabId);
             if (context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY) != null) {
                 location = UriBuilder.fromUri(location).queryParam(OAuth2Constants.DISPLAY,
-                                                                   context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
-                    .build();
+                                context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
+                        .build();
             }
             Response response = Response.seeOther(location)
-                .build();
+                    .build();
             // will forward the request to the IDP with prompt=none if the IDP accepts
             // forwards with prompt=none.
             if ("none".equals(context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.PROMPT_PARAM)) &&

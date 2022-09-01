@@ -51,7 +51,7 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         // param name config
         var authConfig = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authConfig);
-        var configMap = Map.of(WhitelistConstants.IDP_HINT_PARAM_NAME, idpHintParamName);
+        var configMap = Map.of(IdpHintParamName.IDP_HINT_PARAM_NAME, idpHintParamName);
         when(authConfig.getConfig()).thenReturn(configMap);
 
         // identity providers

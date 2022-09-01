@@ -196,7 +196,7 @@ class WhitelistAuthenticatorTest
         var authConfig = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authConfig);
         var objectMapper = new ObjectMapper();
-        var configMap = Map.of(WhitelistConstants.IDP_HINT_PARAM_NAME, AdapterConstants.KC_IDP_HINT,
+        var configMap = Map.of(IdpHintParamName.IDP_HINT_PARAM_NAME, AdapterConstants.KC_IDP_HINT,
                                LIST_OF_ALLOWED_IDP, objectMapper.writeValueAsString(allowedIdps));
         when(authConfig.getConfig()).thenReturn(configMap);
 

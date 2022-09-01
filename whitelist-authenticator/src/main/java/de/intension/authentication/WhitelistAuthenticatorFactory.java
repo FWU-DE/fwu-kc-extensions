@@ -1,7 +1,5 @@
 package de.intension.authentication;
 
-import java.util.List;
-
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -10,6 +8,8 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+
+import java.util.List;
 
 /**
  * Factory to create custom {@link WhitelistAuthenticator}.
@@ -74,7 +74,7 @@ public class WhitelistAuthenticatorFactory
     public List<ProviderConfigProperty> getConfigProperties()
     {
         return List.of(
-                       new ProviderConfigProperty(WhitelistConstants.IDP_HINT_PARAM_NAME, "IdP hint parameter name",
+                       new ProviderConfigProperty(IdpHintParamName.IDP_HINT_PARAM_NAME, "IdP hint parameter name",
                                "Name of the URL query parameter which contains the allowed IdP.",
                                ProviderConfigProperty.STRING_TYPE, KC_IDP_HINT),
                        new ProviderConfigProperty(LIST_OF_ALLOWED_IDP, "Whitelist of IdPs",
