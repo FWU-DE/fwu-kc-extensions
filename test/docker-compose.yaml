@@ -25,6 +25,8 @@ services:
     - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper.jar:/opt/jboss/keycloak/standalone/deployments/multi-value-user-attribute-mapper.jar"
     networks:
     - fwunet
+    depends_on:
+    - idp_mock
 
   postgres:
     container_name: postgres
@@ -36,6 +38,14 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    networks:
+    - fwunet
+
+  idp_mock:
+    container_name: idp-mock
+    image: ghcr.io/navikt/mock-oauth2-server:0.5.1
+    ports:
+    - 8443:8080
     networks:
     - fwunet
 

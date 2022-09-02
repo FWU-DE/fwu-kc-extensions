@@ -4,7 +4,9 @@ import static de.intension.authentication.WhitelistAuthenticatorFactory.LIST_OF_
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.constants.AdapterConstants.KC_IDP_HINT;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -15,8 +17,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.constants.AdapterConstants;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.ClientModel;
@@ -29,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.intension.authentication.dto.WhitelistEntry;
+import de.intension.authentication.test.TestAuthenticationFlowContext;
 
 class WhitelistAuthenticatorTest
 {
@@ -144,16 +147,16 @@ class WhitelistAuthenticatorTest
         assertEquals(expectedSuccess, context.getSuccess());
     }
 
-    private TestContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps)
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps)
         throws JsonProcessingException
     {
         return mockContext(clientId, kcIdpHint, allowedIdps, null);
     }
 
-    private TestContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp)
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp)
         throws JsonProcessingException
     {
-        TestContext context = mock(TestContext.class);
+        var context = mock(TestAuthenticationFlowContext.class);
 
         // clientId return value
         var authSession = mock(AuthenticationSessionModel.class);
@@ -193,7 +196,8 @@ class WhitelistAuthenticatorTest
         var authConfig = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authConfig);
         var objectMapper = new ObjectMapper();
-        var configMap = Map.of(LIST_OF_ALLOWED_IDP, objectMapper.writeValueAsString(allowedIdps));
+        var configMap = Map.of(IdpHintParamName.IDP_HINT_PARAM_NAME, AdapterConstants.KC_IDP_HINT,
+                               LIST_OF_ALLOWED_IDP, objectMapper.writeValueAsString(allowedIdps));
         when(authConfig.getConfig()).thenReturn(configMap);
 
         // success/failure
@@ -218,27 +222,4 @@ class WhitelistAuthenticatorTest
         new WhitelistAuthenticator().authenticate(context);
     }
 
-    private abstract class TestContext
-        implements AuthenticationFlowContext
-    {
-
-        private Boolean success = null;
-
-        @Override
-        public void success()
-        {
-            success = Boolean.TRUE;
-        }
-
-        @Override
-        public void failure(AuthenticationFlowError error, Response response)
-        {
-            success = Boolean.FALSE;
-        }
-
-        public Boolean getSuccess()
-        {
-            return success;
-        }
-    }
 }

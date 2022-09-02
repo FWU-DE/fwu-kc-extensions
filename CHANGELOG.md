@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.4.0]
+
+- Whitelist Authenticator allows IdP hint parameter name to be configured
+- Custom identity provider authenticator which allows IdP hint parameter name to be configured
+- Error message for missing identity provider in whitelist was improved
+
 ## Version [1.3.0]
 
 - Whitelist Authenticator must also work in the context of First Broker Login Flow

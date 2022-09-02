@@ -11,7 +11,6 @@ import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
-import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -26,26 +25,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.intension.authentication.dto.WhitelistEntry;
 
 /**
- * Check KC_IDP_HINT against a configured whitelist.
+ * Check IdP hint against a configured whitelist.
  */
 public class WhitelistAuthenticator
-    implements Authenticator, AdapterConstants
-{
+        implements Authenticator, IdpHintParamName {
 
     private static final Logger logger = Logger.getLogger(WhitelistAuthenticator.class);
 
     @Override
-    public void authenticate(AuthenticationFlowContext context)
-    {
+    public void authenticate(AuthenticationFlowContext context) {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         String providerId = getProviderIdFromContext(context);
         if (!isAllowedIdP(context, clientId, providerId)) {
-            String info = String.format("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
-            logger.info(info);
-            Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(), Response.Status.FORBIDDEN, info);
+            logger.infof("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
+            Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
+                    Response.Status.FORBIDDEN, "idpNotConfigured", providerId, clientId);
             context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, response);
-        }
-        else {
+        } else {
             context.success();
         }
     }
@@ -53,13 +49,14 @@ public class WhitelistAuthenticator
     /**
      * Get provider id from context.
      */
-    private String getProviderIdFromContext(AuthenticationFlowContext context)
-    {
-        String providerId = context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+    private String getProviderIdFromContext(AuthenticationFlowContext context) {
+        String idpHintParamName = getIdpHintParamName(context);
+        String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
         if (StringUtil.isBlank(providerId)) {
             try {
                 SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
-                    .readFromAuthenticationSession(context.getAuthenticationSession(), AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+                        .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
                 }
@@ -71,40 +68,34 @@ public class WhitelistAuthenticator
     }
 
     @Override
-    public void action(AuthenticationFlowContext context)
-    {
-        //not needed
+    public void action(AuthenticationFlowContext context) {
+        // not needed
     }
 
     @Override
-    public boolean requiresUser()
-    {
+    public boolean requiresUser() {
         return false;
     }
 
     @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user)
-    {
+    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return true;
     }
 
     @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user)
-    {
-        //not needed
+    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
+        // not needed
     }
 
     @Override
-    public void close()
-    {
-        //not needed
+    public void close() {
+        // not needed
     }
 
     /**
      * Check combination of clientId and providerId against configured whitelist.
      */
-    private boolean isAllowedIdP(AuthenticationFlowContext context, String clientId, String providerId)
-    {
+    private boolean isAllowedIdP(AuthenticationFlowContext context, String clientId, String providerId) {
         if (providerId == null || providerId.isEmpty()) {
             return true;
         }
