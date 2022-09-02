@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [1.4.1]
+
+- Authenticators return parameter 'kc_idp_hint' if config is completely missing
+
 ## Version [1.4.0]
 
 - Whitelist Authenticator allows IdP hint parameter name to be configured
