@@ -37,6 +37,7 @@ class RemoveUserOnLogOutEventIT
         .withNetwork(network)
         .withNetworkAliases("test")
         .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
+        .withContextPath("/auth/")
         .withAccessToHost(true);
 
     private static GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
