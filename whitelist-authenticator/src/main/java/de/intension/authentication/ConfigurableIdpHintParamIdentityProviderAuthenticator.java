@@ -1,22 +1,22 @@
 package de.intension.authentication;
 
-import java.net.URI;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticator;
 import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticatorFactory;
+import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.ClientSessionCode;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Same as {@link IdentityProviderAuthenticator} but with configurable IdP hint
@@ -30,7 +30,9 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         String idpHintParamName = getIdpHintParamName(context);
-        if (context.getUriInfo().getQueryParameters().containsKey(idpHintParamName)) {
+        if (AdapterConstants.KC_IDP_HINT.equals(idpHintParamName)) {
+            super.authenticate(context);
+        } else if (context.getUriInfo().getQueryParameters().containsKey(idpHintParamName)) {
             String providerId = context.getUriInfo().getQueryParameters()
                     .getFirst(idpHintParamName);
             if (providerId == null || providerId.equals("")) {
