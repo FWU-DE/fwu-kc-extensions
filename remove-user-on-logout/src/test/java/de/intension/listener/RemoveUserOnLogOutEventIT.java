@@ -203,7 +203,7 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage logout()
         {
-            String signOutButton = "Sign Out";
+            String signOutButton = "Sign out";
             wait.until(ExpectedConditions.elementToBeClickable(By.linkText(signOutButton)));
             driver.findElement(By.linkText(signOutButton)).click();
             return this;
