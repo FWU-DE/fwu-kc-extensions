@@ -22,7 +22,6 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
@@ -33,13 +32,12 @@ class RemoveUserOnLogOutEventIT
 
     private static Network             network           = Network.newNetwork();
 
-    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:16.1.1")
-        .withExtensionClassesFrom("target/classes")
+    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:18.0.2")
+        .withProviderClassesFrom("target/classes")
         .withNetwork(network)
         .withNetworkAliases("test")
-        .withEnv("KEYCLOAK_IMPORT", "/opt/keycloak/imports/fwu-realm.json,/opt/keycloak/imports/idp-realm.json")
-        .withCopyFileToContainer(MountableFile.forClasspathResource("fwu-realm.json"), "/opt/keycloak/imports/")
-        .withCopyFileToContainer(MountableFile.forClasspathResource("idp-realm.json"), "/opt/keycloak/imports/")
+        .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
+        .withContextPath("/auth/")
         .withAccessToHost(true);
 
     private static GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
@@ -205,7 +203,7 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage logout()
         {
-            String signOutButton = "Sign Out";
+            String signOutButton = "Sign out";
             wait.until(ExpectedConditions.elementToBeClickable(By.linkText(signOutButton)));
             driver.findElement(By.linkText(signOutButton)).click();
             return this;
