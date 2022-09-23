@@ -10,6 +10,8 @@ The parameter for selecting the IdP (default: `kc_idp_hint`) can be configured i
 
 <img src="../docs/whitelist/00_set_vidis_idp_hint.png" width="70%"/>
 
+If the configuration is missing or doesn't contain the configured parameter, the authenticator will look for the parameter 'kc_idp_hint'.
+
 ### Preparing a whitelist (JSON)
 
 The Whitelist will be stored as a simple JSON-Structure in a custom config property inside the Authenticator.
