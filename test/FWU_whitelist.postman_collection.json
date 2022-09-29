@@ -75,7 +75,7 @@
 							"    pm.response.to.have.status(403);",
 							"});",
 							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Diese Anwendung ist derzeit nicht für diese Heimatorganisation (IdP) freigegeben\");",
+							"    pm.expect(pm.response.text()).to.include(\"Diese Anwendung ist mit Deinem Nutzerkonto derzeit nicht möglich\");",
 							"});"
 						],
 						"type": "text/javascript"
