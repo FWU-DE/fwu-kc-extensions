@@ -10,6 +10,10 @@ All notable changes to this project will be documented here.
 
 Updated Keycloak versions for extensions to `18.0.2`.
 
+## Version [1.5.1]
+
+- Changed error message for missing IdP configuration
+
 ## Version [1.5.0]
 
 - Authenticators return parameter 'kc_idp_hint' if config is partly missing
