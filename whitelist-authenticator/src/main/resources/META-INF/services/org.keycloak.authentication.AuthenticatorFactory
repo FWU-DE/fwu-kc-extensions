@@ -1,2 +1,3 @@
 de.intension.authentication.WhitelistAuthenticatorFactory
 de.intension.authentication.ConfigurableIdpHintParamIdentityProviderAuthenticatorFactory
+de.intension.authentication.schools.SchoolWhitelistAuthenticatorFactory

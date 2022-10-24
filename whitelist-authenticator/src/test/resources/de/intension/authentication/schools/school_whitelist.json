@@ -1,0 +1,18 @@
+[
+  {
+    "spAlias": "vidis-idp",
+    "listOfSchools": ["817","912"]
+  },
+  {
+    "spAlias": "aix-concept-o",
+    "listOfSchools": ["817","912","421"]
+  },
+  {
+    "spAlias": "security-admin-console",
+    "listOfSchools": ["8171","912","421"]
+  },
+  {
+    "spAlias": "test-client",
+    "listOfSchools": ["1234"]
+  }
+]

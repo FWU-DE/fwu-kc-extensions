@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [2.2.0]
+
+- Whitelist Authenticator which checks valid combinations of Client ID and School ID information.
+
 ## Version [2.1.0]
 
 - Authenticators return parameter 'kc_idp_hint' if config is partly missing
@@ -8,7 +12,7 @@ All notable changes to this project will be documented here.
 
 ## Version [2.0.0]
 
-Updated Keycloak versions for extensions to `18.0.2`.
+- Updated Keycloak versions for extensions to `18.0.2`.
 
 ## Version [1.5.1]
 
