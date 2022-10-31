@@ -34,7 +34,7 @@ For more details please check [here](./whitelist-authenticator/README.md).
 ### Whitelist Authenticator for Schools
 
 This Authenticator checks valid combinations of Client ID and School ID information.
-For more details please check [here](./whitelist-authenticator/README.md).
+For more details please check [here](./whitelist-authenticator-schools/README.md).
 
 ### User Attribute Mapper with value mapping
 

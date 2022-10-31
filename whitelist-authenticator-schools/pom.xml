@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-  <name>Whitelist authenticator</name>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>de.intension</groupId>
     <artifactId>fwu-kc-extensions</artifactId>
+    <groupId>de.intension</groupId>
     <version>${projectVersion}</version>
   </parent>
-
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>whitelist-authenticator</artifactId>
+  <artifactId>whitelist-authenticator-schools</artifactId>
 
   <packaging>jar</packaging>
 
@@ -36,6 +33,18 @@
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>
     </dependency>
   </dependencies>
 

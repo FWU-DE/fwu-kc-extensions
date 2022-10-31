@@ -20,14 +20,13 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.utils.StringUtil;
 
-import de.intension.authentication.IdpHintParamName;
 import de.intension.authentication.dto.SchoolWhitelistEntry;
 
 /**
  * Check users school id against service provider white list.
  */
 public class SchoolWhitelistAuthenticator
-    implements Authenticator, IdpHintParamName
+    implements Authenticator
 {
 
     private static final Logger logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
@@ -52,7 +51,7 @@ public class SchoolWhitelistAuthenticator
 
     protected Response createErrorPage(AuthenticationFlowContext context){
         return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                               Response.Status.FORBIDDEN, "idpNotConfigured");
+                               Response.Status.FORBIDDEN, "spNotConfigured");
     }
 
     /**
