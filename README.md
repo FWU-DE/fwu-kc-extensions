@@ -31,6 +31,11 @@ It holds the customization to remove the user on logout or session expiration. F
 This Authenticator checks valid combinations of Client ID and `KC_IDP_HINT` information.
 For more details please check [here](./whitelist-authenticator/README.md).
 
+### Whitelist Authenticator for Schools
+
+This Authenticator checks valid combinations of Client ID and School ID information.
+For more details please check [here](./whitelist-authenticator-schools/README.md).
+
 ### User Attribute Mapper with value mapping
 
 This mapper imports user attributes with the ability to translate values.

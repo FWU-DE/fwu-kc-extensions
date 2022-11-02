@@ -22,7 +22,8 @@ services:
     - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/jboss/keycloak/standalone/deployments/remove-user-on-logout.jar"
     - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/hmac-mapper.jar"
     - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
-    - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper.jar:/opt/jboss/keycloak/standalone/deployments/multi-value-user-attribute-mapper.jar"
+    - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator-schools.jar"
+    - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/multi-value-user-attribute-mapper.jar"
     networks:
     - fwunet
     depends_on:
@@ -48,6 +49,17 @@ services:
     - 8443:8080
     networks:
     - fwunet
+
+  static_http:
+    container_name: static_http
+    image: nginx:alpine
+    ports:
+      - 8083:8080
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/app/static
+    networks:
+      - fwunet
 
 networks:
   fwunet:
