@@ -37,11 +37,14 @@ public class RemoveExpiredSessionUsers
     {
         UserProvider provider = session.getProvider(UserProvider.class, "jpa");
         UserModel userModel = provider.getUserById(realm, userId);
-        Stream<UserSessionModel> userSessionModels = session.sessions().getUserSessionsStream(realm, userModel);
-        Optional<UserSessionModel> userSession = userSessionModels.findFirst();
 
-        if (userModel != null && (!userSession.isPresent() || !AuthenticationManager.isSessionValid(realm, userSession.get()))) {
-            removeUser(session, userModel);
+        if (userModel != null) {
+            Stream<UserSessionModel> userSessionModels = session.sessions().getUserSessionsStream(realm, userModel);
+            Optional<UserSessionModel> userSession = userSessionModels.findFirst();
+
+            if (!userSession.isPresent() || !AuthenticationManager.isSessionValid(realm, userSession.get())) {
+                removeUser(session, userModel);
+            }
         }
     }
 

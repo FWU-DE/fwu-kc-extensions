@@ -4,6 +4,7 @@ All notable changes to this project will be documented here.
 ## Version [2.2.0]
 
 - Whitelist Authenticator which checks valid combinations of Client ID and School ID information.
+- Fix the NPE on the RemoveExpiredSessionUsers while querying the user session from infinispan
 
 ## Version [2.1.0]
 
