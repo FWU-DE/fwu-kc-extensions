@@ -1,0 +1,26 @@
+{
+  "pid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+  "person": {
+    "name": {
+      "familienname": "Muster",
+      "vorname": "Max"
+    },
+    "geburt": {
+      "datum": "2010-01-01"
+    },
+    "geschlecht": "d",
+    "lokalisierung": "de-DE",
+    "vertrauensstufe": "VOLL"
+  },
+  "personenkontexte": [{
+    "ktid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+    "organisation": {
+      "orgid": "15685758-d18e-49c1-a644-f9996eb0bf08",
+      "kennung": "NI_12345",
+      "name": "Muster-Schule",
+      "typ": "SCHULE"
+    },
+    "rolle": "LERN",
+    "personenstatus": "AKTIV"
+  }]
+}

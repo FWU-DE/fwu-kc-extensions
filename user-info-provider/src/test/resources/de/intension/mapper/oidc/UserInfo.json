@@ -1,0 +1,43 @@
+{
+  "pid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+  "heimatorganisation": {
+    "name": "DE-SN-Schullogin",
+    "bundesland": "DE-BY"
+  },
+  "person": {
+    "name": {
+      "familienname": "Muster",
+      "vorname": "Max",
+      "akronym": "MaMu"
+    },
+    "geburt": {
+      "datum": "2010-01-01"
+    },
+    "geschlecht": "D",
+    "lokalisierung": "de-DE",
+    "vertrauensstufe": "VOLL"
+  },
+  "personenkontexte": [
+    {
+      "ktid": "af3a88fc-d766-11ec-9d64-0242ac120111",
+      "organisation": {
+        "orgid": "15685758-d18e-49c1-a644-f9996eb0bf11",
+        "kennung": "5555",
+        "name": "Test-Schule",
+        "typ": "ANBIETER"
+      },
+      "rolle": "LEHR",
+      "personenstatus": "INAKTIV"
+    },
+    {
+    "ktid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+    "organisation": {
+      "orgid": "15685758-d18e-49c1-a644-f9996eb0bf08",
+      "kennung": "NI_12345",
+      "name": "Muster-Schule",
+      "typ": "SCHULE"
+    },
+    "rolle": "LERN",
+    "personenstatus": "AKTIV"
+  }]
+}
