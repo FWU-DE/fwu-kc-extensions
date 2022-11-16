@@ -17,18 +17,16 @@ public class Organisation
 
     @JsonProperty(UserInfoAttributeNames.ORG_ID)
     private String           orgid;
-    @JsonIgnore
+    @JsonProperty(UserInfoAttributeNames.ORG_KENNUNG)
     private String           kennung;
     @JsonProperty(UserInfoAttributeNames.NAME)
     private String           name;
     @JsonProperty(UserInfoAttributeNames.ORG_TYP)
     private OrganisationsTyp typ;
-    @JsonProperty(UserInfoAttributeNames.VIDIS_SCHULIDENTIFIKATOR)
-    private String           vidisSchulidentifikator;
 
     @JsonIgnore
     public boolean isEmpty()
     {
-        return (orgid == null || name == null || vidisSchulidentifikator == null || typ == null);
+        return name == null && kennung == null;
     }
 }

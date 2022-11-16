@@ -2,7 +2,7 @@ package de.intension.rest.sanis;
 
 import static de.intension.api.UserInfoAttribute.*;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 
 import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -10,10 +10,10 @@ import org.keycloak.models.UserModel;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import de.intension.api.UserInfoAttribute;
+import de.intension.mapper.oidc.UserInfoRequesterMapper;
 import de.intension.rest.BaseMapper;
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.IValueMapper;
@@ -22,51 +22,44 @@ public class SanisKeycloakMapping
     implements IKeycloakApiMapper
 {
 
-    protected static final Logger                                 logger         = Logger.getLogger(SanisKeycloakMapping.class);
-    private static final EnumMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
-    private static final EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
+    protected static final Logger                                 logger         = Logger.getLogger(UserInfoRequesterMapper.class);
+    private static final HashMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
+    private static final HashMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
 
-    private static EnumMap<UserInfoAttribute, IValueMapper> initPerson()
+    private static HashMap<UserInfoAttribute, IValueMapper> initPerson()
     {
-        EnumMap<UserInfoAttribute, IValueMapper> personMapping = new EnumMap<>(UserInfoAttribute.class);
+        HashMap<UserInfoAttribute, IValueMapper> personMapping = new HashMap<>();
         personMapping.put(PERSON_FAMILIENNAME, new BaseMapper("$.person.name.familienname"));
         personMapping.put(PERSON_VORNAME, new BaseMapper("$.person.name.vorname"));
         personMapping.put(PERSON_GEBURTSDATUM, new BaseMapper("$.person.geburt.datum"));
         personMapping.put(PERSON_GESCHLECHT, new UpperCaseMapper("$.person.geschlecht"));
         personMapping.put(PERSON_LOKALISIERUNG, new BaseMapper("$.person.lokalisierung"));
-        personMapping.put(PERSON_VERTRAUENSSTUFE, new UpperCaseMapper("$.person.vertrauensstufe"));
+        personMapping.put(PERSON_VERTRAUENSSTUFE, new BaseMapper("$.person.vertrauensstufe"));
         return personMapping;
     }
 
-    private static EnumMap<UserInfoAttribute, IValueMapper> initKontext()
+    private static HashMap<UserInfoAttribute, IValueMapper> initKontext()
     {
-        EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = new EnumMap<>(UserInfoAttribute.class);
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ID, new BaseMapper("$.personenkontexte[#].ktid"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ID, new BaseMapper("$.personenkontexte[#].organisation.orgid"));
+        HashMap<UserInfoAttribute, IValueMapper> kontextMapping = new HashMap<>();
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new UpperCaseMapper("$.personenkontexte[#].organisation.typ"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new UpperCaseMapper("$.personenkontexte[#].rolle"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new UpperCaseMapper("$.personenkontexte[#].personenstatus"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new BaseMapper("$.personenkontexte[#].organisation.typ"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new BaseMapper("$.personenkontexte[#].rolle"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new BaseMapper("$.personenkontexte[#].personenstatus"));
         return kontextMapping;
     }
 
     @Override
     public void addAttributesToResource(Object resource, String userInfo)
     {
-        try {
-            Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
-            personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
-            Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
-            if (numberOfKontexte != null) {
-                for (int i = 0; i < numberOfKontexte; i++) {
-                    addPersonkontextToContext(i, document, resource);
-                }
+        Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
+        personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
+        Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
+        if (numberOfKontexte != null) {
+            for (int i = 0; i < numberOfKontexte; i++) {
+                addPersonkontextToContext(i, document, resource);
             }
-        } catch (JsonPathException e) {
-            logger.errorf("Error while reading personInfo json - %s", e.getMessage());
         }
-
     }
 
     /**

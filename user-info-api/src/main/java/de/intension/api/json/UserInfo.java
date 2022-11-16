@@ -21,8 +21,6 @@ public class UserInfo
 
     public static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @JsonProperty("version")
-    private String                   version      = "1.0.0";
     @JsonProperty(UserInfoAttributeNames.PID)
     private String                   pid;
     @JsonProperty(UserInfoAttributeNames.HEIMATORGANISATION)
@@ -42,7 +40,7 @@ public class UserInfo
     @JsonIgnore
     public boolean isEmpty()
     {
-        return pid == null || (heimatOrganisation == null || heimatOrganisation.isEmpty()) && (person == null || person.isEmpty())
+        return pid == null && (heimatOrganisation == null || heimatOrganisation.isEmpty()) && (person == null || person.isEmpty())
                 && (personenKontexte == null || personenKontexte.isEmpty());
     }
 

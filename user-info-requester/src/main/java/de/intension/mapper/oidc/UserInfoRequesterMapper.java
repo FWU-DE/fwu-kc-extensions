@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.*;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.mappers.UserAttributeMapper;
@@ -19,6 +18,8 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.utils.StringUtil;
+
+import com.google.gson.*;
 
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.RestClient;
@@ -77,9 +78,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                             BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        if(userInfo != null){
-            sanisMapping.addAttributesToResource(context, userInfo);
-        }
+        sanisMapping.addAttributesToResource(context, userInfo);
     }
 
     @Override
@@ -87,9 +86,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                    BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        if(userInfo != null){
-            sanisMapping.addAttributesToResource(user, userInfo);
-        }
+        sanisMapping.addAttributesToResource(user, userInfo);
     }
 
     /**
@@ -105,6 +102,10 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                 String accessToken = getAccessToken(context);
                 if (accessToken != null) {
                     userInfo = RestClient.get(url, accessToken);
+                    //TODO test purpose - Remove this line for PROD!!!
+                    Gson gson = new GsonBuilder().create();
+                    JsonObject userInfoJO = gson.fromJson(userInfo, JsonObject.class);
+                    userInfo = userInfoJO.get("userInfo").toString();
                 }
                 else {
                     logger.errorf("Access Token is null inside BrokeredIdentityContext for IdP %s", context.getIdpConfig().getAlias());
@@ -112,7 +113,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
             } catch (MalformedURLException e) {
                 logger.errorf("%s - Malformed URL: %s", REST_API_URL_LABEL, endpointUrl);
             } catch (IOException e) {
-                logger.errorf(e,"Error while calling rest endpoint %s", endpointUrl);
+                logger.errorf("Error while calling rest endpoint %s", endpointUrl);
             }
         }
         else {

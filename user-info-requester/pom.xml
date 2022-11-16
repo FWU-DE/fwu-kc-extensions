@@ -11,6 +11,12 @@
 
   <artifactId>user-info-requester</artifactId>
 
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.keycloak</groupId>
@@ -31,6 +37,8 @@
     <dependency>
       <groupId>de.intension</groupId>
       <artifactId>user-info-api</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>

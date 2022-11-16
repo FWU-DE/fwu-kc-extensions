@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <name>FWU Keycloak extensions</name>
@@ -20,18 +20,15 @@
     <module>user-info-api</module>
     <module>user-info-requester</module>
     <module>user-info-provider</module>
-    <module>acronym-mapper</module>
-    <module>school-mapper</module>
   </modules>
 
   <properties>
-    <projectVersion>3.0.0</projectVersion>
-    <keycloak.version>20.0.1</keycloak.version>
+    <projectVersion>2.2.1</projectVersion>
+    <keycloak.version>16.1.1</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.release>${java.version}</maven.compiler.release>
-    <mockito.version>4.9.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -42,33 +39,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-launcher</artifactId>
-      <version>1.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
-      <version>${mockito.version}</version>
+      <version>4.6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -116,12 +89,6 @@
         <version>2.4.0</version>
       </dependency>
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>31.1-jre</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty</artifactId>
         <version>5.14.0</version>
@@ -148,7 +115,7 @@
       <dependency>
         <groupId>com.github.dasniko</groupId>
         <artifactId>testcontainers-keycloak</artifactId>
-        <version>2.4.0</version>
+        <version>1.10.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -173,22 +140,12 @@
         <artifactId>jackson-databind</artifactId>
         <version>2.13.3</version>
       </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>31.1-jre</version>
-      </dependency>
       <!-- Lombok -->
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>1.18.24</version>
         <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>de.intension</groupId>
-        <artifactId>user-info-api</artifactId>
-        <version>${projectVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -206,8 +163,7 @@
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
               <manifestEntries>
-                <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi,
-                  org.keycloak.keycloak-server-spi-private,
+                <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi, org.keycloak.keycloak-server-spi-private,
                   org.keycloak.keycloak-services,
                   org.keycloak.keycloak-saml-core
                 </Dependencies>

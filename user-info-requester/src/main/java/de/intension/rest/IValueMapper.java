@@ -1,7 +1,6 @@
 package de.intension.rest;
 
-public interface IValueMapper
-{
+public interface IValueMapper {
 
     String getJsonPath();
 
