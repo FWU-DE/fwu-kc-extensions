@@ -27,7 +27,7 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
         property = new ProviderConfigProperty();
         property.setName(ATTRIBUTE);
         property.setLabel("User Attribute");
-        property.setHelpText("Name of the user attribute, which will contain the acronym");
+        property.setHelpText("Name of the user attribute, which will contain the acronym. Defaults to 'acronym' when left empty.");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setDefaultValue(ATTRIBUTE_DEFAULT_VALUE);
         configProperties.add(property);
