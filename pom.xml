@@ -17,6 +17,7 @@
     <module>whitelist-authenticator</module>
     <module>multi-value-user-attribute-mapper</module>
     <module>whitelist-authenticator-schools</module>
+    <module>acronym-mapper</module>
   </modules>
 
   <properties>
@@ -45,6 +46,7 @@
 
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-core</artifactId>
