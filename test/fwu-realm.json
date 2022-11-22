@@ -1100,12 +1100,16 @@
   ],
   "identityProviderMappers": [
     {
-      "id": "c2d85ff0-d0e3-4fa4-af62-715a4fc19fcd",
-      "name": "Acronym",
+      "id": "0c72593f-cb3e-45d5-80c1-9fad4325cf3c",
+      "name": "Prefix school IDs",
       "identityProviderAlias": "keycloak-oidc",
-      "identityProviderMapper": "acronym-idp-mapper",
+      "identityProviderMapper": "prefixed-attribute-idp-mapper",
       "config": {
-        "syncMode": "INHERIT"
+        "claims": "[]",
+        "syncMode": "INHERIT",
+        "claim": "schools",
+        "attribute": "prefixedSchools",
+        "prefix": "DE-SN-Schullogin."
       }
     }
   ],
