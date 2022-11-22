@@ -20,7 +20,7 @@ public class AcronymMapperFactory extends AbstractLDAPStorageMapperFactory {
 
     public static final String PROVIDER_ID = "acronym-mapper";
 
-    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
         ProviderConfigProperty attrName = createConfigProperty(AcronymMapper.USER_MODEL_ATTRIBUTE, "User Model Attribute Name",
