@@ -13,6 +13,7 @@
   <artifactId>acronym-mapper</artifactId>
 
   <name>Acronym mapper</name>
+  <description>LDAP mapper that will process user attributes to an acronym.</description>
 
   <dependencies>
     <dependency>
@@ -39,7 +40,23 @@
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-ldap-federation</artifactId>
       <version>${keycloak.version}</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
