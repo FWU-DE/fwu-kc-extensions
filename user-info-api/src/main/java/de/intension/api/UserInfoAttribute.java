@@ -1,6 +1,5 @@
 package de.intension.api;
 
-import de.intension.api.enumerations.Geschlecht;
 import de.intension.api.enumerations.OrganisationsTyp;
 import de.intension.api.enumerations.PersonenStatus;
 import de.intension.api.enumerations.Vertrauensstufe;
@@ -15,7 +14,7 @@ public enum UserInfoAttribute
     PERSON_VORNAME(UserInfoAttributeNames.PERSON_VORNAME, UserInfoAttributeNames.PERSON_VORNAME, Boolean.FALSE, null),
     PERSON_AKRONYM(UserInfoAttributeNames.PERSON_AKRONYM, UserInfoAttributeNames.PERSON_AKRONYM, Boolean.FALSE, null),
     PERSON_GEBURTSDATUM(UserInfoAttributeNames.PERSON_GEBURTSDATUM, UserInfoAttributeNames.PERSON_GEBURTSDATUM, Boolean.FALSE, null),
-    PERSON_GESCHLECHT(UserInfoAttributeNames.PERSON_GESCHLECHT, UserInfoAttributeNames.PERSON_GESCHLECHT, Boolean.FALSE, Geschlecht.X),
+    PERSON_GESCHLECHT(UserInfoAttributeNames.PERSON_GESCHLECHT, UserInfoAttributeNames.PERSON_GESCHLECHT, Boolean.FALSE, null),
     PERSON_LOKALISIERUNG(UserInfoAttributeNames.PERSON_LOKALISIERUNG, UserInfoAttributeNames.PERSON_LOKALISIERUNG, Boolean.TRUE, "de-DE"),
     PERSON_VERTRAUENSSTUFE(UserInfoAttributeNames.PERSON_VERTRAUENSSTUFE, UserInfoAttributeNames.PERSON_VERTRAUENSSTUFE, Boolean.TRUE, Vertrauensstufe.VOLL),
 
