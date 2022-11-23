@@ -156,8 +156,8 @@ public class UserInfoHelper
     private void addPersonName(Person person, ProtocolMapperModel mappingModel, UserModel user)
     {
         PersonName personName = new PersonName();
-        String familienName = resolveSingleAttributeValue(user, PERSON_FAMILIENNAME);
-        String vorname = resolveSingleAttributeValue(user, PERSON_VORNAME);
+        String familienName = getFamilienname(user);
+        String vorname = getVorname(user);
         if (isActive(PERSON_FAMILIENNAME, mappingModel)) {
             personName.setFamilienname(familienName);
         }
@@ -176,6 +176,28 @@ public class UserInfoHelper
         if (!personName.isEmpty()) {
             person.setPerson(personName);
         }
+    }
+
+    /**
+     * Get first name either from user attribute or user property (fallback).
+     */
+    private String getVorname(UserModel user){
+        String vorname = resolveSingleAttributeValue(user, PERSON_VORNAME);
+        if(vorname == null || vorname.isEmpty()){
+            vorname = user.getFirstName();
+        }
+        return vorname;
+    }
+
+    /**
+     * Get last name either from user attribute or user property (fallback).
+     */
+    private String getFamilienname(UserModel user){
+        String familienname = resolveSingleAttributeValue(user, PERSON_FAMILIENNAME);
+        if(familienname == null || familienname.isEmpty()){
+            familienname = user.getLastName();
+        }
+        return familienname;
     }
 
     /**
