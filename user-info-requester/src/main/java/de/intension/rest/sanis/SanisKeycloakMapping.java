@@ -2,7 +2,7 @@ package de.intension.rest.sanis;
 
 import static de.intension.api.UserInfoAttribute.*;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 
 import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -13,7 +13,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import de.intension.api.UserInfoAttribute;
-import de.intension.mapper.oidc.UserInfoRequesterMapper;
 import de.intension.rest.BaseMapper;
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.IValueMapper;
@@ -22,13 +21,13 @@ public class SanisKeycloakMapping
     implements IKeycloakApiMapper
 {
 
-    protected static final Logger                                 logger         = Logger.getLogger(UserInfoRequesterMapper.class);
-    private static final HashMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
-    private static final HashMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
+    protected static final Logger                                 logger         = Logger.getLogger(SanisKeycloakMapping.class);
+    private static final EnumMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
+    private static final EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
 
-    private static HashMap<UserInfoAttribute, IValueMapper> initPerson()
+    private static EnumMap<UserInfoAttribute, IValueMapper> initPerson()
     {
-        HashMap<UserInfoAttribute, IValueMapper> personMapping = new HashMap<>();
+        EnumMap<UserInfoAttribute, IValueMapper> personMapping = new EnumMap<>(UserInfoAttribute.class);
         personMapping.put(PERSON_FAMILIENNAME, new BaseMapper("$.person.name.familienname"));
         personMapping.put(PERSON_VORNAME, new BaseMapper("$.person.name.vorname"));
         personMapping.put(PERSON_GEBURTSDATUM, new BaseMapper("$.person.geburt.datum"));
@@ -38,9 +37,11 @@ public class SanisKeycloakMapping
         return personMapping;
     }
 
-    private static HashMap<UserInfoAttribute, IValueMapper> initKontext()
+    private static EnumMap<UserInfoAttribute, IValueMapper> initKontext()
     {
-        HashMap<UserInfoAttribute, IValueMapper> kontextMapping = new HashMap<>();
+        EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = new EnumMap<>(UserInfoAttribute.class);
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ID, new BaseMapper("$.personenkontexte[#].ktid"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ID, new BaseMapper("$.personenkontexte[#].organisation.orgid"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new BaseMapper("$.personenkontexte[#].organisation.typ"));

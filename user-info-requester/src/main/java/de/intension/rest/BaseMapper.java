@@ -1,19 +1,23 @@
 package de.intension.rest;
 
 public class BaseMapper
-    implements IValueMapper{
+    implements IValueMapper
+{
 
-    private String jsonPath;
+    private final String jsonPath;
 
-    public BaseMapper(String jsonPath){
+    public BaseMapper(String jsonPath)
+    {
         this.jsonPath = jsonPath;
     }
 
-    public String getJsonPath(){
+    public String getJsonPath()
+    {
         return jsonPath;
     }
 
-    @Override public String mapValue(String value)
+    @Override
+    public String mapValue(String value)
     {
         return value;
     }

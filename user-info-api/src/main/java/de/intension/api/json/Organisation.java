@@ -23,10 +23,12 @@ public class Organisation
     private String           name;
     @JsonProperty(UserInfoAttributeNames.ORG_TYP)
     private OrganisationsTyp typ;
+    @JsonProperty(UserInfoAttributeNames.VIDIS_SCHULIDENTIFIKATOR)
+    private String           vidisSchulidentifikator;
 
     @JsonIgnore
     public boolean isEmpty()
     {
-        return name == null && kennung == null;
+        return (orgid == null || name == null && kennung == null && vidisSchulidentifikator == null);
     }
 }
