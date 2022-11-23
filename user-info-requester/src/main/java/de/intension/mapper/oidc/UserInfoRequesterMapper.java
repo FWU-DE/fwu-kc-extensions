@@ -19,7 +19,9 @@ import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.utils.StringUtil;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.RestClient;
@@ -102,10 +104,6 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                 String accessToken = getAccessToken(context);
                 if (accessToken != null) {
                     userInfo = RestClient.get(url, accessToken);
-                    //TODO test purpose - Remove this line for PROD!!!
-                    Gson gson = new GsonBuilder().create();
-                    JsonObject userInfoJO = gson.fromJson(userInfo, JsonObject.class);
-                    userInfo = userInfoJO.get("userInfo").toString();
                 }
                 else {
                     logger.errorf("Access Token is null inside BrokeredIdentityContext for IdP %s", context.getIdpConfig().getAlias());

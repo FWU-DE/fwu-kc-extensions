@@ -17,11 +17,11 @@ public class Geburt
 {
 
     @JsonProperty(UserInfoAttributeNames.GEBURT_DATUM)
-    private String geburt;
+    private String datum;
 
     @JsonIgnore
     public boolean isEmpty()
     {
-        return (geburt == null || geburt.isBlank());
+        return (datum == null || datum.isBlank());
     }
 }
