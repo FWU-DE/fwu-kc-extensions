@@ -91,15 +91,16 @@ public class PrefixAttributeMapper extends AbstractClaimMapper {
 
     @Override
     public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        templateClaim(session, user, mapperModel, context);
+        templateClaim(user, mapperModel, context);
     }
 
     @Override
     public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        templateClaim(session, user, mapperModel, context);
+        templateClaim(user, mapperModel, context);
     }
 
-    private void templateClaim(KeycloakSession session, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
+    @SuppressWarnings("unchecked")
+    private void templateClaim(UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
         var config = mapperModel.getConfig();
         String claim = config.get(CLAIM);
         String userAttribute = config.get(ATTRIBUTE);
