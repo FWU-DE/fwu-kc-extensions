@@ -21,16 +21,6 @@ public class PersonName
     @JsonProperty(UserInfoAttributeNames.AKRONYM)
     private String akronym;
 
-    public String getAkronym()
-    {
-        if (akronym == null || akronym.isBlank()) {
-            if (vorname != null && vorname.length() >= 2 && familienname != null && familienname.length() >= 2) {
-                return vorname.substring(0, 2).concat(familienname.substring(0, 2));
-            }
-        }
-        return akronym;
-    }
-
     @JsonIgnore
     public boolean isEmpty()
     {
