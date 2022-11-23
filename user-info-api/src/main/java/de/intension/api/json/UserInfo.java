@@ -21,6 +21,8 @@ public class UserInfo
 
     public static final ObjectMapper objectMapper = new ObjectMapper();
 
+    @JsonProperty("version")
+    private String                   version      = "1.0.0";
     @JsonProperty(UserInfoAttributeNames.PID)
     private String                   pid;
     @JsonProperty(UserInfoAttributeNames.HEIMATORGANISATION)

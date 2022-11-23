@@ -28,7 +28,7 @@ public class Personenkontext
     @JsonIgnore
     public boolean isEmpty()
     {
-        return (organisation == null || organisation.isEmpty()) && rolle == null;
+        return ktid == null || (organisation == null || organisation.isEmpty()) && rolle == null;
     }
 
 }

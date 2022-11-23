@@ -32,27 +32,12 @@ public class UserInfoHelper
     public UserInfo getUserInfoFromKeycloakUser(IDToken token, ProtocolMapperModel mappingModel, UserModel user)
     {
         UserInfo userInfo = new UserInfo();
-        userInfo.setPid(getSubject(token));
+        userInfo.setPid(token.getSubject());
         String heimatOrgName = addHeimatOrganisation(userInfo, mappingModel, user);
         addPerson(userInfo, mappingModel, user);
         addDefaultPersonKontext(userInfo, mappingModel, user, heimatOrgName);
         addPersonenKontextArray(userInfo, mappingModel, user, heimatOrgName);
         return userInfo;
-    }
-
-    /**
-     * Get subject identifier from token.
-     */
-    private String getSubject(IDToken token)
-    {
-        String subject = token.getSubject();
-        if (StringUtil.isBlank(subject)) {
-            Map<String, Object> otherClaims = token.getOtherClaims();
-            if (otherClaims != null) {
-                subject = (String)otherClaims.get("sub");
-            }
-        }
-        return subject;
     }
 
     /**
@@ -63,7 +48,7 @@ public class UserInfoHelper
         Personenkontext kontext = new Personenkontext();
         Rolle rolle = getRolle(user, -1);
         kontext.setKtid(getKit(user, heimatOrgName, rolle, -1));
-        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgName, rolle, userInfo);
+        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgName, rolle);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
         }
@@ -78,6 +63,7 @@ public class UserInfoHelper
             }
         }
         if (!organisation.isEmpty()) {
+            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, -1);
             kontext.setOrganisation(organisation);
         }
         if (!kontext.isEmpty()) {
@@ -88,12 +74,14 @@ public class UserInfoHelper
     /**
      * Add {@link Organisation} json structure to userInfo claim.
      */
-    private Organisation getOrganisation(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle, UserInfo userInfo)
+    private Organisation getOrganisation(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle)
     {
         Organisation organisation = new Organisation();
         String kennung = resolveSingleAttributeValue(user, PERSON_KONTEXT_ORG_KENNUNG);
         organisation.setOrgid(getOrgId(user, heimatOrgName, rolle, kennung, -1));
-        organisation.setKennung(kennung);
+        if (isActive(PERSON_KONTEXT_ORG_KENNUNG, mappingModel)) {
+            organisation.setKennung(kennung);
+        }
         if (isActive(PERSON_KONTEXT_ORG_NAME, mappingModel)) {
             organisation.setName(resolveSingleAttributeValue(user, PERSON_KONTEXT_ORG_NAME));
         }
@@ -107,9 +95,6 @@ public class UserInfoHelper
                 }
             }
         }
-        if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
-            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, -1);
-        }
         return organisation;
     }
 
@@ -119,7 +104,6 @@ public class UserInfoHelper
     private String addHeimatOrganisation(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user)
     {
         HeimatOrganisation heimatOrganisation = new HeimatOrganisation();
-        heimatOrganisation.setId(resolveSingleAttributeValue(user, HEIMATORGANISATION_ID));
         String orgName = resolveSingleAttributeValue(user, HEIMATORGANISATION_NAME);
         if (isActive(HEIMATORGANISATION_NAME, mappingModel)) {
             heimatOrganisation.setName(orgName);
@@ -172,8 +156,8 @@ public class UserInfoHelper
     private void addPersonName(Person person, ProtocolMapperModel mappingModel, UserModel user)
     {
         PersonName personName = new PersonName();
-        String familienName = getFamilienname(user);
-        String vorname = getVorname(user);
+        String familienName = resolveSingleAttributeValue(user, PERSON_FAMILIENNAME);
+        String vorname = resolveSingleAttributeValue(user, PERSON_VORNAME);
         if (isActive(PERSON_FAMILIENNAME, mappingModel)) {
             personName.setFamilienname(familienName);
         }
@@ -182,7 +166,7 @@ public class UserInfoHelper
         }
         if (isActive(PERSON_AKRONYM, mappingModel)) {
             String akronym = resolveSingleAttributeValue(user, PERSON_AKRONYM);
-            if (StringUtil.isBlank(akronym) && vorname != null && vorname.length() >= 2 && familienName != null && familienName.length() >= 2) {
+            if ((akronym == null || akronym.isBlank()) && vorname != null && vorname.length() >= 2 && familienName != null && familienName.length() >= 2) {
                 akronym = vorname.substring(0, 2).concat(familienName.substring(0, 2));
             }
             if (akronym != null) {
@@ -192,30 +176,6 @@ public class UserInfoHelper
         if (!personName.isEmpty()) {
             person.setPerson(personName);
         }
-    }
-
-    /**
-     * Get first name either from user attribute or user property (fallback).
-     */
-    private String getVorname(UserModel user)
-    {
-        String vorname = resolveSingleAttributeValue(user, PERSON_VORNAME);
-        if (vorname == null || vorname.isEmpty()) {
-            vorname = user.getFirstName();
-        }
-        return vorname;
-    }
-
-    /**
-     * Get last name either from user attribute or user property (fallback).
-     */
-    private String getFamilienname(UserModel user)
-    {
-        String familienname = resolveSingleAttributeValue(user, PERSON_FAMILIENNAME);
-        if (familienname == null || familienname.isEmpty()) {
-            familienname = user.getLastName();
-        }
-        return familienname;
     }
 
     /**
@@ -257,7 +217,7 @@ public class UserInfoHelper
         Rolle rolle = getRolle(user, i);
         Personenkontext kontext = new Personenkontext();
         kontext.setKtid(getKit(user, heimatOrgName, rolle, i));
-        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgName, rolle, i, userInfo);
+        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgName, rolle, i);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
         }
@@ -272,6 +232,7 @@ public class UserInfoHelper
             }
         }
         if (!organisation.isEmpty()) {
+            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, i);
             kontext.setOrganisation(organisation);
         }
         return kontext;
@@ -280,12 +241,14 @@ public class UserInfoHelper
     /**
      * Add {@link Organisation} json structure to userInfo claim.
      */
-    private Organisation getOrganisationArray(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle, Integer i, UserInfo userInfo)
+    private Organisation getOrganisationArray(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle, Integer i)
     {
         Organisation organisation = new Organisation();
         String kennung = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_ORG_KENNUNG, i);
         organisation.setOrgid(getOrgId(user, heimatOrgName, rolle, kennung, i));
-        organisation.setKennung(kennung);
+        if (isActive(PERSON_KONTEXT_ORG_KENNUNG, mappingModel)) {
+            organisation.setKennung(kennung);
+        }
         if (isActive(PERSON_KONTEXT_ORG_NAME, mappingModel)) {
             organisation.setName(resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_ORG_NAME, i));
         }
@@ -298,9 +261,6 @@ public class UserInfoHelper
                     logger.errorf(LOG_UNSUPPORTED_VALUE, orgTyp, PERSON_KONTEXT_ORG_TYP.getAttributeName());
                 }
             }
-        }
-        if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
-            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, i);
         }
         return organisation;
     }
@@ -316,8 +276,9 @@ public class UserInfoHelper
         }
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
             String vidisId = resolveSingleAttributeValue(user, attribute, index);
-            if (StringUtil.isBlank(vidisId) && userInfo.getHeimatOrganisation() != null
-                    && StringUtil.isNotBlank(userInfo.getHeimatOrganisation().getName()) && StringUtil.isNotBlank(org.getKennung())) {
+            if ((vidisId == null || vidisId.isEmpty()) && userInfo.getHeimatOrganisation() != null
+                    && userInfo.getHeimatOrganisation().getName() != null &&
+                    !userInfo.getHeimatOrganisation().getName().isEmpty() && org.getKennung() != null && !org.getKennung().isEmpty()) {
                 org.setVidisSchulidentifikator(String.format("%s.%s", userInfo.getHeimatOrganisation().getName(), org.getKennung()).toLowerCase());
             }
             else if (vidisId != null) {
@@ -406,7 +367,7 @@ public class UserInfoHelper
             attribute = PERSON_KONTEXT_ARRAY_ID;
         }
         String kontextId = resolveSingleAttributeValue(user, attribute, index);
-        if (StringUtil.isBlank(kontextId) && rolle != null && StringUtil.isNotBlank(heimatOrgName)) {
+        if ((kontextId == null || kontextId.isEmpty()) && rolle != null && heimatOrgName != null && !heimatOrgName.isEmpty()) {
             String builder = rolle.name() + heimatOrgName;
             kontextId = Hashing.sha256()
                 .hashString(builder, StandardCharsets.UTF_8)
@@ -425,7 +386,7 @@ public class UserInfoHelper
             attribute = PERSON_KONTEXT_ARRAY_ORG_ID;
         }
         String orgId = resolveSingleAttributeValue(user, attribute, index);
-        if ((StringUtil.isBlank(orgId)) && rolle != null && StringUtil.isNotBlank(heimatOrgName) && StringUtil.isNotBlank(kennung)) {
+        if ((orgId == null || orgId.isEmpty()) && rolle != null && heimatOrgName != null && !heimatOrgName.isEmpty() && kennung != null && !kennung.isEmpty()) {
             String builder = rolle.name() + heimatOrgName + kennung;
             orgId = Hashing.sha256()
                 .hashString(builder, StandardCharsets.UTF_8)

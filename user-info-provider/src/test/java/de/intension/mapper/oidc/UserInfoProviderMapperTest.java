@@ -21,10 +21,8 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
-import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
 import de.intension.api.UserInfoAttribute;
 
@@ -45,10 +43,7 @@ class UserInfoProviderMapperTest
         mapper.transformIDToken(idToken, createMapperModel(mapper), session, createUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
         Assertions.assertNotNull(userInfo);
-        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo,
-                                new CustomComparator(JSONCompareMode.STRICT,
-                                        new Customization("**.ktid", (o1, o2) -> true),
-                                        new Customization("**.orgid", (o1, o2) -> true)));
+        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo, JSONCompareMode.STRICT);
     }
 
     private ProtocolMapperModel createMapperModel(UserInfoProviderMapper mapper)
@@ -93,6 +88,7 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ORG_TYP.getAttributeName(), "ANBIETER");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ROLLE.getAttributeName(), "LEHR");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_STATUS.getAttributeName(), "INAKTIV");
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ORG_VIDIS_ID.getAttributeName(), "vidis.id");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_TYP, 0), "SCHULE");
