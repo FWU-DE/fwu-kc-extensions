@@ -33,8 +33,6 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
         configProperties.add(property);
     }
 
-    private String attribute = ATTRIBUTE_DEFAULT_VALUE;
-
     @Override
     public boolean supportsSyncMode(IdentityProviderSyncMode syncMode) {
         // supports any sync mode
@@ -72,11 +70,6 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
     }
 
     @Override
-    public void init(Config.Scope config) {
-        this.attribute = config.get(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
-    }
-
-    @Override
     public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
         updateUser(user);
     }
@@ -87,6 +80,8 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
     }
 
     private void updateUser(UserModel user) {
+        String attribute = config.get(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
+
         var firstName = user.getAttributeStream(UserModel.FIRST_NAME).findFirst().orElse("");
         var lastName = user.getAttributeStream(UserModel.LAST_NAME).findFirst().orElse("");
 
