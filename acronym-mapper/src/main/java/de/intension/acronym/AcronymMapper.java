@@ -1,6 +1,5 @@
 package de.intension.acronym;
 
-import org.keycloak.Config;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
@@ -71,16 +70,16 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
 
     @Override
     public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        updateUser(user);
+        updateUser(user, mapperModel);
     }
 
     @Override
     public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        updateUser(user);
+        updateUser(user, mapperModel);
     }
 
-    private void updateUser(UserModel user) {
-        String attribute = config.get(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
+    private void updateUser(UserModel user, IdentityProviderMapperModel mapperModel) {
+        String attribute = mapperModel.getConfig().getOrDefault(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
 
         var firstName = user.getAttributeStream(UserModel.FIRST_NAME).findFirst().orElse("");
         var lastName = user.getAttributeStream(UserModel.LAST_NAME).findFirst().orElse("");
