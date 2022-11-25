@@ -7,6 +7,7 @@ import de.intension.api.enumerations.Vertrauensstufe;
 public enum UserInfoAttribute
 {
 
+    HEIMATORGANISATION_ID(UserInfoAttributeNames.HEIMATORGANISATION_ID, UserInfoAttributeNames.HEIMATORGANISATION_ID, Boolean.TRUE, null),
     HEIMATORGANISATION_NAME(UserInfoAttributeNames.HEIMATORGANISATION_NAME, UserInfoAttributeNames.HEIMATORGANISATION_NAME, Boolean.TRUE, null),
     HEIMATORGANISATION_BUNDESLAND(UserInfoAttributeNames.HEIMATORGANISATION_BUNDESLAND, UserInfoAttributeNames.HEIMATORGANISATION_BUNDESLAND, Boolean.TRUE,
             null),

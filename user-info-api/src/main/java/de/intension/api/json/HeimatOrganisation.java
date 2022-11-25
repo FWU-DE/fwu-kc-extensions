@@ -14,6 +14,8 @@ import lombok.Setter;
 public class HeimatOrganisation
 {
 
+    @JsonProperty(UserInfoAttributeNames.ID)
+    private String id;
     @JsonProperty(UserInfoAttributeNames.NAME)
     private String name;
     @JsonProperty(UserInfoAttributeNames.BUNDESLAND)
@@ -22,7 +24,7 @@ public class HeimatOrganisation
     @JsonIgnore
     public boolean isEmpty()
     {
-        return name == null && bundesland == null;
+        return id == null || name == null && bundesland == null;
     }
 
 }

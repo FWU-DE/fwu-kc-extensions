@@ -89,6 +89,7 @@ class UserInfoProviderMapperTest
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
         TestUserModel userModel = new TestUserModel(null, null, "224");
+        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_ID.getAttributeName(), "3e3b679c-6cae-11ed-a1eb-0242ac120002");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_NAME.getAttributeName(), "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_FAMILIENNAME.getAttributeName(), "Muster");
@@ -118,6 +119,7 @@ class UserInfoProviderMapperTest
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
         TestUserModel userModel = new TestUserModel(null, null, "224");
+        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_ID.getAttributeName(), "3e3b679c-6cae-11ed-a1eb-0242ac120002");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_NAME.getAttributeName(), "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
         userModel.setFirstName("Max");
