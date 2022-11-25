@@ -42,7 +42,6 @@ public class UserInfoProviderMapper
         addConfigEntry(PERSON_LOKALISIERUNG);
         addConfigEntry(PERSON_VERTRAUENSSTUFE);
         addConfigEntry(PERSON_KONTEXT_ORG_VIDIS_ID);
-        addConfigEntry(PERSON_KONTEXT_ORG_KENNUNG);
         addConfigEntry(PERSON_KONTEXT_ORG_NAME);
         addConfigEntry(PERSON_KONTEXT_ORG_TYP);
         addConfigEntry(PERSON_KONTEXT_ROLLE);
