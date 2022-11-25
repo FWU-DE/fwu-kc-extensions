@@ -42,7 +42,7 @@ public class UserInfo
     @JsonIgnore
     public boolean isEmpty()
     {
-        return pid == null && (heimatOrganisation == null || heimatOrganisation.isEmpty()) && (person == null || person.isEmpty())
+        return pid == null || (heimatOrganisation == null || heimatOrganisation.isEmpty()) && (person == null || person.isEmpty())
                 && (personenKontexte == null || personenKontexte.isEmpty());
     }
 

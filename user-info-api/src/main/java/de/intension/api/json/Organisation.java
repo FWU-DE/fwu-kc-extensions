@@ -17,7 +17,7 @@ public class Organisation
 
     @JsonProperty(UserInfoAttributeNames.ORG_ID)
     private String           orgid;
-    @JsonProperty(UserInfoAttributeNames.ORG_KENNUNG)
+    @JsonIgnore
     private String           kennung;
     @JsonProperty(UserInfoAttributeNames.NAME)
     private String           name;
@@ -29,6 +29,6 @@ public class Organisation
     @JsonIgnore
     public boolean isEmpty()
     {
-        return (orgid == null || name == null && kennung == null && vidisSchulidentifikator == null);
+        return (orgid == null || name == null || vidisSchulidentifikator == null || typ == null);
     }
 }
