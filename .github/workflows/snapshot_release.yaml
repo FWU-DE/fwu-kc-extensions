@@ -15,7 +15,7 @@ jobs:
         with:
           java-version: 11
       - name: Build with Maven
-        run: mvn --batch-mode package -DprojectVersion=${GITHUB_REF#refs/*/}
+        run: mvn --batch-mode package -DprojectVersion=$GITHUB_REF_NAME
 
   publish:
     needs: package
@@ -29,13 +29,11 @@ jobs:
       - name: Get module names
         id: get-modules
         run: |
-          TAG=${GITHUB_REF#refs/*/}
-          echo "version=$TAG" >> $GITHUB_OUTPUT
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
           for module in $modules
           do
             if [ "$module" != "fwu-kc-extensions" ]; then
-              echo "$module/target/$module-$TAG.jar" >> modules.txt
+              echo "$module/target/$module-$GITHUB_REF_NAME.jar" >> modules.txt
             fi
           done
           csv=$(paste -s -d , modules.txt)
@@ -49,7 +47,7 @@ jobs:
         if: ${{ steps.get-modules.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.get-modules.outputs.version }}
+          tag: $GITHUB_REF_NAME
           artifacts: "${{ steps.get-modules.outputs.artifacts }}"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
