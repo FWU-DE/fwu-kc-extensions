@@ -5,20 +5,8 @@ on:
       - '*-SNAPSHOT'
 
 jobs:
-  package:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build with Maven
-        run: mvn --batch-mode package -DprojectVersion=${GITHUB_REF#refs/*/}
-
   publish:
-    needs: package
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -26,30 +14,27 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Check release exists
-        id: check-release
+      - name: Deploy to GitHub packages
+        run: mvn --batch-mode deploy -DprojectVersion=$GITHUB_REF_NAME -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get module names
+        id: get-modules
         run: |
-          TAG=${GITHUB_REF#refs/*/}
-          echo "::set-output name=version::$TAG"
-          modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
+          modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
           for module in $modules
           do
             if [ "$module" != "fwu-kc-extensions" ]; then
-              echo "$module/target/$module-$TAG.jar" >> modules.txt
+              echo "$module/target/$module-$GITHUB_REF_NAME.jar" >> modules.txt
             fi
           done
           csv=$(paste -s -d , modules.txt)
-          echo "::set-output name=artifacts::$csv"
-      - name: Build with Maven
-        if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Publish release
-        if: ${{ steps.check-release.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.check-release.outputs.version }}
-          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          tag: "$GITHUB_REF_NAME"
+          artifacts: "${{ steps.get-modules.outputs.artifacts }}"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
