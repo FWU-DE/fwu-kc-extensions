@@ -6,8 +6,8 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
 
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -16,6 +16,8 @@ jobs:
           java-version: 11
       - name: Deploy to GitHub packages
         run: mvn --batch-mode deploy -DprojectVersion=$GITHUB_REF_NAME -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get module names
         id: get-modules
         run: |
@@ -31,11 +33,6 @@ jobs:
           cat modules.txt >> $GITHUB_ENV
           csv=$(paste -s -d , modules.txt)
           echo "artifacts=$csv" >> $GITHUB_OUTPUT
-      - name: Build with Maven
-        if: ${{ steps.get-modules.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish release
         if: ${{ steps.get-modules.outputs.version != '' }}
         uses: ncipollo/release-action@v1
