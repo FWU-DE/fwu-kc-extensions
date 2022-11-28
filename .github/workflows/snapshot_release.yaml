@@ -30,6 +30,7 @@ jobs:
         id: get-modules
         run: |
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
+          echo $modules
           for module in $modules
           do
             if [ "$module" != "fwu-kc-extensions" ]; then
