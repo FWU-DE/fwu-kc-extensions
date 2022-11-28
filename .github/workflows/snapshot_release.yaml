@@ -29,7 +29,7 @@ jobs:
       - name: Get module names
         id: get-modules
         run: |
-          modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
+          modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
           echo $modules
           for module in $modules
           do
