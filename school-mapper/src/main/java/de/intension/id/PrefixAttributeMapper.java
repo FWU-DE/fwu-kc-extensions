@@ -1,6 +1,5 @@
-package de.intension.schoolmapper;
+package de.intension.id;
 
-import org.jboss.logging.Logger;
 import org.keycloak.broker.oidc.mappers.AbstractClaimMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
@@ -8,8 +7,11 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
+/**
+ * Identity provider mapper
+ */
 public class PrefixAttributeMapper extends AbstractClaimMapper {
     public static final String PROVIDER_ID = "prefixed-attribute-idp-mapper";
     public static final String[] COMPATIBLE_PROVIDERS = {ANY_PROVIDER};
@@ -19,8 +21,6 @@ public class PrefixAttributeMapper extends AbstractClaimMapper {
     public static final String ATTRIBUTE = "attribute";
     public static final String PREFIX = "prefix";
     public static final String LOWER_CASE = "toLowerCase";
-
-    private final Logger logger = Logger.getLogger(PrefixAttributeMapper.class);
 
     static {
         ProviderConfigProperty property = new ProviderConfigProperty();
@@ -91,36 +91,32 @@ public class PrefixAttributeMapper extends AbstractClaimMapper {
 
     @Override
     public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        templateClaim(user, mapperModel, context);
+        prefix(user, mapperModel.getConfig(), context);
     }
 
     @Override
     public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        templateClaim(user, mapperModel, context);
+        prefix(user, mapperModel.getConfig(), context);
     }
 
+    /**
+     * Prefixes each attribute in a list with a given prefix.
+     *
+     * @param user    User to set modified attribute value
+     * @param context IdP context to get claim value
+     */
     @SuppressWarnings("unchecked")
-    private void templateClaim(UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        var config = mapperModel.getConfig();
+    private void prefix(UserModel user, Map<String, String> config, BrokeredIdentityContext context) {
         String claim = config.get(CLAIM);
         String userAttribute = config.get(ATTRIBUTE);
         String prefix = config.get(PREFIX);
         boolean toLowerCase = Boolean.parseBoolean(config.getOrDefault(LOWER_CASE, Boolean.FALSE.toString()));
-        logger.info("Claim: " + claim);
         Object claimValue = getClaimValue(context, claim);
+        PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase);
         if (claimValue instanceof List) {
-            logger.info(claimValue.toString());
-            var claimValues = (List<Object>) claimValue;
-            claimValues.forEach(v -> logger.info(v + " is of type " + v.getClass()));
-            var prefixed = claimValues.stream()
-                    .map(c -> prefix + c)
-                    .map(toLowerCase ? String::toLowerCase : c -> c)
-                    .collect(Collectors.toList());
-            user.setAttribute(userAttribute, prefixed);
+            user.setAttribute(userAttribute, prefixer.prefix((List<String>) claimValue));
         } else {
-            logger.info(claimValue + " is of type " + claimValue.getClass());
-            String prefixed = prefix + claimValue;
-            user.setSingleAttribute(userAttribute, toLowerCase ? prefixed.toLowerCase() : prefixed);
+            user.setSingleAttribute(userAttribute, prefixer.prefix((String) claimValue));
         }
     }
 }
