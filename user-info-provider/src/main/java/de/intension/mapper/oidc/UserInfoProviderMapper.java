@@ -49,6 +49,7 @@ public class UserInfoProviderMapper
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserInfoProviderMapper.class);
         setDefaultTokeClaimNameValue();
         setDefaultTokeClaimType();
+        deactivateAccessToken();
     }
 
     /**
@@ -72,6 +73,18 @@ public class UserInfoProviderMapper
             .findFirst();
         if (!config.isEmpty()) {
             config.get().setDefaultValue("JSON");
+        }
+    }
+
+    /**
+     * Deactivate ACCESS_TOKEN as a default target storing users metadata.
+     */
+    private static void deactivateAccessToken()
+    {
+        Optional<ProviderConfigProperty> config = configProperties.stream().filter(p -> p.getName().equals(OIDCAttributeMapperHelper.INCLUDE_IN_ACCESS_TOKEN))
+                                                                  .findFirst();
+        if (!config.isEmpty()) {
+            config.get().setDefaultValue("false");
         }
     }
 
