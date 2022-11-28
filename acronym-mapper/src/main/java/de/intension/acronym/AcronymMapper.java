@@ -1,5 +1,6 @@
 package de.intension.acronym;
 
+import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
@@ -20,6 +21,8 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
     private static final String ATTRIBUTE_DEFAULT_VALUE = "acronym";
 
     protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+
+    private static final Logger LOG = Logger.getLogger(AcronymMapper.class);
 
     static {
         ProviderConfigProperty property;
@@ -81,9 +84,30 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
     private void updateUser(UserModel user, IdentityProviderMapperModel mapperModel) {
         String attribute = mapperModel.getConfig().getOrDefault(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
 
-        var firstName = user.getAttributeStream(UserModel.FIRST_NAME).findFirst().orElse("");
-        var lastName = user.getAttributeStream(UserModel.LAST_NAME).findFirst().orElse("");
+        var firstName = getAttribute(user, UserModel.FIRST_NAME);
+        var lastName = getAttribute(user, UserModel.LAST_NAME);
 
-        user.setSingleAttribute(attribute, AcronymUtil.createAcronym(firstName, lastName));
+        if (firstName != null && lastName != null) {
+            user.setSingleAttribute(attribute, AcronymUtil.createAcronym(firstName, lastName));
+        }
+    }
+
+    /**
+     * Get attribute value from a user for acronym creation.
+     *
+     * @param attribute Name of the attribute to fetch
+     * @return Attribute value or null if attribute is missing, empty or shorter than 2 characters
+     */
+    private String getAttribute(UserModel user, String attribute) {
+        var value = user.getAttributeStream(attribute).findFirst().orElse(null);
+        if (value == null || value.isBlank()) {
+            LOG.warnf("User '%s' is missing attribute value '%s'. Skipping acronym mapping.", user.getId(), attribute);
+            return null;
+        }
+        if (value.length() < 2) {
+            LOG.warnf("User '%s' attribute '%s' value '%s' is too short. Skipping acronym mapping.", user.getId(), attribute, value);
+            return null;
+        }
+        return value;
     }
 }
