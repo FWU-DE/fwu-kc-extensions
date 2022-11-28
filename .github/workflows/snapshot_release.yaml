@@ -31,7 +31,6 @@ jobs:
           csv=$(paste -s -d , modules.txt)
           echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Publish release
-        if: ${{ steps.get-modules.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
           tag: $GITHUB_REF_NAME
