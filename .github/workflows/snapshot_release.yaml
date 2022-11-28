@@ -21,16 +21,13 @@ jobs:
       - name: Get module names
         id: get-modules
         run: |
-          mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
-          echo "modules=$modules" >> $GITHUB_ENV
           for module in $modules
           do
             if [ "$module" != "fwu-kc-extensions" ]; then
               echo "$module/target/$module-$GITHUB_REF_NAME.jar" >> modules.txt
             fi
           done
-          cat modules.txt >> $GITHUB_ENV
           csv=$(paste -s -d , modules.txt)
           echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Publish release
