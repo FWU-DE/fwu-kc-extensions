@@ -30,13 +30,14 @@ jobs:
         id: get-modules
         run: |
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
-          echo $modules
+          echo "modules=$modules" >> $GITHUB_ENV
           for module in $modules
           do
             if [ "$module" != "fwu-kc-extensions" ]; then
               echo "$module/target/$module-$GITHUB_REF_NAME.jar" >> modules.txt
             fi
           done
+          cat modules.txt >> $GITHUB_ENV
           csv=$(paste -s -d , modules.txt)
           echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Build with Maven
