@@ -1,13 +1,10 @@
 # Change Log
+
 All notable changes to this project will be documented here.
 
-## Version [2.3.0]
+## Version [2.4.0]
 
-- New Feature: Acroynm mapper - Identity provider mapper that will combine the first two letters of the first and last name to a lowercase acronym.
-
-## Version [2.2.1]
-
-- Fixed Nullpointer Exception on infinispan session search
+- New feature: Prefixed attribute mapper - Prefixes single- and multi-valued claim values
 
 ## Version [2.2.0]
 
@@ -52,7 +49,8 @@ All notable changes to this project will be documented here.
 
 ## Version [1.2.0]
 
-- New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to other values
+- New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to
+  other values
 
 ## Version [1.1.1]
 
@@ -66,12 +64,14 @@ All notable changes to this project will be documented here.
 
 - Removed old HMAC Pairwise mapper
 - Refactored new HMAC Pairwise mapper
-  - uses hostname of sector identifier URI
-  - sector identifier URI return value not validated anymore
-  - possibility to encode any user property or attribute
+    - uses hostname of sector identifier URI
+    - sector identifier URI return value not validated anymore
+    - possibility to encode any user property or attribute
 
 ## Version [1.0.0]
+
 Initial release containing following keycloak extensions
+
 - HMAC Pairwise mapper to pseudonymize user IDs
 - HMAC Pairwise mapper with static sector identifier
 - Remove users from keycloak on logout or on session expiry
