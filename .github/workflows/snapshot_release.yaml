@@ -30,7 +30,7 @@ jobs:
         id: check-release
         run: |
           TAG=${GITHUB_REF#refs/*/}
-          echo "::set-output name=version::$TAG"
+          echo "version=$TAG" >> $GITHUB_OUTPUT
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
           for module in $modules
           do
@@ -39,7 +39,7 @@ jobs:
             fi
           done
           csv=$(paste -s -d , modules.txt)
-          echo "::set-output name=artifacts::$csv"
+          echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Build with Maven
         if: ${{ steps.check-release.outputs.version != '' }}
         run: mvn --batch-mode clean deploy
