@@ -26,8 +26,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Check release exists
-        id: check-release
+      - name: Get module names
+        id: get-modules
         run: |
           TAG=${GITHUB_REF#refs/*/}
           echo "version=$TAG" >> $GITHUB_OUTPUT
@@ -41,15 +41,15 @@ jobs:
           csv=$(paste -s -d , modules.txt)
           echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Build with Maven
-        if: ${{ steps.check-release.outputs.version != '' }}
+        if: ${{ steps.get-modules.outputs.version != '' }}
         run: mvn --batch-mode clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish release
-        if: ${{ steps.check-release.outputs.version != '' }}
+        if: ${{ steps.get-modules.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.check-release.outputs.version }}
-          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          tag: ${{ steps.get-modules.outputs.version }}
+          artifacts: "${{ steps.get-modules.outputs.artifacts }}"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
