@@ -11,12 +11,6 @@
 
   <artifactId>user-info-provider</artifactId>
 
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.keycloak</groupId>
@@ -37,8 +31,6 @@
     <dependency>
       <groupId>de.intension</groupId>
       <artifactId>user-info-api</artifactId>
-      <version>${projectVersion}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.skyscreamer</groupId>

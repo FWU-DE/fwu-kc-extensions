@@ -24,6 +24,8 @@ services:
     - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator.jar"
     - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/jboss/keycloak/standalone/deployments/whitelist-authenticator-schools.jar"
     - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/jboss/keycloak/standalone/deployments/multi-value-user-attribute-mapper.jar"
+    - "../user-info-provider/target/user-info-provider-docker.jar:/opt/jboss/keycloak/standalone/deployments/user-info-provider.jar"
+    - "../user-info-requester/target/user-info-requester-docker.jar:/opt/jboss/keycloak/standalone/deployments/user-info-requester.jar"
     networks:
     - fwunet
     depends_on:
