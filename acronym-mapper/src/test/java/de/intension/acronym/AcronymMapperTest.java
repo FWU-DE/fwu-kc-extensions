@@ -1,14 +1,12 @@
 package de.intension.acronym;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.models.IdentityProviderMapperModel;
 import org.keycloak.models.UserModel;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +17,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
-@ExtendWith(MockitoExtension.class)
 class AcronymMapperTest {
     private static final String ATTRIBUTE_DEFAULT_VALUE = "acronym";
 
