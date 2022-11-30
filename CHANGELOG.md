@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [2.3.0]
+
+- New Feature: Acroynm mapper - Identity provider mapper that will combine the first two letters of the first and last name to a lowercase acronym.
+
+## Version [2.2.1]
+
+- Fixed Nullpointer Exception on infinispan session search
+
 ## Version [2.2.0]
 
 - Whitelist Authenticator which checks valid combinations of Client ID and School ID information.

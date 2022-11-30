@@ -1098,7 +1098,17 @@
       }
     }
   ],
-  "identityProviderMappers": [],
+  "identityProviderMappers": [
+    {
+      "id": "c2d85ff0-d0e3-4fa4-af62-715a4fc19fcd",
+      "name": "Acronym",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "acronym-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT"
+      }
+    }
+  ],
   "components": {
     "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
       {

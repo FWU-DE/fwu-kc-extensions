@@ -42,6 +42,11 @@ This mapper imports user attributes with the ability to translate values.
 It supports SAML- and OIDC- Identity Providers.
 For more details please check [here](./multi-value-user-attribute-mapper/README.md).
 
+### Acronym mapper
+
+This mapper combines the first two letters of the first and last name to a lowercase acronym. 
+For more details please check [here](./acronym-mapper/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
