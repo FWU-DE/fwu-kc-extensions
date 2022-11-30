@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.*;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.mappers.UserAttributeMapper;
@@ -18,10 +19,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.utils.StringUtil;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.RestClient;
@@ -111,7 +108,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
             } catch (MalformedURLException e) {
                 logger.errorf("%s - Malformed URL: %s", REST_API_URL_LABEL, endpointUrl);
             } catch (IOException e) {
-                logger.errorf("Error while calling rest endpoint %s", endpointUrl);
+                logger.errorv(e,"Error while calling rest endpoint %s", endpointUrl);
             }
         }
         else {
