@@ -3,7 +3,7 @@
 Teachers can reference the school they're working at via a school ID.
 Because it is possible for a teacher to work at multiple schools, this attribute is multi-valued.
 Unfortunately these school IDs are not globally unique; only per organization (identity provider).
-For this reason the school IDs have to be prefixed with a value that is unique for this identity provider when importing them.
+For this reason the school IDs have to be prefixed with a value that is unique for this identity provider when they're logging in.
 
 ## Configuration
 
