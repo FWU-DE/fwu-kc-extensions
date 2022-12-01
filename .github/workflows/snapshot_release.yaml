@@ -21,6 +21,7 @@ jobs:
       - name: Get module names
         id: get-modules
         run: |
+          echo "::set-output name=version::$GITHUB_REF_NAME"
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
           for module in $modules
           do
@@ -33,7 +34,7 @@ jobs:
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-          tag: "$GITHUB_REF_NAME"
+          tag: ${{ steps.check-release.outputs.version }}
           artifacts: "${{ steps.get-modules.outputs.artifacts }}"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
