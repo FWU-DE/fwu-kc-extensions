@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <name>FWU Keycloak extensions</name>
@@ -17,6 +17,7 @@
     <module>whitelist-authenticator</module>
     <module>multi-value-user-attribute-mapper</module>
     <module>whitelist-authenticator-schools</module>
+    <module>acronym-mapper</module>
     <module>school-mapper</module>
   </modules>
 
@@ -27,6 +28,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.release>${java.version}</maven.compiler.release>
+    <mockito.version>4.9.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -45,7 +47,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
-      <version>4.6.1</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -139,7 +141,8 @@
                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               </manifest>
               <manifestEntries>
-                <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi, org.keycloak.keycloak-server-spi-private,
+                <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi,
+                  org.keycloak.keycloak-server-spi-private,
                   org.keycloak.keycloak-services,
                   org.keycloak.keycloak-saml-core
                 </Dependencies>
