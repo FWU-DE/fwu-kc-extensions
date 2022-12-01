@@ -1,4 +1,9 @@
-# School ID mapper
+# Prefixed attribute mapper
+
+This identity provider mapper can be used to add a prefix to claim values when mapping them to a user attribute.
+The claim can be single- or multi-valued. In case of multi-valued all values are prefixed.
+
+## Example use-case
 
 Teachers can reference the school they're working at via a school ID.
 Because it is possible for a teacher to work at multiple schools, this attribute is multi-valued.
