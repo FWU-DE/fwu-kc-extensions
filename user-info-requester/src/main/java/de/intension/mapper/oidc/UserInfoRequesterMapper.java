@@ -77,7 +77,9 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                             BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        sanisMapping.addAttributesToResource(context, userInfo);
+        if(userInfo != null){
+            sanisMapping.addAttributesToResource(context, userInfo);
+        }
     }
 
     @Override
@@ -85,7 +87,9 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                    BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        sanisMapping.addAttributesToResource(user, userInfo);
+        if(userInfo != null){
+            sanisMapping.addAttributesToResource(user, userInfo);
+        }
     }
 
     /**
@@ -108,7 +112,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
             } catch (MalformedURLException e) {
                 logger.errorf("%s - Malformed URL: %s", REST_API_URL_LABEL, endpointUrl);
             } catch (IOException e) {
-                logger.errorv(e,"Error while calling rest endpoint %s", endpointUrl);
+                logger.errorf(e,"Error while calling rest endpoint %s", endpointUrl);
             }
         }
         else {
