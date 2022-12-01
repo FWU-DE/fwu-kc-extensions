@@ -64,7 +64,7 @@ public class SanisKeycloakMapping
                 }
             }
         } catch (JsonPathException e) {
-            logger.error("Error while reading personInfo json", e);
+            logger.errorf("Error while reading personInfo json - %s", e.getMessage());
         }
 
     }
