@@ -15,7 +15,14 @@
           "type": "password",
           "value": "test"
         }
-      ]
+      ],
+      "attributes": {
+        "prefixedSchools": [
+          "DE-SN-Schullogin.0815",
+          "DE-SN-Schullogin.1337",
+          "DE-SN-Schullogin.421"
+        ]
+      }
     },
     {
       "username": "brock",
@@ -1107,6 +1114,19 @@
       "config": {
         "syncMode": "INHERIT"
       }
+    },
+    {
+      "id": "0c72593f-cb3e-45d5-80c1-9fad4325cf3c",
+      "name": "Prefix school IDs",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "prefixed-attribute-idp-mapper",
+      "config": {
+        "claims": "[]",
+        "syncMode": "INHERIT",
+        "claim": "schools",
+        "attribute": "prefixedSchools",
+        "prefix": "DE-SN-Schullogin."
+      }
     }
   ],
   "components": {
@@ -1348,7 +1368,59 @@
       ]
     },
     {
-      "id": "21f09d4b-c069-4d1b-9732-978e205b4cec",
+      "id": "184b7ecd-8f79-460c-9bb0-843cb5260239",
+      "alias": "Browser Forms",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    },
+    {
+      "id": "0def28d3-0b80-48f6-b30f-199aed66a288",
+      "alias": "Default",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 0,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 1,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 2,
+          "flowAlias": "Browser Forms",
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "id": "1a95134b-d594-4b79-8da6-b2f1fabf6eea",
       "alias": "Direct Grant - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -1426,7 +1498,60 @@
       ]
     },
     {
-      "id": "40c49983-5259-4908-97b4-2532141300e2",
+      "id": "829fca7d-eb03-4a9f-a9c9-3074cee76ada",
+      "alias": "Prefixed school whitelist Browser",
+      "description": "browser based authentication",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "flowAlias": "Default",
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        },
+        {
+          "authenticatorConfig": "Prefixes",
+          "authenticator": "school-whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 33,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    },
+    {
+      "id": "71072305-197e-4c2e-afa5-b43fe96c672b",
+      "alias": "Prefixed school whitelist Browser Browser - Conditional OTP",
+      "description": "Flow to determine if the OTP is required for the authentication",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-configured",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "auth-otp-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    },
+    {
+      "id": "9ce211de-072e-4168-9251-70dc484bd84f",
       "alias": "Reset - Conditional OTP",
       "description": "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
       "providerId": "basic-flow",
@@ -2001,7 +2126,16 @@
   ],
   "authenticatorConfig": [
     {
-      "id": "0733653f-ba7f-4a6c-8b34-00a81148c6a7",
+      "id": "38e85238-b060-422e-baf7-3ba994df8e1d",
+      "alias": "Prefixes",
+      "config": {
+        "cacheRefreshInterval": "5",
+        "whitelistUri": "http://172.17.0.1:8083/school_whitelist.json",
+        "userAttributeName": "prefixedSchools"
+      }
+    },
+    {
+      "id": "25b09bed-2af6-454d-931d-b4e95b881528",
       "alias": "create unique user config",
       "config": {
         "require.password.update.after.registration": "false"
@@ -2080,7 +2214,7 @@
       "config": {}
     }
   ],
-  "browserFlow": "browser",
+  "browserFlow": "Prefixed school whitelist Browser",
   "registrationFlow": "registration",
   "directGrantFlow": "direct grant",
   "resetCredentialsFlow": "reset credentials",

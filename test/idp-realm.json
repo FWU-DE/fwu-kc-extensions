@@ -13,7 +13,14 @@
               "type": "password",
               "value": "test"
             }
-          ]
+          ],
+          "attributes": {
+            "schools": [
+              "0815",
+              "1337",
+              "415"
+            ]
+          }
         }
     ],
     "notBefore": 0,
@@ -312,6 +319,23 @@
         "publicClient": false,
         "frontchannelLogout": false,
         "protocol": "openid-connect",
+        "protocolMappers": [
+          {
+            "name": "Test",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "multivalued": "true",
+              "user.attribute": "schools",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "schools",
+              "jsonType.label": "String"
+            }
+          }
+        ],
         "attributes": {
           "saml.assertion.signature": "false",
           "id.token.as.detached.signature": "false",

@@ -1,14 +1,33 @@
 [
   {
     "spAlias": "vidis-idp",
-    "listOfSchools": ["817","912"]
+    "listOfSchools": [
+      "817",
+      "912"
+    ]
   },
   {
     "spAlias": "aix-concept-o",
-    "listOfSchools": ["817","912","421"]
+    "listOfSchools": [
+      "817",
+      "912",
+      "421"
+    ]
   },
   {
     "spAlias": "security-admin-console",
-    "listOfSchools": ["8171","912","421"]
+    "listOfSchools": [
+      "8171",
+      "912",
+      "421"
+    ]
+  },
+  {
+    "spAlias": "account",
+    "listOfSchools": [
+      "DE-SN-Schullogin.8171",
+      "DE-SN-Schullogin.912",
+      "DE-SN-Schullogin.421"
+    ]
   }
 ]

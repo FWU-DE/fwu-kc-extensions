@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [2.4.0]
+
+- New feature: Prefixed attribute mapper - Prefixes single- and multi-valued claim values
+
 ## Version [2.3.0]
 
 - New Feature: Acroynm mapper - Identity provider mapper that will combine the first two letters of the first and last name to a lowercase acronym.

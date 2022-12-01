@@ -18,10 +18,11 @@
     <module>multi-value-user-attribute-mapper</module>
     <module>whitelist-authenticator-schools</module>
     <module>acronym-mapper</module>
+    <module>school-mapper</module>
   </modules>
 
   <properties>
-    <projectVersion>2.3.0</projectVersion>
+    <projectVersion>2.4.0</projectVersion>
     <keycloak.version>16.1.1</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
