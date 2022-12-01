@@ -56,8 +56,7 @@ All notable changes to this project will be documented here.
 
 ## Version [1.2.0]
 
-- New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to
-  other values
+- New Keycloak extension that extends the existing **Attribute Importer** with the ability to map incoming values to other values
 
 ## Version [1.1.1]
 
@@ -71,14 +70,12 @@ All notable changes to this project will be documented here.
 
 - Removed old HMAC Pairwise mapper
 - Refactored new HMAC Pairwise mapper
-    - uses hostname of sector identifier URI
-    - sector identifier URI return value not validated anymore
-    - possibility to encode any user property or attribute
+  - uses hostname of sector identifier URI
+  - sector identifier URI return value not validated anymore
+  - possibility to encode any user property or attribute
 
 ## Version [1.0.0]
-
 Initial release containing following keycloak extensions
-
 - HMAC Pairwise mapper to pseudonymize user IDs
 - HMAC Pairwise mapper with static sector identifier
 - Remove users from keycloak on logout or on session expiry
