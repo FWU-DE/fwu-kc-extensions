@@ -1100,6 +1100,15 @@
   ],
   "identityProviderMappers": [
     {
+      "id": "c2d85ff0-d0e3-4fa4-af62-715a4fc19fcd",
+      "name": "Acronym",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "acronym-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT"
+      }
+    },
+    {
       "id": "0c72593f-cb3e-45d5-80c1-9fad4325cf3c",
       "name": "Prefix school IDs",
       "identityProviderAlias": "keycloak-oidc",
