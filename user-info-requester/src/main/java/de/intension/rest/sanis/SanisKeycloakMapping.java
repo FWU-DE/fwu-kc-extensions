@@ -10,6 +10,7 @@ import org.keycloak.models.UserModel;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.PathNotFoundException;
 
 import de.intension.api.UserInfoAttribute;
@@ -53,14 +54,19 @@ public class SanisKeycloakMapping
     @Override
     public void addAttributesToResource(Object resource, String userInfo)
     {
-        Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
-        personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
-        Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
-        if (numberOfKontexte != null) {
-            for (int i = 0; i < numberOfKontexte; i++) {
-                addPersonkontextToContext(i, document, resource);
+        try {
+            Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
+            personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
+            Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
+            if (numberOfKontexte != null) {
+                for (int i = 0; i < numberOfKontexte; i++) {
+                    addPersonkontextToContext(i, document, resource);
+                }
             }
+        } catch (JsonPathException e) {
+            logger.error("Error while reading personInfo json", e);
         }
+
     }
 
     /**
