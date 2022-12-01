@@ -47,6 +47,11 @@ For more details please check [here](./multi-value-user-attribute-mapper/README.
 This mapper combines the first two letters of the first and last name to a lowercase acronym. 
 For more details please check [here](./acronym-mapper/README.md).
 
+### School ID mapper
+
+Identity provider mapper regarding school IDs made up of a home organization and a school ID.
+For more details please check [here](./school-mapper/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
