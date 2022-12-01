@@ -33,6 +33,9 @@ jobs:
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
+          tag: "$GITHUB_REF_NAME"
           artifacts: "${{ steps.get-modules.outputs.artifacts }}"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          allowUpdates: true
