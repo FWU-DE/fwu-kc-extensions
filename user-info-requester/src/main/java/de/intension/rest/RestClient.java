@@ -1,5 +1,7 @@
 package de.intension.rest;
 
+import org.jboss.logging.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,6 +10,7 @@ import java.net.URL;
 
 public class RestClient
 {
+    protected static final Logger logger = Logger.getLogger(RestClient.class);
 
     private RestClient()
     {
@@ -24,6 +27,8 @@ public class RestClient
         con.setConnectTimeout(30 * 1000);
         con.setReadTimeout(30 * 1000);
         con.setInstanceFollowRedirects(false);
+
+        logger.infof("Connection - response code: %s with message %s", con.getResponseCode(), con.getResponseMessage());
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
