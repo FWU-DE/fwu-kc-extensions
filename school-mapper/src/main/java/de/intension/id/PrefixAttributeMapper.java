@@ -112,11 +112,21 @@ public class PrefixAttributeMapper extends AbstractClaimMapper {
         String prefix = config.get(PREFIX);
         boolean toLowerCase = Boolean.parseBoolean(config.getOrDefault(LOWER_CASE, Boolean.FALSE.toString()));
         Object claimValue = getClaimValue(context, claim);
+        if (claimValue == null) {
+            return;
+        }
         PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase);
         if (claimValue instanceof List) {
-            user.setAttribute(userAttribute, prefixer.prefix((List<String>) claimValue));
+            var prefixedValues = prefixer.prefix((List<String>) claimValue);
+            if (!prefixedValues.isEmpty()) {
+                user.setAttribute(userAttribute, prefixedValues);
+            }
         } else {
-            user.setSingleAttribute(userAttribute, prefixer.prefix((String) claimValue));
+            String stringValue = (String) claimValue;
+            if (stringValue.isBlank()) {
+                return;
+            }
+            user.setSingleAttribute(userAttribute, prefixer.prefix(stringValue));
         }
     }
 }

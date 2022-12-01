@@ -1,7 +1,6 @@
 package de.intension.id;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +25,7 @@ public class PrefixAttributeService {
      */
     public List<String> prefix(List<String> values) {
         return values.stream()
-                .filter(Objects::nonNull)
+                .filter(v -> v != null && !v.isBlank())
                 .map(this::prefix)
                 .collect(Collectors.toList());
     }
