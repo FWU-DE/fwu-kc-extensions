@@ -54,3 +54,9 @@ We use [semantic versioning](https://semver.org/) defined in `projectVersion` in
 When this version is changed a new release will be created with the next [main](https://github.com/FWU-DE/fwu-kc-extensions/actions/workflows/main.yaml) pipeline.
 The pipeline will deploy the Maven artifacts to GitHub packages aswell as create a GitHub release with the new version and attach the module artifacts to it.
 Make sure to update [`CHANGELOG.md`](CHANGELOG.md) when creating a new release.
+
+### Snapshot releases
+
+To release a snapshot on any branch, push a tag ending in "`-SNAPSHOT`" to the GitHub repository.
+This will trigger the [snapshot release](https://github.com/FWU-DE/fwu-kc-extensions/actions/workflows/snapshot_release.yaml) pipeline.
+The pipeline is capable of updating existing snapshot releases aswell.
