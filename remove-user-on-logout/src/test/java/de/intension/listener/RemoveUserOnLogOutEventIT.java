@@ -19,10 +19,11 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
@@ -33,20 +34,24 @@ class RemoveUserOnLogOutEventIT
 
     private static Network             network           = Network.newNetwork();
 
-    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:16.1.1")
-        .withExtensionClassesFrom("target/classes")
+    private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
+
+    @Container
+    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:20.0.1")
+        .withProviderClassesFrom("target/classes")
+        .withContextPath("/auth")
         .withNetwork(network)
         .withNetworkAliases("test")
-        .withEnv("KEYCLOAK_IMPORT", "/opt/keycloak/imports/fwu-realm.json,/opt/keycloak/imports/idp-realm.json")
-        .withCopyFileToContainer(MountableFile.forClasspathResource("fwu-realm.json"), "/opt/keycloak/imports/")
-        .withCopyFileToContainer(MountableFile.forClasspathResource("idp-realm.json"), "/opt/keycloak/imports/")
+        .withClasspathResourceMapping("fwu-realm.json",IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
+        .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
+        .withRealmImportFiles("/fwu-realm.json","/idp-realm.json")
         .withAccessToHost(true);
 
     private static GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
         .withNetwork(network)
         .withNetworkAliases("test")
         .withExposedPorts(4444, 5900)
-        .withSharedMemorySize(2000000000l);
+        .withSharedMemorySize(2000000000L);
 
     private RemoteWebDriver            driver;
     private FluentWait<WebDriver>      wait;
@@ -205,7 +210,7 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage logout()
         {
-            String signOutButton = "Sign Out";
+            String signOutButton = "Sign out";
             wait.until(ExpectedConditions.elementToBeClickable(By.linkText(signOutButton)));
             driver.findElement(By.linkText(signOutButton)).click();
             return this;
