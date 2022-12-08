@@ -21,7 +21,7 @@ jobs:
       - name: Get module names
         id: get-modules
         run: |
-          echo "version=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+          echo "::set-output name=version::$GITHUB_REF_NAME"
           modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' -DprojectVersion=$GITHUB_REF_NAME exec:exec -q)
           for module in $modules
           do

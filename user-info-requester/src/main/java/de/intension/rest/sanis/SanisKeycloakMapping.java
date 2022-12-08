@@ -34,7 +34,7 @@ public class SanisKeycloakMapping
         personMapping.put(PERSON_GEBURTSDATUM, new BaseMapper("$.person.geburt.datum"));
         personMapping.put(PERSON_GESCHLECHT, new UpperCaseMapper("$.person.geschlecht"));
         personMapping.put(PERSON_LOKALISIERUNG, new BaseMapper("$.person.lokalisierung"));
-        personMapping.put(PERSON_VERTRAUENSSTUFE, new BaseMapper("$.person.vertrauensstufe"));
+        personMapping.put(PERSON_VERTRAUENSSTUFE, new UpperCaseMapper("$.person.vertrauensstufe"));
         return personMapping;
     }
 
@@ -45,9 +45,9 @@ public class SanisKeycloakMapping
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ID, new BaseMapper("$.personenkontexte[#].organisation.orgid"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new BaseMapper("$.personenkontexte[#].organisation.typ"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new BaseMapper("$.personenkontexte[#].rolle"));
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new BaseMapper("$.personenkontexte[#].personenstatus"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new UpperCaseMapper("$.personenkontexte[#].organisation.typ"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new UpperCaseMapper("$.personenkontexte[#].rolle"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new UpperCaseMapper("$.personenkontexte[#].personenstatus"));
         return kontextMapping;
     }
 
