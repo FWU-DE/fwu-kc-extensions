@@ -93,15 +93,17 @@ jobs:
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
           GROUP_NAME: ${{ steps.getGroup.outputs.info }}
           ARTIFACTS: ${{ steps.check-release.outputs.artifacts }}
-          VERSION: ${{ steps.getVersion.outputs.version }}
+          VERSION: ${{ steps.check-release.outputs.version }}
         run: |
+          group=${GROUP_NAME/.//}
           IFS=',' read -ra archives <<< $ARTIFACTS
           for archive in ${archives[@]}
           do
-            filename=${archive##*/}
-            curl --request PUT \
-              --upload-file ${archive} \
-              --header "Deploy-Token: ${GITLAB_TOKEN}" \
-              "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${GROUP_NAME}/${VERSION}/${filename}"
+              filename=${archive##*/}
+              artifact=${filename%-*}
+              curl --request PUT \
+                  --upload-file ${archive} \
+                  --header "Deploy-Token: ${GITLAB_TOKEN}" \
+                  "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
           done
 

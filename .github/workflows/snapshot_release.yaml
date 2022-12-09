@@ -49,13 +49,16 @@ jobs:
           VERSION: $GITHUB_REF_NAME
         run: |
           group=$(mvn -N -Dexec.executable='echo' -Dexec.args='${project.groupId}' exec:exec -q)
-          IFS=','
+          group=${group/.//}
+          echo "group: ${group}"
+          IFS=',' 
           read -ra archives <<< $ARTIFACTS
           for archive in ${archives[@]}
           do
-            filename=${archive##*/}
-            curl --request PUT \
-              --upload-file ${archive} \
-              --header "Deploy-Token: ${GITLAB_TOKEN}" \
-              "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${VERSION}/${filename}"
+              filename=${archive##*/}
+              artifact=${filename%-*}
+              curl --request PUT \
+                  --upload-file ${archive} \
+                  --header "Deploy-Token: ${GITLAB_TOKEN}" \
+                  "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
           done
