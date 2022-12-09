@@ -45,17 +45,17 @@ jobs:
           GITLAB_HOST: ${{ secrets.GITLAB_HOST }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          GROUP_NAME: de/intension/fwu-kc-extensions
           ARTIFACTS: "${{ steps.get-modules.outputs.artifacts }}"
           VERSION: $GITHUB_REF_NAME
         run: |
+          group=$(mvn -N -Dexec.executable='echo' -Dexec.args='${project.groupId}' exec:exec -q)
           IFS=','
           read -ra archives <<< $ARTIFACTS
-          for archive in ${archives}
+          for archive in ${archives[@]}
           do
             filename=${archive##*/}
             curl --request PUT \
               --upload-file ${archive} \
               --header "Deploy-Token: ${GITLAB_TOKEN}" \
-              "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${GROUP_NAME}/${VERSION}/${filename}"
+              "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${VERSION}/${filename}"
           done
