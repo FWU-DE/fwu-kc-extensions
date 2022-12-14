@@ -3,7 +3,9 @@
   "person": {
     "name": {
       "familienname": "Muster",
-      "vorname": "Max"
+      "vorname": "Max",
+      "initialenFamilienname": "M",
+      "initialenVorname": "M"
     },
     "geburt": {
       "datum": "2010-01-01"

@@ -29,6 +29,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Deploy API modules first
+        run: mvn --batch-mode deploy -pl user-info-api
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check release exists
         id: check-release
         run: |

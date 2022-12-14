@@ -4,5 +4,6 @@ public enum OrganisationsTyp
 {
     SCHULE,
     ANBIETER,
-    SONSTIGE
+    SONSTIGE,
+    UNBEST
 }

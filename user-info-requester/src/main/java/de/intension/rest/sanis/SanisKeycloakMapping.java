@@ -35,6 +35,8 @@ public class SanisKeycloakMapping
         personMapping.put(PERSON_GESCHLECHT, new UpperCaseMapper("$.person.geschlecht"));
         personMapping.put(PERSON_LOKALISIERUNG, new BaseMapper("$.person.lokalisierung"));
         personMapping.put(PERSON_VERTRAUENSSTUFE, new UpperCaseMapper("$.person.vertrauensstufe"));
+        personMapping.put(PERSON_FAMILIENNAME_INITIALEN, new BaseMapper("$.person.name.initialenFamilienname"));
+        personMapping.put(PERSON_VORNAME_INITIALEN, new BaseMapper("$.person.name.initialenVorname"));
         return personMapping;
     }
 

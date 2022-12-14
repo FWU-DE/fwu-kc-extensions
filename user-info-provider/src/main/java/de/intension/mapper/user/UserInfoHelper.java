@@ -8,8 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.logging.Logger;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.representations.IDToken;
 import org.keycloak.utils.StringUtil;
@@ -23,33 +22,39 @@ import de.intension.api.json.*;
 public class UserInfoHelper
 {
 
-    protected static final Logger logger                = Logger.getLogger(UserInfoHelper.class);
-    private static final String   LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
+    protected static final Logger           logger                = Logger.getLogger(UserInfoHelper.class);
+    private static final String             LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
+    private static final UserBirthdayHelper birthdayHelper        = new UserBirthdayHelper();
+    private static final IdpHelper          idpHelper             = new IdpHelper();
 
     /**
      * Create userInfo attribute from users attributes.
      */
-    public UserInfo getUserInfoFromKeycloakUser(IDToken token, ProtocolMapperModel mappingModel, UserModel user)
+    public UserInfo getUserInfoFromKeycloakUser(KeycloakSession keycloakSession, UserSessionModel session, IDToken token, ProtocolMapperModel mappingModel)
     {
         UserInfo userInfo = new UserInfo();
-        userInfo.setPid(getSubject(token));
-        String heimatOrgName = addHeimatOrganisation(userInfo, mappingModel, user);
-        addPerson(userInfo, mappingModel, user);
-        addDefaultPersonKontext(userInfo, mappingModel, user, heimatOrgName);
-        addPersonenKontextArray(userInfo, mappingModel, user, heimatOrgName);
+        userInfo.setPid(getSubject(token, session));
+        String heimatOrgId = addHeimatOrganisation(keycloakSession, session, userInfo, mappingModel);
+        addPerson(userInfo, mappingModel, session.getUser());
+        addDefaultPersonKontext(userInfo, mappingModel, session.getUser(), heimatOrgId);
+        addPersonenKontextArray(userInfo, mappingModel, session.getUser(), heimatOrgId);
         return userInfo;
     }
 
     /**
      * Get subject identifier from token.
      */
-    private String getSubject(IDToken token)
+    private String getSubject(IDToken token, UserSessionModel sessionModel)
     {
         String subject = token.getSubject();
         if (StringUtil.isBlank(subject)) {
             Map<String, Object> otherClaims = token.getOtherClaims();
             if (otherClaims != null) {
                 subject = (String)otherClaims.get("sub");
+            }
+            //Fallback - Use User-ID from Keycloak
+            if (StringUtil.isBlank(subject) && sessionModel.getUser() != null) {
+                subject = sessionModel.getUser().getId();
             }
         }
         return subject;
@@ -58,12 +63,12 @@ public class UserInfoHelper
     /**
      * Add {@link Personenkontext} json structure to userInfo claim.
      */
-    private void addDefaultPersonKontext(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName)
+    private void addDefaultPersonKontext(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId)
     {
         Personenkontext kontext = new Personenkontext();
         Rolle rolle = getRolle(user, -1);
-        kontext.setKtid(getKit(user, heimatOrgName, rolle, -1));
-        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgName, rolle, userInfo);
+        kontext.setKtid(getKit(user, heimatOrgId, rolle, -1));
+        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgId, rolle, userInfo);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
         }
@@ -88,14 +93,16 @@ public class UserInfoHelper
     /**
      * Add {@link Organisation} json structure to userInfo claim.
      */
-    private Organisation getOrganisation(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle, UserInfo userInfo)
+    private Organisation getOrganisation(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId, Rolle rolle, UserInfo userInfo)
     {
         Organisation organisation = new Organisation();
         String kennung = resolveSingleAttributeValue(user, PERSON_KONTEXT_ORG_KENNUNG);
-        organisation.setOrgid(getOrgId(user, heimatOrgName, rolle, kennung, -1));
-        organisation.setKennung(kennung);
+        organisation.setOrgid(getOrgId(user, heimatOrgId, rolle, kennung, -1));
         if (isActive(PERSON_KONTEXT_ORG_NAME, mappingModel)) {
             organisation.setName(resolveSingleAttributeValue(user, PERSON_KONTEXT_ORG_NAME));
+        }
+        if (isActive(PERSON_KONTEXT_ORG_KENNUNG, mappingModel)) {
+            organisation.setKennung(kennung);
         }
         if (isActive(PERSON_KONTEXT_ORG_TYP, mappingModel)) {
             String orgTyp = resolveSingleAttributeValue(user, PERSON_KONTEXT_ORG_TYP);
@@ -108,7 +115,7 @@ public class UserInfoHelper
             }
         }
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
-            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, -1);
+            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, kennung, -1);
         }
         return organisation;
     }
@@ -116,21 +123,23 @@ public class UserInfoHelper
     /**
      * Add @{@link HeimatOrganisation} json structure to userInfo claim.
      */
-    private String addHeimatOrganisation(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user)
+    private String addHeimatOrganisation(KeycloakSession keycloakSession, UserSessionModel session, UserInfo userInfo, ProtocolMapperModel mappingModel)
     {
         HeimatOrganisation heimatOrganisation = new HeimatOrganisation();
-        heimatOrganisation.setId(resolveSingleAttributeValue(user, HEIMATORGANISATION_ID));
-        String orgName = resolveSingleAttributeValue(user, HEIMATORGANISATION_NAME);
-        if (isActive(HEIMATORGANISATION_NAME, mappingModel)) {
-            heimatOrganisation.setName(orgName);
+        IdentityProviderModel idpProviderModel = idpHelper.getIdpAlias(keycloakSession, session);
+        if (idpProviderModel != null) {
+            heimatOrganisation.setId(idpProviderModel.getAlias());
+            if (isActive(HEIMATORGANISATION_NAME, mappingModel)) {
+                heimatOrganisation.setName(idpProviderModel.getDisplayName());
+            }
         }
         if (isActive(HEIMATORGANISATION_BUNDESLAND, mappingModel)) {
-            heimatOrganisation.setBundesland(resolveSingleAttributeValue(user, HEIMATORGANISATION_BUNDESLAND));
+            heimatOrganisation.setBundesland(resolveSingleAttributeValue(session.getUser(), HEIMATORGANISATION_BUNDESLAND));
         }
         if (!heimatOrganisation.isEmpty()) {
             userInfo.setHeimatOrganisation(heimatOrganisation);
         }
-        return orgName;
+        return heimatOrganisation.getId();
     }
 
     /**
@@ -141,13 +150,7 @@ public class UserInfoHelper
         Person person = new Person();
         addPersonName(person, mappingModel, user);
         addGeschlecht(person, mappingModel, user);
-        if (isActive(PERSON_GEBURTSDATUM, mappingModel)) {
-            String geburtsdatum = resolveSingleAttributeValue(user, PERSON_GEBURTSDATUM);
-            if (StringUtil.isNotBlank(geburtsdatum)) {
-                Geburt geburt = new Geburt(geburtsdatum);
-                person.setGeburt(geburt);
-            }
-        }
+        addGeburt(person, mappingModel, user);
         if (isActive(PERSON_LOKALISIERUNG, mappingModel)) {
             person.setLokalisierung(resolveSingleAttributeValue(user, PERSON_LOKALISIERUNG));
         }
@@ -167,6 +170,26 @@ public class UserInfoHelper
     }
 
     /**
+     * Add @{@link Geburt} to @{@link Person} json structure.
+     */
+    private void addGeburt(Person person, ProtocolMapperModel mappingModel, UserModel user)
+    {
+        String geburtsdatum = resolveSingleAttributeValue(user, PERSON_GEBURTSDATUM);
+        if (birthdayHelper.isValidBirthdayFormat(geburtsdatum)) {
+            Geburt geburt = new Geburt();
+            if (isActive(PERSON_GEBURTSDATUM, mappingModel)) {
+                geburt.setDatum(geburtsdatum);
+            }
+            if (isActive(PERSON_ALTER, mappingModel)) {
+                geburt.setAlter(birthdayHelper.calculateAge(geburtsdatum));
+            }
+            if (!geburt.isEmpty()) {
+                person.setGeburt(geburt);
+            }
+        }
+    }
+
+    /**
      * Add {@link PersonName} json structure to userInfo claim.
      */
     private void addPersonName(Person person, ProtocolMapperModel mappingModel, UserModel user)
@@ -177,8 +200,14 @@ public class UserInfoHelper
         if (isActive(PERSON_FAMILIENNAME, mappingModel)) {
             personName.setFamilienname(familienName);
         }
+        if (isActive(PERSON_FAMILIENNAME_INITIALEN, mappingModel)) {
+            personName.setInitialenFamilienname(resolveSingleAttributeValue(user, PERSON_FAMILIENNAME_INITIALEN));
+        }
         if (isActive(PERSON_VORNAME, mappingModel)) {
             personName.setVorname(vorname);
+        }
+        if (isActive(PERSON_VORNAME_INITIALEN, mappingModel)) {
+            personName.setInitialenVorname(resolveSingleAttributeValue(user, PERSON_VORNAME_INITIALEN));
         }
         if (isActive(PERSON_AKRONYM, mappingModel)) {
             String akronym = resolveSingleAttributeValue(user, PERSON_AKRONYM);
@@ -238,11 +267,11 @@ public class UserInfoHelper
     /**
      * Add personenkontext arrays.
      */
-    private void addPersonenKontextArray(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName)
+    private void addPersonenKontextArray(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId)
     {
         Set<Integer> indizes = getPersonenKontexteIndizes(user);
         for (Integer i : indizes) {
-            Personenkontext kontext = getKontextArr(userInfo, mappingModel, user, heimatOrgName, i);
+            Personenkontext kontext = getKontextArr(userInfo, mappingModel, user, heimatOrgId, i);
             if (!kontext.isEmpty()) {
                 userInfo.getPersonenKontexte().add(kontext);
             }
@@ -252,12 +281,12 @@ public class UserInfoHelper
     /**
      * Get single Kontext from array structure.
      */
-    private Personenkontext getKontextArr(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Integer i)
+    private Personenkontext getKontextArr(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId, Integer i)
     {
         Rolle rolle = getRolle(user, i);
         Personenkontext kontext = new Personenkontext();
-        kontext.setKtid(getKit(user, heimatOrgName, rolle, i));
-        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgName, rolle, i, userInfo);
+        kontext.setKtid(getKit(user, heimatOrgId, rolle, i));
+        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgId, rolle, i, userInfo);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
         }
@@ -280,14 +309,16 @@ public class UserInfoHelper
     /**
      * Add {@link Organisation} json structure to userInfo claim.
      */
-    private Organisation getOrganisationArray(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgName, Rolle rolle, Integer i, UserInfo userInfo)
+    private Organisation getOrganisationArray(ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId, Rolle rolle, Integer i, UserInfo userInfo)
     {
         Organisation organisation = new Organisation();
         String kennung = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_ORG_KENNUNG, i);
-        organisation.setOrgid(getOrgId(user, heimatOrgName, rolle, kennung, i));
-        organisation.setKennung(kennung);
+        organisation.setOrgid(getOrgId(user, heimatOrgId, rolle, kennung, i));
         if (isActive(PERSON_KONTEXT_ORG_NAME, mappingModel)) {
             organisation.setName(resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_ORG_NAME, i));
+        }
+        if (isActive(PERSON_KONTEXT_ORG_KENNUNG, mappingModel)) {
+            organisation.setKennung(kennung);
         }
         if (isActive(PERSON_KONTEXT_ORG_TYP, mappingModel)) {
             String orgTyp = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_ORG_TYP, i);
@@ -300,7 +331,7 @@ public class UserInfoHelper
             }
         }
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
-            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, i);
+            addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, kennung, i);
         }
         return organisation;
     }
@@ -308,7 +339,8 @@ public class UserInfoHelper
     /**
      * Add vidis schulidentifikator to Organisation
      */
-    private void addVidisSchulIdentifikator(ProtocolMapperModel mappingModel, UserModel user, UserInfo userInfo, Organisation org, Integer index)
+    private void addVidisSchulIdentifikator(ProtocolMapperModel mappingModel, UserModel user, UserInfo userInfo, Organisation org, String kennung,
+                                            Integer index)
     {
         UserInfoAttribute attribute = PERSON_KONTEXT_ORG_VIDIS_ID;
         if (index != -1) {
@@ -317,8 +349,8 @@ public class UserInfoHelper
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
             String vidisId = resolveSingleAttributeValue(user, attribute, index);
             if (StringUtil.isBlank(vidisId) && userInfo.getHeimatOrganisation() != null
-                    && StringUtil.isNotBlank(userInfo.getHeimatOrganisation().getName()) && StringUtil.isNotBlank(org.getKennung())) {
-                org.setVidisSchulidentifikator(String.format("%s.%s", userInfo.getHeimatOrganisation().getName(), org.getKennung()).toLowerCase());
+                    && StringUtil.isNotBlank(userInfo.getHeimatOrganisation().getId()) && StringUtil.isNotBlank(kennung)) {
+                org.setVidisSchulidentifikator(String.format("%s.%s", userInfo.getHeimatOrganisation().getId(), kennung).toLowerCase());
             }
             else if (vidisId != null) {
                 org.setVidisSchulidentifikator(vidisId);
@@ -399,15 +431,15 @@ public class UserInfoHelper
     /**
      * Get generated context id hash.
      */
-    private String getKit(UserModel user, String heimatOrgName, Rolle rolle, Integer index)
+    private String getKit(UserModel user, String heimatOrgId, Rolle rolle, Integer index)
     {
         UserInfoAttribute attribute = PERSON_KONTEXT_ID;
         if (index != null) {
             attribute = PERSON_KONTEXT_ARRAY_ID;
         }
         String kontextId = resolveSingleAttributeValue(user, attribute, index);
-        if (StringUtil.isBlank(kontextId) && rolle != null && StringUtil.isNotBlank(heimatOrgName)) {
-            String builder = rolle.name() + heimatOrgName;
+        if (StringUtil.isBlank(kontextId) && rolle != null && StringUtil.isNotBlank(heimatOrgId)) {
+            String builder = rolle.name() + heimatOrgId;
             kontextId = Hashing.sha256()
                 .hashString(builder, StandardCharsets.UTF_8)
                 .toString();
@@ -418,15 +450,15 @@ public class UserInfoHelper
     /**
      * Get generated organisation id hash.
      */
-    private String getOrgId(UserModel user, String heimatOrgName, Rolle rolle, String kennung, Integer index)
+    private String getOrgId(UserModel user, String heimatOrgId, Rolle rolle, String kennung, Integer index)
     {
         UserInfoAttribute attribute = PERSON_KONTEXT_ORG_ID;
         if (index != -1) {
             attribute = PERSON_KONTEXT_ARRAY_ORG_ID;
         }
         String orgId = resolveSingleAttributeValue(user, attribute, index);
-        if ((StringUtil.isBlank(orgId)) && rolle != null && StringUtil.isNotBlank(heimatOrgName) && StringUtil.isNotBlank(kennung)) {
-            String builder = rolle.name() + heimatOrgName + kennung;
+        if ((StringUtil.isBlank(orgId)) && rolle != null && StringUtil.isNotBlank(heimatOrgId) && StringUtil.isNotBlank(kennung)) {
+            String builder = rolle.name() + heimatOrgId + kennung;
             orgId = Hashing.sha256()
                 .hashString(builder, StandardCharsets.UTF_8)
                 .toString();

@@ -1,5 +1,6 @@
 package de.intension.mapper.oidc;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,15 +15,14 @@ import java.util.Map;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.ClientSessionContext;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.UserSessionModel;
+import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
+import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
 import de.intension.api.UserInfoAttribute;
 
@@ -43,7 +43,9 @@ class UserInfoProviderMapperTest
         mapper.transformIDToken(idToken, createMapperModel(mapper), session, createUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
         Assertions.assertNotNull(userInfo);
-        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo,
+                                new CustomComparator(JSONCompareMode.STRICT,
+                                        new Customization("**.alter", new AgeValueMatcher())));
     }
 
     @Test
@@ -88,14 +90,16 @@ class UserInfoProviderMapperTest
     private UserSessionModel createUserModel()
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
-        TestUserModel userModel = new TestUserModel(null, null, "224");
-        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_ID.getAttributeName(), "3e3b679c-6cae-11ed-a1eb-0242ac120002");
-        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_NAME.getAttributeName(), "DE-SN-Schullogin");
+        RealmModel realm = getTestRealm();
+        TestUserModel userModel = new TestUserModel(null, realm, "224");
+        userModel.setSingleAttribute(UserModel.IDP_ALIAS, "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_FAMILIENNAME.getAttributeName(), "Muster");
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_FAMILIENNAME_INITIALEN.getAttributeName(), "M");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_VORNAME.getAttributeName(), "Max");
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_VORNAME_INITIALEN.getAttributeName(), "M");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_AKRONYM.getAttributeName(), "MaMu");
-        userModel.setSingleAttribute(UserInfoAttribute.PERSON_GEBURTSDATUM.getAttributeName(), "2010-01-01");
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_GEBURTSDATUM.getAttributeName(), AgeValueMatcher.DATE_OF_BIRTH);
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_GESCHLECHT.getAttributeName(), "D");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_LOKALISIERUNG.getAttributeName(), "de-DE");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_VERTRAUENSSTUFE.getAttributeName(), "VOLL");
@@ -110,17 +114,17 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_TYP, 0), "SCHULE");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_STATUS, 0), "AKTIV");
-        userModel.setReadonly(false);
         when(userSessionModel.getUser()).thenReturn(userModel);
+        when(userSessionModel.getRealm()).thenReturn(realm);
         return userSessionModel;
     }
 
     private UserSessionModel createDefaultUserModel()
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
-        TestUserModel userModel = new TestUserModel(null, null, "224");
-        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_ID.getAttributeName(), "3e3b679c-6cae-11ed-a1eb-0242ac120002");
-        userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_NAME.getAttributeName(), "DE-SN-Schullogin");
+        RealmModel realm = getTestRealm();
+        TestUserModel userModel = new TestUserModel(null, realm, "224");
+        userModel.setSingleAttribute(UserModel.IDP_ALIAS, "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
         userModel.setFirstName("Max");
         userModel.setLastName("Muster");
@@ -130,8 +134,8 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
         userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
-        userModel.setReadonly(false);
         when(userSessionModel.getUser()).thenReturn(userModel);
+        when(userSessionModel.getRealm()).thenReturn(realm);
         return userSessionModel;
     }
 
@@ -148,5 +152,15 @@ class UserInfoProviderMapperTest
     {
         URL url = getClass().getClassLoader().getResource(path);
         return new String(Files.readAllBytes(Paths.get(url.toURI())));
+    }
+
+    private RealmModel getTestRealm()
+    {
+        RealmModel realm = mock(RealmModel.class);
+        IdentityProviderModel idpModel = mock(IdentityProviderModel.class);
+        when(idpModel.getAlias()).thenReturn("DE-SN-Schullogin");
+        when(idpModel.getDisplayName()).thenReturn("Musterschule");
+        when(realm.getIdentityProviderByAlias(anyString())).thenReturn(idpModel);
+        return realm;
     }
 }

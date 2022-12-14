@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.1.0]
+
+- New extensions to request and support SANIS specific fields
+
 ## Version [3.0.0]
 
 - Update extensions and docker-compose-file to use keycloack 20.0.1 

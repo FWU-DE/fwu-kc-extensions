@@ -31,9 +31,11 @@ class SanisKeycloakMappingTest
         BrokeredIdentityContext context = new BrokeredIdentityContext("12345");
         IKeycloakApiMapper mapper = new SanisKeycloakMapping();
         mapper.addAttributesToResource(context, userInfoJson);
-        assertEquals(13, context.getContextData().size());
+        assertEquals(15, context.getContextData().size());
         assertEquals("Max", context.getUserAttribute(PERSON_VORNAME.getAttributeName()));
+        assertEquals("M", context.getUserAttribute(PERSON_VORNAME_INITIALEN.getAttributeName()));
         assertEquals("Muster", context.getUserAttribute(PERSON_FAMILIENNAME.getAttributeName()));
+        assertEquals("M", context.getUserAttribute(PERSON_FAMILIENNAME_INITIALEN.getAttributeName()));
         assertEquals("2010-01-01", context.getUserAttribute(PERSON_GEBURTSDATUM.getAttributeName()));
         assertEquals("D", context.getUserAttribute(PERSON_GESCHLECHT.getAttributeName()));
         assertEquals("de-DE", context.getUserAttribute(PERSON_LOKALISIERUNG.getAttributeName()));

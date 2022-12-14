@@ -6,19 +6,21 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import com.google.gson.*;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.mappers.UserAttributeMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
-import org.keycloak.models.IdentityProviderMapperModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.utils.StringUtil;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.RestClient;
@@ -27,11 +29,13 @@ import de.intension.rest.sanis.SanisKeycloakMapping;
 public class UserInfoRequesterMapper extends UserAttributeMapper
 {
 
-    public static final String                        PROVIDER_ID      = "user-info-request-mapper_oidc";
-    protected static final Logger                     logger           = Logger.getLogger(UserInfoRequesterMapper.class);
-    private static final IKeycloakApiMapper           sanisMapping     = new SanisKeycloakMapping();
+    public static final String                         PROVIDER_ID                  = "vidis-info-request-mapper_oidc";
+    protected static final Logger                      logger                       = Logger.getLogger(UserInfoRequesterMapper.class);
+    private static final IKeycloakApiMapper            sanisMapping                 = new SanisKeycloakMapping();
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+    private static final Set<IdentityProviderSyncMode> IDENTITY_PROVIDER_SYNC_MODES = Collections.singleton(IdentityProviderSyncMode.IMPORT);
+
+    private static final List<ProviderConfigProperty>  configProperties             = new ArrayList<>();
 
     static {
         ProviderConfigProperty property = new ProviderConfigProperty();
@@ -46,6 +50,12 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
     public List<ProviderConfigProperty> getConfigProperties()
     {
         return configProperties;
+    }
+
+    @Override
+    public boolean supportsSyncMode(IdentityProviderSyncMode syncMode)
+    {
+        return IDENTITY_PROVIDER_SYNC_MODES.contains(syncMode);
     }
 
     @Override
@@ -77,7 +87,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                             BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        if(userInfo != null){
+        if (userInfo != null) {
             sanisMapping.addAttributesToResource(context, userInfo);
         }
     }
@@ -87,7 +97,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                                    BrokeredIdentityContext context)
     {
         String userInfo = getUserInfo(mapperModel, context);
-        if(userInfo != null){
+        if (userInfo != null) {
             sanisMapping.addAttributesToResource(user, userInfo);
         }
     }
@@ -112,7 +122,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
             } catch (MalformedURLException e) {
                 logger.errorf("%s - Malformed URL: %s", REST_API_URL_LABEL, endpointUrl);
             } catch (IOException e) {
-                logger.errorf(e,"Error while calling rest endpoint %s", endpointUrl);
+                logger.errorf(e, "Error while calling rest endpoint %s", endpointUrl);
             }
         }
         else {

@@ -9,13 +9,16 @@ public class UserInfoAttributeNames
     public static final String    HEIMATORGANISATION                = "heimatorganisation";
     public static final String    PERSON                            = "person";
     public static final String    FAMILIENNAME                      = "familienname";
+    public static final String    FAMILIENNAME_INITIALEN            = "initialenFamilienname";
     public static final String    VORNAME                           = "vorname";
+    public static final String    VORNAME_INITIALEN                 = "initialenVorname";
     public static final String    AKRONYM                           = "akronym";
     public static final String    GESCHLECHT                        = "geschlecht";
     public static final String    LOKALISIERUNG                     = "lokalisierung";
     public static final String    VERTRAUENSSTUFE                   = "vertrauensstufe";
     public static final String    GEBURT                            = "geburt";
     public static final String    GEBURT_DATUM                      = "datum";
+    public static final String    GEBURT_ALTER                      = "alter";
     public static final String    PERSONENKONTEXTE                  = "personenkontexte";
     public static final String    KTID                              = "ktid";
     public static final String    ROLLE                             = "rolle";
@@ -34,6 +37,7 @@ public class UserInfoAttributeNames
     protected static final String PERSON_KONTEXT_ARRAY_ORG          = String.format("%s.org", PERSON_KONTEXT_ARRAY);
     protected static final String PERSON_KONTEXT_ARRAY_STATUS       = String.format("%s.status", PERSON_KONTEXT_ARRAY);
     private static final String   CONCAT                            = "%s.%s";
+    protected static final String PERSON_ALTER                      = String.format(CONCAT, PERSON, GEBURT_ALTER);
     protected static final String PERSON_KONTEXT_ID                 = String.format(CONCAT, PERSON_KONTEXT, ID);
     protected static final String PERSON_KONTEXT_ORG_ID             = String.format(CONCAT, PERSON_KONTEXT_ORG, ID);
     protected static final String PERSON_KONTEXT_ARRAY_ID           = String.format(CONCAT, PERSON_KONTEXT_ARRAY, ID);
@@ -43,7 +47,9 @@ public class UserInfoAttributeNames
     protected static final String HEIMATORGANISATION_NAME           = String.format(CONCAT, HEIMATORGANISATION, NAME);
     protected static final String HEIMATORGANISATION_BUNDESLAND     = String.format(CONCAT, HEIMATORGANISATION, BUNDESLAND);
     protected static final String PERSON_FAMILIENNAME               = String.format(CONCAT, PERSON, FAMILIENNAME);
+    protected static final String PERSON_FAMILIENNAME_INITIALEN     = String.format(CONCAT, PERSON, FAMILIENNAME_INITIALEN);
     protected static final String PERSON_VORNAME                    = String.format(CONCAT, PERSON, VORNAME);
+    protected static final String PERSON_VORNAME_INITIALEN          = String.format(CONCAT, PERSON, VORNAME_INITIALEN);
     protected static final String PERSON_AKRONYM                    = String.format(CONCAT, PERSON, AKRONYM);
     protected static final String PERSON_GESCHLECHT                 = String.format(CONCAT, PERSON, GESCHLECHT);
     protected static final String PERSON_LOKALISIERUNG              = String.format(CONCAT, PERSON, LOKALISIERUNG);
