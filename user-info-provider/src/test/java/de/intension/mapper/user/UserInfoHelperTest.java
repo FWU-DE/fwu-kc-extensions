@@ -96,7 +96,12 @@ class UserInfoHelperTest
             "null,Test,null,null,null",
             "null,null,School,null,null",
             "null,null,null,SCHULE,null",
-            "null,null,null,null,0815"}, nullValues = {"null"})
+            "null,null,null,null,0815",
+            "1242,Schule,null,null,0815",
+            "1242,Schule,Musterschule,null,0815",
+            "1242,null,Musterschule,SCHULE,null",
+            "1242,'',Musterschule,SCHULE,null",
+            "1242,null,Musterschule,SCHULE,''"}, nullValues = {"null"})
     void should_mark_as_empty_organisation(String orgid, String kennung, String name, OrganisationsTyp typ, String vidisSchulidentifikator)
     {
         Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator);
@@ -106,7 +111,15 @@ class UserInfoHelperTest
     @ParameterizedTest
     @CsvSource(value = {"1242,Test,School,SCHULE,0815",
             "1242,Test,null,SCHULE,0815",
-            "1242,Test,'',SCHULE,0815"}, nullValues = {"null"})
+            "1242,Test,'',SCHULE,0815",
+            "1242,null,School,SCHULE,0815",
+            "1242,'',School,SCHULE,0815",
+            "1242,Test,School,SCHULE,null",
+            "1242,Test,School,SCHULE,''",
+            "1242,Test,null,SCHULE,''",
+            "1242,Test,null,SCHULE,null",
+            "1242,null,null,SCHULE,0815",
+            "1242,'','',SCHULE,0815",}, nullValues = {"null"})
     void should_mark_as_not_empty_organisation(String orgid, String kennung, String name, OrganisationsTyp typ, String vidisSchulidentifikator)
     {
         Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator);

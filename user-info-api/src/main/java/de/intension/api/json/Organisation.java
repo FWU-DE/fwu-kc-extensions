@@ -35,6 +35,6 @@ public class Organisation
     @JsonIgnore
     public boolean isEmpty()
     {
-        return StringUtil.isBlank(orgid) || StringUtil.isBlank(kennung) || StringUtil.isBlank(vidisSchulidentifikator) || typ == null;
+        return StringUtil.isBlank(orgid) || (StringUtil.isBlank(kennung) && StringUtil.isBlank(vidisSchulidentifikator)) || typ == null;
     }
 }
