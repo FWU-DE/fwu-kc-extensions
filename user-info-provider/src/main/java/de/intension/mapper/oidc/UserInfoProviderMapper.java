@@ -109,6 +109,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         property.setLabel(attribute.getLabel());
         property.setDefaultValue(attribute.isEnabled().toString());
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        property.setHelpText(attribute.getHelpText());
         configProperties.add(property);
     }
 
@@ -119,6 +120,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         property.setLabel("Add only child attributes");
         property.setDefaultValue("false");
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        property.setHelpText("Erzeugt eine flache Struktur mit mehreren Claims im Token.");
         configProperties.add(property);
     }
 

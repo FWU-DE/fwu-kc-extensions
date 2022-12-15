@@ -3,7 +3,10 @@ All notable changes to this project will be documented here.
 
 ## Version [3.1.0]
 
-- New extensions to request and support SANIS specific fields
+- New feature: Support of reading user details from SANIS-API and forwarding to the connected Service Providers
+  - OIDC Mapper to request school and user details from SANIS-API
+  - Protocol Mapper to forward additional school and user details to the connected Service Providers
+  - API model of the Vidis adaptation of SANIS-API (compatible with SANIS)
 
 ## Version [3.0.0]
 
