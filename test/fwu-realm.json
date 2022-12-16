@@ -562,6 +562,89 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "id": "030661c3-0739-4ed1-b173-aa8deb7ddcb9",
+      "clientId": "sanis-test",
+      "name": "Vidis Info",
+      "description": "Test Vidis Info",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "display.on.consent.screen": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "31432fdb-4d83-4299-b1c7-4a9fdd80cfc0",
+          "name": "Vidis Info Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "vidis-info-provider-mapper",
+          "consentRequired": false,
+          "config": {
+            "person.alter": "true",
+            "person.vorname": "true",
+            "person.kontext.org.kennung": "true",
+            "person.kontext.org.name": "true",
+            "person.kontext.org.vidis_schulidentifikator": "true",
+            "heimatorganisation.name": "true",
+            "person.familienname": "true",
+            "person.geschlecht": "true",
+            "person.geburtsdatum": "true",
+            "person.lokalisierung": "true",
+            "person.vertrauensstufe": "true",
+            "person.kontext.org.typ": "true",
+            "person.kontext.rolle": "true",
+            "person.initialenFamilienname": "true",
+            "person.kontext.status": "true",
+            "childrenOnly": "false",
+            "access.token.claim": "false",
+            "jsonType.label": "JSON",
+            "heimatorganisation.bundesland": "true",
+            "person.akronym": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "person.initialenVorname": "true",
+            "claim.name": "vidisInfo"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     }
   ],
   "clientScopes": [
@@ -1088,7 +1171,7 @@
       "enabled": true,
       "updateProfileFirstLoginMode": "on",
       "trustEmail": false,
-      "storeToken": false,
+      "storeToken": true,
       "addReadTokenRoleOnCreate": false,
       "authenticateByDefault": false,
       "linkOnly": false,
@@ -1126,6 +1209,19 @@
         "claim": "schools",
         "attribute": "prefixedSchools",
         "prefix": "DE-SN-Schullogin."
+      }
+    },
+    {
+      "id": "32aee08d-bae6-457c-b1d9-a346a0feadac",
+      "name": "Sanis Import",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "vidis-info-request-mapper_oidc",
+      "config": {
+        "syncMode": "IMPORT",
+        "claims": "[]",
+        "attributes": "[]",
+        "attribute": "acronym",
+        "REST_API_URL": "http://static_http:8080/person-info_sanis.json"
       }
     }
   ],
@@ -2130,7 +2226,7 @@
       "alias": "Prefixes",
       "config": {
         "cacheRefreshInterval": "5",
-        "whitelistUri": "http://172.17.0.1:8083/school_whitelist.json",
+        "whitelistUri": "http://static_http:8080/school_whitelist.json",
         "userAttributeName": "prefixedSchools"
       }
     },

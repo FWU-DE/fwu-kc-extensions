@@ -52,6 +52,24 @@ For more details please check [here](./acronym-mapper/README.md).
 Identity provider mapper regarding school IDs made up of a home organization and a school ID.
 For more details please check [here](./school-mapper/README.md).
 
+
+### Extension of User Info endpoint with school details
+
+#### User Info Api
+
+API - which defines the standard vidis field names.
+For more details please check [here](./user-info-api/README.md).
+
+#### User Info Requester
+
+Identity provider mapper which calls a SANIS REST-API to collect user metadata.
+For more details please check [here](./user-info-requester/README.md).
+
+#### User Info Provider
+
+OIDC Protocol mapper to add vidis user metadata to client tokens.
+For more details please check [here](./user-info-provider/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).

@@ -26,6 +26,9 @@ services:
     - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/keycloak/providers/multi-value-user-attribute-mapper.jar"
     - "../acronym-mapper/target/acronym-mapper-docker.jar:/opt/keycloak/providers/acronym-mapper.jar"
     - "../school-mapper/target/school-mapper-docker.jar:/opt/keycloak/providers/school-mapper.jar"
+    - "../user-info-provider/target/user-info-provider-docker.jar:/opt/keycloak/providers/user-info-provider.jar"
+    - "../user-info-requester/target/user-info-requester-docker.jar:/opt/keycloak/providers/user-info-requester.jar"
+    - "../user-info-api/target/user-info-api-docker.jar:/opt/keycloak/providers/user-info-api.jar"
     networks:
     - fwunet
     depends_on:

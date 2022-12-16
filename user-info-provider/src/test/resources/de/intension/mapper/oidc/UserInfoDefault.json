@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "pid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+  "heimatorganisation": {
+    "id": "DE-SN-Schullogin",
+    "name": "Musterschule",
+    "bundesland": "DE-BY"
+  },
+  "person": {
+    "name": {
+      "familienname": "Muster",
+      "vorname": "Max",
+      "akronym": "mamu"
+    },
+    "lokalisierung": "de-DE",
+    "vertrauensstufe": "VOLL"
+  },
+  "personenkontexte": [
+    {
+      "ktid": "9b1f342f3ebf284f9d218736d24c0461622e26b3382101c687d254d8cd7a3728",
+      "organisation": {
+        "orgid": "02feb60dc3f691af4a4bf92410fac8292bb8e7d6adebb70b2a65d3c35d825d8a",
+        "kennung": "5555",
+        "name": "Test-Schule",
+        "typ": "SCHULE",
+        "vidis_schulidentifikator": "de-sn-schullogin.5555"
+      },
+      "rolle": "LEHR",
+      "personenstatus": "AKTIV"
+    },
+    {
+      "ktid": "d6b601ec366eee7eb897931470915a3ae3ad6b7d99b26c1c06be5f3d0de587cb",
+      "organisation": {
+        "orgid": "c51f8d8719e6f7206a8c47cf772e3d2737f2aca7a337ead179b1c0ee77412e2f",
+        "kennung": "NI_12345",
+        "name": "Muster-Schule",
+        "typ": "SCHULE",
+        "vidis_schulidentifikator": "de-sn-schullogin.ni_12345"
+      },
+      "rolle": "LERN",
+      "personenstatus": "AKTIV"
+    }
+  ]
+}
