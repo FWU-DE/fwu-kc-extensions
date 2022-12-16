@@ -42,6 +42,7 @@ Context array
 <digit> ::= <zero> | <posDigit>
 <number> ::= <zero> <posDigit> | <posDigit> <digit>
 ```
+(To learn how to read this, read about [BNF](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form))
 
 | Attribute Key                                              |Type|Description|
 |:-----------------------------------------------------------|:----|:----|
