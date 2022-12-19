@@ -6,7 +6,7 @@ on:
     paths:
       - 'pom.xml'
       - '*/pom.xml'
-      - '*/main.yaml'
+      - '.github/workflows/main.yaml'
 
 jobs:
   package:
