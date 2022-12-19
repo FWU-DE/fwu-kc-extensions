@@ -2,7 +2,7 @@ version: '3.7'
 services:
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:20.0.1
+    image: quay.io/keycloak/keycloak:20.0
     ports:
     - 18080:8080
     - 8787:8787
@@ -10,9 +10,11 @@ services:
       KC_HTTP_RELATIVE_PATH: "/auth"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: keycloak
-      DB_ADDR: postgres
-      DB_USER: keycloak
-      DB_PASSWORD: password
+      KC_DB_URL_HOST: postgres
+      KC_DB_USER: keycloak
+      KC_DB_PASSWORD: password
+      DEBUG: true
+      DEBUG_PORT: "*:8787"
     command: ["start-dev", "--import-realm"]
     volumes:
     - /etc/localtime:/etc/localtime:ro

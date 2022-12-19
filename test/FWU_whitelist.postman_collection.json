@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "d99a6791-762f-47bd-8946-e3be5287b3e9",
+		"_postman_id": "a962c37d-d998-42f5-9b4b-828305d7f25d",
 		"name": "FWU - whitelist auth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "6328296"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -75,7 +74,7 @@
 							"    pm.response.to.have.status(403);",
 							"});",
 							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Diese Anwendung ist mit Deinem Nutzerkonto derzeit nicht möglich\");",
+							"    pm.expect(pm.response.text()).to.include(\"Die Anmeldung an dieser Anwendung ist mit Deinem Nutzerkonto derzeit nicht möglich\");",
 							"});"
 						],
 						"type": "text/javascript"

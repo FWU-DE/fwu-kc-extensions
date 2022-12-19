@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "2cc6fea9-df97-428c-b49d-f482a9c451c0",
+		"_postman_id": "660d3376-15ee-4bea-be6b-67ccf2397ea6",
 		"name": "FWU",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "7256702"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -507,6 +506,14 @@
 						"token"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "get realms",
+			"request": {
+				"method": "GET",
+				"header": []
 			},
 			"response": []
 		}
