@@ -36,26 +36,30 @@ jobs:
           TAG=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
           response=$(curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG)
           message=$(echo $response | jq -r .message)
+          echo "Message: $message"
           if [ "$message" == "Not Found" ]; then
             echo "version=$TAG" >> $GITHUB_OUTPUT
             modules=$(mvn -Dexec.executable='echo' -Dexec.args='${project.artifactId}' exec:exec -q)
+            echo "Modules: $modules"
             for module in $modules
             do
+              echo "Iterating modules: $module"
               if [ "$module" != "fwu-kc-extensions" ]; then
                 echo "$module/target/$module-$TAG.jar" >> modules.txt
               fi
             done
             csv=$(paste -s -d , modules.txt)
+            echo "Generated CSV: $csv"
             echo "artifacts=$csv" >> $GITHUB_OUTPUT
           else
             echo "Release $TAG already exists!"
           fi
-      - name: Build with Maven
+      - name: Deploy to GitHub packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy
+        run: mvn --batch-mode clean deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish release
+      - name: Publish GitHub release
         if: ${{ steps.check-release.outputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
