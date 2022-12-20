@@ -30,21 +30,32 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Get Version
+        id: getVersion
+        uses: mavrosxristoforos/get-xml-info@1.0
+        with:
+          xml-file: 'pom.xml'
+          xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='projectVersion']"
+      - name: Get Modules
+        id: getModules
+        uses: mavrosxristoforos/get-xml-info@1.0
+        with:
+          xml-file: 'pom.xml'
+          xpath: "//*[local-name()='project']/*[local-name()='modules']/*[local-name()='module']"
       - name: Check release exists
         id: check-release
         run: |
           rm modules.txt || true
-          TAG=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
+          TAG=${{ steps.getVersion.outputs.info }}
           echo "TAG: $TAG"
           response=$(curl --silent -H 'Accept: application/vnd.github.v3+json' "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
           message=$(echo $response | jq -r .message)
           echo "Message: $message"
           if [ "$message" = "Not Found" ]; then
             echo "version=$TAG" >> $GITHUB_OUTPUT
-            modules=$(mvn -Dexec.executable='/usr/bin/echo' -Dexec.args='${project.artifactId}' exec:exec -q)
-            echo "Modules: $modules"
-            for module in $modules; do
-              echo "Iterating modules: $module"
+            IFS="," read -a modules <<< ${{ steps.getModules.outputs.info }}
+            for module in ${modules[@]}; do
+              echo "Found module: $module"
               if [ "$module" != "fwu-kc-extensions" ]; then
                 echo "$module/target/$module-$TAG.jar" >> modules.txt
               fi
