@@ -35,7 +35,7 @@ jobs:
         uses: mavrosxristoforos/get-xml-info@1.0
         with:
           xml-file: 'pom.xml'
-          xpath: "//*[local-name()='project']/*[local-name()='group']"
+          xpath: "//*[local-name()='project']/*[local-name()='groupId']"
       - name: Get Version
         id: getVersion
         uses: mavrosxristoforos/get-xml-info@1.0
