@@ -6,7 +6,6 @@ on:
     paths:
       - 'pom.xml'
       - '*/pom.xml'
-      - '.github/workflows/main.yaml'
 
 jobs:
   package:
@@ -30,20 +29,20 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Get Maven Group
-        id: getGroup
+      - name: Get maven group
+        id: get-group
         uses: mavrosxristoforos/get-xml-info@1.0
         with:
           xml-file: 'pom.xml'
           xpath: "//*[local-name()='project']/*[local-name()='groupId']"
-      - name: Get Version
-        id: getVersion
+      - name: Get version
+        id: get-version
         uses: mavrosxristoforos/get-xml-info@1.0
         with:
           xml-file: 'pom.xml'
           xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='projectVersion']"
-      - name: Get Modules
-        id: getModules
+      - name: Get modules
+        id: get-modules
         uses: mavrosxristoforos/get-xml-info@1.0
         with:
           xml-file: 'pom.xml'
@@ -52,14 +51,14 @@ jobs:
         id: check-release
         run: |
           rm modules.txt || true
-          TAG=${{ steps.getVersion.outputs.info }}
+          TAG=${{ steps.get-version.outputs.info }}
           echo "TAG: $TAG"
           response=$(curl --silent -H 'Accept: application/vnd.github.v3+json' "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
           message=$(echo $response | jq -r .message)
           echo "Message: $message"
           if [ "$message" = "Not Found" ]; then
             echo "version=$TAG" >> $GITHUB_OUTPUT
-            IFS="," read -a modules <<< ${{ steps.getModules.outputs.info }}
+            IFS="," read -a modules <<< ${{ steps.get-modules.outputs.info }}
             for module in ${modules[@]}; do
               echo "Found module: $module"
               if [ "$module" != "fwu-kc-extensions" ]; then
@@ -74,7 +73,7 @@ jobs:
           fi
       - name: Deploy to GitHub packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy
+        run: mvn --batch-mode clean deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish GitHub release
@@ -91,7 +90,7 @@ jobs:
           GITLAB_HOST: ${{ secrets.GITLAB_HOST }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          GROUP_NAME: ${{ steps.getGroup.outputs.info }}
+          GROUP_NAME: ${{ steps.get-group.outputs.info }}
           ARTIFACTS: ${{ steps.check-release.outputs.artifacts }}
           VERSION: ${{ steps.check-release.outputs.version }}
         run: |
@@ -106,4 +105,11 @@ jobs:
                   --header "Deploy-Token: ${GITLAB_TOKEN}" \
                   "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
           done
+      - name: Trigger image build on Gitlab
+        if: ${{ steps.check-release.outputs.version != '' }}
+        env:
+          GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
+          VERSION: ${{ steps.check-release.outputs.version }}
+        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F variables[CI_COMMIT_SHA]=${VERSION} https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
 
