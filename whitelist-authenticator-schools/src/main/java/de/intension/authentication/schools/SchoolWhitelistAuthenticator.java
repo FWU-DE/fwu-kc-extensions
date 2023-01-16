@@ -30,6 +30,7 @@ public class SchoolWhitelistAuthenticator
 {
 
     private static final Logger logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
+    static final String         ALLOW_ALL = "AllowAll";
 
     private final Object lock = new Object();
 
@@ -189,8 +190,11 @@ public class SchoolWhitelistAuthenticator
      */
     private boolean isPermittedServiceRequest(List<SchoolWhitelistEntry> entries, String clientId, List<String> schoolIds)
     {
-        boolean permitted = false;
         List<String> permittedSchools = getPermittedSchoolsByClientId(entries, clientId);
+        if (permittedSchools.contains(ALLOW_ALL)) {
+            return true;
+        }
+        boolean permitted = false;
         if (!schoolIds.isEmpty() && !permittedSchools.isEmpty()) {
             for (String userSchoolId : schoolIds) {
                 if (permittedSchools.contains(userSchoolId)) {

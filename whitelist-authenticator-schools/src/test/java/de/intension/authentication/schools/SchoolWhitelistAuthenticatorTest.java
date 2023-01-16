@@ -1,8 +1,13 @@
 package de.intension.authentication.schools;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.*;
+import static io.netty.handler.codec.http.HttpHeaderNames.CACHE_CONTROL;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_DISPOSITION;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.BinaryBody.binary;
 import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
@@ -143,9 +148,24 @@ class SchoolWhitelistAuthenticatorTest
         throws Exception
     {
         SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
-        TestAuthenticationFlowContext context = mockContext("test-client2", List.of("1234"), false);
+        TestAuthenticationFlowContext context = mockContext("not-configured-client", List.of("1234"), false);
         authenticator.authenticate(context);
         assertEquals(false, context.getSuccess());
+    }
+
+    /**
+     * GIVEN: a valid whitelist configuration with a client configured with ALLOW_ALL marker
+     * WHEN: authentication flow is called with this client and any school id in the user attribute
+     * THEN: context status is "success"
+     */
+    @Test
+    void should_allow_access_because_of_allow_all_marker()
+        throws Exception
+    {
+        SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
+        TestAuthenticationFlowContext context = mockContext("allow-all-client", List.of("1234"), false);
+        authenticator.authenticate(context);
+        assertEquals(true, context.getSuccess());
     }
 
     /**
@@ -157,6 +177,7 @@ class SchoolWhitelistAuthenticatorTest
     void should_deny_access_because_of_invalid_whitelist_URI()
         throws Exception
     {
+        WhiteListCache.getInstance().clear();
         SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
         TestAuthenticationFlowContext context = mockContext("test-client", List.of("1234"), true);
         authenticator.authenticate(context);

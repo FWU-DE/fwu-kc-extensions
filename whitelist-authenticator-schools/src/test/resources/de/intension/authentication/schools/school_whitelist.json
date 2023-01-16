@@ -14,5 +14,9 @@
   {
     "spAlias": "test-client",
     "listOfSchools": ["1234"]
+  },
+  {
+    "spAlias": "allow-all-client",
+    "listOfSchools": ["AllowAll"]
   }
 ]
