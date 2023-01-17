@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.3.0]
+
+- New feature: Prefixed attribute for SAML identity providers
 
 ## Version [3.2.1]
 
@@ -23,7 +26,7 @@ All notable changes to this project will be documented here.
 
 ## Version [3.0.0]
 
-- Update extensions and docker-compose-file to use keycloack 20.0.1
+- Update extensions and docker-compose-file to use keycloack 20.0.1 
 
 ## Version [2.4.0]
 

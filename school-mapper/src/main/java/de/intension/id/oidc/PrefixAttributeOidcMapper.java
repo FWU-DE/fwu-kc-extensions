@@ -1,5 +1,8 @@
-package de.intension.id;
+package de.intension.id.oidc;
 
+import de.intension.id.PrefixAttributeService;
+import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
+import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.mappers.AbstractClaimMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
@@ -10,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Identity provider mapper
+ * Identity provider mapper to map OIDC token claims to user attributes.
  */
-public class PrefixAttributeMapper extends AbstractClaimMapper {
+public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
     public static final String PROVIDER_ID = "prefixed-attribute-idp-mapper";
-    public static final String[] COMPATIBLE_PROVIDERS = {ANY_PROVIDER};
+    public static final String[] COMPATIBLE_PROVIDERS = {
+            KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
+            OIDCIdentityProviderFactory.PROVIDER_ID
+    };
 
     protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 

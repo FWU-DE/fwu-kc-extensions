@@ -1,1 +1,2 @@
-de.intension.id.PrefixAttributeMapper
+de.intension.id.oidc.PrefixAttributeOidcMapper
+de.intension.id.saml.PrefixAttributeSamlMapper
