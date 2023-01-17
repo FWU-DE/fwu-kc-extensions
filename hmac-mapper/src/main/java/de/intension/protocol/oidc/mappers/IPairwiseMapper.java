@@ -1,33 +1,28 @@
 package de.intension.protocol.oidc.mappers;
 
-import java.util.List;
-
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperContainerModel;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.OIDCAccessTokenMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCIDTokenMapper;
 import org.keycloak.protocol.oidc.mappers.UserInfoTokenMapper;
 import org.keycloak.provider.ProviderConfigProperty;
 
+import java.util.List;
+
 /**
  * Interface to "adopt" the {@link org.keycloak.protocol.oidc.mappers.AbstractPairwiseSubMapper}
  * behaviour.
  * Should make it easier to identify code changes after a new Keycloak release.
  */
-public interface IPairwiseSubMapper
-    extends OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper
-{
+public interface IPairwiseMapper
+        extends OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
     String getIdPrefix();
 
     /**
-     * Generates a pairwise subject identifier.
+     * Generates a pairwise identifier.
      */
-    String generateSub(ProtocolMapperModel mappingModel, String sectorIdentifier, String localSub);
+    String generateIdentifier(ProtocolMapperModel mappingModel, String sectorIdentifier, String localSub);
 
     /**
      * Implement to add additional provider configuration properties.
@@ -42,7 +37,7 @@ public interface IPairwiseSubMapper
      * endpoint.
      */
     void validateAdditionalConfig(KeycloakSession session, RealmModel realm, ProtocolMapperContainerModel mapperContainer, ProtocolMapperModel mapperModel)
-        throws ProtocolMapperConfigException;
+            throws ProtocolMapperConfigException;
 
     /**
      * Implement to validate the SECTOR_IDENTIFIER_URI.
@@ -50,5 +45,5 @@ public interface IPairwiseSubMapper
      * {@link org.keycloak.protocol.oidc.utils.PairwiseSubMapperValidator#validate(KeycloakSession, ClientModel, ProtocolMapperModel)}
      */
     void validateSectorIdentifier(KeycloakSession session, ClientModel client, ProtocolMapperModel mapperModel)
-        throws ProtocolMapperConfigException;
+            throws ProtocolMapperConfigException;
 }

@@ -27,7 +27,7 @@
     {
       "username": "brock",
       "enabled": true,
-      "email": "",
+      "email": "brock.harrison@pewter.com",
       "firstName": "Brock",
       "lastName": "",
       "credentials": [
@@ -549,6 +549,19 @@
           "consentRequired": false,
           "config": {
             "sectorIdentifierUri": "https://sector.identifier.de",
+            "pairwiseSubHashAlgorithm": "HmacSHA3-512",
+            "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
+            "pairwiseLocalSubIdentifier": "username"
+          }
+        },
+        {
+          "name": "Pseudo email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-email-mapper",
+          "consentRequired": false,
+          "config": {
+            "sectorIdentifierUri": "https://sector.identifier.de",
+            "emailDomain": "vidis.schule",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
             "pairwiseLocalSubIdentifier": "username"

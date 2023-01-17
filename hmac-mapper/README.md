@@ -1,4 +1,11 @@
+# HMAC pairwise mappers with static sectorIdentifier
+
+There are two mappers available for pseudonymizing OIDC token claims with HMAC.
+
 # HMAC Pairwise subject with static sectorIdentifier
+
+This mapper sets the claim value `sub`.
+
 ## Configuration
 
 Create a mapper for the desired client and enter your desired values.
@@ -40,3 +47,26 @@ Outcome:
 3. The `sub` in the access tokens returned by `applicy` and `formand` are **not** the same because the algorithm is not same for the latter
 4. The `sub` in the access tokens returned by `formand` and `desight` are **not** the same because they don't share the same sector identifier
 5. The `sub` in the access tokens returned by `applicy` are different for each user
+
+# HMAC pairwise email
+
+This mapper sets the claim value `email`.
+
+## Configuration
+
+The configuration doesn't differ much from the other mapper.
+Only the email domain must be configured, so that the pseudo hash generated is a valid email.
+
+### Example
+
+Given:
+1. The configured email domain "google.com"
+2. The generated `sub` is `dc750843-a671-4c0d-ae94-bf2434d6f2b6`
+
+Result:
+
+The claim value `email` in the *access token*, *user info* and/or *ID token* will be:
+
+```
+dc750843-a671-4c0d-ae94-bf2434d6f2b6@google.com
+```
