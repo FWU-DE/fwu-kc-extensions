@@ -1,5 +1,19 @@
 package de.intension.protocol.oidc.mappers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.ProtocolMapperModel;
@@ -12,13 +26,6 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class HmacPairwiseSubMapperTest {
 
     private static final String ID = "id";
@@ -30,7 +37,8 @@ class HmacPairwiseSubMapperTest {
 
     /**
      * GIVEN: a user, same salt, hash algorithm, sector identifier
-     * WHEN: sub created twice for access token with same user with same local sub value
+     * WHEN: sub created twice for access token with same user with same local sub
+     * value
      * THEN: resulting subject value is same
      */
     @Test
@@ -47,7 +55,8 @@ class HmacPairwiseSubMapperTest {
 
     /**
      * GIVEN: a user, same salt, hash algorithm, sector identifier
-     * WHEN: sub created twice for access token with same user with different local sub value
+     * WHEN: sub created twice for access token with same user with different local
+     * sub value
      * THEN: resulting subject value is not same
      */
     @Test
@@ -81,7 +90,8 @@ class HmacPairwiseSubMapperTest {
 
     /**
      * GIVEN: a user, same salt, hash algorithm, sector identifier
-     * WHEN: sub created for user info token twice with same user with same local sub value
+     * WHEN: sub created for user info token twice with same user with same local
+     * sub value
      * THEN: resulting sub in claim is same
      */
     @Test
@@ -98,19 +108,18 @@ class HmacPairwiseSubMapperTest {
 
     /**
      * GIVEN: a user, same salt, hash algorithm, sector identifier
-     * WHEN: sub created for invalid local sub identifier
-     * THEN: throw RuntimeException with expected message
+     * WHEN: sub created for missing local sub identifier
+     * THEN: sub is not changed on the access token
      */
     @Test
     void should_throw_run_time_exception_when_empty_local_sub_identifier_value() {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
+        AccessToken token = new AccessToken().subject("before");
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            mapper.transformAccessToken(new AccessToken(), createMapperModel("wrongLocalSubIdentifier"), null,
-                    mockUserSessionModel(USER_ID, "wrongLocalSubIdentifier", null), null);
-        });
+        mapper.transformAccessToken(token, createMapperModel("wrongLocalSubIdentifier"), null,
+                mockUserSessionModel(USER_ID, "wrongLocalSubIdentifier", null), null);
 
-        assertEquals("Local sub identifier is not valid", exception.getMessage());
+        assertEquals("before", token.getSubject());
 
     }
 
@@ -125,7 +134,8 @@ class HmacPairwiseSubMapperTest {
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USER_NAME), null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
-        ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, "Azhdfopek", SECTOR_IDENTIFIER);
+        ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, "Azhdfopek",
+                SECTOR_IDENTIFIER);
         AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), anotherSaltProtocolMapper, null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
@@ -134,7 +144,8 @@ class HmacPairwiseSubMapperTest {
 
     /**
      * GIVEN: a user, same salt, hash algorithm, sector identifier
-     * WHEN: sub created twice with same user with different sector identifier sub value
+     * WHEN: sub created twice with same user with different sector identifier sub
+     * value
      * THEN: resulting subject value is not same
      */
     @Test
@@ -143,7 +154,8 @@ class HmacPairwiseSubMapperTest {
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USER_NAME), null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
-        ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT, "http://www.example.de");
+        ProtocolMapperModel anotherSaltProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT,
+                "http://www.example.de");
         AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), anotherSaltProtocolMapper, null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
@@ -175,7 +187,8 @@ class HmacPairwiseSubMapperTest {
     @Test
     void should_throw_illegal_state_exception_when_wrong_algorithm_configured() {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        ProtocolMapperModel wrongAlgorithmProtocolMapper = createMapperModel(USER_NAME, "wrongAlgorithm", SALT, SECTOR_IDENTIFIER);
+        ProtocolMapperModel wrongAlgorithmProtocolMapper = createMapperModel(USER_NAME, "wrongAlgorithm", SALT,
+                SECTOR_IDENTIFIER);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             mapper.generateIdentifier(wrongAlgorithmProtocolMapper, SECTOR_IDENTIFIER, USER_ID);
@@ -226,7 +239,8 @@ class HmacPairwiseSubMapperTest {
     @Test
     void should_throw_protocol_mapper_config_exception_when_invalid_sector_identifier_configured() {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        ProtocolMapperModel invalidSectorIdentifierProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT, "invalidSectorIdentifier");
+        ProtocolMapperModel invalidSectorIdentifierProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT,
+                "invalidSectorIdentifier");
 
         ProtocolMapperConfigException exception = assertThrows(ProtocolMapperConfigException.class, () -> {
             mapper.validateSectorIdentifier(null, null, invalidSectorIdentifierProtocolMapper);
@@ -243,7 +257,8 @@ class HmacPairwiseSubMapperTest {
     @Test
     void should_throw_protocol_mapper_config_exception_when_malformed_sector_identifier_configured() {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        ProtocolMapperModel malformedSectorIdentifierProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT, "http://finance.yahoo.com/q/h?s=^IXIC");
+        ProtocolMapperModel malformedSectorIdentifierProtocolMapper = createMapperModel(USER_NAME, HMAC_SHA_256, SALT,
+                "http://finance.yahoo.com/q/h?s=^IXIC");
 
         ProtocolMapperConfigException exception = assertThrows(ProtocolMapperConfigException.class, () -> {
             mapper.validateSectorIdentifier(null, null, malformedSectorIdentifierProtocolMapper);
@@ -260,7 +275,8 @@ class HmacPairwiseSubMapperTest {
     @Test
     void should_throw_protocol_mapper_config_exception_when_wrong_algorithm_configured() {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        ProtocolMapperModel noAlgorithmProtocolMapper = createMapperModel(USER_NAME, "wrongAlgorithm", SALT, SECTOR_IDENTIFIER);
+        ProtocolMapperModel noAlgorithmProtocolMapper = createMapperModel(USER_NAME, "wrongAlgorithm", SALT,
+                SECTOR_IDENTIFIER);
 
         ProtocolMapperConfigException exception = assertThrows(ProtocolMapperConfigException.class, () -> {
             mapper.validateConfig(null, null, null, noAlgorithmProtocolMapper);
@@ -319,7 +335,8 @@ class HmacPairwiseSubMapperTest {
     /**
      * GIVEN: valid hmac pairwise sub mapper
      * WHEN: get id of the mapper
-     * THEN: value of the result is concatenated value of oidc-{prefix-id}-{pairwise-mapper-suffix}
+     * THEN: value of the result is concatenated value of
+     * oidc-{prefix-id}-{pairwise-mapper-suffix}
      */
     @Test
     void should_contain_contenated_id_of_hmac_pairwise_mapper()
@@ -355,15 +372,18 @@ class HmacPairwiseSubMapperTest {
     /**
      * GIVEN: valid hmac pairwise sub mapper
      * WHEN: get help text
-     * THEN: it is 'Calculates a pairwise subject identifier using a salted HMAC hash and
-     * sectorIdentifier. See OpenID Connect specification for more info about pairwise subject
+     * THEN: it is 'Calculates a pairwise subject identifier using a salted HMAC
+     * hash and
+     * sectorIdentifier. See OpenID Connect specification for more info about
+     * pairwise subject
      * identifiers.'
      */
     @Test
     void should_have_expected_help_text_for_hmac_pairwise_mapper()
             throws Exception {
         HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-        assertEquals("Calculates a pairwise subject identifier using a salted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.",
+        assertEquals(
+                "Calculates a pairwise subject identifier using a salted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.",
                 mapper.getHelpText());
     }
 
@@ -376,7 +396,8 @@ class HmacPairwiseSubMapperTest {
      * @param sectorIdentifier
      * @return
      */
-    private ProtocolMapperModel createMapperModel(String localSubIdentifier, String hashAlgorithm, String salt, String sectorIdentifier) {
+    private ProtocolMapperModel createMapperModel(String localSubIdentifier, String hashAlgorithm, String salt,
+            String sectorIdentifier) {
         ProtocolMapperModel protocolMapperModel = new ProtocolMapperModel();
         protocolMapperModel.setConfig(new HashMap<String, String>());
         protocolMapperModel.setName("HMAC Mapper");
@@ -398,7 +419,8 @@ class HmacPairwiseSubMapperTest {
         UserModel userModel = mock(UserModel.class);
         when(userModel.getId()).thenReturn(id);
         when(userModel.getAttributeStream(localSubIdentifier))
-                .thenReturn(localSubIdentifierValue != null ? Arrays.asList(localSubIdentifierValue).stream() : Collections.<String>emptyList().stream());
+                .thenReturn(localSubIdentifierValue != null ? Arrays.asList(localSubIdentifierValue).stream()
+                        : Collections.<String>emptyList().stream());
         when(userSessionModel.getUser()).thenReturn(userModel);
         return userSessionModel;
     }
