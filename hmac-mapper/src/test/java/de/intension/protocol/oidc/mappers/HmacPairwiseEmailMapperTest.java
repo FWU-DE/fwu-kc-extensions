@@ -8,6 +8,7 @@ import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperTest.USER_
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperTest.mockUserSessionModel;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.not;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,54 +20,66 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 
 class HmacPairwiseEmailMapperTest {
+
     private static final String EMAIL_DOMAIN = "vidis.test";
+    private static final String EMAIL_BEFORE = "example@test.de";
 
     /**
      * GIVEN a fresh access token
      * WHEN transforming it with {@link HmacPairwiseEmailMapper}
-     * THEN the email in the access token is set
+     * THEN the email in the access token is set to a pseudo value
      */
     @Test
     void should_generate_email_for_access_token() {
         HmacPairwiseEmailMapper mapper = new HmacPairwiseEmailMapper();
+        var token = new AccessToken();
+        token.setEmail(EMAIL_BEFORE);
 
-        AccessToken accessToken = mapper.transformAccessToken(new AccessToken(),
+        AccessToken accessToken = mapper.transformAccessToken(token,
                 createMapperModel(USER_NAME, EMAIL_DOMAIN), null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
+        assertThat(accessToken.getEmail(), not(EMAIL_BEFORE));
         assertThat(accessToken.getEmail(), endsWith("@" + EMAIL_DOMAIN));
     }
 
     /**
      * GIVEN a fresh ID token
      * WHEN transforming it with {@link HmacPairwiseEmailMapper}
-     * THEN the email in the ID token is set
+     * THEN the email in the ID token is set to a pseudo value
      */
     @Test
     void should_generate_email_for_ID_token() {
         HmacPairwiseEmailMapper mapper = new HmacPairwiseEmailMapper();
+        var token = new IDToken();
+        token.setEmail(EMAIL_BEFORE);
 
-        IDToken idToken = mapper.transformIDToken(new IDToken(),
+        IDToken idToken = mapper.transformIDToken(token,
                 createMapperModel(USER_NAME, EMAIL_DOMAIN), null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
+        assertThat(idToken.getEmail(), not(EMAIL_BEFORE));
         assertThat(idToken.getEmail(), endsWith("@" + EMAIL_DOMAIN));
     }
 
     /**
      * GIVEN a fresh user info token
      * WHEN transforming it with {@link HmacPairwiseEmailMapper}
-     * THEN the email in the user info token is set
+     * THEN the email in the user info token is set to a pseudo value
      */
     @Test
     void should_generate_email_for_user_info_token() {
         HmacPairwiseEmailMapper mapper = new HmacPairwiseEmailMapper();
-
+        var token = new AccessToken();
+        token.setOtherClaims("email", EMAIL_BEFORE);
+        
         AccessToken userInfoToken = mapper.transformUserInfoToken(new AccessToken(),
                 createMapperModel(USER_NAME, EMAIL_DOMAIN), null,
                 mockUserSessionModel(USER_ID, USER_NAME, "tim"), null);
 
-        assertThat(userInfoToken.getOtherClaims().get("email").toString(), endsWith("@" + EMAIL_DOMAIN));
+        String emailClaimValue = userInfoToken.getOtherClaims().get("email").toString();
+        assertThat(emailClaimValue, not(EMAIL_BEFORE));
+        assertThat(emailClaimValue, endsWith("@" + EMAIL_DOMAIN));
     }
 
     /**
