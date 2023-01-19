@@ -57,7 +57,7 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
             return token;
         }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
             return token;
         }
         token.setEmail(generateEmail(mappingModel, localSub));
@@ -71,7 +71,7 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
             return token;
         }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
             return token;
         }
         token.setEmail(generateEmail(mappingModel, localSub));
@@ -85,11 +85,26 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
             return token;
         }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        if (!checkPrerequisites(localSub, mappingModel,
+                String.valueOf(token.getOtherClaims().get("email")))) {
             return token;
         }
         token.getOtherClaims().put("email", generateEmail(mappingModel, localSub));
         return token;
+    }
+
+    /**
+     * Checks whether to execute the mapper.
+     */
+    private boolean checkPrerequisites(String localSub, ProtocolMapperModel mappingModel, String email) {
+        if (localSub == null) {
+            return false;
+        }
+        boolean overrideEmail = Boolean.valueOf(mappingModel.getConfig().get(OVERRIDE_PROP_NAME));
+        if (!overrideEmail && email != null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -111,13 +126,19 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
     public List<ProviderConfigProperty> getAdditionalConfigProperties() {
         var configProperties = super.getAdditionalConfigProperties();
         configProperties.add(createEmailDomainConfig());
+        configProperties.add(createOverrideConfig());
         return configProperties;
     }
 
-    /**
-     * Creates the mapper's configuration property for the email domain config to
-     * use.
-     */
+    private ProviderConfigProperty createOverrideConfig() {
+        var property = new ProviderConfigProperty();
+        property.setName(OVERRIDE_PROP_NAME);
+        property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        property.setLabel(OVERRIDE_PROP_LABEL);
+        property.setHelpText(OVERRIDE_PROP_HELP);
+        return property;
+    }
+
     private static ProviderConfigProperty createEmailDomainConfig() {
         var property = new ProviderConfigProperty();
         property.setName(EMAIL_DOMAIN_PROP_NAME);
