@@ -414,7 +414,7 @@ class HmacPairwiseSubMapperTest {
         return createMapperModel(localSubIdentifier, HMAC_SHA_256, SALT, SECTOR_IDENTIFIER);
     }
 
-    static UserSessionModel mockUserSessionModel(String id, String localSubIdentifier, String localSubIdentifierValue) {
+    private static UserSessionModel mockUserSessionModel(String id, String localSubIdentifier, String localSubIdentifierValue) {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
         UserModel userModel = mock(UserModel.class);
         when(userModel.getId()).thenReturn(id);
@@ -424,5 +424,4 @@ class HmacPairwiseSubMapperTest {
         when(userSessionModel.getUser()).thenReturn(userModel);
         return userSessionModel;
     }
-
 }

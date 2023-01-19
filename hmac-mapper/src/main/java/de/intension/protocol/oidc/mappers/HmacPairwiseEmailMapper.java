@@ -2,9 +2,11 @@ package de.intension.protocol.oidc.mappers;
 
 import java.util.List;
 
+import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
@@ -56,11 +58,12 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
         if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        UserModel user = userSession.getUser();
+        String localSub = getLocalIdentifierValue(user, mappingModel);
         if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
             return token;
         }
-        token.setEmail(generateEmail(mappingModel, localSub));
+        token.setEmail(generateEmail(mappingModel, localSub, user.getEmail()));
         return token;
     }
 
@@ -70,11 +73,12 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
         if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        UserModel user = userSession.getUser();
+        String localSub = getLocalIdentifierValue(user, mappingModel);
         if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
             return token;
         }
-        token.setEmail(generateEmail(mappingModel, localSub));
+        token.setEmail(generateEmail(mappingModel, localSub, user.getEmail()));
         return token;
     }
 
@@ -84,12 +88,13 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
         if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        UserModel user = userSession.getUser();
+        String localSub = getLocalIdentifierValue(user, mappingModel);
         if (!checkPrerequisites(localSub, mappingModel,
                 String.valueOf(token.getOtherClaims().get("email")))) {
             return token;
         }
-        token.getOtherClaims().put("email", generateEmail(mappingModel, localSub));
+        token.getOtherClaims().put("email", generateEmail(mappingModel, localSub, user.getEmail()));
         return token;
     }
 
@@ -111,11 +116,13 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
      * Generate the HMAC identifier like in {@link HmacPairwiseSubMapper} but add an
      * email domain to it.
      */
-    private String generateEmail(ProtocolMapperModel mappingModel, String email) {
-        var pseudoEmail = generateIdentifier(mappingModel, getSectorIdentifier(mappingModel), email);
+    private String generateEmail(ProtocolMapperModel mappingModel, String localSub, String email) {
+        var pseudoEmail = generateIdentifier(mappingModel, getSectorIdentifier(mappingModel), localSub);
         var emailDomain = mappingModel.getConfig().get(EMAIL_DOMAIN_PROP_NAME);
         if (StringUtil.isBlank(emailDomain)) {
-            pseudoEmail += "@" + email.split("@")[1];
+            if (!ObjectUtil.isBlank(email)) {
+                pseudoEmail += "@" + email.split("@")[1];
+            }
         } else {
             pseudoEmail += "@" + emailDomain;
         }
@@ -136,6 +143,7 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
         property.setLabel(OVERRIDE_PROP_LABEL);
         property.setHelpText(OVERRIDE_PROP_HELP);
+        property.setDefaultValue(true);
         return property;
     }
 
