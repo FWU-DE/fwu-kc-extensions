@@ -56,6 +56,7 @@ This mapper sets the claim value `email`.
 
 The configuration doesn't differ much from the other mapper.
 Only the email domain must be configured, so that the pseudo hash generated is a valid email.
+Additionally, one can configure whether to override an existing email claim value.
 
 ### Example
 
