@@ -58,16 +58,42 @@ The configuration doesn't differ much from the other mapper.
 Only the email domain must be configured, so that the pseudo hash generated is a valid email.
 Additionally, one can configure whether to override an existing email claim value.
 
-### Example
+### Examples
 
-Given:
+#### Given
 1. The configured email domain "google.com"
 2. The generated `sub` is `dc750843-a671-4c0d-ae94-bf2434d6f2b6`
 
 Result:
 
-The claim value `email` in the *access token*, *user info* and/or *ID token* will be:
+The claim value `email` in the configured tokens will be:
 
 ```
 dc750843-a671-4c0d-ae94-bf2434d6f2b6@google.com
+```
+
+#### Given
+1. The email domain ist **not** configured for the mapper
+2. The user's email is `example@gmail.com`
+3. The generated `sub` is `dc750843-a671-4c0d-ae94-bf2434d6f2b6`
+
+Result:
+
+The claim value `email` in the configured tokens will be:
+
+```
+dc750843-a671-4c0d-ae94-bf2434d6f2b6@gmail.com
+```
+
+#### Given
+1. The email domain ist **not** configured for the mapper
+2. The user's email is **not** set
+3. The generated `sub` is `dc750843-a671-4c0d-ae94-bf2434d6f2b6`
+
+Result:
+
+The claim value `email` in the configured tokens will be:
+
+```
+dc750843-a671-4c0d-ae94-bf2434d6f2b6
 ```
