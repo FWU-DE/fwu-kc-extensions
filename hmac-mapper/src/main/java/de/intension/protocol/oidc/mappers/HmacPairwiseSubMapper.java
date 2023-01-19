@@ -25,6 +25,7 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
+import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
 import org.keycloak.protocol.oidc.utils.PairwiseSubMapperUtils;
 import org.keycloak.protocol.oidc.utils.PairwiseSubMapperValidator;
@@ -68,6 +69,9 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     public IDToken transformIDToken(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session,
             UserSessionModel userSession,
             ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
@@ -81,6 +85,9 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel,
             KeycloakSession session, UserSessionModel userSession,
             ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
@@ -94,6 +101,9 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     public AccessToken transformUserInfoToken(AccessToken token, ProtocolMapperModel mappingModel,
             KeycloakSession session, UserSessionModel userSession,
             ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
@@ -210,6 +220,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         sectorIdentifierConfigProperty.setHelpText(SECTOR_IDENTIFIER_PROP_HELP);
         configProperties.add(sectorIdentifierConfigProperty);
         configProperties.addAll(getAdditionalConfigProperties());
+        OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, this.getClass());
         return configProperties;
     }
 

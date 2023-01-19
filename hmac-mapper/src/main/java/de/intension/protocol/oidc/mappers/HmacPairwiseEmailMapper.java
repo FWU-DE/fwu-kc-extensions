@@ -6,6 +6,7 @@ import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
@@ -30,6 +31,10 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
     private static final String EMAIL_DOMAIN_PROP_LABEL = "Email domain";
     private static final String EMAIL_DOMAIN_PROP_HELP = "The email domain is appended to the claim value after pseudonymization.";
 
+    private static final String OVERRIDE_PROP_NAME = "override";
+    private static final String OVERRIDE_PROP_LABEL = "Override existing";
+    private static final String OVERRIDE_PROP_HELP = "Toggle overriding an existing email claim.";
+
     @Override
     public String getId() {
         return PROVIDER_ID;
@@ -48,6 +53,9 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
     @Override
     public IDToken transformIDToken(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session,
             UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
@@ -59,6 +67,9 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
     @Override
     public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel,
             KeycloakSession session, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
@@ -70,6 +81,9 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper {
     @Override
     public AccessToken transformUserInfoToken(AccessToken token, ProtocolMapperModel mappingModel,
             KeycloakSession session, UserSessionModel userSession, ClientSessionContext clientSessionCtx) {
+        if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
+            return token;
+        }
         String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
