@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.2.0]
+
+- New feature: OIDC HMAC Pairwise mapper for email
+
+## Version [3.1.1]
+
+- Update extensions and docker-compose-file to use keycloack 20.0.2
+
 ## Version [3.1.0]
 
 - New feature: Support of reading user details from SANIS-API and forwarding to the connected Service Providers
@@ -10,7 +18,7 @@ All notable changes to this project will be documented here.
 
 ## Version [3.0.0]
 
-- Update extensions and docker-compose-file to use keycloack 20.0.1 
+- Update extensions and docker-compose-file to use keycloack 20.0.1
 
 ## Version [2.4.0]
 

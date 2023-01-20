@@ -13,7 +13,7 @@ services:
       KC_DB_URL_HOST: postgres
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: password
-      DEBUG: true
+      DEBUG: "true"
       DEBUG_PORT: "*:8787"
     command: ["start-dev", "--import-realm"]
     volumes:
