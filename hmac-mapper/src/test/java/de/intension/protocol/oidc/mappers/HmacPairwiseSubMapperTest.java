@@ -21,6 +21,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
+import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
@@ -329,7 +330,7 @@ class HmacPairwiseSubMapperTest {
 
         List<ProviderConfigProperty> configProperties = mapper.getConfigProperties();
 
-        assertEquals(4, configProperties.size());
+        assertEquals(7, configProperties.size());
     }
 
     /**
@@ -406,6 +407,9 @@ class HmacPairwiseSubMapperTest {
         config.put("pairwiseSubAlgorithmSalt", salt);
         config.put("pairwiseLocalSubIdentifier", localSubIdentifier);
         config.put(PairwiseSubMapperHelper.SECTOR_IDENTIFIER_URI, sectorIdentifier);
+        config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ACCESS_TOKEN, Boolean.TRUE.toString());
+        config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ID_TOKEN, Boolean.TRUE.toString());
+        config.put(OIDCAttributeMapperHelper.INCLUDE_IN_USERINFO, Boolean.TRUE.toString());
         protocolMapperModel.setConfig(config);
         return protocolMapperModel;
     }
@@ -414,7 +418,8 @@ class HmacPairwiseSubMapperTest {
         return createMapperModel(localSubIdentifier, HMAC_SHA_256, SALT, SECTOR_IDENTIFIER);
     }
 
-    private static UserSessionModel mockUserSessionModel(String id, String localSubIdentifier, String localSubIdentifierValue) {
+    private static UserSessionModel mockUserSessionModel(String id, String localSubIdentifier,
+            String localSubIdentifierValue) {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
         UserModel userModel = mock(UserModel.class);
         when(userModel.getId()).thenReturn(id);
