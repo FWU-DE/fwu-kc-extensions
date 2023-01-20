@@ -22,6 +22,8 @@ jobs:
 
   publish:
     needs: package
+    outputs:
+      publishedVersion: ${{ steps.check-release.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -105,11 +107,15 @@ jobs:
                   --header "Deploy-Token: ${GITLAB_TOKEN}" \
                   "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
           done
-      - name: Trigger image build on Gitlab
-        if: ${{ steps.check-release.outputs.version != '' }}
+  startImageBuild:
+    needs: publish
+    if: ${{ needs.publish.outputs.publishedVersion }} != ""
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger image build and deployment on Gitlab
         env:
           GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          VERSION: ${{ steps.check-release.outputs.version }}
-        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=dev -F variables[CI_COMMIT_SHA]=${VERSION} https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
+          VERSION: ${{ needs.publish.outputs.publishedVersion }}
+        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=dev -F variables[CI_COMMIT_SHA]=${VERSION} "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
 
