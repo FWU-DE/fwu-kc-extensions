@@ -4,8 +4,8 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:20.0
     ports:
-    - 18080:8080
-    - 8787:8787
+      - 18080:8080
+      - 8787:8787
     environment:
       KC_HTTP_RELATIVE_PATH: "/auth"
       KEYCLOAK_ADMIN: admin
@@ -15,47 +15,53 @@ services:
       KC_DB_PASSWORD: password
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
-    command: ["start-dev", "--import-realm"]
+    command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
     volumes:
-    - /etc/localtime:/etc/localtime:ro
-    - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
-    - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
-    - "./idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
-    - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
-    - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/keycloak/providers/hmac-mapper.jar"
-    - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/keycloak/providers/whitelist-authenticator.jar"
-    - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/keycloak/providers/whitelist-authenticator-schools.jar"
-    - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/keycloak/providers/multi-value-user-attribute-mapper.jar"
-    - "../acronym-mapper/target/acronym-mapper-docker.jar:/opt/keycloak/providers/acronym-mapper.jar"
-    - "../school-mapper/target/school-mapper-docker.jar:/opt/keycloak/providers/school-mapper.jar"
-    - "../user-info-provider/target/user-info-provider-docker.jar:/opt/keycloak/providers/user-info-provider.jar"
-    - "../user-info-requester/target/user-info-requester-docker.jar:/opt/keycloak/providers/user-info-requester.jar"
-    - "../user-info-api/target/user-info-api-docker.jar:/opt/keycloak/providers/user-info-api.jar"
+      - /etc/localtime:/etc/localtime:ro
+      #    - realms
+      - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
+      - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
+      - "./idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
+      #    - themes
+      - "../../fwu-idp-theme/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
+      - "../../fwu-idp-theme/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
+      - "../../fwu-idp-theme/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
+      #    - extensions
+      - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
+      - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/keycloak/providers/hmac-mapper.jar"
+      - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/keycloak/providers/whitelist-authenticator.jar"
+      - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/keycloak/providers/whitelist-authenticator-schools.jar"
+      - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/keycloak/providers/multi-value-user-attribute-mapper.jar"
+      - "../acronym-mapper/target/acronym-mapper-docker.jar:/opt/keycloak/providers/acronym-mapper.jar"
+      - "../school-mapper/target/school-mapper-docker.jar:/opt/keycloak/providers/school-mapper.jar"
+      - "../user-info-provider/target/user-info-provider-docker.jar:/opt/keycloak/providers/user-info-provider.jar"
+      - "../user-info-requester/target/user-info-requester-docker.jar:/opt/keycloak/providers/user-info-requester.jar"
+      - "../user-info-api/target/user-info-api-docker.jar:/opt/keycloak/providers/user-info-api.jar"
     networks:
-    - fwunet
+      - fwunet
     depends_on:
-    - idp_mock
+      - idp_mock
 
   postgres:
     container_name: postgres
     image: postgres
     restart: always
     ports:
-    - 5432:5432
+      - 5432:5432
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
     networks:
-    - fwunet
+      - fwunet
 
   idp_mock:
     container_name: idp-mock
     image: ghcr.io/navikt/mock-oauth2-server:0.5.1
     ports:
-    - 8443:8080
+      - 8443:8080
     networks:
-    - fwunet
+      - fwunet
 
   static_http:
     container_name: static_http
@@ -74,4 +80,4 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.18.0.0/16
+        - subnet: 172.18.0.0/16
