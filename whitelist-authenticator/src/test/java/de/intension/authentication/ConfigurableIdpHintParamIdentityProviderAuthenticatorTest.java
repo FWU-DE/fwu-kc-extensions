@@ -13,8 +13,10 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,26 +26,32 @@ import static org.mockito.Mockito.*;
 class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
 {
 
-    private static final String VALID_IDP = "facebook";
+    private static final String VALID_IDP           = "facebook";
+    private static final String EMPTY_IDP           = "";
+    private static final String NO_DEFAULT_PROVIDER = "";
+    private static final String DEFAULT_PROVIDER    = "IDP";
 
     @ParameterizedTest
     @CsvSource({
-            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + VALID_IDP + "," + true,
-            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + VALID_IDP + "," + true,
-            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + "google" + "," + false,
-            AdapterConstants.KC_IDP_HINT + "," + "parameter" + "," + VALID_IDP + "," + false
+            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + VALID_IDP + "," + true + "," + NO_DEFAULT_PROVIDER,
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + VALID_IDP + "," + true + "," + NO_DEFAULT_PROVIDER,
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_IDP + "," + false + "," + NO_DEFAULT_PROVIDER, // false because no default provider being set
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_IDP + "," + true + "," + DEFAULT_PROVIDER, // true because default provider is set
+            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + "google" + "," + false + "," + NO_DEFAULT_PROVIDER,
+            AdapterConstants.KC_IDP_HINT + "," + "parameter" + "," + VALID_IDP + "," + false + "," + NO_DEFAULT_PROVIDER
     })
-    void testConfigurableIdpHintParamIdentityProviderAuthenticator(String idpHintParamName, String paramInUrl, String idpName, String success)
+    void testConfigurableIdpHintParamIdentityProviderAuthenticator(String idpHintParamName, String paramInUrl, String idpName, String success,
+                                                                   String defaultProvider)
         throws Exception
     {
-        var context = mockContext(idpHintParamName, paramInUrl, idpName);
+        var context = mockContext(idpHintParamName, paramInUrl, idpName, defaultProvider);
 
         new ConfigurableIdpHintParamIdentityProviderAuthenticator().authenticate(context);
 
         assertEquals(Boolean.parseBoolean(success), context.getSuccess());
     }
 
-    private TestAuthenticationFlowContext mockContext(String idpHintParamName, String paramInUrl, String idpName)
+    private TestAuthenticationFlowContext mockContext(String idpHintParamName, String paramInUrl, String idpName, String defaultProvider)
         throws URISyntaxException
     {
         var context = mock(TestAuthenticationFlowContext.class);
@@ -51,7 +59,11 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         // param name config
         var authConfig = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authConfig);
-        var configMap = Map.of(IdpHintParamName.IDP_HINT_PARAM_NAME, idpHintParamName);
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put(IdpHintParamName.IDP_HINT_PARAM_NAME, idpHintParamName);
+        if (defaultProvider != null) {
+            configMap.put("defaultProvider", defaultProvider);
+        }
         when(authConfig.getConfig()).thenReturn(configMap);
 
         // identity providers
@@ -61,7 +73,10 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         var idp = mock(IdentityProviderModel.class);
         when(idp.isEnabled()).thenReturn(true);
         when(idp.getAlias()).thenReturn(VALID_IDP);
-        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idp));
+        var defaultIdp = mock(IdentityProviderModel.class);
+        when(defaultIdp.isEnabled()).thenReturn(true);
+        when(defaultIdp.getAlias()).thenReturn(DEFAULT_PROVIDER);
+        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idp,defaultIdp));
 
         // success/failure
         doCallRealMethod().when(context).success();
@@ -74,7 +89,7 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         var uriInfo = mock(UriInfo.class);
         when(context.getUriInfo()).thenReturn(uriInfo);
         var queryParams = new MultivaluedHashMap<String, String>();
-        queryParams.put(paramInUrl, List.of(idpName));
+        queryParams.put(paramInUrl, List.of(idpName == null ? "" : idpName));
         when(uriInfo.getQueryParameters()).thenReturn(queryParams);
         when(uriInfo.getBaseUri()).thenReturn(new URI("https://intension.de/"));
 

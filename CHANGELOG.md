@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+
+## Version [3.2.1]
+
+- fix fallback to KC_IDP_HINT 
+
 ## Version [3.2.0]
 
 - New feature: OIDC HMAC Pairwise mapper for email
