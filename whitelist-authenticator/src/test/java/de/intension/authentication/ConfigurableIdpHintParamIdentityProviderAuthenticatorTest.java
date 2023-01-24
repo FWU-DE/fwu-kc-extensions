@@ -1,6 +1,19 @@
 package de.intension.authentication;
 
-import de.intension.authentication.test.TestAuthenticationFlowContext;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.UriInfo;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.constants.AdapterConstants;
@@ -9,36 +22,23 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import de.intension.authentication.test.TestAuthenticationFlowContext;
 
 class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
 {
 
-    private static final String VALID_IDP           = "facebook";
-    private static final String EMPTY_IDP           = "";
-    private static final String NO_DEFAULT_PROVIDER = "";
-    private static final String DEFAULT_PROVIDER    = "IDP";
+    private static final String VALID_IDP        = "facebook";
+    private static final String EMPTY_PROVIDER   = "";
+    private static final String DEFAULT_PROVIDER = "IDP";
 
     @ParameterizedTest
     @CsvSource({
-            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + VALID_IDP + "," + true + "," + NO_DEFAULT_PROVIDER,
-            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + VALID_IDP + "," + true + "," + NO_DEFAULT_PROVIDER,
-            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_IDP + "," + false + "," + NO_DEFAULT_PROVIDER, // false because no default provider being set
-            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_IDP + "," + true + "," + DEFAULT_PROVIDER, // true because default provider is set
-            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + "google" + "," + false + "," + NO_DEFAULT_PROVIDER,
-            AdapterConstants.KC_IDP_HINT + "," + "parameter" + "," + VALID_IDP + "," + false + "," + NO_DEFAULT_PROVIDER
+            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + VALID_IDP + "," + true + "," + EMPTY_PROVIDER,
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + VALID_IDP + "," + true + "," + EMPTY_PROVIDER,
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_PROVIDER + "," + false + "," + EMPTY_PROVIDER, // false because no default provider being set
+            "vidis_idp_hint" + "," + "vidis_idp_hint" + "," + EMPTY_PROVIDER + "," + true + "," + DEFAULT_PROVIDER, // true because default provider is set
+            AdapterConstants.KC_IDP_HINT + "," + AdapterConstants.KC_IDP_HINT + "," + "google" + "," + false + "," + EMPTY_PROVIDER,
+            AdapterConstants.KC_IDP_HINT + "," + "parameter" + "," + VALID_IDP + "," + false + "," + EMPTY_PROVIDER
     })
     void testConfigurableIdpHintParamIdentityProviderAuthenticator(String idpHintParamName, String paramInUrl, String idpName, String success,
                                                                    String defaultProvider)
@@ -76,7 +76,7 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         var defaultIdp = mock(IdentityProviderModel.class);
         when(defaultIdp.isEnabled()).thenReturn(true);
         when(defaultIdp.getAlias()).thenReturn(DEFAULT_PROVIDER);
-        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idp,defaultIdp));
+        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idp, defaultIdp));
 
         // success/failure
         doCallRealMethod().when(context).success();
