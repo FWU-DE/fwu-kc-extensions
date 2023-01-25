@@ -36,7 +36,6 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
         String idpHintParamName = getIdpHintParamName(context);
         String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
         if (AdapterConstants.KC_IDP_HINT.equals(idpHintParamName) || StringUtil.isBlank(providerId)) {
-//            if we have no or empty configured_idp_hint the  just let us use the default one. keeps code base small.
             super.authenticate(context);
         }
         else {
