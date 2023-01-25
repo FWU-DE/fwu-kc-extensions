@@ -4,7 +4,7 @@ All notable changes to this project will be documented here.
 
 ## Version [3.2.1]
 
-- fix fallback to KC_IDP_HINT 
+- Fix whitelist authenticator to fallback to `kc_idp_hint` if `vidis_idp_hint` not set
 
 ## Version [3.2.0]
 
