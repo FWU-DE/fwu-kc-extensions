@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+
+## Version [3.2.1]
+
+- Fix whitelist authenticator to fallback to `kc_idp_hint` if `vidis_idp_hint` not set
+
 ## Version [3.2.0]
 
 - New feature: OIDC HMAC Pairwise mapper for email

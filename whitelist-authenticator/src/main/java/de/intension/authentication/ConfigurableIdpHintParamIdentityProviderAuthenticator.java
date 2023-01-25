@@ -12,12 +12,12 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticator;
-import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticatorFactory;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.ClientSessionCode;
+import org.keycloak.utils.StringUtil;
 
 /**
  * Same as {@link IdentityProviderAuthenticator} but with configurable IdP hint
@@ -34,47 +34,13 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
     public void authenticate(AuthenticationFlowContext context)
     {
         String idpHintParamName = getIdpHintParamName(context);
-        if (AdapterConstants.KC_IDP_HINT.equals(idpHintParamName)) {
+        String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
+        if (AdapterConstants.KC_IDP_HINT.equals(idpHintParamName) || StringUtil.isBlank(providerId)) {
             super.authenticate(context);
         }
-        else if (context.getUriInfo().getQueryParameters().containsKey(idpHintParamName)) {
-            String providerId = context.getUriInfo().getQueryParameters()
-                .getFirst(idpHintParamName);
-            if (providerId == null || providerId.equals("")) {
-                LOG.tracef("Defaulting to 'kc_idp_hint'");
-                providerId = context.getUriInfo().getQueryParameters()
-                    .getFirst(AdapterConstants.KC_IDP_HINT);
-            }
-            if (providerId == null || providerId.equals("")) {
-                LOG.tracef("Skipping: IdP hint query parameter is empty");
-                context.attempted();
-            }
-            else {
-                LOG.tracef("Redirecting: %s set to %s", idpHintParamName, providerId);
-                redirect(context, providerId);
-            }
-        }
-        else if (context.getAuthenticatorConfig() != null
-                && context.getAuthenticatorConfig().getConfig()
-                    .containsKey(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER)) {
-            if (context.getForwardedErrorMessage() != null) {
-                LOG.infof(
-                          "Should redirect to remote IdP but forwardedError has value '%s', skipping this authenticator...",
-                          context.getForwardedErrorMessage());
-                context.attempted();
-
-                return;
-            }
-
-            String defaultProvider = context.getAuthenticatorConfig().getConfig()
-                .get(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER);
-            LOG.tracef("Redirecting: default provider set to %s", defaultProvider);
-            redirect(context, defaultProvider);
-        }
         else {
-            LOG.tracef("No default provider set or %s query parameter provided",
-                       idpHintParamName);
-            context.attempted();
+            LOG.tracef("Redirecting: %s set to %s", idpHintParamName, providerId);
+            redirect(context, providerId);
         }
     }
 
