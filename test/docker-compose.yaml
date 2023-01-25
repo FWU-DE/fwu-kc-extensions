@@ -86,6 +86,7 @@ services:
     command: [ "start-dev", "--import-realm" ]
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./saml-realm.json:/opt/keycloak/data/import/saml-realm.json
     networks:
       - fwunet
 
