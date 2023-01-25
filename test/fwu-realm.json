@@ -1199,6 +1199,44 @@
         "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true"
       }
+    },
+    {
+      "alias": "keycloak-saml",
+      "displayName": "SAML Test",
+      "internalId": "eca1b3af-b2b5-4ce1-b22d-47b45f06ab1d",
+      "providerId": "saml",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "validateSignature": "true",
+        "signingCertificate": "MIICtzCCAZ8CBgGF6ZJSqTANBgkqhkiG9w0BAQsFADAfMR0wGwYDVQQDDBRzYW1sLWlkZW50aXR5LWJyb2tlcjAeFw0yMzAxMjUxNTM0MThaFw0zMzAxMjUxNTM1NThaMB8xHTAbBgNVBAMMFHNhbWwtaWRlbnRpdHktYnJva2VyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArcpqYPK149Vd/RWSPz8ukBSBHpitPK+DY8+30j78EzZZ8mbT0ESxMOMBsbMXg2GHEYjcrAWhog+tOvvH4sFnjsnCqL2TwTf3LGLStNUs2YyUQNSzmB564XrIX4GFsbfNY+ccq6kSyEOMoej1pHO+rjie+mwk3aFZ3Y+zMY2DZ5WI+1dvquOWHT0cb8l8INaqrVbsichU7N8RinhKnMPv/o5qsLiG8YTK9L0NGfQF8qOjpfgaoHDf8LSNaLGAG9zpa0cwznIAcjbmLmGgzddeIyI5o6zxZiMufZx7jvVeRA1PR/4sCodTgm9fNZ2RkxVKTU//vKwvEj1Jj9RXHnyQMwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBHxel3xWztRXBWhnTXjDrHzrMHuUUjnsKKPCn0fK3cDTtZfac2zgOhOn12LiA8CsR8XaOixf+fB4rrWXRpqW/BTvnyRgdWaRVFeiZebZKIgz5iUN6dF4VNufLEeS/dNn5/ok2I3h+TifQgVuYK/bUnk5iVyxRRqB8Ec4Vfv6u2IdHztcALOdksyQ/guefXGklrXl2ufV3HOAaZkFeVFrMmYtG2S+VyftzNhH+k3DorR4UTp0GXGokQA9hcASrBqzt9lL7VJGVl6ckXFq5d1EUp/bs0veQU2rp9ciu+u3AvF3nuwcFCXwklueo/DypWKyWyy5oM1eXBJwEO04j2L1Ac",
+        "postBindingLogout": "true",
+        "singleLogoutServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "postBindingResponse": "true",
+        "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+        "entityId": "saml-identity-broker",
+        "backchannelSupported": "false",
+        "signSpMetadata": "false",
+        "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
+        "wantAssertionsEncrypted": "false",
+        "signatureAlgorithm": "RSA_SHA256",
+        "idpEntityId": "http://172.18.0.1:18443/auth/realms/saml",
+        "loginHint": "false",
+        "allowCreate": "true",
+        "wantAssertionsSigned": "false",
+        "postBindingAuthnRequest": "true",
+        "forceAuthn": "false",
+        "singleSignOnServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "wantAuthnRequestsSigned": "true",
+        "guiOrder": "0",
+        "principalType": "Subject NameID"
+      }
     }
   ],
   "identityProviderMappers": [
