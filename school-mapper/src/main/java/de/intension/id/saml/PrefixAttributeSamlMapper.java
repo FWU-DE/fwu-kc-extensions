@@ -3,6 +3,7 @@ package de.intension.id.saml;
 import static de.intension.id.oidc.PrefixAttributeOidcMapper.LOWER_CASE;
 import static de.intension.id.oidc.PrefixAttributeOidcMapper.PREFIX;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -46,33 +47,33 @@ public class PrefixAttributeSamlMapper extends UserAttributeMapper
     @Override
     public List<ProviderConfigProperty> getConfigProperties()
     {
-        var configProperties = super.getConfigProperties();
-        var prefixProperty = configProperties.stream()
-            .filter(p -> PREFIX.equals(p.getName()))
-            .findFirst()
-            .orElse(null);
-        if (prefixProperty == null) {
-            var property = new ProviderConfigProperty();
-            property.setName(PREFIX);
-            property.setLabel("Prefix");
-            property.setHelpText("Prefix to add to the claim.");
-            property.setType(ProviderConfigProperty.STRING_TYPE);
-            configProperties.add(property);
-        }
-        var lowercaseProperty = configProperties.stream()
-            .filter(p -> LOWER_CASE.equals(p.getName()))
-            .findFirst()
-            .orElse(null);
-        if (lowercaseProperty == null) {
-            var property = new ProviderConfigProperty();
-            property.setName(LOWER_CASE);
-            property.setLabel("To lowercase");
-            property.setHelpText("Transform the attribute value to lowercase.");
-            property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
-            property.setDefaultValue(false);
-            configProperties.add(property);
-        }
+        // it's important to make a copy here
+        // otherwise the static list of UserAttributeMapper is manipulated
+        var configProperties = copyList(super.getConfigProperties());
+
+        var property = new ProviderConfigProperty();
+        property.setName(PREFIX);
+        property.setLabel("Prefix");
+        property.setHelpText("Prefix to add to the attribute.");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        configProperties.add(property);
+
+        property = new ProviderConfigProperty();
+        property.setName(LOWER_CASE);
+        property.setLabel("To lowercase");
+        property.setHelpText("Transform the attribute value to lowercase.");
+        property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        property.setDefaultValue(false);
+        configProperties.add(property);
+
         return configProperties;
+    }
+
+    private List<ProviderConfigProperty> copyList(List<ProviderConfigProperty> configProperties)
+    {
+        List<ProviderConfigProperty> copy = new ArrayList<>();
+        copy.addAll(configProperties);
+        return copy;
     }
 
     @Override
