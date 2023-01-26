@@ -151,9 +151,19 @@ public class PrefixAttributeSamlMapper extends UserAttributeMapper
             .filter(elementWith(attributeName))
             .flatMap(attributeType -> attributeType.getAttribute().getAttributeValue().stream())
             .filter(Objects::nonNull)
+            .filter(this::stringNotBlank)
             .filter(this::listNotEmpty)
             .map(Object::toString)
             .collect(Collectors.toList());
+    }
+
+    private boolean stringNotBlank(Object object)
+    {
+        if (object instanceof String) {
+            var string = (String)object;
+            return !string.isBlank();
+        }
+        return true;
     }
 
     @SuppressWarnings("unchecked")
