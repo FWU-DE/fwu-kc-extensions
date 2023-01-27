@@ -180,20 +180,20 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
         AssertionType assertion = (AssertionType)context.getContextData().get(SAMLEndpoint.SAML_ASSERTION);
 
         var statements = assertion.getAttributeStatements();
-        LOG.info("Found X statements: " + statements.size());
+        LOG.tracef("Found %d statements", statements.size());
         for (var statement : statements) {
             var attributes = statement.getAttributes();
-            LOG.info("Found X attributes: " + attributes.size());
             for (var attribute : attributes) {
                 var attributeType = attribute.getAttribute();
-                LOG.info("Found attribute type: " + attributeType.getName());
                 if (Objects.equals(attributeType.getName(), attributeName) || Objects.equals(attributeType.getFriendlyName(), attributeName)) {
+                    LOG.debug("Found attribute to map: " + attributeType.toString());
                     return attributeType.getAttributeValue().stream()
                         .map(Object::toString)
                         .collect(Collectors.toList());
                 }
             }
         }
+        LOG.debug("Found no attribute to map for name: " + attributeName);
         return List.of();
     }
 
