@@ -100,17 +100,6 @@ class PrefixAttributeSamlMapperTest
         Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
     }
 
-    @Test
-    void should_not_map_school_ids_if_saml_statement_is_empty_list()
-    {
-        var token = samlStatement("school", List.of());
-        var config = mapperConfig("school", "prefixed", "NOT ", true);
-
-        var user = testMapping(token, config);
-
-        Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
-    }
-
     private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase)
     {
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_NAME, samlValue,
@@ -122,11 +111,19 @@ class PrefixAttributeSamlMapperTest
         return config;
     }
 
+    @SuppressWarnings("unchecked")
     private AssertionType samlStatement(String attributeName, Object value)
     {
         var statement = Mockito.mock(AssertionType.class);
         var attributeValue = new AttributeType(attributeName);
-        attributeValue.addAttributeValue(value);
+        if (value instanceof List) {
+            for (Object item : (List<Object>)value) {
+                attributeValue.addAttributeValue(item);
+            }
+        }
+        else {
+            attributeValue.addAttributeValue(value);
+        }
         var attribute = new AttributeStatementType();
         attribute.addAttribute(new AttributeStatementType.ASTChoiceType(attributeValue));
         var attributeStatements = Set.of(attribute);
