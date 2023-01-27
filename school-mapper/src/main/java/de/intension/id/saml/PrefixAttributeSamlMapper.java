@@ -20,6 +20,7 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.broker.saml.SAMLEndpoint;
 import org.keycloak.broker.saml.mappers.UserAttributeMapper;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
+import org.keycloak.dom.saml.v2.assertion.AttributeType;
 import org.keycloak.models.IdentityProviderMapperModel;
 import org.keycloak.models.IdentityProviderSyncMode;
 import org.keycloak.models.KeycloakSession;
@@ -150,9 +151,10 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
         if (StringUtil.isNullOrEmpty(attribute)) {
             return;
         }
-        String attributeName = getAttributeNameFromMapperModel(mapperModel);
+        String attributeName = mapperModel.getConfig().get(ATTRIBUTE_NAME);
+        String attributeFriendlyName = mapperModel.getConfig().get(ATTRIBUTE_FRIENDLY_NAME);
 
-        List<String> attributeValuesInContext = findAttributeValuesInContext(attributeName, context);
+        List<String> attributeValuesInContext = findAttributeValuesInContext(context, attributeName, attributeFriendlyName);
         if (!attributeValuesInContext.isEmpty()) {
             PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase);
             var prefixedValues = prefixer.prefix(attributeValuesInContext);
@@ -175,7 +177,7 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
     /**
      * @see UserAttributeMapper#findAttributeValuesInContext
      */
-    private List<String> findAttributeValuesInContext(String attributeName, BrokeredIdentityContext context)
+    private List<String> findAttributeValuesInContext(BrokeredIdentityContext context, String attributeName, String attributeFriendlyName)
     {
         AssertionType assertion = (AssertionType)context.getContextData().get(SAMLEndpoint.SAML_ASSERTION);
 
@@ -185,7 +187,7 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
             var attributes = statement.getAttributes();
             for (var attribute : attributes) {
                 var attributeType = attribute.getAttribute();
-                if (Objects.equals(attributeType.getName(), attributeName) || Objects.equals(attributeType.getFriendlyName(), attributeName)) {
+                if (checkAttributeName(attributeType, attributeName, attributeFriendlyName)) {
                     LOG.debug("Found attribute to map: " + attributeType.toString());
                     return attributeType.getAttributeValue().stream()
                         .filter(Objects::nonNull)
@@ -197,6 +199,14 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
         }
         LOG.debug("Found no attribute to map for name: " + attributeName);
         return List.of();
+    }
+
+    private boolean checkAttributeName(AttributeType attribute, String attributeName, String attributeFriendlyName)
+    {
+        if (attributeName != null) {
+            return Objects.equals(attribute.getName(), attributeName);
+        }
+        return Objects.equals(attribute.getFriendlyName(), attributeFriendlyName);
     }
 
     private boolean notBlank(String value)
@@ -212,17 +222,5 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
         if (values != null && !values.isEmpty()) {
             consumer.accept(values.get(0));
         }
-    }
-
-    /**
-     * @see UserAttributeMapper#getAttributeNameFromMapperModel
-     */
-    private String getAttributeNameFromMapperModel(IdentityProviderMapperModel mapperModel)
-    {
-        String attributeName = mapperModel.getConfig().get(ATTRIBUTE_NAME);
-        if (attributeName == null) {
-            attributeName = mapperModel.getConfig().get(ATTRIBUTE_FRIENDLY_NAME);
-        }
-        return attributeName;
     }
 }
