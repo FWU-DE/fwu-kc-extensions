@@ -15,10 +15,10 @@
         }
       ],
       "attributes": {
-        "prefixedSchools": [
-          "DE-SN-Schullogin.0815",
-          "DE-SN-Schullogin.1337",
-          "DE-SN-Schullogin.421"
+        "schools": [
+          "0815",
+          "1337",
+          "415"
         ]
       }
     }
