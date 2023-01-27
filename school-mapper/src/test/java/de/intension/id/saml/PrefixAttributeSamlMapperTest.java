@@ -1,17 +1,6 @@
 package de.intension.id.saml;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.times;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import de.intension.id.PrefixAttributeConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -28,10 +17,13 @@ import org.keycloak.models.UserModel;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import de.intension.id.PrefixAttributeConstants;
+import java.util.*;
 
-class PrefixAttributeSamlMapperTest
-{
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.times;
+
+class PrefixAttributeSamlMapperTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -40,8 +32,7 @@ class PrefixAttributeSamlMapperTest
             "true,prefix.1234"
     })
     @SuppressWarnings("unchecked")
-    void should_map_school_id_with_prefix(Boolean lowercase, String expected)
-    {
+    void should_map_school_id_with_prefix(Boolean lowercase, String expected) {
         ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
         var token = samlStatement("schoolId", "1234");
         var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase);
@@ -62,8 +53,7 @@ class PrefixAttributeSamlMapperTest
             "1234##,false,1,PREFIX.1234"
     })
     @SuppressWarnings("unchecked")
-    void should_map_multiple_school_ids_with_prefix(String claimValue, Boolean lowercase, Integer expectedAmount, String expected)
-    {
+    void should_map_multiple_school_ids_with_prefix(String claimValue, Boolean lowercase, Integer expectedAmount, String expected) {
         ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
         var token = samlStatement("schoolId", Arrays.asList(claimValue.split("##")));
         var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase);
@@ -77,8 +67,7 @@ class PrefixAttributeSamlMapperTest
     }
 
     @Test
-    void should_not_map_school_id_if_saml_statement_misses_value()
-    {
+    void should_not_map_school_id_if_saml_statement_misses_value() {
         var token = samlStatement("foo", "bar");
         var config = mapperConfig("schoolId", "prefixedId", "NOT ", true);
 
@@ -90,8 +79,7 @@ class PrefixAttributeSamlMapperTest
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"   "})
-    void should_not_map_school_id_if_saml_statement_value_is_invalid(String value)
-    {
+    void should_not_map_school_id_if_saml_statement_value_is_invalid(String value) {
         var token = samlStatement("school", value);
         var config = mapperConfig("school", "prefixed", "NOT ", true);
 
@@ -102,14 +90,13 @@ class PrefixAttributeSamlMapperTest
 
     @Test
     @SuppressWarnings("unchecked")
-    void should_map_school_id_for_friendly_name()
-    {
+    void should_map_school_id_for_friendly_name() {
         ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
         var token = samlStatement("schoolId", "1234");
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_FRIENDLY_NAME, "schoolId",
-                                          UserAttributeMapper.USER_ATTRIBUTE, "prefixedId",
-                                          PrefixAttributeConstants.PREFIX, "PREFIX.",
-                                          PrefixAttributeConstants.LOWER_CASE, "false"));
+                UserAttributeMapper.USER_ATTRIBUTE, "prefixedId",
+                PrefixAttributeConstants.PREFIX, "PREFIX.",
+                PrefixAttributeConstants.LOWER_CASE, "false"));
 
         var user = testMapping(token, config);
 
@@ -117,11 +104,10 @@ class PrefixAttributeSamlMapperTest
         assertThat(prefixCaptor.getValue().get(0), equalTo("PREFIX.1234"));
     }
 
-    private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase)
-    {
+    private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase) {
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_NAME, samlValue,
-                                          UserAttributeMapper.USER_ATTRIBUTE, userAttribute,
-                                          PrefixAttributeConstants.PREFIX, prefix));
+                UserAttributeMapper.USER_ATTRIBUTE, userAttribute,
+                PrefixAttributeConstants.PREFIX, prefix));
         if (lowercase != null) {
             config.put(PrefixAttributeConstants.LOWER_CASE, Boolean.toString(lowercase));
         }
@@ -129,17 +115,15 @@ class PrefixAttributeSamlMapperTest
     }
 
     @SuppressWarnings("unchecked")
-    private AssertionType samlStatement(String attributeName, Object value)
-    {
+    private AssertionType samlStatement(String attributeName, Object value) {
         var statement = Mockito.mock(AssertionType.class);
         var attributeValue = new AttributeType(attributeName);
         attributeValue.setFriendlyName(attributeName);
         if (value instanceof List) {
-            for (Object item : (List<Object>)value) {
+            for (Object item : (List<Object>) value) {
                 attributeValue.addAttributeValue(item);
             }
-        }
-        else {
+        } else {
             attributeValue.addAttributeValue(value);
         }
         var attribute = new AttributeStatementType();
@@ -149,8 +133,7 @@ class PrefixAttributeSamlMapperTest
         return statement;
     }
 
-    private UserModel testMapping(AssertionType samlAssertion, Map<String, String> mapperConfig)
-    {
+    private UserModel testMapping(AssertionType samlAssertion, Map<String, String> mapperConfig) {
         var user = Mockito.spy(UserModel.class);
 
         var context = Mockito.mock(BrokeredIdentityContext.class);
