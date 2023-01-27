@@ -1,7 +1,7 @@
 package de.intension.id.saml;
 
-import static de.intension.id.oidc.PrefixAttributeOidcMapper.LOWER_CASE;
-import static de.intension.id.oidc.PrefixAttributeOidcMapper.PREFIX;
+import static de.intension.id.PrefixAttributeConstants.LOWER_CASE;
+import static de.intension.id.PrefixAttributeConstants.PREFIX;
 import static org.keycloak.broker.saml.mappers.UserAttributeMapper.ATTRIBUTE_FRIENDLY_NAME;
 import static org.keycloak.broker.saml.mappers.UserAttributeMapper.ATTRIBUTE_NAME;
 import static org.keycloak.broker.saml.mappers.UserAttributeMapper.ATTRIBUTE_NAME_FORMAT;
