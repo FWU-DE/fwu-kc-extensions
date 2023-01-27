@@ -24,6 +24,7 @@ import org.keycloak.dom.saml.v2.assertion.AssertionType;
 import org.keycloak.dom.saml.v2.assertion.AttributeStatementType;
 import org.keycloak.dom.saml.v2.assertion.AttributeType;
 import org.keycloak.models.IdentityProviderMapperModel;
+import org.keycloak.models.UserModel;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -45,9 +46,9 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("schoolId", "1234");
         var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase);
 
-        var context = testMapping(token, config);
+        var user = testMapping(token, config);
 
-        Mockito.verify(context, times(1)).setUserAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+        Mockito.verify(user, times(1)).setAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
         assertThat(String.format("Expected %s for lowercase %b", expected, lowercase), prefixCaptor.getValue().get(0), equalTo(expected));
     }
 
@@ -67,9 +68,9 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("schoolId", Arrays.asList(claimValue.split("##")));
         var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase);
 
-        var context = testMapping(token, config);
+        var user = testMapping(token, config);
 
-        Mockito.verify(context, times(1)).setUserAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+        Mockito.verify(user, times(1)).setAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
         List<String> actual = prefixCaptor.getValue();
         assertThat(actual, hasSize(expectedAmount));
         assertThat(String.format("Expected %s for lowercase %b", expected, lowercase), actual, contains(expected.split("##")));
@@ -81,10 +82,9 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("foo", "bar");
         var config = mapperConfig("schoolId", "prefixedId", "NOT ", true);
 
-        var context = testMapping(token, config);
+        var user = testMapping(token, config);
 
-        Mockito.verify(context, Mockito.atMostOnce()).getContextData();
-        Mockito.verify(context, Mockito.never()).setUserAttribute(Mockito.anyString(), Mockito.anyList());
+        Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
     }
 
     @ParameterizedTest
@@ -95,10 +95,9 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("school", value);
         var config = mapperConfig("school", "prefixed", "NOT ", true);
 
-        var context = testMapping(token, config);
+        var user = testMapping(token, config);
 
-        Mockito.verify(context, Mockito.atMostOnce()).getContextData();
-        Mockito.verify(context, Mockito.never()).setUserAttribute(Mockito.anyString(), Mockito.anyList());
+        Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
@@ -107,10 +106,9 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("school", List.of());
         var config = mapperConfig("school", "prefixed", "NOT ", true);
 
-        var context = testMapping(token, config);
+        var user = testMapping(token, config);
 
-        Mockito.verify(context, Mockito.atMostOnce()).getContextData();
-        Mockito.verify(context, Mockito.never()).setUserAttribute(Mockito.anyString(), Mockito.anyList());
+        Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
     }
 
     private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase)
@@ -136,13 +134,15 @@ class PrefixAttributeSamlMapperTest
         return statement;
     }
 
-    private BrokeredIdentityContext testMapping(AssertionType samlAssertion, Map<String, String> mapperConfig)
+    private UserModel testMapping(AssertionType samlAssertion, Map<String, String> mapperConfig)
     {
+        var user = Mockito.spy(UserModel.class);
+
         var context = Mockito.mock(BrokeredIdentityContext.class);
         Mockito.when(context.getContextData()).thenReturn(Map.of(SAMLEndpoint.SAML_ASSERTION, samlAssertion));
         var mapperModel = Mockito.mock(IdentityProviderMapperModel.class);
         Mockito.when(mapperModel.getConfig()).thenReturn(mapperConfig);
-        new PrefixAttributeSamlMapper().importNewUser(null, null, null, mapperModel, context);
-        return context;
+        new PrefixAttributeSamlMapper().importNewUser(null, null, user, mapperModel, context);
+        return user;
     }
 }
