@@ -211,7 +211,7 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
 
     private boolean notBlank(String value)
     {
-        return !StringUtil.isNullOrEmpty(value) && !value.isBlank();
+        return value != null && !value.isBlank();
     }
 
     /**
