@@ -100,6 +100,23 @@ class PrefixAttributeSamlMapperTest
         Mockito.verify(user, Mockito.never()).setAttribute(Mockito.anyString(), Mockito.anyList());
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_map_school_id_for_friendly_name()
+    {
+        ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
+        var token = samlStatement("schoolId", "1234");
+        var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_FRIENDLY_NAME, "schoolId",
+                                          UserAttributeMapper.USER_ATTRIBUTE, "prefixedId",
+                                          PrefixAttributeOidcMapper.PREFIX, "PREFIX.",
+                                          PrefixAttributeOidcMapper.LOWER_CASE, "false"));
+
+        var user = testMapping(token, config);
+
+        Mockito.verify(user, times(1)).setAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+        assertThat(prefixCaptor.getValue().get(0), equalTo("PREFIX.1234"));
+    }
+
     private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase)
     {
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_NAME, samlValue,
@@ -116,6 +133,7 @@ class PrefixAttributeSamlMapperTest
     {
         var statement = Mockito.mock(AssertionType.class);
         var attributeValue = new AttributeType(attributeName);
+        attributeValue.setFriendlyName(attributeName);
         if (value instanceof List) {
             for (Object item : (List<Object>)value) {
                 attributeValue.addAttributeValue(item);
