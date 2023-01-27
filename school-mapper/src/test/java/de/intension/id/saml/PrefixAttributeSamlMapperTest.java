@@ -28,7 +28,7 @@ import org.keycloak.models.UserModel;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import de.intension.id.oidc.PrefixAttributeOidcMapper;
+import de.intension.id.PrefixAttributeConstants;
 
 class PrefixAttributeSamlMapperTest
 {
@@ -108,8 +108,8 @@ class PrefixAttributeSamlMapperTest
         var token = samlStatement("schoolId", "1234");
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_FRIENDLY_NAME, "schoolId",
                                           UserAttributeMapper.USER_ATTRIBUTE, "prefixedId",
-                                          PrefixAttributeOidcMapper.PREFIX, "PREFIX.",
-                                          PrefixAttributeOidcMapper.LOWER_CASE, "false"));
+                                          PrefixAttributeConstants.PREFIX, "PREFIX.",
+                                          PrefixAttributeConstants.LOWER_CASE, "false"));
 
         var user = testMapping(token, config);
 
@@ -121,9 +121,9 @@ class PrefixAttributeSamlMapperTest
     {
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_NAME, samlValue,
                                           UserAttributeMapper.USER_ATTRIBUTE, userAttribute,
-                                          PrefixAttributeOidcMapper.PREFIX, prefix));
+                                          PrefixAttributeConstants.PREFIX, prefix));
         if (lowercase != null) {
-            config.put(PrefixAttributeOidcMapper.LOWER_CASE, Boolean.toString(lowercase));
+            config.put(PrefixAttributeConstants.LOWER_CASE, Boolean.toString(lowercase));
         }
         return config;
     }
