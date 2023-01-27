@@ -1,5 +1,6 @@
-package de.intension.id;
+package de.intension.id.oidc;
 
+import de.intension.id.PrefixAttributeConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -23,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.times;
 
-class PrefixAttributeMapperTest {
+class PrefixAttributeOidcMapperTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -75,8 +76,6 @@ class PrefixAttributeMapperTest {
         Mockito.verifyNoInteractions(user);
     }
 
-    private static final String NULL_VALUE = null;
-
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"   "})
@@ -101,10 +100,10 @@ class PrefixAttributeMapperTest {
 
     private Map<String, String> mapperConfig(String claim, String attribute, String prefix, Boolean lowercase) {
         var config = new HashMap<>(Map.of(AbstractClaimMapper.CLAIM, claim,
-                PrefixAttributeMapper.ATTRIBUTE, attribute,
-                PrefixAttributeMapper.PREFIX, prefix));
+                PrefixAttributeOidcMapper.ATTRIBUTE, attribute,
+                PrefixAttributeConstants.PREFIX, prefix));
         if (lowercase != null) {
-            config.put(PrefixAttributeMapper.LOWER_CASE, Boolean.toString(lowercase));
+            config.put(PrefixAttributeConstants.LOWER_CASE, Boolean.toString(lowercase));
         }
         return config;
     }
@@ -121,7 +120,7 @@ class PrefixAttributeMapperTest {
         var mapperModel = Mockito.mock(IdentityProviderMapperModel.class);
         Mockito.when(mapperModel.getConfig()).thenReturn(mapperConfig);
         var user = Mockito.mock(UserModel.class);
-        new PrefixAttributeMapper().updateBrokeredUser(null, null, user, mapperModel, context);
+        new PrefixAttributeOidcMapper().updateBrokeredUser(null, null, user, mapperModel, context);
         return user;
     }
 }

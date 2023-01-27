@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.3.0]
+
+- New feature: Prefixed attribute mapper for SAML identity providers
 
 ## Version [3.2.1]
 

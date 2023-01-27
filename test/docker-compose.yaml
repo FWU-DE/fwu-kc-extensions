@@ -74,6 +74,22 @@ services:
     networks:
       - fwunet
 
+  saml_idp:
+    container_name: saml-idp-mock
+    image: quay.io/keycloak/keycloak:20.0
+    ports:
+      - 18443:8080
+    environment:
+      KC_HTTP_RELATIVE_PATH: "/auth"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: keycloak
+    command: [ "start-dev", "--import-realm" ]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./saml-realm.json:/opt/keycloak/data/import/saml-realm.json
+    networks:
+      - fwunet
+
 networks:
   fwunet:
     driver: bridge

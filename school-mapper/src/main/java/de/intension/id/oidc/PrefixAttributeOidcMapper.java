@@ -1,5 +1,8 @@
-package de.intension.id;
+package de.intension.id.oidc;
 
+import de.intension.id.PrefixAttributeService;
+import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
+import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.mappers.AbstractClaimMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
@@ -9,24 +12,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static de.intension.id.PrefixAttributeConstants.LOWER_CASE;
+import static de.intension.id.PrefixAttributeConstants.PREFIX;
+
 /**
- * Identity provider mapper
+ * Identity provider mapper to map OIDC token claims to user attributes.
  */
-public class PrefixAttributeMapper extends AbstractClaimMapper {
+public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
+
     public static final String PROVIDER_ID = "prefixed-attribute-idp-mapper";
-    public static final String[] COMPATIBLE_PROVIDERS = {ANY_PROVIDER};
-
-    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-
+    public static final String[] COMPATIBLE_PROVIDERS = {
+            KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
+            OIDCIdentityProviderFactory.PROVIDER_ID
+    };
     public static final String ATTRIBUTE = "attribute";
-    public static final String PREFIX = "prefix";
-    public static final String LOWER_CASE = "toLowerCase";
+    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
         ProviderConfigProperty property = new ProviderConfigProperty();
         property.setName(CLAIM);
         property.setLabel("Claim");
-        property.setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
+        property
+                .setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         configProperties.add(property);
 
@@ -90,12 +97,14 @@ public class PrefixAttributeMapper extends AbstractClaimMapper {
     }
 
     @Override
-    public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
+    public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel,
+                              BrokeredIdentityContext context) {
         prefix(user, mapperModel.getConfig(), context);
     }
 
     @Override
-    public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
+    public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel,
+                                   BrokeredIdentityContext context) {
         prefix(user, mapperModel.getConfig(), context);
     }
 
