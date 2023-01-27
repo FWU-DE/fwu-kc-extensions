@@ -188,13 +188,20 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper
                 if (Objects.equals(attributeType.getName(), attributeName) || Objects.equals(attributeType.getFriendlyName(), attributeName)) {
                     LOG.debug("Found attribute to map: " + attributeType.toString());
                     return attributeType.getAttributeValue().stream()
+                        .filter(Objects::nonNull)
                         .map(Object::toString)
+                        .filter(this::notBlank)
                         .collect(Collectors.toList());
                 }
             }
         }
         LOG.debug("Found no attribute to map for name: " + attributeName);
         return List.of();
+    }
+
+    private boolean notBlank(String value)
+    {
+        return !StringUtil.isNullOrEmpty(value) && !value.isBlank();
     }
 
     /**
