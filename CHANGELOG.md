@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.4.0]
+
+- New Feature: School whitelist no supports Flag to allow all schools.
+
+
 ## Version [3.3.0]
 
 - New feature: Prefixed attribute mapper for SAML identity providers
