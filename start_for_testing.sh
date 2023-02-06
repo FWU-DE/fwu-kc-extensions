@@ -1,8 +1,15 @@
 #!/bin/bash
 
+which docker-compose
+if [ $? != 0 ]; then
+  compose="docker compose"
+else
+  compose="docker-compose"
+fi
+
 function cleanup {
   printf '\U1F433 %s\n' "Stopping Docker containers"
-  docker compose -f test/docker-compose.yaml down --volumes
+  $compose -f test/docker-compose.yaml down --volumes
 }
 
 trap cleanup EXIT
@@ -13,11 +20,5 @@ if [[ "$?" -ne 0 ]] ; then
   echo 'could not run maven package'; exit $rc
 fi
 
-which docker-compose
-if [ $? != 0 ]; then
-  compose="docker compose"
-else
-  compose="docker-compose"
-fi
 # start docker
 $compose -f test/docker-compose.yaml up --build
