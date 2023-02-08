@@ -2,6 +2,7 @@ package de.intension.authentication.rest;
 
 import static org.jboss.logging.Logger.getLogger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -30,19 +31,20 @@ import twitter4j.JSONException;
 import twitter4j.JSONObject;
 
 public class IdPAssignmentsClient
+    implements Closeable
 {
 
-    private static final Logger        LOG          = getLogger(IdPAssignmentsClient.class);
-    private final ObjectMapper         objectMapper = new ObjectMapper();
-    private String                     restApiUrl;
-    private String                     kcAuthUrl;
-
-    private static final RequestConfig requestConfig = getRequestConfig(10);
+    private static final Logger       LOG          = getLogger(IdPAssignmentsClient.class);
+    private final ObjectMapper        objectMapper = new ObjectMapper();
+    private final String              restApiUrl;
+    private final String              kcAuthUrl;
+    private final CloseableHttpClient httpClient;
 
     public IdPAssignmentsClient(String kcAuthUrl, String restApiUrl)
     {
         this.restApiUrl = restApiUrl;
         this.kcAuthUrl = kcAuthUrl;
+        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(getRequestConfig()).build();
     }
 
     /**
@@ -60,7 +62,6 @@ public class IdPAssignmentsClient
         throws JSONException, IOException, URISyntaxException
     {
         List<String> listOfIdps;
-        CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
         HttpGet httpGet = new HttpGet(new URIBuilder(String.format(restApiUrl, clientId)).build());
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(apiRealm, apiClientId, apiClientSecret));
         httpGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -82,6 +83,8 @@ public class IdPAssignmentsClient
             listOfIdps = new ArrayList<>();
             LOG.debugv("No Whitelist entries found for clientId [{0}]", clientId);
         }
+
+        response.close();
         return listOfIdps;
     }
 
@@ -91,8 +94,6 @@ public class IdPAssignmentsClient
     private String getAccessToken(String realm, String clientId, String clientSecret)
         throws JSONException, IOException
     {
-        CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-
         String tokenUrl = String.format("%s/realms/%s/protocol/openid-connect/token", kcAuthUrl, realm);
 
         HttpPost httpPost = new HttpPost(tokenUrl);
@@ -113,7 +114,6 @@ public class IdPAssignmentsClient
         JSONObject readEntity = new JSONObject(EntityUtils.toString(response.getEntity()));
 
         response.close();
-        httpClient.close();
 
         return readEntity.getString(OAuth2Constants.ACCESS_TOKEN);
     }
@@ -121,12 +121,19 @@ public class IdPAssignmentsClient
     /**
      * Get request configuration for timeout handling.
      */
-    private static RequestConfig getRequestConfig(int timeoutInSeconds)
+    private RequestConfig getRequestConfig()
     {
+        int timeoutInSeconds = 10;
         return RequestConfig.custom()
             .setConnectTimeout(timeoutInSeconds * 1000)
             .setConnectionRequestTimeout(timeoutInSeconds * 1000)
             .setSocketTimeout(timeoutInSeconds * 1000).build();
     }
 
+    @Override
+    public void close()
+        throws IOException
+    {
+        httpClient.close();
+    }
 }

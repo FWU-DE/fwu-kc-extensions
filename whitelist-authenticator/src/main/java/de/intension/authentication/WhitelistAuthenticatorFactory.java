@@ -1,5 +1,6 @@
 package de.intension.authentication;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.keycloak.Config;
@@ -114,7 +115,13 @@ public class WhitelistAuthenticatorFactory
     @Override
     public void close()
     {
-        //not needed
+        if(whitelistAuthenticator != null){
+            try {
+                whitelistAuthenticator.getClient().close();
+            } catch (IOException e) {
+                //do nothing
+            }
+        }
     }
 
 }

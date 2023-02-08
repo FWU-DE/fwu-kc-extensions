@@ -1,5 +1,6 @@
 package de.intension.authentication.schools;
 
+import java.io.IOException;
 import java.util.List;
 
 import de.intension.authentication.rest.SchoolAssignmentsClient;
@@ -112,7 +113,13 @@ public class SchoolWhitelistAuthenticatorFactory
     @Override
     public void close()
     {
-        //do nothing
+        if(whitelistAuthenticator != null){
+            try {
+                whitelistAuthenticator.getClient().close();
+            } catch (IOException e) {
+                //do nothing
+            }
+        }
     }
 
 }

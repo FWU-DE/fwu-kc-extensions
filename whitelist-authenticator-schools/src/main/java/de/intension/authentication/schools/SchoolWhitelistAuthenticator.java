@@ -32,7 +32,7 @@ public class SchoolWhitelistAuthenticator
 {
 
     private static final Logger     logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
-    private SchoolAssignmentsClient client;
+    private final SchoolAssignmentsClient client;
 
     public SchoolWhitelistAuthenticator(SchoolAssignmentsClient client)
     {
@@ -185,5 +185,9 @@ public class SchoolWhitelistAuthenticator
             logger.warn(e.getLocalizedMessage());
         }
         return providerId;
+    }
+
+    public SchoolAssignmentsClient getClient(){
+        return client;
     }
 }

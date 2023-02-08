@@ -2,6 +2,7 @@ package de.intension.authentication.rest;
 
 import static org.jboss.logging.Logger.getLogger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,18 +32,21 @@ import twitter4j.JSONException;
 import twitter4j.JSONObject;
 
 public class SchoolAssignmentsClient
+    implements Closeable
 {
 
     private static final Logger LOG          = getLogger(SchoolAssignmentsClient.class);
     private final ObjectMapper  objectMapper = new ObjectMapper();
-    private String              restApiUrl;
-    private String              kcAuthUrl;
-    private static final RequestConfig requestConfig = getRequestConfig(10);
+    private final String        restApiUrl;
+    private final String        kcAuthUrl;
+
+    private final CloseableHttpClient httpClient;
 
     public SchoolAssignmentsClient(String kcAuthUrl, String restApiUrl)
     {
         this.restApiUrl = restApiUrl;
         this.kcAuthUrl = kcAuthUrl;
+        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(getRequestConfig()).build();
     }
 
     /**
@@ -60,7 +64,6 @@ public class SchoolAssignmentsClient
         throws JSONException, IOException, URISyntaxException
     {
         SchoolConfigDTO schoolConfig = null;
-        CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
         HttpGet httpGet = new HttpGet(restApiUrl);
         URI uri = new URIBuilder(httpGet.getURI())
             .addParameter("serviceProvider", clientId)
@@ -85,6 +88,7 @@ public class SchoolAssignmentsClient
         else {
             LOG.debugv("No Whitelist entries found for clientId [{0}]", clientId);
         }
+        response.close();
         return schoolConfig;
     }
 
@@ -94,8 +98,6 @@ public class SchoolAssignmentsClient
     private String getAccessToken(String realm, String clientId, String clientSecret)
         throws JSONException, IOException
     {
-        CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-
         String tokenUrl = String.format("%s/realms/%s/protocol/openid-connect/token", kcAuthUrl, realm);
 
         HttpPost httpPost = new HttpPost(tokenUrl);
@@ -116,20 +118,25 @@ public class SchoolAssignmentsClient
         JSONObject readEntity = new JSONObject(EntityUtils.toString(response.getEntity()));
 
         response.close();
-        httpClient.close();
-
         return readEntity.getString(OAuth2Constants.ACCESS_TOKEN);
     }
 
     /**
      * Get request configuration for timeout handling.
      */
-    private static RequestConfig getRequestConfig(int timeoutInSeconds)
+    private static RequestConfig getRequestConfig()
     {
+        int timeoutInSeconds = 10;
         return RequestConfig.custom()
-                            .setConnectTimeout(timeoutInSeconds * 1000)
-                            .setConnectionRequestTimeout(timeoutInSeconds * 1000)
-                            .setSocketTimeout(timeoutInSeconds * 1000).build();
+            .setConnectTimeout(timeoutInSeconds * 1000)
+            .setConnectionRequestTimeout(timeoutInSeconds * 1000)
+            .setSocketTimeout(timeoutInSeconds * 1000).build();
     }
 
+    @Override
+    public void close()
+        throws IOException
+    {
+        httpClient.close();
+    }
 }

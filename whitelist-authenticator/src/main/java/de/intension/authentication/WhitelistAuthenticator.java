@@ -30,7 +30,7 @@ public class WhitelistAuthenticator
 {
 
     private static final Logger  logger = Logger.getLogger(WhitelistAuthenticator.class);
-    private IdPAssignmentsClient client;
+    private final IdPAssignmentsClient client;
 
     public WhitelistAuthenticator(IdPAssignmentsClient client)
     {
@@ -142,14 +142,20 @@ public class WhitelistAuthenticator
      */
     private String getConfigEntry(AuthenticationFlowContext context, String configKey, String defaultValue)
     {
-        String value;
+        String value = null;
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
         if (config.containsKey(configKey)) {
             value = config.get(configKey);
         }
-        else {
+        else if(defaultValue != null){
             value = defaultValue;
+        } else {
+            logger.errorv("Provider %s - Parameter %s must not be null", WhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
         }
         return value;
+    }
+
+    public IdPAssignmentsClient getClient(){
+        return client;
     }
 }
