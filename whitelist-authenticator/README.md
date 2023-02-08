@@ -4,6 +4,15 @@ Authenticator extension which rejects authentication if client does not match a 
 
 ## Configuration
 
+### SPI environment variables
+
+The following environment variables must be set within the deployment pipeline.
+
+| Property                                                 | Description                                                        | Example                                                    |
+|----------------------------------------------------------|--------------------------------------------------------------------|------------------------------------------------------------|
+| KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL | Keycloak auth URI                                                  | http://keycloak:8080/auth                                  |
+| KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL    | Whitelist REST endpoint (path variables must be replaced with '%s' | http://mockserver:1080/service-provider/%s/idp-assignments |
+
 ### Setting the IdP hint parameter name
 
 The parameter for selecting the IdP (default: `kc_idp_hint`) can be configured in the authenticator config.
@@ -12,23 +21,18 @@ The parameter for selecting the IdP (default: `kc_idp_hint`) can be configured i
 
 If the configuration is missing or doesn't contain the configured parameter, the authenticator will look for the parameter 'kc_idp_hint'.
 
-### Preparing a whitelist (JSON)
+### Preparing a whitelist
 
-The Whitelist will be stored as a simple JSON-Structure in a custom config property inside the Authenticator.
+The Whitelist configuration will be managed by a microservice, which provides endpoints to gather those information.
 
-**Structure:**
+**Endpoint:** <hostname>/service-provider/{id}/idp-assignments
 
-List of JSON-Objects having two attributes
-1. `clientId`: Client ID from Keycloak client configuration
-2. `listOfIdPs`: JSON-Array with Identity Provider alias
-
-**Example:**
-```
+```json
 [
-{ "clientId" : "fullAccess", "listOfIdPs" : ["facebook", "google"]},
-{ "clientId" : "restrictedAccess", "listOfIdPs" : ["google"]}
+  "schulportal_m-v"
 ]
 ```
+
 ### Set up a new authentication flow
 
 First step of the new authentication flow will be our new `Whitelist Authenticator` followed by a flow step for the standard authentication procedure. 
@@ -71,8 +75,12 @@ The following steps are valid for "Browser" and "First Broker Login" authenticat
 <img src="../docs/whitelist/06_configure_whitelist.png" width="70%"/>
 
 8. Overwrite the parameter name for the IdP hint if needed
-9. Enter whitelist (JSON-Structure)
+9. Enter the name of the realm, where the client is configured to access the microservice REST-API
+10. Enter Client ID for the microservice REST-API
+11. Enter Client Secret for the microservice REST-API
 10. Click Button `Save` to save your changes
+
+**Hint:** For the microservice Keycloak client the service account must be activated
 
 **Step 3: Configure IdP hint parameter name for identity provider authenticator**
 

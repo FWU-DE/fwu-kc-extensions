@@ -1,5 +1,7 @@
 package de.intension.authentication;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -12,18 +14,13 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.constants.AdapterConstants;
-import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.utils.StringUtil;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.intension.authentication.dto.WhitelistEntry;
+import de.intension.authentication.rest.IdPAssignmentsClient;
 
 /**
  * Check IdP hint against a configured whitelist.
@@ -32,7 +29,13 @@ public class WhitelistAuthenticator
     implements Authenticator, IdpHintParamName
 {
 
-    private static final Logger logger = Logger.getLogger(WhitelistAuthenticator.class);
+    private static final Logger  logger = Logger.getLogger(WhitelistAuthenticator.class);
+    private IdPAssignmentsClient client;
+
+    public WhitelistAuthenticator(IdPAssignmentsClient client)
+    {
+        this.client = client;
+    }
 
     @Override
     public void authenticate(AuthenticationFlowContext context)
@@ -109,27 +112,44 @@ public class WhitelistAuthenticator
      */
     private boolean isAllowedIdP(AuthenticationFlowContext context, String clientId, String providerId)
     {
+        boolean isAllowed = false;
         if (providerId == null || providerId.isEmpty()) {
-            return true;
+            isAllowed = true;
         }
-        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
-        Map<String, String> config = authenticatorConfig.getConfig();
-        String allowedIdPs = config.get(WhitelistAuthenticatorFactory.LIST_OF_ALLOWED_IDP);
-        if (allowedIdPs != null && !allowedIdPs.isEmpty()) {
-            ObjectMapper objectMapper = new ObjectMapper();
+        else {
             try {
-                List<WhitelistEntry> entries = objectMapper.readValue(allowedIdPs, new TypeReference<>() {
-
-                });
-                for (WhitelistEntry entry : entries) {
-                    if (clientId.equals(entry.getClientId())) {
-                        return entry.getListOfIdPs().contains(providerId);
-                    }
+                String apiRealm = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
+                String apiClientId = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
+                String apiClientSecret = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
+                List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientSecret);
+                if (allowedIdPs != null && allowedIdPs.contains(providerId)) {
+                    isAllowed = true;
                 }
-            } catch (JsonProcessingException e) {
-                logger.error("Invalid whitelist format for IdP configuration", e);
+            } catch (IOException | URISyntaxException e) {
+                logger.errorf(e, "List of assigned IdPs could not fetched clientId=%s, providerId=%s, url=%s", clientId, providerId, client.getUrl());
             }
         }
-        return false;
+        return isAllowed;
+    }
+
+    /**
+     * Get value from authenticator configuration by key.
+     * 
+     * @param context Authentication context
+     * @param configKey Key to search for
+     * @param defaultValue If config is not set, default key is used
+     * @return Value or default
+     */
+    private String getConfigEntry(AuthenticationFlowContext context, String configKey, String defaultValue)
+    {
+        String value;
+        Map<String, String> config = context.getAuthenticatorConfig().getConfig();
+        if (config.containsKey(configKey)) {
+            value = config.get(configKey);
+        }
+        else {
+            value = defaultValue;
+        }
+        return value;
     }
 }

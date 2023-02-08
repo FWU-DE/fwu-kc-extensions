@@ -13,6 +13,10 @@ services:
       KC_DB_URL_HOST: postgres
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: password
+      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
+      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/service-provider/%s/idp-assignments
+      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
+      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/school-assignments
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
@@ -63,17 +67,6 @@ services:
     networks:
       - fwunet
 
-  static_http:
-    container_name: static_http
-    image: nginx:alpine
-    ports:
-      - 8083:8080
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/app/static
-    networks:
-      - fwunet
-
   saml_idp:
     container_name: saml-idp-mock
     image: quay.io/keycloak/keycloak:20.0
@@ -87,6 +80,19 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./saml-realm.json:/opt/keycloak/data/import/saml-realm.json
+    networks:
+      - fwunet
+
+  mockServer:
+    image: mockserver/mockserver:5.14.0
+    container_name: mockserver
+    command: -logLevel DEBUG
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/mockserver.json
+    ports:
+      - 11090:1080
+    volumes:
+      - ./mock/mockserver.json:/config/mockserver.json
     networks:
       - fwunet
 

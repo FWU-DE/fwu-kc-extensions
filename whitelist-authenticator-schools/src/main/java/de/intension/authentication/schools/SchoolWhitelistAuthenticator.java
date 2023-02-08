@@ -1,6 +1,6 @@
 package de.intension.authentication.schools;
 
-import java.net.URI;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +13,16 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.models.AuthenticatorConfigModel;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.utils.StringUtil;
 
-import de.intension.authentication.dto.SchoolWhitelistEntry;
+import de.intension.authentication.rest.SchoolAssignmentsClient;
+import de.intension.authentication.rest.SchoolConfigDTO;
 
 /**
  * Check users school id against service provider white list.
@@ -29,18 +31,20 @@ public class SchoolWhitelistAuthenticator
     implements Authenticator
 {
 
-    private static final Logger logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
-    static final String         ALLOW_ALL = "AllowAll";
+    private static final Logger     logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
+    private SchoolAssignmentsClient client;
 
-    private final Object lock = new Object();
+    public SchoolWhitelistAuthenticator(SchoolAssignmentsClient client)
+    {
+        this.client = client;
+    }
 
     @Override
     public void authenticate(AuthenticationFlowContext context)
     {
-        List<SchoolWhitelistEntry> entries = getWhiteListFromCache(context);
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         List<String> schoolIds = getSchoolIdsFromUser(context);
-        if (isPermittedServiceRequest(entries, clientId, schoolIds)) {
+        if (isPermittedServiceRequest(context, clientId, schoolIds)) {
             context.success();
         }
         else {
@@ -50,37 +54,10 @@ public class SchoolWhitelistAuthenticator
         }
     }
 
-    protected Response createErrorPage(AuthenticationFlowContext context){
+    protected Response createErrorPage(AuthenticationFlowContext context)
+    {
         return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
                                Response.Status.FORBIDDEN, "spNotConfigured");
-    }
-
-    /**
-     * Get whitelist entries from cache.
-     */
-    private List<SchoolWhitelistEntry> getWhiteListFromCache(AuthenticationFlowContext context)
-    {
-        WhiteListCache cache = WhiteListCache.getInstance();
-        CacheStatus cacheStatus;
-        synchronized(lock){
-            //wait until cache is initialized for the first time
-            //first User LOGIN will initialize the cache after server restart
-            cacheStatus = cache.getState(getCacheIntervalFromConfig(context));
-        }
-        if (cacheStatus == CacheStatus.OUTDATED) {
-            //refresh cache in the background and do not wait for it
-            logger.info("trigger cache update asynchronous");
-            triggerAsyncCacheUpdate(context);
-        }
-        else if (cacheStatus == CacheStatus.NOT_INITIALIZED) {
-            //first call, trigger and wait
-            logger.info("trigger cache update synchronous");
-            synchronized(lock){
-                triggerCacheUpdate(context);
-            }
-            logger.info("cache updated synchronous");
-        }
-        return cache.getAll();
     }
 
     /**
@@ -89,10 +66,10 @@ public class SchoolWhitelistAuthenticator
     private List<String> getSchoolIdsFromUser(AuthenticationFlowContext context)
     {
         List<String> schoolIds = null;
-        String schoolsAttributeName = getConfigParam(context, SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM);
+        String schoolsAttributeName = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM, null);
         if (StringUtil.isNotBlank(schoolsAttributeName)) {
             UserModel user = context.getUser();
-            if(user != null){
+            if (user != null) {
                 schoolIds = user.getAttributes().get(schoolsAttributeName);
             }
         }
@@ -106,119 +83,36 @@ public class SchoolWhitelistAuthenticator
     }
 
     /**
-     * Get whitelist URI from @{@link AuthenticationFlowContext}
-     */
-    private URI getURIFromConfig(AuthenticationFlowContext context)
-    {
-        String whitelistURI = getConfigParam(context, SchoolWhitelistAuthenticatorFactory.WHITELIST_URI_PARAM);
-        URI uri = null;
-        if (StringUtil.isBlank(whitelistURI)) {
-            logger.errorf("Whitelist URI must not be blank for provider %s", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID);
-        }
-        else {
-            try {
-                uri = new URI(whitelistURI);
-            } catch (URISyntaxException e) {
-                logger.errorf("Invalid uri '%s' configured for provider %s", whitelistURI, SchoolWhitelistAuthenticatorFactory.PROVIDER_ID);
-            }
-        }
-        return uri;
-    }
-
-    /**
-     * Get cache refresh interval from @{@link AuthenticationFlowContext}
-     */
-    private int getCacheIntervalFromConfig(AuthenticationFlowContext context)
-    {
-        int intervalInMinutes = 5; //default
-        String interval = getConfigParam(context, SchoolWhitelistAuthenticatorFactory.CACHE_REFRESH_PARAM);
-        if (StringUtil.isNotBlank(interval)) {
-            try {
-                intervalInMinutes = Integer.parseInt(interval);
-            } catch (NumberFormatException e) {
-                logger.errorf("Invalid interval format %s", interval);
-            }
-        }
-        else {
-            logger.errorf("Interval must not be empty for provider %s", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID);
-        }
-        return intervalInMinutes;
-    }
-
-    /**
-     * Get config param from @{@link AuthenticationFlowContext}
-     */
-    private String getConfigParam(AuthenticationFlowContext context, String parameterName)
-    {
-        String value = null;
-        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
-        if (authenticatorConfig != null) {
-            Map<String, String> config = authenticatorConfig.getConfig();
-            value = config.get(parameterName);
-        }
-        return value;
-    }
-
-    /**
-     * Triggers an asynchronous cache update
-     */
-    private void triggerAsyncCacheUpdate(AuthenticationFlowContext context)
-    {
-        URI uri = getURIFromConfig(context);
-        if (uri != null) {
-            ConfigTask task = new ConfigTask(uri);
-            Thread thread = new Thread(task);
-            thread.start();
-        }
-    }
-
-    /**
-     * Triggers a synchronous cache update (cache initializing only)
-     */
-    private void triggerCacheUpdate(AuthenticationFlowContext context)
-    {
-        URI uri = getURIFromConfig(context);
-        if (uri != null) {
-            ConfigTask task = new ConfigTask(uri);
-            task.run();
-        }
-    }
-
-    /**
      * Checks, whether the combination of Service Provider ID (clientID) and School ID is part of the
      * whitelist.
      */
-    private boolean isPermittedServiceRequest(List<SchoolWhitelistEntry> entries, String clientId, List<String> schoolIds)
+    private boolean isPermittedServiceRequest(AuthenticationFlowContext context, String clientId, List<String> schoolIds)
     {
-        List<String> permittedSchools = getPermittedSchoolsByClientId(entries, clientId);
-        if (permittedSchools.contains(ALLOW_ALL)) {
-            return true;
-        }
+        String apiRealm = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
+        String apiClientId = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
+        String apiClientSecret = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
+        String identityProvider = getProviderIdFromContext(context);
+
         boolean permitted = false;
-        if (!schoolIds.isEmpty() && !permittedSchools.isEmpty()) {
-            for (String userSchoolId : schoolIds) {
-                if (permittedSchools.contains(userSchoolId)) {
-                    permitted = true;
-                    break;
+        try {
+            SchoolConfigDTO config = client.getListOfAllowedSchools(identityProvider, clientId, apiRealm, apiClientId, apiClientSecret);
+            if (config != null && config.isAllowAll()) {
+                permitted = true;
+            }
+            else if (config != null) {
+                for (String userSchoolId : schoolIds) {
+                    if (config.getVidisSchoolIdentifiers().contains(userSchoolId)) {
+                        permitted = true;
+                        break;
+                    }
                 }
             }
+        } catch (IOException e) {
+            logger.errorf(e, "error %s", client.getUrl());
+        } catch (URISyntaxException e) {
+            logger.errorf("Invalid syntax for URI %s", client.getUrl());
         }
         return permitted;
-    }
-
-    /**
-     * Get permitted school IDs for a given Service Provider (clientId)
-     */
-    private List<String> getPermittedSchoolsByClientId(List<SchoolWhitelistEntry> entries, String clientId)
-    {
-        if (!entries.isEmpty()) {
-            for (SchoolWhitelistEntry entry : entries) {
-                if (entry.getSpAlias().equals(clientId)) {
-                    return entry.getListOfSchools();
-                }
-            }
-        }
-        return new ArrayList<>();
     }
 
     @Override
@@ -249,5 +143,47 @@ public class SchoolWhitelistAuthenticator
     public void close()
     {
         //do nothing
+    }
+
+    /**
+     * Get value from authenticator configuration by key.
+     * 
+     * @param context Authentication context
+     * @param configKey Key to search for
+     * @param defaultValue If config is not set, default key is used
+     * @return Value or default
+     */
+    private String getConfigEntry(AuthenticationFlowContext context, String configKey, String defaultValue)
+    {
+        String value = null;
+        Map<String, String> config = context.getAuthenticatorConfig().getConfig();
+        if (config.containsKey(configKey)) {
+            value = config.get(configKey);
+        }
+        else if(defaultValue != null){
+            value = defaultValue;
+        } else {
+            logger.errorv("Provider %s - Parameter %s must not be null", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
+        }
+        return value;
+    }
+
+    /**
+     * Get provider id from context.
+     */
+    private String getProviderIdFromContext(AuthenticationFlowContext context)
+    {
+        String providerId = null;
+        try {
+            SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                               AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+            if (serializedCtx != null) {
+                providerId = serializedCtx.getIdentityProviderId();
+            }
+        } catch (Exception e) {
+            logger.warn(e.getLocalizedMessage());
+        }
+        return providerId;
     }
 }

@@ -1,4 +1,4 @@
-package de.intension.authentication.test;
+package de.intension.authentication.schools;
 
 import javax.ws.rs.core.Response;
 

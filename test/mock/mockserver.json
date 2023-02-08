@@ -1,0 +1,60 @@
+[
+  {
+    "id": "allow",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/service-provider/fullAccess/idp-assignments"
+    },
+    "httpResponse": {
+      "body": "[\"facebook\", \"google\"]"
+    }
+  },
+  {
+    "id": "deny",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/service-provider/restrictedAccess/idp-assignments"
+    },
+    "httpResponse": {
+      "body": "[\"github\"]"
+    }
+  },
+  {
+    "id": "fallback",
+    "priority": -10,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/service-provider/.*/idp-assignments"
+    },
+    "httpResponse": {
+      "body": "[]"
+    }
+  },
+  {
+    "id": "allowedSchools",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/school-assignments",
+      "queryStringParameters": {
+        "serviceProvider": "account"
+      }
+    },
+    "httpResponse": {
+      "body": "{\"allowAll\": false,\"vidisSchoolIdentifiers\": [\"DE-SN-Schullogin.0815\",\"DE-SN-Schullogin.1111\"]}"
+    }
+  },
+  {
+    "id": "personInfo",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/person-info"
+    },
+    "httpResponse": {
+      "body": "{\"pid\":\"0d41a726-e3c2-4a50-a73a-0d22d89f8bcc\",\"person\":{\"name\":{\"familienname\":\"Muster\",\"vorname\":\"Hans\",\"initialenFamilienname\":\"M\",\"initialenVorname\":\"H\"},\"geburt\":{\"datum\":\"2022-11-09\",\"geburtsort\":\"Musterstadt\"},\"geschlecht\":\"m\",\"lokalisierung\":\"de-DE\",\"vertrauensstufe\":\"VOLL\"},\"personenkontexte\":[{\"ktid\":\"0d41a726-e3c2-4a50-a73a-0d22d89f8bcc\",\"rolle\":\"LEHR\",\"organisation\":{\"kennung\":\"NI_0815\",\"orgid\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"Musterschule\",\"typ\":\"SCHULE\"},\"personenstatus\":\"ACTIVE\",\"gruppen\":[{\"gruppe\":{\"id\":\"string\",\"bezeichnung\":\"string\",\"typ\":\"string\",\"bereich\":\"string\",\"optionen\":[\"string\"],\"differenzierung\":\"string\",\"bildungsziele\":[\"string\"],\"jahrgangsstufen\":[\"string\"],\"faecher\":[\"string\"],\"organisation\":{\"kennung\":\"string\",\"orgid\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"name\":\"string\",\"typ\":\"string\"},\"referrer\":\"string\"},\"gruppenzugehoerigkeit\":{\"rollen\":[\"string\"]}}]}]}"
+    }
+  }
+]
