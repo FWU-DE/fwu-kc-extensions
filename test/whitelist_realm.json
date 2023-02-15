@@ -392,6 +392,99 @@
       ]
     },
     {
+      "clientId": "whitelist-api",
+      "name": "",
+      "description": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "73PMFkblWe512m7SGY2v8jmKr1BxPpDk",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "client.secret.creation.time": "1675691338",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "name": "Client IP Address",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientAddress",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientAddress",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "Client ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientId",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "Client Host",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientHost",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientHost",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "access": {
+        "view": true,
+        "configure": true,
+        "manage": true
+      }
+    },
+    {
       "id": "ef98a5cd-4eee-4b1f-a40f-c4262397a267",
       "clientId": "restrictedAccess",
       "surrogateAuthRequired": false,
@@ -1889,12 +1982,13 @@
   ],
   "authenticatorConfig": [
     {
-      "id": "79a034ab-5bf3-4e77-af5b-1b7aa878c8b8",
+      "id": "d6f36128-17e6-4412-8812-5ae3fbe0c6e3",
       "alias": "W",
       "config": {
-        "listOfAllowedIdPs": "[\n    {\n        \"clientId\" : \"fullAccess\",\n        \"listOfIdPs\" : [\"facebook\", \"google\"]\n    },\n    {\n        \"clientId\" : \"restrictedAccess\",\n        \"listOfIdPs\" : [\"google\"]\n    }\n]",
-        "test1": "[{\"key\":\"myClient\",\"value\":\"facebook\"}]",
-        "idpHintParamName": "vidis_idp_hint"
+        "authWhiteListClientIdSecret": "73PMFkblWe512m7SGY2v8jmKr1BxPpDk",
+        "authWhitelistRealm": "whitelist",
+        "idpHintParamName": "vidis_idp_hint",
+        "authWhiteListClientId": "whitelist-api"
       }
     },
     {

@@ -1,7 +1,9 @@
 package de.intension.authentication.schools;
 
+import java.io.IOException;
 import java.util.List;
 
+import de.intension.authentication.rest.SchoolAssignmentsClient;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -15,13 +17,16 @@ public class SchoolWhitelistAuthenticatorFactory
     implements AuthenticatorFactory, AdapterConstants
 {
 
-    public static final String                 PROVIDER_ID            = "school-whitelist-authenticator";
-    public static final String                 USER_ATTRIBUTE_PARAM   = "userAttributeName";
+    public static final String                 PROVIDER_ID                  = "school-whitelist-authenticator";
+    public static final String                 USER_ATTRIBUTE_PARAM         = "userAttributeName";
     public static final String                 USER_ATTRIBUTE_PARAM_DEFAULT = "ucsschoolSchool";
-    public static final String                 WHITELIST_URI_PARAM    = "whitelistUri";
-    public static final String                 CACHE_REFRESH_PARAM    = "cacheRefreshInterval";
+    private static final String                CONF_KC_AUTH_URL             = "kcAuthUrl";
+    private static final String                CONF_REST_URL                = "restUrl";
+    public static final String                 AUTH_WHITELIST_REALM         = "authWhitelistRealm";
+    public static final String                 AUTH_WHITELIST_CLIENT_ID     = "authWhiteListClientId";
+    public static final String                 AUTH_WHITELIST_CLIENT_SECRET = "authWhiteListClientIdSecret";
 
-    private final SchoolWhitelistAuthenticator whitelistAuthenticator = new SchoolWhitelistAuthenticator();
+    private SchoolWhitelistAuthenticator whitelistAuthenticator;
 
     @Override
     public Authenticator create(KeycloakSession keycloakSession)
@@ -78,18 +83,25 @@ public class SchoolWhitelistAuthenticatorFactory
                        new ProviderConfigProperty(USER_ATTRIBUTE_PARAM, "User attribute",
                                "User attribute which contains the school ids",
                                ProviderConfigProperty.STRING_TYPE, USER_ATTRIBUTE_PARAM_DEFAULT),
-                       new ProviderConfigProperty(WHITELIST_URI_PARAM, "Whitelist URI",
-                               "Hyperlink to the schools whitelist JSON-file configuration",
-                               ProviderConfigProperty.STRING_TYPE, null),
-                       new ProviderConfigProperty(CACHE_REFRESH_PARAM, "Cache refresh interval (minutes)",
-                               "Defines the refresh interval for the internal cache in minutes",
-                               ProviderConfigProperty.STRING_TYPE, 15));
+                       new ProviderConfigProperty(AUTH_WHITELIST_REALM, "Realm",
+                                                  "Specifies the name of the realm that contains the configured client "
+                                                      + "for the REST API. If no value is specified, then the current realm is used.",
+                                                  ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_ID, "Client ID",
+                                                  "REST-API Client ID",
+                                                  ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_SECRET, "Client Secret",
+                                                  "REST-API Client Secret",
+                                                  ProviderConfigProperty.PASSWORD, null));
     }
 
     @Override
     public void init(Config.Scope scope)
     {
-        //do nothing
+        whitelistAuthenticator = new SchoolWhitelistAuthenticator(
+            new SchoolAssignmentsClient(
+                scope.get(CONF_KC_AUTH_URL),
+                scope.get(CONF_REST_URL)));
     }
 
     @Override
@@ -101,7 +113,13 @@ public class SchoolWhitelistAuthenticatorFactory
     @Override
     public void close()
     {
-        //do nothing
+        if(whitelistAuthenticator != null){
+            try {
+                whitelistAuthenticator.getClient().close();
+            } catch (IOException e) {
+                //do nothing
+            }
+        }
     }
 
 }

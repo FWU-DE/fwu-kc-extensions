@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.5.0]
+
+- Improvement: School whitelist configuration is now read from a REST-API
+- Improvement: IdP whitelist configuration is now read from a REST-API
+
 ## Version [3.4.0]
 
 - New Feature: School whitelist no supports Flag to allow all schools.
