@@ -30,13 +30,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{authUrl}}/realms/whitelist/protocol/openid-connect/auth?response_type=code&client_id=fullAccess&redirect_uri=http://localhost:18080&vidis_idp_hint=facebook",
+					"raw": "{{authUrl}}/realms/{{whitelist_realm}}/protocol/openid-connect/auth?response_type=code&client_id={{whitelistClientId}}&redirect_uri={{redirectrUri}}&vidis_idp_hint={{whitelist_idp_hint}}",
 					"host": [
 						"{{authUrl}}"
 					],
 					"path": [
 						"realms",
-						"whitelist",
+						"{{whitelist_realm}}",
 						"protocol",
 						"openid-connect",
 						"auth"
@@ -48,15 +48,15 @@
 						},
 						{
 							"key": "client_id",
-							"value": "fullAccess"
+							"value": "{{whitelistClientId}}"
 						},
 						{
 							"key": "redirect_uri",
-							"value": "http://localhost:18080"
+							"value": "{{redirectrUri}}"
 						},
 						{
 							"key": "vidis_idp_hint",
-							"value": "facebook"
+							"value": "{{whitelist_idp_hint}}"
 						}
 					]
 				}
