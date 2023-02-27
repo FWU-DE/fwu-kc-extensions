@@ -508,14 +508,6 @@
 				}
 			},
 			"response": []
-		},
-		{
-			"name": "get realms",
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"response": []
 		}
 	],
 	"auth": {
@@ -571,7 +563,7 @@
 	"variable": [
 		{
 			"key": "authUrl",
-			"value": "http://localhost:18080/",
+			"value": "http://localhost:18080/auth",
 			"type": "default"
 		}
 	]
