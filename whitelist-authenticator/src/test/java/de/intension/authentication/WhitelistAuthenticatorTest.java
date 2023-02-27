@@ -4,9 +4,7 @@ import static de.intension.authentication.WhitelistAuthenticatorFactory.LIST_OF_
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.constants.AdapterConstants.KC_IDP_HINT;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,14 +14,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockito.Mockito;
 
@@ -121,10 +123,10 @@ class WhitelistAuthenticatorTest
     }
 
     @Test
-    void should_whitelist_because_of_valid_idp_hint_and_invalid_brokered_idp_is_ignored()
+    void should_not_whitelist_because_of_valid_idp_hint_is_ignored_and_brokered_idp_is_used()
         throws JsonProcessingException
     {
-        doGoogleIdpTest("google", "facebook", Boolean.TRUE);
+        doGoogleIdpTest("google", "facebook", Boolean.FALSE);
     }
 
     @Test
@@ -132,6 +134,19 @@ class WhitelistAuthenticatorTest
         throws JsonProcessingException
     {
         doGoogleIdpTest(null, null, Boolean.TRUE);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"google,true", "facebook,false"})
+    void should_whitelist_based_on_post_broker_context(String brokeredIdp, boolean expected)
+        throws JsonProcessingException
+    {
+        var whitelist = new WhitelistEntry();
+        whitelist.setClientId("app");
+        whitelist.setListOfIdPs(List.of("google"));
+        var context = mockContext("app", null, List.of(whitelist), brokeredIdp, LoginActionsService.POST_BROKER_LOGIN_PATH);
+        authenticate(context);
+        assertEquals(expected, context.getSuccess());
     }
 
     private void doGoogleIdpTest(String kcIdpHint, String brokeredIdp, Boolean expectedSuccess)
@@ -156,8 +171,17 @@ class WhitelistAuthenticatorTest
     private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp)
         throws JsonProcessingException
     {
-        var context = mock(TestAuthenticationFlowContext.class);
+        String flowPath = LoginActionsService.AUTHENTICATE_PATH;
+        if (brokeredIdp != null) {
+            flowPath = LoginActionsService.FIRST_BROKER_LOGIN_PATH;
+        }
+        return mockContext(clientId, kcIdpHint, allowedIdps, brokeredIdp, flowPath);
+    }
 
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, List<WhitelistEntry> allowedIdps, String brokeredIdp, String flowPath)
+        throws JsonProcessingException
+    {
+        var context = mock(TestAuthenticationFlowContext.class);
         // clientId return value
         var authSession = mock(AuthenticationSessionModel.class);
         when(context.getAuthenticationSession()).thenReturn(authSession);
@@ -166,7 +190,8 @@ class WhitelistAuthenticatorTest
         var realm = mock(RealmModel.class);
         when(authSession.getRealm()).thenReturn(realm);
         when(realm.isRegistrationEmailAsUsername()).thenReturn(false);
-        if (brokeredIdp != null) {
+        when(context.getFlowPath()).thenReturn(flowPath);
+        if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
             when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(String.format("{\n"
                     + "    \"id\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
                     + "    \"brokerUsername\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
@@ -175,10 +200,23 @@ class WhitelistAuthenticatorTest
                     + "    \"identityProviderId\": \"%s\"\n"
                     + "}", brokeredIdp));
         }
-        else {
+        else if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
             when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(null);
         }
-
+        else {
+            when(authSession.getAuthNote(PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT)).thenReturn(String.format("{"
+                    + "\"id\":\"2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"brokerUsername\":\"idpuser\","
+                    + "\"brokerSessionId\":\"keycloak-oidc.9b19439f-eaf3-4799-9c24-5f749470ca73\","
+                    + "\"brokerUserId\":\"keycloak-oidc.2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"email\":\"idpuser@test.de\","
+                    + "\"lastName\":\"user\","
+                    + "\"firstName\":\"idp\","
+                    + "\"modelUsername\":\"idpuser\","
+                    + "\"identityProviderId\":\"%s\""
+                    + "}",
+                                                                                                                           brokeredIdp));
+        }
         when(client.getClientId()).thenReturn(clientId);
 
         // kc_id_hint

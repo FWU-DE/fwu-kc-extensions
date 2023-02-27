@@ -10,6 +10,7 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.AuthenticatorConfigModel;
@@ -17,6 +18,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -56,20 +58,33 @@ public class WhitelistAuthenticator
     private String getProviderIdFromContext(AuthenticationFlowContext context)
     {
         String idpHintParamName = getIdpHintParamName(context);
-        String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
-        providerId = StringUtil.isNotBlank(providerId) ? providerId
-                : context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
-        if (StringUtil.isBlank(providerId)) {
-            try {
+
+        String flowPath = context.getFlowPath();
+        String providerId = null;
+        try {
+            if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
+                providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
+                providerId = StringUtil.isNotBlank(providerId) ? providerId
+                        : context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+            }
+            else if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
                 SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
                     .readFromAuthenticationSession(context.getAuthenticationSession(),
                                                    AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
                 }
-            } catch (Exception e) {
-                logger.warn(e.getLocalizedMessage());
             }
+            else if (LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)) {
+                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                    .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                                   PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
+                if (serializedCtx != null) {
+                    providerId = serializedCtx.getIdentityProviderId();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn(e.getLocalizedMessage());
         }
         return providerId;
     }
