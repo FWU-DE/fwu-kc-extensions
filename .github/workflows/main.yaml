@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - bugfix/FWUV-159/whiteListAuthenticatorSupportForPostLogin
     paths:
       - 'pom.xml'
       - '*/pom.xml'
