@@ -1,9 +1,16 @@
 # Change Log
 All notable changes to this project will be documented here.
+## Version [3.6.1]
+
+Fix: Whitelist authenticator to support Post Login Flow
 
 ## Version [3.6.0]
 
 - New Feature: Client Mapper to include pseudonyms of the user for other clients 
+
+## Version [3.5.1]
+
+Fix: Whitelist authenticator to support Post Login Flow
 
 ## Version [3.5.0]
 

@@ -14,11 +14,13 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
 import de.intension.authentication.rest.SchoolAssignmentsClient;
@@ -31,7 +33,7 @@ public class SchoolWhitelistAuthenticator
     implements Authenticator
 {
 
-    private static final Logger     logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
+    private static final Logger           logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
     private final SchoolAssignmentsClient client;
 
     public SchoolWhitelistAuthenticator(SchoolAssignmentsClient client)
@@ -160,9 +162,10 @@ public class SchoolWhitelistAuthenticator
         if (config.containsKey(configKey)) {
             value = config.get(configKey);
         }
-        else if(defaultValue != null){
+        else if (defaultValue != null) {
             value = defaultValue;
-        } else {
+        }
+        else {
             logger.errorv("Provider %s - Parameter %s must not be null", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
         }
         return value;
@@ -173,13 +176,24 @@ public class SchoolWhitelistAuthenticator
      */
     private String getProviderIdFromContext(AuthenticationFlowContext context)
     {
+        String flowPath = context.getFlowPath();
         String providerId = null;
         try {
-            SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
-                .readFromAuthenticationSession(context.getAuthenticationSession(),
-                                               AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
-            if (serializedCtx != null) {
-                providerId = serializedCtx.getIdentityProviderId();
+            if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
+                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                    .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                                   AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+                if (serializedCtx != null) {
+                    providerId = serializedCtx.getIdentityProviderId();
+                }
+            }
+            else if (LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)) {
+                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                    .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                                   PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
+                if (serializedCtx != null) {
+                    providerId = serializedCtx.getIdentityProviderId();
+                }
             }
         } catch (Exception e) {
             logger.warn(e.getLocalizedMessage());
@@ -187,7 +201,8 @@ public class SchoolWhitelistAuthenticator
         return providerId;
     }
 
-    public SchoolAssignmentsClient getClient(){
+    public SchoolAssignmentsClient getClient()
+    {
         return client;
     }
 }

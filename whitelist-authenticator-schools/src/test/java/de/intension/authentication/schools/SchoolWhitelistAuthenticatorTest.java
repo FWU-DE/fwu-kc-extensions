@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.HttpStatusCode.NOT_FOUND_404;
 import static org.mockserver.model.HttpStatusCode.OK_200;
 
 import java.util.ArrayList;
@@ -17,10 +16,15 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.junit.jupiter.MockServerExtension;
@@ -35,8 +39,11 @@ class SchoolWhitelistAuthenticatorTest
 
     private final ClientAndServer clientAndServer;
 
-    private final static String   WHITELIST_DEDICATED = "{\"allowAll\": false,\"vidisSchoolIdentifiers\": [\"1234\"]}";
-    private final static String   WHITELIST_ALLOW_ALL = "{\"allowAll\": true,\"vidisSchoolIdentifiers\": []}";
+    private final static String   WHITELIST_DEDICATED         = "{\"allowAll\": false,\"vidisSchoolIdentifiers\": [\"1234\"]}";
+    private final static String   WHITELIST_ALLOW_ALL         = "{\"allowAll\": true,\"vidisSchoolIdentifiers\": []}";
+    private final static String   WHITELIST_NOT_ENTRIES_FOUND = "{\"allowAll\": false,\"vidisSchoolIdentifiers\": []}";
+    private final static String   IDP_VALID                   = "validIdP";
+    private final static String   IDP_INVALID                 = "invalidIdP";
 
     public SchoolWhitelistAuthenticatorTest(ClientAndServer client)
     {
@@ -52,7 +59,8 @@ class SchoolWhitelistAuthenticatorTest
         clientAndServer
             .when(
                   request().withPath("/school-assignments")
-                      .withQueryStringParameter("serviceProvider", "test-client"))
+                      .withQueryStringParameter("serviceProvider", "test-client")
+                      .withQueryStringParameter("idpId", IDP_VALID))
             .respond(
                      response()
                          .withStatusCode(OK_200.code())
@@ -63,7 +71,8 @@ class SchoolWhitelistAuthenticatorTest
         clientAndServer
             .when(
                   request().withPath("/school-assignments")
-                      .withQueryStringParameter("serviceProvider", "allow-all-client"))
+                      .withQueryStringParameter("serviceProvider", "allow-all-client")
+                      .withQueryStringParameter("idpId", IDP_VALID))
             .respond(
                      response()
                          .withStatusCode(OK_200.code())
@@ -74,11 +83,19 @@ class SchoolWhitelistAuthenticatorTest
         clientAndServer
             .when(
                   request().withPath("/school-assignments")
-                      .withQueryStringParameter("serviceProvider", "not-configured-client"))
+                      .withQueryStringParameter("serviceProvider", "not-configured-client")
+                      .withQueryStringParameter("idpId", IDP_VALID))
             .respond(
                      response()
-                         .withStatusCode(NOT_FOUND_404.code())
-                         .withReasonPhrase(NOT_FOUND_404.reasonPhrase()));
+                         .withBody(WHITELIST_NOT_ENTRIES_FOUND));
+        clientAndServer
+            .when(
+                  request().withPath("/school-assignments")
+                      .withQueryStringParameter("serviceProvider", "test-client")
+                      .withQueryStringParameter("idpId", IDP_INVALID))
+            .respond(
+                     response()
+                         .withBody(WHITELIST_NOT_ENTRIES_FOUND));
         clientAndServer
             .when(
                   request().withPath("/auth/realms/test/protocol/openid-connect/token"))
@@ -92,11 +109,12 @@ class SchoolWhitelistAuthenticatorTest
      * WHEN: authentication flow is called with a configured clientId and valid schoolId user attribute
      * THEN: context status is "success"
      */
-    @Test
-    void should_permit_access_because_of_matching_clientId_and_schoolId()
+    @ParameterizedTest
+    @CsvSource({LoginActionsService.FIRST_BROKER_LOGIN_PATH, LoginActionsService.POST_BROKER_LOGIN_PATH})
+    void should_permit_access_because_of_matching_clientId_and_schoolId(String flowPath)
     {
         SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
-        TestAuthenticationFlowContext context = mockContext("test-client", List.of("1234"));
+        TestAuthenticationFlowContext context = mockContext("test-client", List.of("1234"), IDP_VALID, flowPath);
         authenticator.authenticate(context);
         assertEquals(true, context.getSuccess());
     }
@@ -187,7 +205,28 @@ class SchoolWhitelistAuthenticatorTest
         assertEquals(false, context.getSuccess());
     }
 
+    /**
+     * GIVEN: valid whitelist configuration which is reachable via URI
+     * WHEN: authentication flow is called with a not configured IdP and valid schoolId user
+     * attribute
+     * THEN: context status is "failed"
+     */
+    @ParameterizedTest
+    @CsvSource({LoginActionsService.FIRST_BROKER_LOGIN_PATH, LoginActionsService.POST_BROKER_LOGIN_PATH})
+    void should_deny_access_because_of_not_configured_IdP(String flowPath)
+    {
+        SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
+        TestAuthenticationFlowContext context = mockContext("test-client", List.of("1234"), IDP_INVALID, flowPath);
+        authenticator.authenticate(context);
+        assertEquals(false, context.getSuccess());
+    }
+
     private TestAuthenticationFlowContext mockContext(String clientId, List<String> usersSchoolIds)
+    {
+        return mockContext(clientId, usersSchoolIds, IDP_VALID, LoginActionsService.FIRST_BROKER_LOGIN_PATH);
+    }
+
+    private TestAuthenticationFlowContext mockContext(String clientId, List<String> usersSchoolIds, String brokeredIdp, String flowPath)
     {
         TestAuthenticationFlowContext context = mock(TestAuthenticationFlowContext.class);
         // success/failure
@@ -196,9 +235,11 @@ class SchoolWhitelistAuthenticatorTest
         doCallRealMethod().when(context).forceChallenge(any());
         doCallRealMethod().when(context).attempted();
         when(context.getSuccess()).thenCallRealMethod();
+        when(context.getFlowPath()).thenReturn(flowPath);
         //mock realm
         RealmModel realm = mock(RealmModel.class);
         when(realm.getName()).thenReturn("test");
+        when(realm.isRegistrationEmailAsUsername()).thenReturn(false);
         when(context.getRealm()).thenReturn(realm);
         //mock user attributes
         UserModel userModel = mock(UserModel.class);
@@ -206,12 +247,36 @@ class SchoolWhitelistAuthenticatorTest
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM_DEFAULT, usersSchoolIds);
         when(userModel.getAttributes()).thenReturn(attributes);
+        when(userModel.getId()).thenReturn("0983762");
         //mock clientId
         AuthenticationSessionModel model = mock(AuthenticationSessionModel.class);
         when(context.getAuthenticationSession()).thenReturn(model);
         ClientModel clientModel = mock(ClientModel.class);
         when(model.getClient()).thenReturn(clientModel);
+        when(model.getRealm()).thenReturn(realm);
         when(clientModel.getClientId()).thenReturn(clientId);
+        if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
+            when(model.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(String.format("{\n"
+                    + "    \"id\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"brokerUsername\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"brokerSessionId\": \"saml.37ffe451-9e1f-407d-b4a1-d7e30fc6a5e4::238082bb-f294-4e27-ae2b-c99f36ab210b\",\n"
+                    + "    \"brokerUserId\": \"saml.G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"identityProviderId\": \"%s\"\n"
+                    + "}", brokeredIdp));
+        }
+        else {
+            when(model.getAuthNote(PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT)).thenReturn(String.format("{"
+                    + "\"id\":\"2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"brokerUsername\":\"idpuser\","
+                    + "\"brokerSessionId\":\"keycloak-oidc.9b19439f-eaf3-4799-9c24-5f749470ca73\","
+                    + "\"brokerUserId\":\"keycloak-oidc.2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"email\":\"idpuser@test.de\","
+                    + "\"lastName\":\"user\","
+                    + "\"firstName\":\"idp\","
+                    + "\"modelUsername\":\"idpuser\","
+                    + "\"identityProviderId\":\"%s\""
+                    + "}", brokeredIdp));
+        }
         //config
         AuthenticatorConfigModel authenticatorConfigModel = mock(AuthenticatorConfigModel.class);
         when(context.getAuthenticatorConfig()).thenReturn(authenticatorConfigModel);
