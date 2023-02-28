@@ -188,8 +188,10 @@ class WhitelistAuthenticatorTest
         var client = mock(ClientModel.class);
         when(authSession.getClient()).thenReturn(client);
         var realm = mock(RealmModel.class);
+        when(context.getRealm()).thenReturn(realm);
         when(authSession.getRealm()).thenReturn(realm);
         when(realm.isRegistrationEmailAsUsername()).thenReturn(false);
+        when(realm.getId()).thenReturn("vidis");
         when(context.getFlowPath()).thenReturn(flowPath);
         if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
             when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(String.format("{\n"
