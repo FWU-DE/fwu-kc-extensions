@@ -4,10 +4,6 @@ on:
     branches:
       - main
       - bugfix/FWUV-159/whiteListAuthenticatorSupportForPostLogin
-    paths:
-      - 'pom.xml'
-      - '*/pom.xml'
-      - '.github/workflows/actions/main.yaml'
 
 jobs:
   package:
