@@ -40,6 +40,7 @@ public class WhitelistAuthenticator
     public void authenticate(AuthenticationFlowContext context)
     {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
+        logger.infof("authenticate - clientId=%s realm=%s", clientId, context.getRealm().getId());
         String providerId = getProviderIdFromContext(context);
         if (!isAllowedIdP(context, clientId, providerId)) {
             logger.infof("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
@@ -60,12 +61,14 @@ public class WhitelistAuthenticator
         String idpHintParamName = getIdpHintParamName(context);
 
         String flowPath = context.getFlowPath();
+        logger.infof("getProviderId - fowPath=%s", flowPath);
         String providerId = null;
         try {
             if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
                 providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
                 providerId = StringUtil.isNotBlank(providerId) ? providerId
                         : context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+                logger.infof("getProviderId - from URI = %s", providerId);
             }
             else if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
                 SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
@@ -73,6 +76,9 @@ public class WhitelistAuthenticator
                                                    AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
+                    logger.infof("getProviderId - from brokered context=%s", providerId);
+                } else {
+                    logger.info("getProviderId - brokered context is null");
                 }
             }
             else if (LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)) {
@@ -81,6 +87,9 @@ public class WhitelistAuthenticator
                                                    PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
+                    logger.infof("getProviderId - from post brokered context=%s", providerId);
+                } else {
+                    logger.info("getProviderId - post brokered context is null");
                 }
             }
         } catch (Exception e) {

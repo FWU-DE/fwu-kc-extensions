@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.4.2]
+
+- Improvement: Whitelist authenticator logging extended
+
 ## Version [3.4.1]
 
 - Fix: Whitelist authenticator to support Post Login Flow
