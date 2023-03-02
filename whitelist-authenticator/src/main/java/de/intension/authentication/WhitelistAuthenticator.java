@@ -2,6 +2,7 @@ package de.intension.authentication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
@@ -14,6 +15,7 @@ import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginCon
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.AuthenticatorConfigModel;
+import org.keycloak.models.FederatedIdentityModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -61,6 +63,7 @@ public class WhitelistAuthenticator
         String idpHintParamName = getIdpHintParamName(context);
 
         String flowPath = context.getFlowPath();
+        KeycloakSession session = context.getSession();
         logger.infof("getProviderId - fowPath=%s", flowPath);
         String providerId = null;
         try {
@@ -68,6 +71,15 @@ public class WhitelistAuthenticator
                 providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
                 providerId = StringUtil.isNotBlank(providerId) ? providerId
                         : context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
+
+                if (providerId == null && session.users() != null && context.getRealm() != null && context.getUser() != null) {
+                    Optional<FederatedIdentityModel> federatedIdentityModel = context.getSession().users()
+                        .getFederatedIdentitiesStream(context.getRealm(), context.getUser()).findFirst();
+
+                    if (federatedIdentityModel.isPresent()) {
+                        providerId = federatedIdentityModel.get().getIdentityProvider();
+                    }
+                }
                 logger.infof("getProviderId - from URI = %s", providerId);
             }
             else if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
@@ -77,7 +89,8 @@ public class WhitelistAuthenticator
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
                     logger.infof("getProviderId - from brokered context=%s", providerId);
-                } else {
+                }
+                else {
                     logger.info("getProviderId - brokered context is null");
                 }
             }
@@ -88,7 +101,8 @@ public class WhitelistAuthenticator
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
                     logger.infof("getProviderId - from post brokered context=%s", providerId);
-                } else {
+                }
+                else {
                     logger.info("getProviderId - post brokered context is null");
                 }
             }

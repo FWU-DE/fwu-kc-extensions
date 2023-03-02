@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.4.3]
+
+- Improvement: Whitelist authenticator validates user by the federated identities
+
 ## Version [3.4.2]
 
 - Improvement: Whitelist authenticator logging extended
