@@ -1371,7 +1371,8 @@
       "addReadTokenRoleOnCreate": false,
       "authenticateByDefault": false,
       "linkOnly": false,
-      "firstBrokerLoginFlowAlias": "first broker login",
+      "firstBrokerLoginFlowAlias": "vidis first broker login",
+      "postBrokerLoginFlowAlias": "Vidis Post Login Flow",
       "config": {
         "loginHint": "true",
         "clientId": "identity-broker",
@@ -1379,7 +1380,7 @@
         "authorizationUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/auth",
         "clientAuthMethod": "client_secret_basic",
         "syncMode": "IMPORT",
-        "clientSecret": "**********",
+        "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true"
       }
     },
@@ -1470,6 +1471,16 @@
         "attributes": "[]",
         "attribute": "acronym",
         "REST_API_URL": "http://static_http:8080/person-info_sanis.json"
+      }
+    },
+    {
+      "id": "79bfff35-6bf2-43ca-a737-924589ab1932",
+      "name": "standard roles",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+      "config": {
+        "syncMode": "FORCE",
+        "role": "account.manage-account"
       }
     }
   ],
@@ -1872,6 +1883,15 @@
       "builtIn": false,
       "authenticationExecutions": [
         {
+          "authenticatorConfig": "config",
+          "authenticator": "whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
           "authenticatorFlow": true,
           "requirement": "REQUIRED",
           "priority": 10,
@@ -1885,6 +1905,15 @@
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 33,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "config",
+          "authenticator": "whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 35,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
@@ -2355,6 +2384,15 @@
           "autheticatorFlow": true,
           "flowAlias": "vidis first broker login User creation or linking",
           "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "config",
+          "authenticator": "whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 21,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
         }
       ]
     },
@@ -2488,6 +2526,25 @@
           "userSetupAllowed": false
         }
       ]
+    },
+    {
+      "id": "183c1262-26f8-4a91-b9d6-d486a3d94298",
+      "alias": "Vidis Post Login Flow",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "config",
+          "authenticator": "whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
     }
   ],
   "authenticatorConfig": [
@@ -2512,6 +2569,30 @@
       "alias": "review profile config",
       "config": {
         "update.profile.on.first.login": "missing"
+      }
+    },
+    {
+      "id": "b8077b4b-6b0e-45af-b32c-e9b88e40a0df",
+      "alias": "config",
+      "config": {
+        "listOfAllowedIdPs": "[\n{ \"clientId\" : \"account\", \"listOfIdPs\" : [\"keycloak-oidc\"]},\n{ \"clientId\" : \"restrictedAccess\", \"listOfIdPs\" : [\"google\"]}\n]",
+        "idpHintParamName": "kc_idp_hint"
+      }
+    },
+    {
+      "id": "1ff3f2ef-cbd5-475a-bd46-ef48ff7e9648",
+      "alias": "config",
+      "config": {
+        "listOfAllowedIdPs": "[\n{ \"clientId\" : \"account\", \"listOfIdPs\" : [\"keycloak-oidc\"]},\n{ \"clientId\" : \"restrictedAccess\", \"listOfIdPs\" : [\"google\"]}\n]",
+        "idpHintParamName": "kc_idp_hint"
+      }
+    },
+    {
+      "id": "c24fbe92-3a46-4709-aee3-7c1be355942a",
+      "alias": "config",
+      "config": {
+        "listOfAllowedIdPs": "[\n{ \"clientId\" : \"account\", \"listOfIdPs\" : [\"keycloak-oidc\"]},\n{ \"clientId\" : \"restrictedAccess\", \"listOfIdPs\" : [\"google\"]}\n]",
+        "idpHintParamName": "kc_idp_hint"
       }
     }
   ],
