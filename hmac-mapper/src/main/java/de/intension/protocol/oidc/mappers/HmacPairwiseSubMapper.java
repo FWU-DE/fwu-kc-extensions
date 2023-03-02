@@ -1,33 +1,19 @@
 package de.intension.protocol.oidc.mappers;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.ClientSessionContext;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperContainerModel;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserSessionModel;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
-import org.keycloak.protocol.oidc.utils.PairwiseSubMapperUtils;
 import org.keycloak.protocol.oidc.utils.PairwiseSubMapperValidator;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
@@ -59,11 +45,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Should be a valid URL where the hostname of the URL is used for hashing.";
 
     public static final String PAIRWISE_MISSING_SECTOR_IDENTIFIER = "pairwiseMissingSectorIdentifier";
-
-    @Override
-    public String getIdPrefix() {
-        return "hmac";
-    }
+    public static final String PROTOCOLL_MAPPER_ID = "oidc-hmac-pairwise-subject-mapper";
 
     @Override
     public IDToken transformIDToken(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session,
@@ -72,12 +54,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
         }
-        setIDTokenSubject(token, generateIdentifier(mappingModel, getSectorIdentifier(mappingModel),
-                localSub));
+        setIDTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -88,11 +69,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
         }
-        setAccessTokenSubject(token, generateIdentifier(mappingModel, getSectorIdentifier(mappingModel),
+        setAccessTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel,
                 localSub));
         return token;
     }
@@ -104,11 +85,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
             return token;
         }
-        String localSub = getLocalIdentifierValue(userSession.getUser(), mappingModel);
+        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
         if (localSub == null) {
             return token;
         }
-        setUserInfoTokenSubject(token, generateIdentifier(mappingModel, getSectorIdentifier(mappingModel),
+        setUserInfoTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel,
                 localSub));
         return token;
     }
@@ -144,22 +125,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     }
 
     @Override
-    public String generateIdentifier(ProtocolMapperModel mappingModel, String sectorIdentifier, String localSub) {
-        String saltStr = PairwiseSubMapperHelper.getSalt(mappingModel);
-        if (saltStr == null) {
-            throw new IllegalStateException("Salt not available on mappingModel. Please update protocol mapper");
-        }
-        String algorithm = getHashAlgorithm(mappingModel);
-        var secretKeySpec = new SecretKeySpec(saltStr.getBytes(UTF_8), algorithm);
-        try {
-            var mac = Mac.getInstance(algorithm);
-            mac.init(secretKeySpec);
-            mac.update(sectorIdentifier.getBytes(UTF_8));
-            mac.update(localSub.getBytes(UTF_8));
-            return UUID.nameUUIDFromBytes(mac.doFinal()).toString();
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new IllegalStateException("Generating sub failed", e);
-        }
+    public String generateIdentifier(ProtocolMapperModel mappingModel, String localSub) {
+        return HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel, localSub);
     }
 
     /**
@@ -226,7 +193,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public String getId() {
-        return "oidc-" + getIdPrefix() + "-pairwise-subject-mapper";
+        return PROTOCOLL_MAPPER_ID;
     }
 
     @Override
@@ -244,7 +211,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     /**
      * Get the configured HMAC hash algorithm.
      */
-    private static String getHashAlgorithm(ProtocolMapperModel mappingModel) {
+    static String getHashAlgorithm(ProtocolMapperModel mappingModel) {
         return mappingModel.getConfig().get(HASH_ALGORITHM_PROP_NAME);
     }
 
@@ -310,25 +277,4 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         }
     }
 
-    /**
-     * Get valid sector identifier from URI.
-     */
-    protected String getSectorIdentifier(ProtocolMapperModel mappingModel) {
-        String sectorIdentifierUri = PairwiseSubMapperHelper.getSectorIdentifierUri(mappingModel);
-        return PairwiseSubMapperUtils.resolveValidSectorIdentifier(sectorIdentifierUri);
-    }
-
-    /**
-     * Retrieve the local sub identifier value from the user based on the
-     * configuration in the
-     * mapper.
-     */
-    protected String getLocalIdentifierValue(UserModel user, ProtocolMapperModel mappingModel) {
-        String localSubIdentifier = mappingModel.getConfig().get(LOCAL_SUB_IDENTIFIER_PROP_NAME);
-
-        if ("id".equals(localSubIdentifier)) {
-            return user.getId();
-        }
-        return user.getAttributeStream(localSubIdentifier).filter(Objects::nonNull).findFirst().orElse(null);
-    }
 }

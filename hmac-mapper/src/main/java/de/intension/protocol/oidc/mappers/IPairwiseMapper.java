@@ -2,11 +2,7 @@ package de.intension.protocol.oidc.mappers;
 
 import java.util.List;
 
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperContainerModel;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.OIDCAccessTokenMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCIDTokenMapper;
@@ -22,12 +18,10 @@ import org.keycloak.provider.ProviderConfigProperty;
 public interface IPairwiseMapper
         extends OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
-    String getIdPrefix();
-
     /**
      * Generates a pairwise identifier.
      */
-    String generateIdentifier(ProtocolMapperModel mappingModel, String sectorIdentifier, String localSub);
+    String generateIdentifier(ProtocolMapperModel mappingModel, String localSub);
 
     /**
      * Implement to add additional provider configuration properties.
