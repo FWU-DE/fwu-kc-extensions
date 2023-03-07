@@ -34,7 +34,7 @@ import org.keycloak.representations.IDToken;
 public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         implements IPairwiseMapper {
 
-    private static final String HASH_ALGORITHM_PROP_NAME = "pairwiseSubHashAlgorithm";
+    protected static final String HASH_ALGORITHM_PROP_NAME = "pairwiseSubHashAlgorithm";
     private static final String HASH_ALGORITHM_PROP_LABEL = "Hash algorithm";
     private static final String HASH_ALGORITHM_PROP_HELP = "Mac hash algorithm used when calculating the pairwise subject identifier.";
 

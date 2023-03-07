@@ -1,6 +1,8 @@
 package de.intension.protocol.oidc.mappers;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.logging.Logger;
 import org.keycloak.models.*;
@@ -27,14 +29,16 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
 {
     private static final Logger LOG = Logger.getLogger(HmacPairwisePseudonymListMapper.class);
 
-    private static final String CLIENT_DOES_NOT_EXIST = "noConfigForClientFoundOrClientDoesNotExist";
-    private static final String       CLAIM_PROP_NAME       = "pseudonymListClaimName";
+    protected static final String CLIENT_DOES_NOT_EXIST_MSG_KEY = "noConfigForClientFoundOrClientDoesNotExist";
+    protected static final String WRONG_MAPPER_TYPE_MSG_KEY = "wrongMapperType";
+    protected static final String       CLAIM_PROP_NAME       = "pseudonymListClaimName";
     private static final String       CLAIM_PROP_HELP       = "Which claim should hold the pseudonym list";
     private static final String       CLAIM_PROP_LABEL      = "Target claim for pseudonym list";
 
-    private static final String       CLIENTS_PROP_NAME     = "clients";
+    protected static final String       CLIENTS_PROP_NAME     = "clients";
     private static final String       CLIENTS_PROP_HELP     = "List of clients to retrieve and add Pseudonyms for";
     private static final String       CLIENTS_PROP_LABEL    = "Clients";
+    protected static final String ACCEPTED_MAPPER_TYPE = "client mapper";
 
     @Override
     public String getId()
@@ -102,29 +106,30 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     {
         if (mapperContainer instanceof ClientModel) {
             validateAllClientConfigsExist(session, mapperModel);
+        } else {
+            throw new ProtocolMapperConfigException(WRONG_MAPPER_TYPE_MSG_KEY, WRONG_MAPPER_TYPE_MSG_KEY, ACCEPTED_MAPPER_TYPE);
         }
     }
 
     private void validateAllClientConfigsExist(KeycloakSession session, ProtocolMapperModel mapperModel)
         throws ProtocolMapperConfigException
     {
-        List<String> clients = getClients(mapperModel);
+        Set<String> clients = getClients(mapperModel);
         for (String clientId : clients) {
-
             if (getProtocollMapperModelForClient(session, clientId).isEmpty()) {
-                throw new ProtocolMapperConfigException(CLIENT_DOES_NOT_EXIST, CLIENT_DOES_NOT_EXIST, clientId);
+                throw new ProtocolMapperConfigException(CLIENT_DOES_NOT_EXIST_MSG_KEY, CLIENT_DOES_NOT_EXIST_MSG_KEY, clientId);
             }
         }
     }
 
-    private static List<String> getClients(ProtocolMapperModel mapperModel)
+    private static Set<String> getClients(ProtocolMapperModel mapperModel)
     {
-        return Arrays.asList(mapperModel.getConfig().get(CLIENTS_PROP_NAME).split("#{2}|,"));
+        return Stream.of(mapperModel.getConfig().get(CLIENTS_PROP_NAME).split("#{2}|,")).map(String::trim).collect(Collectors.toSet());
     }
 
     private static Optional<ProtocolMapperModel> getProtocollMapperModelForClient(KeycloakSession session, String clientId)
     {
-        return Optional.ofNullable(session.getContext().getRealm().getClientByClientId(clientId.trim()))
+        return Optional.ofNullable(session.getContext().getRealm().getClientByClientId(clientId))
             .flatMap(clientModel -> clientModel.getProtocolMappersStream()
                 .filter(mapper -> mapper.getProtocolMapper().equals(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID))
                 .findAny());
@@ -140,6 +145,24 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
         }
         generatePseudonymListClaim(token, mappingModel, session, userSession.getUser());
         return token;
+    }
+
+    private void generatePseudonymListClaim(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserModel user)
+    {
+        for (String client : getClients(mappingModel)) {
+            Optional<ProtocolMapperModel> protocollMapperModelForClient = getProtocollMapperModelForClient(session, client);
+            if (protocollMapperModelForClient.isEmpty()) {
+                LOG.warnf("Could not find HMACPairwiseSubMapperConfig for client %s of PseudonymListMapper(%s) Skipping Client", client, mappingModel.getName());
+                continue;
+            }
+
+            String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, protocollMapperModelForClient.get());
+            if (localSub == null) {
+                return;
+            }
+            addPseudonymToTokenClaim(token, mappingModel.getConfig().get(CLAIM_PROP_NAME), client, HmacPairwiseSubMapperHelper
+                    .generateIdentifier(protocollMapperModelForClient.get(), localSub));
+        }
     }
 
     @Override
@@ -167,27 +190,9 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
         return token;
     }
 
-    private void generatePseudonymListClaim(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserModel user)
-    {
-        for (String client : getClients(mappingModel)) {
-            Optional<ProtocolMapperModel> protocollMapperModelForClient = getProtocollMapperModelForClient(session, client);
-            if (protocollMapperModelForClient.isEmpty()) {
-                LOG.warnf("Could not find HMACPairwiseSubMapperConfig for client %s. Skipping Client", client);
-                continue;
-            }
-
-            String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, protocollMapperModelForClient.get());
-            if (localSub == null) {
-                return;
-            }
-            addPseudonymToTokenClaim(token, mappingModel.getConfig().get(CLAIM_PROP_NAME), client, HmacPairwiseSubMapperHelper
-                .generateIdentifier(protocollMapperModelForClient.get(), localSub));
-        }
-    }
-
     /**
      * Add pseudonym to {@link IDToken}, {@link AccessToken} or UserInfoToken claim holding pseudonym
-     * list.
+     * map.
      *
      * @param token     Token to extend
      * @param claim     the claim in which the client-pseudonym map should be stored.
