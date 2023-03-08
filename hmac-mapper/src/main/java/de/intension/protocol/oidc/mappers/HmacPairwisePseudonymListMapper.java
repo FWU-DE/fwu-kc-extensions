@@ -61,7 +61,7 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     @Override
     public String getHelpText()
     {
-        return "Calculates list of pseudonyms using HMACPaiwrwiseSubMapper";
+        return "Calculates list of pseudonyms using \"HMAC Pairwise subject with static sectorIdentifier\"";
     }
 
     @Override
@@ -116,7 +116,7 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     {
         Set<String> clients = getClients(mapperModel);
         for (String clientId : clients) {
-            if (getProtocollMapperModelForClient(session, clientId).isEmpty()) {
+            if (getProtocolMapperModelForClient(session, clientId).isEmpty()) {
                 throw new ProtocolMapperConfigException(CLIENT_DOES_NOT_EXIST_MSG_KEY, CLIENT_DOES_NOT_EXIST_MSG_KEY, clientId);
             }
         }
@@ -127,11 +127,11 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
         return Stream.of(mapperModel.getConfig().get(CLIENTS_PROP_NAME).split("#{2}|,")).map(String::trim).collect(Collectors.toSet());
     }
 
-    private static Optional<ProtocolMapperModel> getProtocollMapperModelForClient(KeycloakSession session, String clientId)
+    private static Optional<ProtocolMapperModel> getProtocolMapperModelForClient(KeycloakSession session, String clientId)
     {
         return Optional.ofNullable(session.getContext().getRealm().getClientByClientId(clientId))
             .flatMap(clientModel -> clientModel.getProtocolMappersStream()
-                .filter(mapper -> mapper.getProtocolMapper().equals(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID))
+                .filter(mapper -> mapper.getProtocolMapper().equals(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID))
                 .findAny());
     }
 
@@ -150,18 +150,18 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     private void generatePseudonymListClaim(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserModel user)
     {
         for (String client : getClients(mappingModel)) {
-            Optional<ProtocolMapperModel> protocollMapperModelForClient = getProtocollMapperModelForClient(session, client);
-            if (protocollMapperModelForClient.isEmpty()) {
+            Optional<ProtocolMapperModel> protocolMapperModelForClient = getProtocolMapperModelForClient(session, client);
+            if (protocolMapperModelForClient.isEmpty()) {
                 LOG.warnf("Could not find HMACPairwiseSubMapperConfig for client %s of PseudonymListMapper(%s) Skipping Client", client, mappingModel.getName());
                 continue;
             }
 
-            String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, protocollMapperModelForClient.get());
+            String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, protocolMapperModelForClient.get());
             if (localSub == null) {
                 return;
             }
             addPseudonymToTokenClaim(token, mappingModel.getConfig().get(CLAIM_PROP_NAME), client, HmacPairwiseSubMapperHelper
-                    .generateIdentifier(protocollMapperModelForClient.get(), localSub));
+                    .generateIdentifier(protocolMapperModelForClient.get(), localSub));
         }
     }
 

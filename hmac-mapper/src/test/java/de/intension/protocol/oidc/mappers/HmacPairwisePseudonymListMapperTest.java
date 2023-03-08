@@ -58,7 +58,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
 
         when(sessionMock.getContext()).thenReturn(contextMock);
@@ -84,7 +84,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        String incorrectProtcollMapperId = "incorrectProtocollMapper";
+        String incorrectProtcollMapperId = "incorrectProtocolMapper";
         when(referencedClientMapper.getProtocolMapper()).thenReturn(incorrectProtcollMapperId);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
 
@@ -111,7 +111,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
 
         when(sessionMock.getContext()).thenReturn(contextMock);
@@ -213,7 +213,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
         referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
@@ -256,7 +256,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
         referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
@@ -311,7 +311,7 @@ class HmacPairwisePseudonymListMapperTest
 
         ClientModel existingClient = mock(ClientModel.class);
         ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
-        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOLL_MAPPER_ID);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
         referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");

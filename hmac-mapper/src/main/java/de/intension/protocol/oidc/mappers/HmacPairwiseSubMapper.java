@@ -45,7 +45,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Should be a valid URL where the hostname of the URL is used for hashing.";
 
     public static final String PAIRWISE_MISSING_SECTOR_IDENTIFIER = "pairwiseMissingSectorIdentifier";
-    public static final String PROTOCOLL_MAPPER_ID = "oidc-hmac-pairwise-subject-mapper";
+    public static final String PROTOCOL_MAPPER_ID = "oidc-hmac-pairwise-subject-mapper";
 
     @Override
     public IDToken transformIDToken(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session,
@@ -193,7 +193,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public String getId() {
-        return PROTOCOLL_MAPPER_ID;
+        return PROTOCOL_MAPPER_ID;
     }
 
     @Override
