@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "660d3376-15ee-4bea-be6b-67ccf2397ea6",
+		"_postman_id": "ef2f6d82-de61-4b21-b4f7-08a294f2363c",
 		"name": "FWU",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -80,6 +80,15 @@
 							"    const subject = json.sub;",
 							"    pm.expect(subject).to.not.eq(pm.environment.get('userID'));",
 							"    pm.environment.set('applicySubject', subject);",
+							"});",
+							"",
+							"pm.test('should have other pseudomyms', function () {",
+							"    pm.expect(json.otherPseudonyms).to.be.not.null;",
+							"    const pseudonyms = json.otherPseudonyms;",
+							"    pm.expect(pseudonyms[\"applicy\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"formand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"progrand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"desight\"]).to.be.not.null;",
 							"});"
 						],
 						"type": "text/javascript"
@@ -159,6 +168,14 @@
 							"",
 							"pm.test('should have same subject', function () {",
 							"    pm.expect(subject).to.eq(pm.environment.get('applicySubject'));",
+							"});",
+							"pm.test('should have other pseudomyms', function () {",
+							"    pm.expect(json.otherPseudonyms).to.be.not.null;",
+							"    const pseudonyms = json.otherPseudonyms;",
+							"    pm.expect(pseudonyms[\"applicy\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"formand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"progrand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"desight\"]).to.be.not.null;",
 							"});"
 						],
 						"type": "text/javascript"
@@ -242,6 +259,14 @@
 							"",
 							"pm.test('should have unique subject', function () {",
 							"    pm.expect(subject).to.not.eq(pm.environment.get('applicySubjectExt'));",
+							"});",
+							"pm.test('should have other pseudomyms', function () {",
+							"    pm.expect(json.otherPseudonyms).to.be.not.null;",
+							"    const pseudonyms = json.otherPseudonyms;",
+							"    pm.expect(pseudonyms[\"applicy\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"formand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"progrand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"desight\"]).to.be.not.null;",
 							"});"
 						],
 						"type": "text/javascript"
@@ -325,6 +350,14 @@
 							"",
 							"pm.test('should have unique subject', function () {",
 							"    pm.expect(subject).to.not.eq(pm.environment.get('applicySubjectExt'));",
+							"});",
+							"pm.test('should have other pseudomyms', function () {",
+							"    pm.expect(json.otherPseudonyms).to.be.not.null;",
+							"    const pseudonyms = json.otherPseudonyms;",
+							"    pm.expect(pseudonyms[\"applicy\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"formand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"progrand\"]).to.be.not.null;",
+							"    pm.expect(pseudonyms[\"desight\"]).to.be.not.null;",
 							"});"
 						],
 						"type": "text/javascript"
