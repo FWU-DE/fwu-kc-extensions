@@ -1,7 +1,6 @@
 package de.intension.protocol.oidc.mappers;
 
-import static de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper.CLAIM_PROP_NAME;
-import static de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper.CLIENTS_PROP_NAME;
+import static de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper.*;
@@ -73,6 +72,29 @@ class HmacPairwisePseudonymListMapperTest
         assertThat((String)exception.getParameters()[0], Matchers.equalTo(NON_EXISTING_CLIENT));
         assertThat(exception.getMessageKey(), Matchers.equalTo(HmacPairwisePseudonymListMapper.CLIENT_DOES_NOT_EXIST_MSG_KEY));
     }
+    @Test
+    void shouldFail_whenValidateConfig_givenClaimNotSet()
+    {
+        //given
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put(CLIENTS_PROP_NAME, EXISTING_CLIENT);
+        when(mapperMock.getConfig()).thenReturn(configMap);
+
+        ClientModel existingClient = mock(ClientModel.class);
+        ProtocolMapperModel referencedClientMapper = mock(ProtocolMapperModel.class);
+        when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
+        when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
+
+        when(sessionMock.getContext()).thenReturn(contextMock);
+        when(contextMock.getRealm()).thenReturn(realmMock);
+        when(realmMock.getClientByClientId(EXISTING_CLIENT)).thenReturn(existingClient);
+        //when
+        ProtocolMapperContainerModel clientModel = mock(ClientModel.class);
+        ProtocolMapperConfigException exception = assertThrows(ProtocolMapperConfigException.class,
+                                                               () -> classUnderTest.validateConfig(sessionMock, realmMock, clientModel, mapperMock));
+        //then
+        assertThat(exception.getMessageKey(), Matchers.equalTo(TARGET_CLAIM_NOT_SET_MSG_KEY));
+    }
 
     @Test
     void shouldFail_whenValidateConfig_givenReferencedClientOfFalseType()
@@ -107,6 +129,7 @@ class HmacPairwisePseudonymListMapperTest
         //given
         Map<String, String> configMap = new HashMap<>();
         configMap.put(CLIENTS_PROP_NAME, EXISTING_CLIENT);
+        configMap.put(CLAIM_PROP_NAME, "otherPseudonyms");
         when(mapperMock.getConfig()).thenReturn(configMap);
 
         ClientModel existingClient = mock(ClientModel.class);

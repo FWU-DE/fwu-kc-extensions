@@ -29,6 +29,7 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
 {
     protected static final String CLIENT_DOES_NOT_EXIST_MSG_KEY = "noConfigForClientFoundOrClientDoesNotExist";
     protected static final String WRONG_MAPPER_TYPE_MSG_KEY = "wrongMapperType";
+    protected static final String TARGET_CLAIM_NOT_SET_MSG_KEY = "targetClaimNotSetForPseudonymListMapper";
     protected static final String       CLAIM_PROP_NAME       = "pseudonymListClaimName";
     protected static final String       CLAIM_PROP_HELP       = "Which claim should hold the pseudonym list";
     protected static final String       CLAIM_PROP_LABEL      = "Target claim for pseudonym list";
@@ -61,7 +62,7 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     @Override
     public String getHelpText()
     {
-        return "Calculates list of pseudonyms using \"HMAC Pairwise subject with static sectorIdentifier\"";
+        return "Calculates list of pseudonyms using 'HMAC Pairwise subject with static sectorIdentifier'";
     }
 
     @Override
@@ -106,20 +107,34 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     {
         if (mapperContainer instanceof ClientModel) {
             validateAllClientConfigsExist(session, mapperModel);
+            validateClaimIsConfigured(mapperModel);
         } else {
-            throw new ProtocolMapperConfigException(WRONG_MAPPER_TYPE_MSG_KEY, WRONG_MAPPER_TYPE_MSG_KEY, ACCEPTED_MAPPER_TYPE);
+            throw new ProtocolMapperConfigException(WRONG_MAPPER_TYPE_MSG_KEY, "PseudonymlistMapper can only work on Client Mappers.", ACCEPTED_MAPPER_TYPE);
         }
     }
 
+    /**
+     * Validate that all of the configured Clients have a config for the 'HMAC Pairwise subject with static sectorIdentifier' Mapper
+     * @param session the current keycloaksession
+     * @param mapperModel containing config fur this mapper
+     * @throws ProtocolMapperConfigException if one of the client has no 'HMAC Pairwise subject with static sectorIdentifier' Mapper
+     */
     private void validateAllClientConfigsExist(KeycloakSession session, ProtocolMapperModel mapperModel)
         throws ProtocolMapperConfigException
     {
         Set<String> clients = getClients(mapperModel);
         for (String clientId : clients) {
             if (getProtocolMapperModelForClient(session, clientId).isEmpty()) {
-                throw new ProtocolMapperConfigException(CLIENT_DOES_NOT_EXIST_MSG_KEY, CLIENT_DOES_NOT_EXIST_MSG_KEY, clientId);
+                throw new ProtocolMapperConfigException(CLIENT_DOES_NOT_EXIST_MSG_KEY, "PseudonymListMapper config not saved. Client list contains invalid client", clientId);
             }
         }
+    }
+
+    private void validateClaimIsConfigured(ProtocolMapperModel mapperModel) throws ProtocolMapperConfigException {
+        if (mapperModel.getConfig().get(CLAIM_PROP_NAME) == null || mapperModel.getConfig().get(CLAIM_PROP_NAME).isBlank() ) {
+            throw new ProtocolMapperConfigException("PseudonymlistmapperConfig could not be saved. Target Claim required.", TARGET_CLAIM_NOT_SET_MSG_KEY);
+        }
+
     }
 
     private static Set<String> getClients(ProtocolMapperModel mapperModel)
@@ -147,6 +162,13 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
         return token;
     }
 
+    /**
+     * generate PseudonymListClaim or append pseudonyms to existing claim (claim must be of type Map(String,String) so append works)
+     * @param token Token to manipulate Access and ID token are accepted
+     * @param mappingModel mapperModel containing configuration for mapper
+     * @param session current keycloak-session
+     * @param user user for which the pseudonyms should be creted
+     */
     private void generatePseudonymListClaim(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session, UserModel user)
     {
         for (String client : getClients(mappingModel)) {
