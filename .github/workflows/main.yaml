@@ -76,7 +76,7 @@ jobs:
           fi
       - name: Deploy to GitHub packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy -DskipTests -X
+        run: mvn --batch-mode clean deploy -DskipTests -Dmaven.resolver.transport=wagon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish GitHub release
