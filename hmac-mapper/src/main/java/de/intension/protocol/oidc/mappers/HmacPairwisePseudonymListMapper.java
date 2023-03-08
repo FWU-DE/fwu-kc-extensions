@@ -27,18 +27,18 @@ import org.keycloak.representations.IDToken;
 public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
     implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper
 {
-    private static final Logger LOG = Logger.getLogger(HmacPairwisePseudonymListMapper.class);
-
     protected static final String CLIENT_DOES_NOT_EXIST_MSG_KEY = "noConfigForClientFoundOrClientDoesNotExist";
     protected static final String WRONG_MAPPER_TYPE_MSG_KEY = "wrongMapperType";
     protected static final String       CLAIM_PROP_NAME       = "pseudonymListClaimName";
-    private static final String       CLAIM_PROP_HELP       = "Which claim should hold the pseudonym list";
-    private static final String       CLAIM_PROP_LABEL      = "Target claim for pseudonym list";
+    protected static final String       CLAIM_PROP_HELP       = "Which claim should hold the pseudonym list";
+    protected static final String       CLAIM_PROP_LABEL      = "Target claim for pseudonym list";
 
     protected static final String       CLIENTS_PROP_NAME     = "clients";
-    private static final String       CLIENTS_PROP_HELP     = "List of clients to retrieve and add Pseudonyms for";
-    private static final String       CLIENTS_PROP_LABEL    = "Clients";
+    protected static final String       CLIENTS_PROP_HELP     = "List of clients to retrieve and add Pseudonyms for";
+    protected static final String       CLIENTS_PROP_LABEL    = "Clients";
     protected static final String ACCEPTED_MAPPER_TYPE = "client mapper";
+
+    private static final Logger LOG = Logger.getLogger(HmacPairwisePseudonymListMapper.class);
 
     @Override
     public String getId()
@@ -165,6 +165,25 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
         }
     }
 
+    /**
+     * Add pseudonym to {@link IDToken}, {@link AccessToken} or UserInfoToken claim holding pseudonym
+     * map.
+     *
+     * @param token     Token to extend
+     * @param claim     the claim in which the client-pseudonym map should be stored.
+     * @param clientId  clientId to which the pseudonym belongs
+     * @param pseudonym generated Pairwise hmac subject identifier
+     */
+    private void addPseudonymToTokenClaim(IDToken token, String claim, String clientId, String pseudonym)
+    {
+        Map<String, String> pseudonyms = (Map<String, String>)token.getOtherClaims().get(claim);
+        if (pseudonyms == null) {
+            pseudonyms = new HashMap<>();
+        }
+        pseudonyms.put(clientId, pseudonym);
+        token.getOtherClaims().put(claim, pseudonyms);
+    }
+
     @Override
     public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel,
                                             KeycloakSession session, UserSessionModel userSession,
@@ -188,24 +207,5 @@ public class HmacPairwisePseudonymListMapper extends AbstractOIDCProtocolMapper
 
         generatePseudonymListClaim(token, mappingModel, session, userSession.getUser());
         return token;
-    }
-
-    /**
-     * Add pseudonym to {@link IDToken}, {@link AccessToken} or UserInfoToken claim holding pseudonym
-     * map.
-     *
-     * @param token     Token to extend
-     * @param claim     the claim in which the client-pseudonym map should be stored.
-     * @param clientId  clientId to which the pseudonym belongs
-     * @param pseudonym generated Pairwise hmac subject identifier
-     */
-    protected void addPseudonymToTokenClaim(IDToken token, String claim, String clientId, String pseudonym)
-    {
-        Map<String, String> pseudonyms = (Map<String, String>)token.getOtherClaims().get(claim);
-        if (pseudonyms == null) {
-            pseudonyms = new HashMap<>();
-        }
-        pseudonyms.put(clientId, pseudonym);
-        token.getOtherClaims().put(claim, pseudonyms);
     }
 }
