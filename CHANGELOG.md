@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.6.0]
+
+- New Feature: Client Mapper to include pseudonyms of the user for other clients 
+
 ## Version [3.5.0]
 
 - Improvement: School whitelist configuration is now read from a REST-API
@@ -8,7 +12,7 @@ All notable changes to this project will be documented here.
 
 ## Version [3.4.0]
 
-- New Feature: School whitelist no supports Flag to allow all schools.
+- New Feature: School whitelist now supports Flag to allow all schools.
 
 
 ## Version [3.3.0]

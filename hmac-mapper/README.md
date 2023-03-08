@@ -97,3 +97,43 @@ The claim value `email` in the configured tokens will be:
 ```
 dc750843-a671-4c0d-ae94-bf2434d6f2b6
 ```
+
+# HMAC pairwise pseudonym list mapper
+
+This mapper sets a configurable claim containing a map of pseudonyms for configured clients. The pseudonyms are 
+generated using the "HMAC Pairwise subject with static sectorIdentifier" mapper using the original configuration 
+of the clients configured mapper.
+
+## Configuration
+### Select Mapper
+
+Create a mapper for the desired client of type List of HMAC Pairwise subject with static sectorIdentifier
+
+<img src="../docs/pseudo/pseudonymListMapper-selection.png" width="40%"/>
+
+### Configure Mapper
+
+- Name:       Name of the mapper shown in the client's mapper list
+- Clients:    comma or ## separated List of Clients which pseudonym should be added to the claim.
+    ```
+    Client must have a HMAC Pairwise subject with static sectorIdentifier configured otherwise config is rejected
+    If a client gets removed later at users login a message is logged that the client does not exist anymore and the pseudonym for it is not included in the claim.
+    ```
+- Name of the claim which should contain the pseudonym list
+    ```
+    If there is already a claim with that name of type map, then the pseudonyms are added to that claim.
+    If the existing claim is not a map the mapper will fail.
+    ```
+- Tokens where the claim should be included
+
+<img src="../docs/pseudo/pseudonymListMapperConfig.png"/>
+
+## Testing
+
+To verify if the pseudonyms are added you can use the postman collection like for the test for the HMAC Pairwise Mapper. 
+
+- Login into a client which has the new pseudonym list mapper configured.
+- Copy token which the claim got included to. e.g. access token verify it with e.g. jwt.io to contain new claim
+
+<img src="../docs/pseudo/pseudonymList-jwt-visual.png" width="70%" />
+

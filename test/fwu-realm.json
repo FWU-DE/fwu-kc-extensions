@@ -329,6 +329,20 @@
           }
         },
         {
+          "id": "c690bc74-87e5-42f1-a146-190471e51ff2",
+          "name": "PseudonymListMapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-list-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
+            "access.token.claim": "true",
+            "pseudonymListClaimName": "otherPseudonyms",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
           "id": "8456f259-fc07-429d-83ea-e07f444922b3",
           "name": "Pseudo",
           "protocol": "openid-connect",
@@ -458,6 +472,20 @@
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
             "pairwiseLocalSubIdentifier": "username"
           }
+        },
+        {
+          "id": "f6b92a42-d319-4b01-b9af-559b605ea92a",
+          "name": "PseudonymListMapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-list-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
+            "access.token.claim": "true",
+            "pseudonymListClaimName": "otherPseudonyms",
+            "userinfo.token.claim": "true"
+          }
         }
       ],
       "defaultClientScopes": [
@@ -536,6 +564,20 @@
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
             "pairwiseLocalSubIdentifier": "username"
           }
+        },
+        {
+          "id": "b1dc5d03-78ae-4196-b1f3-e3b36a3c792f",
+          "name": "PseudonymListMapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-list-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
+            "access.token.claim": "true",
+            "pseudonymListClaimName": "otherPseudonyms",
+            "userinfo.token.claim": "true"
+          }
         }
       ],
       "defaultClientScopes": [
@@ -603,6 +645,20 @@
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
       "protocolMappers": [
+        {
+          "id": "10ee9eda-84cb-4a2d-bf40-95fdbf82b015",
+          "name": "PseudonymListMapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-list-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
+            "access.token.claim": "true",
+            "pseudonymListClaimName": "otherPseudonyms",
+            "userinfo.token.claim": "true"
+          }
+        },
         {
           "id": "ee2271aa-5633-4850-a53b-b290888190fb",
           "name": "Pseudo",
