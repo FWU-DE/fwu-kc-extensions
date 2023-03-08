@@ -6,6 +6,7 @@ on:
     paths:
       - 'pom.xml'
       - '*/pom.xml'
+      - '.github/workflows/main.yaml'
 
 jobs:
   package:
@@ -75,7 +76,7 @@ jobs:
           fi
       - name: Deploy to GitHub packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy -DskipTests
+        run: mvn --batch-mode clean deploy -DskipTests -e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish GitHub release
