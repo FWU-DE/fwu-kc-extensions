@@ -1,33 +1,6 @@
 package de.intension.authentication;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import de.intension.authentication.rest.IdPAssignmentsClient;
-import de.intension.authentication.test.TestAuthenticationFlowContext;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
-import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.AuthenticatorConfigModel;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.sessions.AuthenticationSessionModel;
-import org.mockito.Mockito;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.junit.jupiter.MockServerExtension;
-import org.mockserver.junit.jupiter.MockServerSettings;
-import org.mockserver.model.MediaType;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.constants.AdapterConstants.KC_IDP_HINT;
@@ -37,20 +10,50 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.HttpStatusCode.NOT_FOUND_404;
 import static org.mockserver.model.HttpStatusCode.OK_200;
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+
+import java.util.Map;
+
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
+import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.AuthenticatorConfigModel;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.services.resources.LoginActionsService;
+import org.keycloak.sessions.AuthenticationSessionModel;
+import org.mockito.Mockito;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.junit.jupiter.MockServerExtension;
+import org.mockserver.junit.jupiter.MockServerSettings;
+import org.mockserver.model.MediaType;
+
+import de.intension.authentication.rest.IdPAssignmentsClient;
+import de.intension.authentication.test.TestAuthenticationFlowContext;
 
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = {18733})
-class WhitelistAuthenticatorTest {
+class WhitelistAuthenticatorTest
+{
 
-    private static final String CLIENT_CONFIGURED     = "configured";
-    private static final String CLIENT_NOT_CONFIGURED = "notConfigured";
-    private static final String CLIENT_CONFIGURED_BUT_NOT_MATCH = "configuredNoMatch";
-    private static final String CLIENT_CONFIGURED_GOOGLE = "configuredGoogle";
+    private static final String   CLIENT_CONFIGURED               = "configured";
+    private static final String   CLIENT_NOT_CONFIGURED           = "notConfigured";
+    private static final String   CLIENT_CONFIGURED_BUT_NOT_MATCH = "configuredNoMatch";
+    private static final String   CLIENT_CONFIGURED_GOOGLE        = "configuredGoogle";
 
     private final ClientAndServer clientAndServer;
 
-    public WhitelistAuthenticatorTest(ClientAndServer client){
+    public WhitelistAuthenticatorTest(ClientAndServer client)
+    {
         clientAndServer = client;
         initMockServer();
     }
@@ -62,52 +65,51 @@ class WhitelistAuthenticatorTest {
     {
         clientAndServer
             .when(
-                request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED)))
+                  request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED)))
             .respond(
-                response()
-                    .withStatusCode(OK_200.code())
-                    .withReasonPhrase(OK_200.reasonPhrase())
-                    .withHeaders(
-                        header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
-                    .withBody("[\"facebook\", \"google\"]"));
+                     response()
+                         .withStatusCode(OK_200.code())
+                         .withReasonPhrase(OK_200.reasonPhrase())
+                         .withHeaders(
+                                      header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
+                         .withBody("[\"facebook\", \"google\"]"));
         clientAndServer
             .when(
-                request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED_GOOGLE)))
+                  request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED_GOOGLE)))
             .respond(
-                response()
-                    .withStatusCode(OK_200.code())
-                    .withReasonPhrase(OK_200.reasonPhrase())
-                    .withHeaders(
-                        header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
-                    .withBody("[\"google\"]"));
+                     response()
+                         .withStatusCode(OK_200.code())
+                         .withReasonPhrase(OK_200.reasonPhrase())
+                         .withHeaders(
+                                      header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
+                         .withBody("[\"google\"]"));
         clientAndServer
             .when(
-                request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED_BUT_NOT_MATCH)))
+                  request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_CONFIGURED_BUT_NOT_MATCH)))
             .respond(
-                response()
-                    .withStatusCode(OK_200.code())
-                    .withReasonPhrase(OK_200.reasonPhrase())
-                    .withHeaders(
-                        header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
-                    .withBody("[\"github\", \"microsoft\"]"));
+                     response()
+                         .withStatusCode(OK_200.code())
+                         .withReasonPhrase(OK_200.reasonPhrase())
+                         .withHeaders(
+                                      header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType()))
+                         .withBody("[\"github\", \"microsoft\"]"));
         clientAndServer
             .when(
-                request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_NOT_CONFIGURED)))
+                  request().withPath(String.format("/service-provider/%s/idp-assignments", CLIENT_NOT_CONFIGURED)))
             .respond(
-                response()
-                    .withStatusCode(NOT_FOUND_404.code())
-                    .withReasonPhrase(NOT_FOUND_404.reasonPhrase()));
+                     response()
+                         .withStatusCode(NOT_FOUND_404.code())
+                         .withReasonPhrase(NOT_FOUND_404.reasonPhrase()));
         clientAndServer
             .when(
-                request().withPath("/auth/realms/test/protocol/openid-connect/token"))
+                  request().withPath("/auth/realms/test/protocol/openid-connect/token"))
             .respond(
-                response()
-                    .withBody("{\"access_token\":\"12345\"}"));
+                     response()
+                         .withBody("{\"access_token\":\"12345\"}"));
     }
 
     @Test
     void should_whitelist()
-        throws IOException
     {
         var context = mockContext(CLIENT_CONFIGURED, "facebook");
         authenticate(context);
@@ -116,7 +118,6 @@ class WhitelistAuthenticatorTest {
 
     @Test
     void should_not_whitelist_if_client_is_not_configured()
-        throws IOException
     {
         var context = mockContext(CLIENT_NOT_CONFIGURED, "facebook");
         authenticate(context);
@@ -125,7 +126,6 @@ class WhitelistAuthenticatorTest {
 
     @Test
     void should_not_whitelist_if_idp_is_not_in_configured_list()
-        throws IOException
     {
         var context = mockContext(CLIENT_CONFIGURED_BUT_NOT_MATCH, "facebook");
         authenticate(context);
@@ -134,67 +134,58 @@ class WhitelistAuthenticatorTest {
 
     @Test
     void should_not_whitelist_if_idp_is_not_in_list()
-        throws IOException, ExecutionException, InterruptedException, TimeoutException, URISyntaxException
     {
         doGoogleIdpTest("facebook", null, Boolean.FALSE);
     }
 
     @Test
     void should_whitelist_if_idp_hint_is_missing()
-        throws IOException, ExecutionException, InterruptedException, TimeoutException, URISyntaxException
     {
         doGoogleIdpTest("", null, Boolean.TRUE);
     }
 
     @Test
     void should_whitelist_if_idp_hint_is_missing_and_config_allows_missing_hint()
-        throws IOException
     {
         var context = mockContext(CLIENT_CONFIGURED_GOOGLE, "");
         authenticate(context);
         assertEquals(Boolean.TRUE, context.getSuccess());
     }
 
-    /*
-    @Test
-    void should_not_whitelist_if_config_allows_missing_hint_and_idp_hint_is_set()
-        throws IOException, ExecutionException, InterruptedException, TimeoutException, URISyntaxException
-    {
-        var context = mockContext(CLIENT_CONFIGURED, "facebook");
-        authenticate(context, List.of("google", ""));
-        assertEquals(Boolean.FALSE, context.getSuccess());
-    }*/
-
     @Test
     void should_whitelist_if_brokered_context_contains_valid_idp()
-        throws IOException
     {
         doGoogleIdpTest(null, "google", Boolean.TRUE);
     }
 
     @Test
     void should_not_whitelist_because_brokered_context_contains_invalid_idp()
-        throws IOException
     {
         doGoogleIdpTest(null, "facebook", Boolean.FALSE);
     }
 
     @Test
-    void should_whitelist_because_of_valid_idp_hint_and_invalid_brokered_idp_is_ignored()
-        throws IOException
+    void should_not_whitelist_because_of_valid_idp_hint_is_ignored_and_brokered_idp_is_used()
     {
-        doGoogleIdpTest("google", "facebook", Boolean.TRUE);
+        doGoogleIdpTest("google", "facebook", Boolean.FALSE);
     }
 
     @Test
     void should_whitelist_if_idp_hint_and_brokered_context_are_missing()
-        throws IOException
     {
         doGoogleIdpTest(null, null, Boolean.TRUE);
     }
 
+    @ParameterizedTest
+    @CsvSource({"google,true", "facebook,false"})
+    void should_whitelist_based_on_post_broker_context(String brokeredIdp, boolean expected)
+    {
+        var context = mockContext(CLIENT_CONFIGURED_GOOGLE, null, brokeredIdp, LoginActionsService.POST_BROKER_LOGIN_PATH);
+        authenticate(context);
+        assertEquals(expected, context.getSuccess());
+    }
+
     private void doGoogleIdpTest(String kcIdpHint, String brokeredIdp, Boolean expectedSuccess)
-        throws IOException
     {
         var context = mockContext(CLIENT_CONFIGURED_GOOGLE, kcIdpHint, brokeredIdp);
         authenticate(context);
@@ -202,13 +193,20 @@ class WhitelistAuthenticatorTest {
     }
 
     private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint)
-        throws JsonProcessingException
     {
         return mockContext(clientId, kcIdpHint, null);
     }
 
     private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, String brokeredIdp)
-        throws JsonProcessingException
+    {
+        String flowPath = LoginActionsService.AUTHENTICATE_PATH;
+        if (brokeredIdp != null) {
+            flowPath = LoginActionsService.FIRST_BROKER_LOGIN_PATH;
+        }
+        return mockContext(clientId, kcIdpHint, brokeredIdp, flowPath);
+    }
+
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, String brokeredIdp, String flowPath)
     {
         var context = mock(TestAuthenticationFlowContext.class);
 
@@ -222,18 +220,32 @@ class WhitelistAuthenticatorTest {
         when(realm.isRegistrationEmailAsUsername()).thenReturn(false);
         when(realm.getName()).thenReturn("test");
         when(authSession.getRealm()).thenReturn(realm);
-
-        if (brokeredIdp != null) {
+        when(context.getFlowPath()).thenReturn(flowPath);
+        if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
             when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(String.format("{\n"
-                                                                                                                       + "    \"id\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
-                                                                                                                       + "    \"brokerUsername\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
-                                                                                                                       + "    \"brokerSessionId\": \"saml.37ffe451-9e1f-407d-b4a1-d7e30fc6a5e4::238082bb-f294-4e27-ae2b-c99f36ab210b\",\n"
-                                                                                                                       + "    \"brokerUserId\": \"saml.G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
-                                                                                                                       + "    \"identityProviderId\": \"%s\"\n"
-                                                                                                                       + "}", brokeredIdp));
+                    + "    \"id\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"brokerUsername\": \"G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"brokerSessionId\": \"saml.37ffe451-9e1f-407d-b4a1-d7e30fc6a5e4::238082bb-f294-4e27-ae2b-c99f36ab210b\",\n"
+                    + "    \"brokerUserId\": \"saml.G-8d24f6a2-2a11-482e-89c5-f5dbe329387e\",\n"
+                    + "    \"identityProviderId\": \"%s\"\n"
+                    + "}", brokeredIdp));
+        }
+        else if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
+            when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(null);
         }
         else {
-            when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(null);
+            when(authSession.getAuthNote(PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT)).thenReturn(String.format("{"
+                    + "\"id\":\"2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"brokerUsername\":\"idpuser\","
+                    + "\"brokerSessionId\":\"keycloak-oidc.9b19439f-eaf3-4799-9c24-5f749470ca73\","
+                    + "\"brokerUserId\":\"keycloak-oidc.2b01a832-8337-4c9d-b260-2e0b6558786b\","
+                    + "\"email\":\"idpuser@test.de\","
+                    + "\"lastName\":\"user\","
+                    + "\"firstName\":\"idp\","
+                    + "\"modelUsername\":\"idpuser\","
+                    + "\"identityProviderId\":\"%s\""
+                    + "}",
+                                                                                                                           brokeredIdp));
         }
 
         when(client.getClientId()).thenReturn(clientId);

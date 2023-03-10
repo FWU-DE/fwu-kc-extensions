@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
@@ -12,12 +13,15 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.constants.AdapterConstants;
+import org.keycloak.models.FederatedIdentityModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
 import de.intension.authentication.rest.IdPAssignmentsClient;
@@ -29,7 +33,7 @@ public class WhitelistAuthenticator
     implements Authenticator, IdpHintParamName
 {
 
-    private static final Logger  logger = Logger.getLogger(WhitelistAuthenticator.class);
+    private static final Logger        logger = Logger.getLogger(WhitelistAuthenticator.class);
     private final IdPAssignmentsClient client;
 
     public WhitelistAuthenticator(IdPAssignmentsClient client)
@@ -58,23 +62,57 @@ public class WhitelistAuthenticator
      */
     private String getProviderIdFromContext(AuthenticationFlowContext context)
     {
-        String idpHintParamName = getIdpHintParamName(context);
-        String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
-        providerId = StringUtil.isNotBlank(providerId) ? providerId
-                : context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT);
-        if (StringUtil.isBlank(providerId)) {
-            try {
+        String flowPath = context.getFlowPath();
+
+        String providerId = null;
+        logger.infof("getProviderId - flowPath=%s", flowPath);
+        try {
+            if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
+                providerId = getProviderIdFromConfiguredOrDefaultIdpHint(context);
+
+                if (providerId == null) {
+                    providerId = getProviderIdFromFederatedIdentityModel(context);
+                }
+                logger.debugf("getProviderId - from URI = %s", providerId);
+            }
+            else if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
                 SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
                     .readFromAuthenticationSession(context.getAuthenticationSession(),
                                                    AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
                 if (serializedCtx != null) {
                     providerId = serializedCtx.getIdentityProviderId();
                 }
-            } catch (Exception e) {
-                logger.warn(e.getLocalizedMessage());
+                logger.debugf("getProviderId - from brokered context=%s", providerId);
             }
+            else if (LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)) {
+                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+                    .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                                   PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
+                if (serializedCtx != null) {
+                    providerId = serializedCtx.getIdentityProviderId();
+                }
+                logger.debugf("getProviderId - from post brokered context=%s", providerId);
+            }
+        } catch (Exception e) {
+            logger.warn(e.getLocalizedMessage());
         }
         return providerId;
+    }
+
+    private String getProviderIdFromConfiguredOrDefaultIdpHint(AuthenticationFlowContext context)
+    {
+        return Optional.ofNullable(context.getUriInfo().getQueryParameters().getFirst(getIdpHintParamName(context)))
+            .filter(StringUtil::isNotBlank)
+            .orElseGet(() -> context.getUriInfo().getQueryParameters().getFirst(AdapterConstants.KC_IDP_HINT));
+    }
+
+    private String getProviderIdFromFederatedIdentityModel(AuthenticationFlowContext context)
+    {
+        if (context.getSession().users() == null || context.getRealm() == null || context.getUser() == null) {
+            return null;
+        }
+        return context.getSession().users().getFederatedIdentitiesStream(context.getRealm(), context.getUser()).findFirst()
+            .map(FederatedIdentityModel::getIdentityProvider).orElse(null);
     }
 
     @Override
@@ -147,15 +185,17 @@ public class WhitelistAuthenticator
         if (config.containsKey(configKey)) {
             value = config.get(configKey);
         }
-        else if(defaultValue != null){
+        else if (defaultValue != null) {
             value = defaultValue;
-        } else {
+        }
+        else {
             logger.errorv("Provider %s - Parameter %s must not be null", WhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
         }
         return value;
     }
 
-    public IdPAssignmentsClient getClient(){
+    public IdPAssignmentsClient getClient()
+    {
         return client;
     }
 }
