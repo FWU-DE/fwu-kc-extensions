@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   keycloak:
-    container_name: keycloak
+    container_name: fwu-keycloak
     image: quay.io/keycloak/keycloak:20.0
     ports:
       - 18080:8080
@@ -101,5 +101,3 @@ networks:
     driver: bridge
     ipam:
       driver: default
-      config:
-        - subnet: 172.18.0.0/16
