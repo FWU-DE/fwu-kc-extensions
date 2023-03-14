@@ -26,7 +26,7 @@
 			"response": []
 		},
 		{
-			"name": "Get Authentication Flows",
+			"name": "CheckAuthenticatorConfig",
 			"event": [
 				{
 					"listen": "test",
@@ -76,7 +76,13 @@
 							"        const body = response.json();",
 							"        console.log(body);",
 							"        pm.test(`ExecutionConfig with ID ${execution.authenticationConfig} Should have all config set`, function () {",
-							"            pm.expect(response, \"No config found\").to.have.status(400);",
+							"            pm.expect(response, \"No config found\").to.have.status(200);",
+							"            pm.expect(typeof body.config).not.to.eql('undefined');",
+							"            const config = body.config",
+							"            pm.expect(config.authWhitelistRealm, \"Realm must not be empty\");",
+							"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must not be empty\");",
+							"            pm.expect(config.authWhiteListClientId, \"Client ID must not be empty\");",
+							"            pm.expect(config.userAttributeName, \"User Attribute must not be empty\");",
 							"        });",
 							"    }) ",
 							"}",
