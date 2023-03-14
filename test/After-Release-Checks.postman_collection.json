@@ -1,0 +1,169 @@
+{
+	"info": {
+		"_postman_id": "d5d2f9fc-3fcd-42f8-882e-296fa77faf28",
+		"name": "FWU After Release Checks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Client Scopes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/admin/realms/{{realm}}/clients",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"{{realm}}",
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Authentication Flows",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var response = pm.response.json();",
+							"const customFlowsToCheck = [\"school-whitelist-authenticator\", \"whitelist-authenticator\"];",
+							"const flows = response.filter(flow => flow.builtIn === false).map(flow => encodeURI(flow.alias));",
+							"flows.forEach(flow => console.log(flow));",
+							"pm.test(\"Should have Status code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Should have custom Authentication flows\", function () {",
+							"   pm.expect(flows.length).to.greaterThan(0);",
+							"});",
+							"",
+							"flows.forEach( flow => {",
+							"    var request = { ",
+							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm\") + \"/authentication/flows/\" + flow + \"/executions\",",
+							"        header:  {",
+							"            'Accept': 'application/json',",
+							"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+							"        }",
+							"    }",
+							"    pm.sendRequest(request, function (err, response) {",
+							"        const body = response.json();",
+							"        pm.test(\"Flow \"+ decodeURI(flow) + \" should have executions\", function () {",
+							"            pm.expect(response).to.have.status(200);",
+							"        });",
+							"        body.filter(execution => execution.configurable === true).filter(execution => ",
+							"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution));",
+							"    })",
+							"});",
+							"",
+							"function validateExecutionConfig(execution) {",
+							"    const configId = execution.authenticationConfig;",
+							"    console.log(`Checking if the config ${execution.authenticationConfig} is correct for ${execution.providerId}`);",
+							"    const request = { ",
+							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm\") + \"/authentication/config/\" + configId,",
+							"        header: {",
+							"            'Accept': 'application/json',",
+							"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+							"        }",
+							"    }",
+							"    const response = pm.sendRequest(request, function (err, response) {",
+							"        const body = response.json();",
+							"        console.log(body);",
+							"        pm.test(`ExecutionConfig with ID ${execution.authenticationConfig} Should have all config set`, function () {",
+							"            pm.expect(response, \"No config found\").to.have.status(400);",
+							"        });",
+							"    }) ",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/admin/realms/{{realm}}/authentication/flows",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"{{realm}}",
+						"authentication",
+						"flows"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const token = pm.globals.get(\"token\");",
+					"const tokenExpiresAt = pm.globals.get(\"token_expires_at\");",
+					"",
+					"// If token is null or expired",
+					"if (!token || tokenExpiresAt < (new Date()).getTime()) {",
+					"  ",
+					"    // Prepare a request to Keycloak for password grant",
+					"    const request = {",
+					"        url: pm.environment.get(\"authUrl\") + \"/realms/\" + \"master\" + \"/protocol/openid-connect/token\",",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Accept': 'application/json',",
+					"            'Content-Type': 'application/x-www-form-urlencoded',",
+					"        },",
+					"        body: {",
+					"            mode: 'urlencoded',",
+					"            urlencoded: [",
+					"                { key: 'grant_type', value: 'client_credentials' },",
+					"                { key: 'client_id', value: pm.environment.get(\"post-release-check-client-id\") },",
+					"                { key: 'client_secret', value: pm.environment.get(\"post-release-check-client-secret\") }",
+					"            ]",
+					"        }",
+					"    };",
+					"",
+					"    // Send the request and store access_token and expiration time in the environment variables",
+					"    pm.sendRequest(request,  function (err, response) {",
+					"        const body = response.json();",
+					"        pm.globals.set(\"token\", body.access_token);",
+					"        pm.globals.set(\"token_expires_at\", (new Date()).getTime() + body.expires_in);",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
