@@ -6,26 +6,6 @@
 	},
 	"item": [
 		{
-			"name": "Get Client Scopes",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{authUrl}}/admin/realms/{{realm}}/clients",
-					"host": [
-						"{{authUrl}}"
-					],
-					"path": [
-						"admin",
-						"realms",
-						"{{realm}}",
-						"clients"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "CheckAuthenticatorConfig",
 			"event": [
 				{
@@ -46,7 +26,7 @@
 							"",
 							"flows.forEach( flow => {",
 							"    var request = { ",
-							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm\") + \"/authentication/flows/\" + flow + \"/executions\",",
+							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/flows/\" + flow + \"/executions\",",
 							"        header:  {",
 							"            'Accept': 'application/json',",
 							"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
@@ -58,31 +38,34 @@
 							"            pm.expect(response).to.have.status(200);",
 							"        });",
 							"        body.filter(execution => execution.configurable === true).filter(execution => ",
-							"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution));",
+							"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution, flow));",
 							"    })",
 							"});",
 							"",
-							"function validateExecutionConfig(execution) {",
+							"function validateExecutionConfig(execution, flow) {",
 							"    const configId = execution.authenticationConfig;",
-							"    console.log(`Checking if the config ${execution.authenticationConfig} is correct for ${execution.providerId}`);",
+							"    const providerId = execution.providerId;",
+							"    console.log(`Checking flow ${flow}: config ${configId} provider: ${providerId}`);",
 							"    const request = { ",
-							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm\") + \"/authentication/config/\" + configId,",
+							"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/config/\" + configId,",
 							"        header: {",
 							"            'Accept': 'application/json',",
 							"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
 							"        }",
 							"    }",
-							"    const response = pm.sendRequest(request, function (err, response) {",
+							"    pm.sendRequest(request, function (err, response) {",
 							"        const body = response.json();",
-							"        console.log(body);",
-							"        pm.test(`ExecutionConfig with ID ${execution.authenticationConfig} Should have all config set`, function () {",
+							"        pm.test(`${flow} config for provider ${providerId} with ID ${configId} Should have all config set`, function () {",
 							"            pm.expect(response, \"No config found\").to.have.status(200);",
-							"            pm.expect(typeof body.config).not.to.eql('undefined');",
+							"            pm.expect(typeof body.config).to.not.eql('undefined');",
 							"            const config = body.config",
-							"            pm.expect(config.authWhitelistRealm, \"Realm must not be empty\");",
-							"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must not be empty\");",
-							"            pm.expect(config.authWhiteListClientId, \"Client ID must not be empty\");",
-							"            pm.expect(config.userAttributeName, \"User Attribute must not be empty\");",
+							"            pm.expect(config.authWhitelistRealm, \"Realm must not be empty\").to.not.undefined;",
+							"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must not be empty\").to.not.undefined;",
+							"            pm.expect(config.authWhiteListClientId, \"Client ID must not be empty\").to.not.undefined;",
+							"            if(providerId === 'school-whitelist-authenticator') {",
+							"                pm.expect(config.userAttributeName, \"User Attribute must not be empty\").to.not.undefined;",
+							"            }",
+							"            ",
 							"        });",
 							"    }) ",
 							"}",
@@ -96,16 +79,93 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{authUrl}}/admin/realms/{{realm}}/authentication/flows",
+					"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/flows",
 					"host": [
 						"{{authUrl}}"
 					],
 					"path": [
 						"admin",
 						"realms",
-						"{{realm}}",
+						"{{realm-to-check}}",
 						"authentication",
 						"flows"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update WhitelistAuthenticator",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": {{config_id}},\n    \"alias\": {{config_alias}},\n\t\"config\": {\n\t\t\"authWhiteListClientId\": \"{{iam-clientId}}\",\n\t\t\"authWhiteListClientIdSecret\": \"{{iam-clientSecret}}\",\n\t\t\"authWhitelistRealm\": \"{{realm-to-check}}\",\n\t\t\"idpHintParamName\": \"vidis_idp_hint\",\n\t\t\"listOfAllowedIdPs\": \"[\\n    { \\\"clientId\\\" : \\\"colors-o\\\", \\\"listOfIdPs\\\" : [\\\"aix-concept-o\\\", \\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"dlgi-moodle-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"edsi-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"sp-mathegym-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"account\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\", \\\"schulportal_m-v\\\", \\\"dllp\\\",\\\"idp-nd-sanis-o-t\\\", \\\"schullogin-sachsen-o\\\"]},\\n    { \\\"clientId\\\" : \\\"account-console\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\", \\\"schulportal_m-v\\\", \\\"dllp\\\", \\\"idp-nd-sanis-o-t\\\", \\\"schullogin-sachsen-o\\\"]},\\n    { \\\"clientId\\\" : \\\"sodix-editor-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"zumpad-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"uni-siegen-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"https://learn.uni-muenster.de/shibboleth\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\" : \\\"sp-avony-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\": \\\"springboot-demo\\\", \\\"listOfIdPs\\\" : [\\\"schulportal_m-v\\\",  \\\"BayernCloud\\\", \\\"portal_wobila\\\", \\\"nrw-logineo-s\\\", \\\"schullogin-sachsen-o\\\", \\\"schulportal-brandenburg-o\\\", \\\"idp-nd-sanis-o-t\\\"]},\\n    { \\\"clientId\\\": \\\"vidis-visa\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\", \\\"schulportal_m-v\\\"]},\\n    { \\\"clientId\\\": \\\"digitales-buecherregal-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    { \\\"clientId\\\": \\\"vidis-visa-g\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\", \\\"schulportal_m-v\\\"]},\\n    { \\\"clientId\\\": \\\"NBP-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    {  \\\"clientId\\\": \\\"bildungslogin-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\"]},\\n    {  \\\"clientId\\\": \\\"bettermarks-o-v2\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\", \\\"schulportal_m-v\\\"]},\\n    {  \\\"clientId\\\": \\\"bettermarks-o\\\", \\\"listOfIdPs\\\" : [\\\"vidis-idp\\\",\\\"schulportal_m-v\\\", \\\"idp-nd-sanis-o-t\\\"]},\\n    { \\\"clientId\\\": \\\"Intension-Test\\\", \\\"listOfIdPs\\\": [\\\"idp-nd-sanis-o-t\\\"]}\\n]\"\n\t}\n}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/config/:config_id",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"{{realm-to-check}}",
+						"authentication",
+						"config",
+						":config_id"
+					],
+					"variable": [
+						{
+							"key": "config_id",
+							"value": "{{config_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Post Login-Flow matches First Broker Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const identityProviders = pm.response.json()",
+							"",
+							"identityProviders.forEach(idp => {",
+							"    if (idp.firstBrokerLoginFlowAlias === 'VIDIS Login Flow') {",
+							"        pm.test( `IDP ${idp.alias} with Vidis Login Flow should use Vidis Post Login Flow as postBrokerLoginFlow`, () => {",
+							"            pm.expect(idp.postBrokerLoginFlowAlias).to.eq('VIDIS Post Login Flow');",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"{{realm-to-check}}",
+						"identity-provider",
+						"instances"
 					]
 				}
 			},
