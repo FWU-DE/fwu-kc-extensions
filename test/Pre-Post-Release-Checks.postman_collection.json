@@ -1,0 +1,342 @@
+{
+	"info": {
+		"_postman_id": "d5d2f9fc-3fcd-42f8-882e-296fa77faf28",
+		"name": "Pre-/Post Release Checks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check Authenticator Config",
+			"item": [
+				{
+					"name": "CheckAuthenticatorConfig",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"const customFlowsToCheck = [\"school-whitelist-authenticator\", \"whitelist-authenticator\"];",
+									"const flows = response.filter(flow => flow.builtIn === false).map(flow => encodeURI(flow.alias));",
+									"// flows.forEach(flow => console.log(flow));",
+									"pm.test(\"Should have Status code 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Should have custom Authentication flows\", function () {",
+									"   pm.expect(flows.length).to.greaterThan(0);",
+									"});",
+									"",
+									"flows.forEach( flow => {",
+									"    var request = { ",
+									"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/flows/\" + flow + \"/executions\",",
+									"        header:  {",
+									"            'Accept': 'application/json',",
+									"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+									"        }",
+									"    }",
+									"    pm.sendRequest(request, function (err, response) {",
+									"        const body = response.json();",
+									"        pm.test(\"Flow \"+ decodeURI(flow) + \" should have executions\", function () {",
+									"            pm.expect(response).to.have.status(200);",
+									"        });",
+									"        body.filter(execution => execution.configurable === true).filter(execution => ",
+									"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution, flow));",
+									"    })",
+									"});",
+									"",
+									"function validateExecutionConfig(execution, flow) {",
+									"    const configId = execution.authenticationConfig;",
+									"    const providerId = execution.providerId;",
+									"    ",
+									"    console.log(`Checking flow \"${decodeURI(flow)}\": config ${configId} provider: ${providerId}`);",
+									"    const request = { ",
+									"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/config/\" + configId,",
+									"        header: {",
+									"            'Accept': 'application/json',",
+									"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+									"        }",
+									"    }",
+									"    const alias = execution.alias;",
+									"    pm.sendRequest(request, function (err, response) {",
+									"        const body = response.json();",
+									"        pm.test(`\"${decodeURI(flow)}\" config for provider ${providerId} with ID ${configId} and alias ${alias} Should have all config set`, function () {",
+									"            pm.expect(response, \"No config found\").to.have.status(200);",
+									"            pm.expect(typeof body.config).to.not.eql('undefined');",
+									"            const config = body.config",
+									"            pm.expect(config.authWhitelistRealm, \"Realm must not be empty\").to.not.undefined;",
+									"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must not be empty\").to.not.undefined;",
+									"            pm.expect(config.authWhiteListClientId, \"Client ID must not be empty\").to.not.undefined;",
+									"            if(providerId === 'school-whitelist-authenticator') {",
+									"                pm.expect(config.userAttributeName, \"User Attribute must not be empty\").to.not.undefined;",
+									"            }",
+									"            ",
+									"        });",
+									"    }) ",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/flows",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"authentication",
+								"flows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get WhitelistAuth Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"pm.test(\"Config should have alias\", function () {",
+									"   pm.expect(response.alias).to.not.undefined;",
+									"});",
+									"pm.collectionVariables.set(\"config_alias\", response.alias);",
+									"pm.collectionVariables.set(\"config_id\", response.id);",
+									"if(typeof response.config.listOfAllowedIdPs != 'undefined'){",
+									"    pm.collectionVariables.set(\"idp-whitelist\", response.config.listOfAllowedIdPs);",
+									"} else {",
+									"    pm.collectionVariables.set(\"idp-whitelist\", null);",
+									"}",
+									"",
+									"if(typeof response.config.idpHintParamName != 'undefined'){",
+									"    pm.collectionVariables.set(\"idp-hint-param-name\", response.config.idpHintParamName);",
+									"} else {",
+									"    pm.collectionVariables.set(\"idp-hint-param-name\", null);",
+									"    console.log(\"setting idpHintParamName to n.a.\")",
+									"}",
+									"if(typeof response.userAttributeName != 'undefined'){",
+									"    pm.collectionVariables.set(\"userAttributeName\", response.config.userAttributeName);",
+									"} else {",
+									"    console.log(\"setting userAttributeName to null\")",
+									"    pm.collectionVariables.set(\"userAttributeName\", null)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/config/:config_id",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"authentication",
+								"config",
+								":config_id"
+							],
+							"variable": [
+								{
+									"key": "config_id",
+									"value": "1a8b5cf5-0b50-4939-916e-783654b0d0c0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update WhitelistAuthenticator",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{config_id}}\",\n    \"alias\": \"{{config_alias}}\",\n    \"config\": {\n        \"authWhiteListClientId\": \"{{iam-clientId}}\",\n        \"authWhiteListClientIdSecret\": \"{{iam-clientSecret}}\",\n        \"authWhitelistRealm\": \"{{realm-to-check}}\",\n        \"idpHintParamName\": \"{{idp-hint-param-name}}\",\n        \"listOfAllowedIdPs\": \"{{idp-whitelist}}\",\n        \"userAttributeName\": \"{{userAttributeName}}\"\n\t}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/config/:config_id",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"authentication",
+								"config",
+								":config_id"
+							],
+							"variable": [
+								{
+									"key": "config_id",
+									"value": "{{config_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Check Post Login-Flow matches First Broker Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const identityProviders = pm.response.json()",
+							"",
+							"identityProviders.forEach(idp => {",
+							"    if (idp.firstBrokerLoginFlowAlias === 'VIDIS Login Flow') {",
+							"        pm.test( `IDP ${idp.alias} with Vidis Login Flow should use Vidis Post Login Flow as postBrokerLoginFlow`, () => {",
+							"            pm.expect(idp.postBrokerLoginFlowAlias).to.eq('VIDIS Post Login Flow');",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+					"host": [
+						"{{authUrl}}"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"{{realm-to-check}}",
+						"identity-provider",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const token = pm.globals.get(\"token\");",
+					"const tokenExpiresAt = pm.globals.get(\"token_expires_at\");",
+					"",
+					"// If token is null or expired",
+					"if (!token || tokenExpiresAt < (new Date()).getTime()) {",
+					"  ",
+					"    // Prepare a request to Keycloak for password grant",
+					"    const request = {",
+					"        url: pm.environment.get(\"authUrl\") + \"/realms/\" + \"master\" + \"/protocol/openid-connect/token\",",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Accept': 'application/json',",
+					"            'Content-Type': 'application/x-www-form-urlencoded',",
+					"        },",
+					"        body: {",
+					"            mode: 'urlencoded',",
+					"            urlencoded: [",
+					"                { key: 'grant_type', value: 'client_credentials' },",
+					"                { key: 'client_id', value: pm.environment.get(\"post-release-check-client-id\") },",
+					"                { key: 'client_secret', value: pm.environment.get(\"post-release-check-client-secret\") }",
+					"            ]",
+					"        }",
+					"    };",
+					"",
+					"    // Send the request and store access_token and expiration time in the environment variables",
+					"    pm.sendRequest(request,  function (err, response) {",
+					"        const body = response.json();",
+					"        pm.globals.set(\"token\", body.access_token);",
+					"        pm.globals.set(\"token_expires_at\", (new Date()).getTime() + body.expires_in);",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "config_id",
+			"value": "9ec791cd-e595-4485-83de-8f46e2040d48",
+			"type": "default"
+		},
+		{
+			"key": "config_alias",
+			"value": "client IdP config",
+			"type": "default"
+		},
+		{
+			"key": "idp-hint-param-name",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "userAttributeName",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "idp-whitelist",
+			"value": ""
+		}
+	]
+}
