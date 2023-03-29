@@ -17,7 +17,7 @@ public class Person
 {
 
     @JsonProperty(UserInfoAttributeNames.NAME)
-    private PersonName      person;
+    private PersonName personName;
     @JsonProperty(UserInfoAttributeNames.GEBURT)
     private Geburt          geburt;
     @JsonProperty(UserInfoAttributeNames.GESCHLECHT)
@@ -27,10 +27,13 @@ public class Person
     @JsonProperty(UserInfoAttributeNames.VERTRAUENSSTUFE)
     private Vertrauensstufe vertrauensstufe;
 
+    @JsonProperty(UserInfoAttributeNames.GRUPPE_REFERRER)
+    private GruppenId referrer;
+
     @JsonIgnore
     public boolean isEmpty()
     {
-        return (person == null || person.isEmpty()) && (geburt == null || geburt.isEmpty()) && geschlecht == null && lokalisierung == null
-                && vertrauensstufe == null;
+        return (personName == null || personName.isEmpty()) && (geburt == null || geburt.isEmpty()) && geschlecht == null && lokalisierung == null
+                && vertrauensstufe == null && (referrer == null || referrer.isEmpty());
     }
 }

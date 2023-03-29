@@ -22,10 +22,11 @@ import de.intension.api.json.*;
 public class UserInfoHelper
 {
 
-    protected static final Logger           logger                = Logger.getLogger(UserInfoHelper.class);
-    private static final String             LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
-    private static final UserBirthdayHelper birthdayHelper        = new UserBirthdayHelper();
-    private static final IdpHelper          idpHelper             = new IdpHelper();
+    protected static final Logger                  logger                = Logger.getLogger(UserInfoHelper.class);
+    private static final String                    LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
+    private static final UserBirthdayHelper        birthdayHelper        = new UserBirthdayHelper();
+    private static final UserVolljaehrigkeitHelper volljaehrigkeitHelper = new UserVolljaehrigkeitHelper();
+    private static final IdpHelper                 idpHelper             = new IdpHelper();
 
     /**
      * Create userInfo attribute from users attributes.
@@ -67,7 +68,7 @@ public class UserInfoHelper
     {
         Personenkontext kontext = new Personenkontext();
         Rolle rolle = getRolle(user, -1);
-        kontext.setKtid(getKit(user, heimatOrgId, rolle, -1));
+        kontext.setId(getKit(user, heimatOrgId, rolle, -1));
         Organisation organisation = getOrganisation(mappingModel, user, heimatOrgId, rolle, userInfo);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
@@ -175,13 +176,23 @@ public class UserInfoHelper
     private void addGeburt(Person person, ProtocolMapperModel mappingModel, UserModel user)
     {
         String geburtsdatum = resolveSingleAttributeValue(user, PERSON_GEBURTSDATUM);
+        String geburtsort = resolveSingleAttributeValue(user, PERSON_GEBURTSORT);
+        Integer age = null;
         if (birthdayHelper.isValidBirthdayFormat(geburtsdatum)) {
             Geburt geburt = new Geburt();
             if (isActive(PERSON_GEBURTSDATUM, mappingModel)) {
                 geburt.setDatum(geburtsdatum);
             }
+            if (isActive(PERSON_GEBURTSORT, mappingModel)) {
+                geburt.setGeburtsort(geburtsort);
+            }
             if (isActive(PERSON_ALTER, mappingModel)) {
-                geburt.setAlter(birthdayHelper.calculateAge(geburtsdatum));
+                age = birthdayHelper.calculateAge(geburtsdatum);
+                geburt.setAlter(age);
+            }
+            if (isActive(PERSON_VOLLJAEHRIG, mappingModel)) {
+                age = age == null ? birthdayHelper.calculateAge(geburtsdatum): age;
+                geburt.setVolljaehrig(volljaehrigkeitHelper.isVolljaehrig(age));
             }
             if (!geburt.isEmpty()) {
                 person.setGeburt(geburt);
@@ -219,7 +230,7 @@ public class UserInfoHelper
             }
         }
         if (!personName.isEmpty()) {
-            person.setPerson(personName);
+            person.setPersonName(personName);
         }
     }
 
@@ -285,7 +296,7 @@ public class UserInfoHelper
     {
         Rolle rolle = getRolle(user, i);
         Personenkontext kontext = new Personenkontext();
-        kontext.setKtid(getKit(user, heimatOrgId, rolle, i));
+        kontext.setId(getKit(user, heimatOrgId, rolle, i));
         Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgId, rolle, i, userInfo);
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
@@ -472,7 +483,7 @@ public class UserInfoHelper
     private boolean isActive(UserInfoAttribute userInfoAttribute, ProtocolMapperModel mappingModel)
     {
         String value = mappingModel.getConfig().get(userInfoAttribute.getAttributeName());
-        return Boolean.valueOf(value);
+        return Boolean.parseBoolean(value);
     }
 
 }

@@ -8,7 +8,9 @@
       "initialenVorname": "M"
     },
     "geburt": {
-      "datum": "2010-01-01"
+      "datum": "2010-01-01",
+      "geburtsort": "Ostfildern, Deutschland",
+      "volljaehrig": "NEIN"
     },
     "geschlecht": "d",
     "lokalisierung": "de-DE",

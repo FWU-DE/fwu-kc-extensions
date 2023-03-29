@@ -100,6 +100,8 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_VORNAME_INITIALEN.getAttributeName(), "M");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_AKRONYM.getAttributeName(), "MaMu");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_GEBURTSDATUM.getAttributeName(), AgeValueMatcher.DATE_OF_BIRTH);
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_GEBURTSORT.getAttributeName(), "Ostfildern, Deutschland");
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_VOLLJAEHRIG.getAttributeName(), "Nein");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_GESCHLECHT.getAttributeName(), "D");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_LOKALISIERUNG.getAttributeName(), "de-DE");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_VERTRAUENSSTUFE.getAttributeName(), "VOLL");
