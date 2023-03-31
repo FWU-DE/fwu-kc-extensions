@@ -7,7 +7,7 @@
   <parent>
     <groupId>de.intension</groupId>
     <artifactId>fwu-kc-extensions</artifactId>
-    <version>${projectVersion}</version>
+    <version>${revision}</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -17,11 +17,6 @@
   <packaging>jar</packaging>
 
   <dependencies>
-    <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>

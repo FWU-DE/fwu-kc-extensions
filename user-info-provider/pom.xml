@@ -5,7 +5,7 @@
   <parent>
     <artifactId>fwu-kc-extensions</artifactId>
     <groupId>de.intension</groupId>
-    <version>${projectVersion}</version>
+    <version>${revision}</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -73,9 +73,9 @@
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
             <manifestEntries>
-              <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi, org.keycloak.keycloak-server-spi-private,
-                org.keycloak.keycloak-services,
-                org.keycloak.keycloak-saml-core
+              <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi,
+                org.keycloak.keycloak-server-spi-private,
+                org.keycloak.keycloak-services, org.keycloak.keycloak-saml-core, com.fasterxml.jackson.datatype.jsr310
               </Dependencies>
             </manifestEntries>
           </archive>
