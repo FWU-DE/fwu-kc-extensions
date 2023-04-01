@@ -10,10 +10,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
@@ -24,12 +26,29 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
+
 import de.intension.api.UserInfoAttribute;
+import de.intension.api.json.GruppeWithZugehoerigkeit;
+import de.intension.mapper.user.UserInfoHelper;
 
 class UserInfoProviderMapperTest
 {
 
     private static final String SUB = "af3a88fc-d766-11ec-9d64-0242ac120002";
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeAll
+    static void setupObjectMapper()
+    {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @Test
     void should_map_all_user_attributes_to_userInfo_claim()
@@ -88,6 +107,7 @@ class UserInfoProviderMapperTest
     }
 
     private UserSessionModel createUserModel()
+        throws IOException
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
         RealmModel realm = getTestRealm();
@@ -111,14 +131,31 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ROLLE.getAttributeName(), "LEHR");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_STATUS.getAttributeName(), "INAKTIV");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ORG_VIDIS_ID.getAttributeName(), "vidis.id");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_TYP, 0), "SCHULE");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_STATUS, 0), "AKTIV");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_TYP, 0), "SCHULE");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_STATUS, 0), "AKTIV");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_LOESCHUNG, 0),
+                                     "{\"zeitpunkt\": \"2099-12-31T23:59Z\"}");
+        List<String> gruppen = getGruppenJson();
+        for (int i = 0; i < gruppen.size(); i++) {
+            userModel.setSingleAttribute(String.format("%s[%d]", UserInfoAttribute.PERSON_KONTEXT_GRUPPEN.getAttributeName(), i), gruppen.get(i));
+        }
+        userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_LOESCHUNG.getAttributeName(), "{\"zeitpunkt\":\"2099-12-31T23:59Z\"}");
         when(userSessionModel.getUser()).thenReturn(userModel);
         when(userSessionModel.getRealm()).thenReturn(realm);
         return userSessionModel;
+    }
+
+    private List<String> getGruppenJson()
+        throws IOException
+    {
+        List<GruppeWithZugehoerigkeit> gruppen = objectMapper.readValue(Resources.getResource("de/intension/mapper/oidc/gruppen.json"),
+                                                                        new TypeReference<List<GruppeWithZugehoerigkeit>>() {});
+        String gruppenJson = objectMapper.writeValueAsString(gruppen);
+
+        return ImmutableList.copyOf(Splitter.fixedLength(255).split(gruppenJson));
     }
 
     private UserSessionModel createDefaultUserModel()
@@ -133,17 +170,12 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ORG_KENNUNG.getAttributeName(), "5555");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ORG_NAME.getAttributeName(), "Test-Schule");
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ROLLE.getAttributeName(), "LEHR");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
-        userModel.setSingleAttribute(getArrayAttName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG, 0), "NI_12345");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME, 0), "Muster-Schule");
+        userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE, 0), "LERN");
         when(userSessionModel.getUser()).thenReturn(userModel);
         when(userSessionModel.getRealm()).thenReturn(realm);
         return userSessionModel;
-    }
-
-    private String getArrayAttName(UserInfoAttribute uia, int index)
-    {
-        return uia.getAttributeName().replace("#", String.valueOf(index));
     }
 
     /**

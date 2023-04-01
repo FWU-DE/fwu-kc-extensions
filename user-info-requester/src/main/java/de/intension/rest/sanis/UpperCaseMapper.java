@@ -1,5 +1,8 @@
 package de.intension.rest.sanis;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import de.intension.rest.BaseMapper;
 
 public class UpperCaseMapper extends BaseMapper
@@ -11,11 +14,8 @@ public class UpperCaseMapper extends BaseMapper
     }
 
     @Override
-    public String mapValue(String value)
+    public List<String> mapValue(Object document, String jsonPath)
     {
-        if (value != null) {
-            return value.toUpperCase();
-        }
-        return value;
+        return super.mapValue(document, jsonPath).stream().map(String::toUpperCase).collect(Collectors.toList());
     }
 }

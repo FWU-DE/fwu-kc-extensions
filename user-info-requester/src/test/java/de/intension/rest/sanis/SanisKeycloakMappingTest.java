@@ -31,7 +31,6 @@ class SanisKeycloakMappingTest
         BrokeredIdentityContext context = new BrokeredIdentityContext("12345");
         IKeycloakApiMapper mapper = new SanisKeycloakMapping();
         mapper.addAttributesToResource(context, userInfoJson);
-        assertEquals(15, context.getContextData().size());
         assertEquals("Max", context.getUserAttribute(PERSON_VORNAME.getAttributeName()));
         assertEquals("M", context.getUserAttribute(PERSON_VORNAME_INITIALEN.getAttributeName()));
         assertEquals("Muster", context.getUserAttribute(PERSON_FAMILIENNAME.getAttributeName()));
@@ -47,5 +46,7 @@ class SanisKeycloakMappingTest
         assertEquals("SCHULE", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_TYP.getAttributeName().replace("#", "0")));
         assertEquals("LERN", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ROLLE.getAttributeName().replace("#", "0")));
         assertEquals("AKTIV", context.getUserAttribute(PERSON_KONTEXT_ARRAY_STATUS.getAttributeName().replace("#", "0")));
+        assertEquals("2099-12-31T23:59Z", context.getUserAttribute(PERSON_KONTEXT_ARRAY_LOESCHUNG.getAttributeName().replace("#", "0")));
+        assertEquals(22, context.getContextData().size());
     }
 }

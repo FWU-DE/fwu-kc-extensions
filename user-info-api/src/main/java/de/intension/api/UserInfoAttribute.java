@@ -52,7 +52,10 @@ public enum UserInfoAttribute
             "Rolle der Person innerhalb der Organisation. Werte: " + Rolle.prettyPrint()),
     PERSON_KONTEXT_STATUS(UserInfoAttributeNames.PERSON_KONTEXT_STATUS, UserInfoAttributeNames.PERSON_KONTEXT_STATUS, Boolean.TRUE, PersonenStatus.AKTIV,
             "Status, den eine Person in einer Organisation in Bezug auf eine bestimmte Rolle hat. Werte: " + PersonenStatus.prettyPrint()),
-    //person context array
+    PERSON_KONTEXT_GRUPPEN(UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, Boolean.TRUE, null,
+            "Gruppen im Personenkontext, denen die Person zugeordnet ist."),
+    PERSON_KONTEXT_LOESCHUNG(UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, Boolean.TRUE, null,
+            "Datum zu dem dieser Personenkontext nicht mehr gültig ist und gelöscht wird."),
     PERSON_KONTEXT_ARRAY_ID(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ID, UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ID, Boolean.TRUE, null,
             null),
     PERSON_KONTEXT_ARRAY_ORG_ID(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_ID, UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_ID, Boolean.TRUE,
@@ -66,9 +69,13 @@ public enum UserInfoAttribute
             null),
     PERSON_KONTEXT_ARRAY_ORG_TYP(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_TYP, UserInfoAttributeNames.PERSON_KONTEXT_ORG_TYP, Boolean.TRUE,
             OrganisationsTyp.SCHULE, null),
+
     PERSON_KONTEXT_ARRAY_ROLLE(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ROLLE, UserInfoAttributeNames.PERSON_KONTEXT_ROLLE, Boolean.FALSE, null, null),
     PERSON_KONTEXT_ARRAY_STATUS(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_STATUS, UserInfoAttributeNames.PERSON_KONTEXT_STATUS, Boolean.TRUE,
-            PersonenStatus.AKTIV, null);
+            PersonenStatus.AKTIV, null),
+    PERSON_KONTEXT_ARRAY_GRUPPEN(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_GRUPPEN, UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, Boolean.TRUE, null, null),
+    PERSON_KONTEXT_ARRAY_LOESCHUNG(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_LOESCHUNG, UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, Boolean.TRUE, null,
+            null);
 
     private final String  attributeName;
     private final String  label;

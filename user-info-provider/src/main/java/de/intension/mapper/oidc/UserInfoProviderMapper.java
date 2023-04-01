@@ -58,6 +58,8 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         addConfigEntry(PERSON_KONTEXT_ORG_TYP);
         addConfigEntry(PERSON_KONTEXT_ROLLE);
         addConfigEntry(PERSON_KONTEXT_STATUS);
+        addConfigEntry(PERSON_KONTEXT_GRUPPEN);
+        addConfigEntry(PERSON_KONTEXT_LOESCHUNG);
         addOnlyChildrenClaims();
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserInfoProviderMapper.class);
         setDefaultTokenClaimNameValue();

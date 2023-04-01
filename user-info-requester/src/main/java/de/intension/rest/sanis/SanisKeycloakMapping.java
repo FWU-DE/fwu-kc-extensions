@@ -3,15 +3,20 @@ package de.intension.rest.sanis;
 import static de.intension.api.UserInfoAttribute.*;
 
 import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.UserModel;
 
+import com.google.common.base.Splitter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.PathNotFoundException;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 import de.intension.api.UserInfoAttribute;
 import de.intension.rest.BaseMapper;
@@ -26,12 +31,17 @@ public class SanisKeycloakMapping
     private static final EnumMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
     private static final EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
 
+    private static final JsonProvider                             jsonProvider   = Configuration.builder().mappingProvider(new JacksonMappingProvider()).build()
+        .jsonProvider();
+
     private static EnumMap<UserInfoAttribute, IValueMapper> initPerson()
     {
         EnumMap<UserInfoAttribute, IValueMapper> personMapping = new EnumMap<>(UserInfoAttribute.class);
         personMapping.put(PERSON_FAMILIENNAME, new BaseMapper("$.person.name.familienname"));
         personMapping.put(PERSON_VORNAME, new BaseMapper("$.person.name.vorname"));
         personMapping.put(PERSON_GEBURTSDATUM, new BaseMapper("$.person.geburt.datum"));
+        personMapping.put(PERSON_GEBURTSORT, new BaseMapper("$.person.geburt.geburtsort"));
+        personMapping.put(PERSON_VOLLJAEHRIG, new UpperCaseMapper("$.person.geburt.volljaehrig"));
         personMapping.put(PERSON_GESCHLECHT, new UpperCaseMapper("$.person.geschlecht"));
         personMapping.put(PERSON_LOKALISIERUNG, new BaseMapper("$.person.lokalisierung"));
         personMapping.put(PERSON_VERTRAUENSSTUFE, new UpperCaseMapper("$.person.vertrauensstufe"));
@@ -43,13 +53,15 @@ public class SanisKeycloakMapping
     private static EnumMap<UserInfoAttribute, IValueMapper> initKontext()
     {
         EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = new EnumMap<>(UserInfoAttribute.class);
-        kontextMapping.put(PERSON_KONTEXT_ARRAY_ID, new BaseMapper("$.personenkontexte[#].ktid"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ID, new BaseMapper("$.personenkontexte[#].id"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ID, new BaseMapper("$.personenkontexte[#].organisation.orgid"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new UpperCaseMapper("$.personenkontexte[#].organisation.typ"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new UpperCaseMapper("$.personenkontexte[#].rolle"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new UpperCaseMapper("$.personenkontexte[#].personenstatus"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_LOESCHUNG, new UpperCaseMapper("$.personenkontexte[#].loeschung.zeitpunkt"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_GRUPPEN, new GruppenMapper("$.personenkontexte[#].gruppen"));
         return kontextMapping;
     }
 
@@ -57,7 +69,7 @@ public class SanisKeycloakMapping
     public void addAttributesToResource(Object resource, String userInfo)
     {
         try {
-            Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
+            Object document = jsonProvider.parse(userInfo);
             personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
             Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
             if (numberOfKontexte != null) {
@@ -86,19 +98,32 @@ public class SanisKeycloakMapping
                     attributeName = attributeName.replace("#", index.toString());
                     jsonPath = jsonPath.replace("#", index.toString());
                 }
-                String value = JsonPath.read(document, jsonPath);
-                if (value != null) {
-                    value = mapper.mapValue(value);
-                    if (resource instanceof BrokeredIdentityContext) {
-                        ((BrokeredIdentityContext)resource).setUserAttribute(attributeName, value);
-                    }
-                    else if (resource instanceof UserModel) {
-                        ((UserModel)resource).setSingleAttribute(attributeName, value);
+                List<String> values = mapper.mapValue(document, jsonPath);
+                for (int i = 0; i < values.size(); i++) {
+                    String attribute = values.size() == 1 ? attributeName : String.format("%s[%d]", attributeName, i);
+                    Iterator<String> iterator = Splitter.fixedLength(255).split(values.get(i)).iterator();
+                    String value = iterator.next();
+                    setAttribute(resource, attribute, value, null);
+                    int overflow = 1;
+                    while (iterator.hasNext()) {
+                        value = iterator.next();
+                        setAttribute(resource, attribute, value, overflow);
                     }
                 }
             } catch (PathNotFoundException e) {
                 logger.debugf("Path not found for %s", mapper.getJsonPath());
             }
+        }
+    }
+
+    private static void setAttribute(Object resource, String attributeName, String value, Integer overflow)
+    {
+        String key = overflow == null ? attributeName : attributeName + "_" + overflow;
+        if (resource instanceof BrokeredIdentityContext) {
+            ((BrokeredIdentityContext)resource).setUserAttribute(key, value);
+        }
+        else if (resource instanceof UserModel) {
+            ((UserModel)resource).setSingleAttribute(key, value);
         }
     }
 
