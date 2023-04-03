@@ -49,7 +49,7 @@ class GruppeTest
                 new GruppenZugehoerigkeit(Collections.singletonList(Rolle.LEHR)));
 
         assertEquals("{\"gruppe\":{\"id\":\"GruppenId\",\"mandant\":\"mandant\",\"orgid\":\"orgId\",\"referrer\":\"referrerId\",\"bezeichnung\":\"GruppeX\",\"thema\":\"ThemaX\",\"beschreibung\":\"GruppeX sucks\",\"typ\":\"KLASSE\",\"bereich\":\"PFLICHT\",\"optionen\":[\"01\"],\"differenzierung\":\"E\",\"bildungsziele\":[\"GS\"],\"jahrgangsstufen\":[\"JS_01\"],\"faecher\":[{\"code\":\"BI\"}],\"referenzgruppen\":[{\"id\":\"ReferenzGruppenId\",\"rollen\":[\"LEHR\"]}],\"laufzeit\":{\"von\":\"2023-03-31\",\"bis\":\"2023-03-31\"},\"revision\":\"Revision1\"},\"gruppenzugehoerigkeit\":{\"rollen\":[\"LEHR\"]}}",
-                     objectMapper.writeValueAsString(gruppeWithZugehoerigkeit));
+                     gruppeWithZugehoerigkeit.getJsonRepresentation());
     }
 
 }

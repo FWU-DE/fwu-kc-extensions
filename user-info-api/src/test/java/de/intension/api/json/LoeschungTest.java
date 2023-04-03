@@ -21,7 +21,7 @@ class LoeschungTest
         objectMapper.registerModule(new JavaTimeModule());
 
         Loeschung loeschung = new Loeschung(LocalDateTime.of(2099, 12, 31, 23, 59));
-        assertEquals("{\"zeitpunkt\":\"2099-12-31T23:59Z\"}", objectMapper.writeValueAsString(loeschung));
+        assertEquals("{\"zeitpunkt\":\"2099-12-31T23:59Z\"}", loeschung.getJsonRepresentation());
     }
 
 }
