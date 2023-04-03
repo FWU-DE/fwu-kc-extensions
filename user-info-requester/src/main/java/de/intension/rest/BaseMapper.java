@@ -24,7 +24,7 @@ public class BaseMapper
     @Override
     public List<String> mapValue(Object document, String jsonPath)
     {
-        String value = JsonPath.parse(document).read(jsonPath, String.class);
+        String value = JsonPath.read(document, jsonPath);
         return Collections.singletonList(value);
     }
 }

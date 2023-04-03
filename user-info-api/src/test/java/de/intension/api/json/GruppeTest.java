@@ -24,8 +24,8 @@ class GruppeTest
         objectMapper.registerModule(new JavaTimeModule());
 
         Laufzeit laufzeit = new Laufzeit();
-        laufzeit.setVon(LocalDate.now());
-        laufzeit.setBis(LocalDate.now());
+        laufzeit.setVon(LocalDate.of(2023, 3, 31));
+        laufzeit.setBis(LocalDate.of(2023, 3, 31));
         Gruppe gruppe = new Gruppe(new GruppenId("GruppenId"),
                 "mandant",
                 "orgId",

@@ -15,8 +15,6 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.PathNotFoundException;
-import com.jayway.jsonpath.spi.json.JsonProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 import de.intension.api.UserInfoAttribute;
 import de.intension.rest.BaseMapper;
@@ -30,9 +28,6 @@ public class SanisKeycloakMapping
     protected static final Logger                                 logger         = Logger.getLogger(SanisKeycloakMapping.class);
     private static final EnumMap<UserInfoAttribute, IValueMapper> personMapping  = initPerson();
     private static final EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = initKontext();
-
-    private static final JsonProvider                             jsonProvider   = Configuration.builder().mappingProvider(new JacksonMappingProvider()).build()
-        .jsonProvider();
 
     private static EnumMap<UserInfoAttribute, IValueMapper> initPerson()
     {
@@ -69,7 +64,7 @@ public class SanisKeycloakMapping
     public void addAttributesToResource(Object resource, String userInfo)
     {
         try {
-            Object document = jsonProvider.parse(userInfo);
+            Object document = Configuration.defaultConfiguration().jsonProvider().parse(userInfo);
             personMapping.forEach((uia, mapper) -> addAttributeToResource(uia, mapper, document, resource, null));
             Integer numberOfKontexte = JsonPath.read(document, "$.personenkontexte.length()");
             if (numberOfKontexte != null) {
