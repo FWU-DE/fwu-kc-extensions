@@ -2,21 +2,19 @@ version: '3.7'
 services:
   keycloak:
     container_name: fwu-keycloak
-    image: quay.io/keycloak/keycloak:20.0
-    ports:
-      - 18080:8080
-      - 8787:8787
+    image: quay.io/keycloak/keycloak:20.0.5
     environment:
+      KC_HTTP_PORT: 18080
       KC_HTTP_RELATIVE_PATH: "/auth"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: keycloak
       KC_DB_URL_HOST: postgres
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: password
-      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
-      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/service-provider/%s/idp-assignments
-      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
-      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/school-assignments
+      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:18080/auth
+      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL: http://localhost:1080/service-provider/%s/idp-assignments
+      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:18080/auth
+      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_REST_URL: http://localhost:1080/school-assignments
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
@@ -31,18 +29,8 @@ services:
       - "../../fwu-idp-theme/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
       - "../../fwu-idp-theme/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
-      - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
-      - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/keycloak/providers/hmac-mapper.jar"
-      - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/keycloak/providers/whitelist-authenticator.jar"
-      - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/keycloak/providers/whitelist-authenticator-schools.jar"
-      - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/keycloak/providers/multi-value-user-attribute-mapper.jar"
-      - "../acronym-mapper/target/acronym-mapper-docker.jar:/opt/keycloak/providers/acronym-mapper.jar"
-      - "../school-mapper/target/school-mapper-docker.jar:/opt/keycloak/providers/school-mapper.jar"
-      - "../user-info-provider/target/user-info-provider-docker.jar:/opt/keycloak/providers/user-info-provider.jar"
-      - "../user-info-requester/target/user-info-requester-docker.jar:/opt/keycloak/providers/user-info-requester.jar"
-      - "../user-info-api/target/user-info-api-docker.jar:/opt/keycloak/providers/user-info-api.jar"
-    networks:
-      - fwunet
+      - "./providers:/opt/keycloak/providers/"
+    network_mode: host
     depends_on:
       - idp_mock
 
@@ -50,29 +38,24 @@ services:
     container_name: postgres
     image: postgres
     restart: always
-    ports:
-      - 5432:5432
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
-    networks:
-      - fwunet
+    network_mode: host
 
   idp_mock:
     container_name: idp-mock
     image: ghcr.io/navikt/mock-oauth2-server:0.5.1
-    ports:
-      - 8443:8080
-    networks:
-      - fwunet
+    environment:
+      SERVER_PORT: 8443
+    network_mode: host
 
   saml_idp:
     container_name: saml-idp-mock
     image: quay.io/keycloak/keycloak:20.0
-    ports:
-      - 18443:8080
     environment:
+      KC_HTTP_PORT: 18443
       KC_HTTP_RELATIVE_PATH: "/auth"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: keycloak
@@ -80,24 +63,14 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./saml-realm.json:/opt/keycloak/data/import/saml-realm.json
-    networks:
-      - fwunet
+    network_mode: host
 
   mockServer:
     image: mockserver/mockserver:5.14.0
     container_name: mockserver
-    command: -logLevel DEBUG
+    command: -logLevel DEBUG -serverPort 11090
     environment:
       MOCKSERVER_INITIALIZATION_JSON_PATH: /config/mockserver.json
-    ports:
-      - 11090:1080
     volumes:
       - ./mock/mockserver.json:/config/mockserver.json
-    networks:
-      - fwunet
-
-networks:
-  fwunet:
-    driver: bridge
-    ipam:
-      driver: default
+    network_mode: host

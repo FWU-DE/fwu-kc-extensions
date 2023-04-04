@@ -1528,8 +1528,8 @@
       "config": {
         "loginHint": "true",
         "clientId": "identity-broker",
-        "tokenUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/token",
-        "authorizationUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/auth",
+        "tokenUrl": "http://localhost:18080/auth/realms/idp/protocol/openid-connect/token",
+        "authorizationUrl": "http://localhost:18080/auth/realms/idp/protocol/openid-connect/auth",
         "clientAuthMethod": "client_secret_basic",
         "syncMode": "IMPORT",
         "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
@@ -1552,7 +1552,7 @@
       "config": {
         "validateSignature": "false",
         "postBindingLogout": "true",
-        "singleLogoutServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "singleLogoutServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
         "postBindingResponse": "true",
         "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
         "entityId": "saml-identity-broker",
@@ -1561,13 +1561,13 @@
         "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
         "wantAssertionsEncrypted": "false",
         "signatureAlgorithm": "RSA_SHA256",
-        "idpEntityId": "http://172.18.0.1:18443/auth/realms/saml",
+        "idpEntityId": "http://localhost:18443/auth/realms/saml",
         "loginHint": "false",
         "allowCreate": "true",
         "wantAssertionsSigned": "false",
         "postBindingAuthnRequest": "true",
         "forceAuthn": "false",
-        "singleSignOnServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "singleSignOnServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
         "wantAuthnRequestsSigned": "true",
         "guiOrder": "0",
         "principalType": "Subject NameID"
@@ -1622,7 +1622,7 @@
         "claims": "[]",
         "attributes": "[]",
         "attribute": "acronym",
-        "REST_API_URL": "http://mockserver:1080/person-info"
+        "REST_API_URL": "http://localhost:11090/person-info"
       }
     },
     {
