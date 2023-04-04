@@ -14,7 +14,6 @@ import org.keycloak.representations.IDToken;
 import org.keycloak.utils.StringUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.hash.Hashing;
@@ -32,6 +31,7 @@ public class UserInfoHelper
     private static final UserVolljaehrigkeitHelper volljaehrigkeitHelper = new UserVolljaehrigkeitHelper();
     private static final IdpHelper                 idpHelper             = new IdpHelper();
     private static final ObjectMapper              objectMapper          = new ObjectMapper();
+    private static final String                    INDEXED_ATTR_FORMAT   = "%s[%d]";
 
     static {
         objectMapper.registerModule(new JavaTimeModule());
@@ -267,11 +267,10 @@ public class UserInfoHelper
 
     private void addLoeschungToPersonenkontext(UserModel user, Personenkontext kontext, Integer indexOfPersonenkontext)
     {
-        String loeschungJson = indexOfPersonenkontext == null ? resolveSingleAttributeValue(user, PERSON_KONTEXT_LOESCHUNG)
-                : resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_LOESCHUNG, indexOfPersonenkontext);
+        String loeschungJson = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_LOESCHUNG, indexOfPersonenkontext);
         if (StringUtil.isNotBlank(loeschungJson)) {
             try {
-                kontext.setLoeschung(objectMapper.readValue(loeschungJson, new TypeReference<Loeschung>() {}));
+                kontext.setLoeschung(objectMapper.readValue(loeschungJson, Loeschung.class));
             } catch (JsonProcessingException e) {
                 logger.errorf(e, "Could not read Attribute %s from user %s", PERSON_KONTEXT_ARRAY_LOESCHUNG.getAttributeName(), user.getUsername());
             }
@@ -281,10 +280,10 @@ public class UserInfoHelper
     /**
      * Resolve single user attribute value with array support (index >= 0).
      */
-    private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute, int index)
+    private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute, Integer index)
     {
         Collection<String> values;
-        if (index == -1) {
+        if (index == null) {
             values = KeycloakModelUtils.resolveAttribute(user, attribute.getAttributeName(), false);
         }
         else {
@@ -306,14 +305,19 @@ public class UserInfoHelper
 
     private void addGruppenToKontext(UserModel user, Personenkontext kontext, String attributeName)
     {
-        String json = resolveSplittedAttribute(user, attributeName);
-        if (StringUtil.isNotBlank(json)) {
+        kontext.setGruppen(new ArrayList<>());
+        int index = 0;
+        String indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, index);
+        String json = resolveSplittedAttribute(user, indexedAttribute);
+        while (StringUtil.isNotBlank(json)) {
             try {
-                List<GruppeWithZugehoerigkeit> gruppen = objectMapper.readValue(json, new TypeReference<List<GruppeWithZugehoerigkeit>>() {});
-                kontext.setGruppen(gruppen);
+                GruppeWithZugehoerigkeit gruppe = objectMapper.readValue(json, GruppeWithZugehoerigkeit.class);
+                kontext.getGruppen().add(gruppe);
             } catch (JsonProcessingException e) {
-                logger.error("Could not deserialize person.kontext.gruppen for user " + user.getUsername(), e);
+                logger.errorf(e, "Could not deserialize person.kontext.gruppen[%d] for user %s" + index, user.getUsername());
             }
+            indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, index++);
+            json = resolveSplittedAttribute(user, indexedAttribute);
         }
     }
 
@@ -335,16 +339,14 @@ public class UserInfoHelper
     {
         StringBuilder jsonBuilder = new StringBuilder();
         int partialIndex = 0;
-        Optional<String> partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "[" + partialIndex + "]", false).stream()
+        Optional<String> partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "_" + partialIndex, false).stream()
             .findFirst();
         while (partial.isPresent() && partial.get().length() == 255) {
             jsonBuilder.append(partial.get());
             partialIndex++;
-            partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "[" + partialIndex + "]", false).stream().findFirst();
+            partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "_" + partialIndex, false).stream().findFirst();
         }
-        if (partial.isPresent()) {
-            jsonBuilder.append(partial.get());
-        }
+        partial.ifPresent(jsonBuilder::append);
         return jsonBuilder.toString();
     }
 
@@ -425,7 +427,7 @@ public class UserInfoHelper
      */
     private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute)
     {
-        return resolveSingleAttributeValue(user, attribute, -1);
+        return resolveSingleAttributeValue(user, attribute, null);
     }
 
     /**

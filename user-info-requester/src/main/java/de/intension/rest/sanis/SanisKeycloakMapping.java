@@ -18,6 +18,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 
 import de.intension.api.UserInfoAttribute;
 import de.intension.rest.BaseMapper;
+import de.intension.rest.GruppenMapper;
 import de.intension.rest.IKeycloakApiMapper;
 import de.intension.rest.IValueMapper;
 
@@ -102,7 +103,7 @@ public class SanisKeycloakMapping
                     int overflow = 1;
                     while (iterator.hasNext()) {
                         value = iterator.next();
-                        setAttribute(resource, attribute, value, overflow);
+                        setAttribute(resource, attribute, value, overflow++);
                     }
                 }
             } catch (PathNotFoundException e) {

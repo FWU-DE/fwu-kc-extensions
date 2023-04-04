@@ -1,4 +1,4 @@
-package de.intension.rest.sanis;
+package de.intension.rest;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
 
-import de.intension.rest.IValueMapper;
 import net.minidev.json.JSONObject;
 
 public class GruppenMapper
