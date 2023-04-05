@@ -267,7 +267,8 @@ public class UserInfoHelper
 
     private void addLoeschungToPersonenkontext(UserModel user, Personenkontext kontext, Integer indexOfPersonenkontext)
     {
-        String loeschungJson = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_LOESCHUNG, indexOfPersonenkontext);
+        UserInfoAttribute attribute = indexOfPersonenkontext == null ? PERSON_KONTEXT_LOESCHUNG : PERSON_KONTEXT_ARRAY_LOESCHUNG;
+        String loeschungJson = resolveSingleAttributeValue(user, attribute, indexOfPersonenkontext);
         if (StringUtil.isNotBlank(loeschungJson)) {
             try {
                 kontext.setLoeschung(objectMapper.readValue(loeschungJson, Loeschung.class));
@@ -305,18 +306,20 @@ public class UserInfoHelper
 
     private void addGruppenToKontext(UserModel user, Personenkontext kontext, String attributeName)
     {
-        kontext.setGruppen(new ArrayList<>());
         int index = 0;
         String indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, index);
         String json = resolveSplittedAttribute(user, indexedAttribute);
         while (StringUtil.isNotBlank(json)) {
             try {
                 GruppeWithZugehoerigkeit gruppe = objectMapper.readValue(json, GruppeWithZugehoerigkeit.class);
+                if (kontext.getGruppen() == null) {
+                    kontext.setGruppen(new ArrayList<>());
+                }
                 kontext.getGruppen().add(gruppe);
             } catch (JsonProcessingException e) {
                 logger.errorf(e, "Could not deserialize person.kontext.gruppen[%d] for user %s" + index, user.getUsername());
             }
-            indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, index++);
+            indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, ++index);
             json = resolveSplittedAttribute(user, indexedAttribute);
         }
     }
@@ -339,7 +342,7 @@ public class UserInfoHelper
     {
         StringBuilder jsonBuilder = new StringBuilder();
         int partialIndex = 0;
-        Optional<String> partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "_" + partialIndex, false).stream()
+        Optional<String> partial = KeycloakModelUtils.resolveAttribute(user, attributeName, false).stream()
             .findFirst();
         while (partial.isPresent() && partial.get().length() == 255) {
             jsonBuilder.append(partial.get());

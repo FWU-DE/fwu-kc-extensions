@@ -9,9 +9,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
@@ -26,11 +25,11 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 
 import de.intension.api.UserInfoAttribute;
@@ -40,9 +39,9 @@ import de.intension.mapper.user.UserInfoHelper;
 class UserInfoProviderMapperTest
 {
 
-    private static final String SUB = "af3a88fc-d766-11ec-9d64-0242ac120002";
+    private static final String       SUB          = "af3a88fc-d766-11ec-9d64-0242ac120002";
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeAll
     static void setupObjectMapper()
@@ -138,24 +137,40 @@ class UserInfoProviderMapperTest
         userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_STATUS, 0), "AKTIV");
         userModel.setSingleAttribute(UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_LOESCHUNG, 0),
                                      "{\"zeitpunkt\": \"2099-12-31T23:59Z\"}");
-        List<String> gruppen = getGruppenJson();
-        for (int i = 0; i < gruppen.size(); i++) {
-            userModel.setSingleAttribute(String.format("%s[%d]", UserInfoAttribute.PERSON_KONTEXT_GRUPPEN.getAttributeName(), i), gruppen.get(i));
-        }
         userModel.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_LOESCHUNG.getAttributeName(), "{\"zeitpunkt\":\"2099-12-31T23:59Z\"}");
+        List<String> gruppeAsJson = getGruppenAsJson();
+        addGruppenToKontext(userModel, gruppeAsJson, UserInfoAttribute.PERSON_KONTEXT_GRUPPEN.getAttributeName());
+        addGruppenToKontext(userModel, gruppeAsJson, UserInfoHelper.getIndexedAttributeName(UserInfoAttribute.PERSON_KONTEXT_ARRAY_GRUPPEN, 0));
         when(userSessionModel.getUser()).thenReturn(userModel);
         when(userSessionModel.getRealm()).thenReturn(realm);
         return userSessionModel;
     }
 
-    private List<String> getGruppenJson()
+    private static void addGruppenToKontext(TestUserModel userModel, List<String> gruppeAsJson, String attributeName)
+    {
+
+        for (int i = 0; i < gruppeAsJson.size(); i++) {
+            Iterator<String> iterator = Splitter.fixedLength(255).split(gruppeAsJson.get(i)).iterator();
+            userModel.setSingleAttribute(String.format("%s[%d]", attributeName, i), iterator.next());
+            int overflowIndex = 1;
+            while (iterator.hasNext()) {
+                userModel.setSingleAttribute(String.format("%s[%d]_%d", attributeName, i, overflowIndex++), iterator.next());
+            }
+        }
+    }
+
+    private List<String> getGruppenAsJson()
         throws IOException
     {
         List<GruppeWithZugehoerigkeit> gruppen = objectMapper.readValue(Resources.getResource("de/intension/mapper/oidc/gruppen.json"),
-                                                                        new TypeReference<List<GruppeWithZugehoerigkeit>>() {});
-        String gruppenJson = objectMapper.writeValueAsString(gruppen);
-
-        return ImmutableList.copyOf(Splitter.fixedLength(255).split(gruppenJson));
+                                                                        new TypeReference<>() {});
+        return gruppen.stream().map(value -> {
+            try {
+                return objectMapper.writeValueAsString(value);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private UserSessionModel createDefaultUserModel()
