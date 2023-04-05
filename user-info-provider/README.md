@@ -41,7 +41,9 @@ This mapper produces the following standardized metadata JSON-structure
     },
     "geburt": {
       "datum": "2010-01-01",
-      "alter": "12"
+      "alter": "12",
+      "volljaehrig": "NEIN",
+      "geburtsort": "Ostfildern, Deutschland"
     },
     "geschlecht": "D",
     "lokalisierung": "de-DE",
@@ -49,7 +51,7 @@ This mapper produces the following standardized metadata JSON-structure
   },
   "personenkontexte": [
     {
-      "ktid": "af3a88fc-d766-11ec-9d64-0242ac120002",
+      "id": "af3a88fc-d766-11ec-9d64-0242ac120002",
       "organisation": {
         "orgid": "15685758-d18e-49c1-a644-f9996eb0bf08",
         "kennung": "NI_12345",
@@ -58,10 +60,64 @@ This mapper produces the following standardized metadata JSON-structure
         "vidis_schulidentifikator": "de-sn-schullogin.ni_12345"
       },
       "rolle": "LERN",
-      "personenstatus": "AKTIV"
+      "personenstatus": "AKTIV",
+      "gruppen": [
+        {
+          "gruppe": {
+            "id": "ab34d607-b950-41a5-b69d-80b8812c224a",
+            "mandant": "02feb60dc3f691af4a4bf92410fac8292bb8e7d6adebb70b2a65d3c35d825d8a",
+            "orgid": "02feb60dc3f691af4a4bf92410fac8292bb8e7d6adebb70b2a65d3c35d825d8a",
+            "referrer": "fe4e50cb-c148-4156-8c2f-dc5260b267cf",
+            "bezeichnung": "Englisch, 2. Klasse",
+            "thema": "Thema",
+            "beschreibung": "Beschreibung der Gruppe",
+            "typ": "SONSTIG",
+            "bereich": "WAHL",
+            "optionen": [
+              "01",
+              "02"
+            ],
+            "differenzierung": "G",
+            "bildungsziele": [
+              "GS"
+            ],
+            "jahrgangsstufen": [
+              "JS_02"
+            ],
+            "faecher": [
+              {
+                "code": "EN"
+              }
+            ],
+            "referenzgruppen": [
+              {
+                "id": "21252996-7a5d-47b5-9c62-c416460908f0",
+                "rollen": [
+                  "LERN",
+                  "LEHR"
+                ]
+              }
+            ],
+            "laufzeit": {
+              "von": "2023-08-01",
+              "bis": "2024-01-31",
+              "sichtfreigabe": "JA"
+            },
+            "revision": "1"
+          },
+          "gruppenzugehoerigkeit": {
+            "rollen": [
+              "LEHR"
+            ]
+          }
+        }
+      ],
+      "loeschung": {
+        "zeitpunkt": "2099-12-31T23:59Z"
+      }
     },
     {
-      "ktid": "af3a88fc-d766-11ec-9d64-0242ac112345",
+      "id": "af3a88fc-d766-11ec-9d64-0242ac112345",
       "organisation": {
         "orgid": "15685758-d18e-49c1-a644-f9996e12345",
         "kennung": "0972",
@@ -70,7 +126,10 @@ This mapper produces the following standardized metadata JSON-structure
         "vidis_schulidentifikator": "de-sn-schullogin.0972"
       },
       "rolle": "LEHR",
-      "personenstatus": "AKTIV"
+      "personenstatus": "AKTIV",
+      "loeschung": {
+        "zeitpunkt": "2099-12-31T23:59Z"
+      }
     }
   ]
 }

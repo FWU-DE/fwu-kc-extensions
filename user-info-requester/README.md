@@ -23,6 +23,8 @@ This attribute importer calls the IdPs SANIS endpoint and stores user metadata i
 | personenkontexte[].organisation.typ     | person.kontext[<number>].org.typ                     |
 | personenkontexte[].rolle                | person.kontext[<number>].rolle                       |
 | personenkontexte[].personenstatus       | person.kontext[<number>].status                      |
+| personenkontexte[].loeschung            | person.kontext[<number>].loeschung                   |
+| personenkontexte[].gruppen[]            | person.kontext[<number>].gruppen[]                   |
 
 ## Configuration
 If an IdP provides the SANIS "/personInfo"-Endpoint, a mapper can be configured to retrieve and store this
