@@ -27,8 +27,8 @@ public class Person
     @JsonProperty(UserInfoAttributeNames.VERTRAUENSSTUFE)
     private Vertrauensstufe vertrauensstufe;
 
-    @JsonProperty(UserInfoAttributeNames.GRUPPE_REFERRER)
-    private GruppenId referrer;
+    @JsonProperty(UserInfoAttributeNames.REFERRER)
+    private String          referrer;
 
     @JsonIgnore
     public boolean isEmpty()

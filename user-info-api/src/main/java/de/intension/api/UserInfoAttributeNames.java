@@ -32,7 +32,7 @@ public class UserInfoAttributeNames
     public static final String    ID                                = "id";
     public static final String    GRUPPEN                           = "gruppen";
     public static final String    GRUPPE                            = "gruppe";
-    public static final String    GRUPPE_REFERRER                   = "referrer";
+    public static final String    REFERRER                          = "referrer";
     public static final String    GRUPPE_MANDANT                    = "mandant";
     public static final String    GRUPPE_BEZEICHNUNG                = "bezeichnung";
     public static final String    GRUPPE_BESCHREIBUNG               = "beschreibung";
@@ -61,7 +61,9 @@ public class UserInfoAttributeNames
     protected static final String PERSON_GEBURTSDATUM               = String.format("%s.geburtsdatum", PERSON);
     protected static final String PERSON_GEBURTSORT                 = String.format(CONCAT, PERSON, GEBURT_ORT);
     protected static final String PERSON_VOLLJAEHRIG                = String.format(CONCAT, PERSON, GEBURT_VOLLJAEHRIG);
+    public static final String    PERSON_REFERRER                   = String.format(CONCAT, PERSON, REFERRER);
     protected static final String PERSON_KONTEXT                    = String.format("%s.kontext", PERSON);
+    protected static final String PERSON_KONTEXT_REFERRER           = String.format(CONCAT, PERSON_KONTEXT, REFERRER);
     protected static final String PERSON_KONTEXT_ORG                = String.format("%s.org", PERSON_KONTEXT);
     protected static final String PERSON_KONTEXT_GRUPPEN            = String.format(CONCAT, PERSON_KONTEXT, GRUPPEN);
     protected static final String PERSON_KONTEXT_LOESCHUNG          = String.format(CONCAT, PERSON_KONTEXT, LOESCHUNG);
@@ -71,6 +73,7 @@ public class UserInfoAttributeNames
     protected static final String PERSON_KONTEXT_ARRAY_STATUS       = String.format("%s.status", PERSON_KONTEXT_ARRAY);
     protected static final String PERSON_KONTEXT_ARRAY_GRUPPEN      = String.format(CONCAT, PERSON_KONTEXT_ARRAY, GRUPPEN);
     protected static final String PERSON_KONTEXT_ARRAY_LOESCHUNG    = String.format(CONCAT, PERSON_KONTEXT_ARRAY, LOESCHUNG);
+    protected static final String PERSON_KONTEXT_ARRAY_REFERRER     = String.format(CONCAT, PERSON_KONTEXT_ARRAY, REFERRER);
     protected static final String PERSON_ALTER                      = String.format(CONCAT, PERSON, GEBURT_ALTER);
     protected static final String PERSON_KONTEXT_ID                 = String.format(CONCAT, PERSON_KONTEXT, ID);
     protected static final String PERSON_KONTEXT_ORG_ID             = String.format(CONCAT, PERSON_KONTEXT_ORG, ID);

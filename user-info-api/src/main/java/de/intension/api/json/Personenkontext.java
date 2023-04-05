@@ -26,8 +26,8 @@ public class Personenkontext
     private Rolle                          rolle;
     @JsonProperty(UserInfoAttributeNames.PERSONENSTATUS)
     private PersonenStatus                 personenstatus;
-    @JsonProperty(UserInfoAttributeNames.GRUPPE_REFERRER)
-    private GruppenId                      referrer;
+    @JsonProperty(UserInfoAttributeNames.REFERRER)
+    private String                         referrer;
     @JsonProperty(UserInfoAttributeNames.GRUPPEN)
     private List<GruppeWithZugehoerigkeit> gruppen;
     @JsonProperty(UserInfoAttributeNames.LOESCHUNG)

@@ -33,6 +33,7 @@ public class SanisKeycloakMapping
     private static EnumMap<UserInfoAttribute, IValueMapper> initPerson()
     {
         EnumMap<UserInfoAttribute, IValueMapper> personMapping = new EnumMap<>(UserInfoAttribute.class);
+        personMapping.put(PERSON_REFERRER, new BaseMapper("$.person.referrer"));
         personMapping.put(PERSON_FAMILIENNAME, new BaseMapper("$.person.name.familienname"));
         personMapping.put(PERSON_VORNAME, new BaseMapper("$.person.name.vorname"));
         personMapping.put(PERSON_GEBURTSDATUM, new BaseMapper("$.person.geburt.datum"));
@@ -50,6 +51,7 @@ public class SanisKeycloakMapping
     {
         EnumMap<UserInfoAttribute, IValueMapper> kontextMapping = new EnumMap<>(UserInfoAttribute.class);
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ID, new BaseMapper("$.personenkontexte[#].id"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_REFERRER, new BaseMapper("$.personenkontexte[#].referrer"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ID, new BaseMapper("$.personenkontexte[#].organisation.orgid"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));

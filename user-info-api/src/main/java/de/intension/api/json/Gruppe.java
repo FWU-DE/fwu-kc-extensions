@@ -36,7 +36,7 @@ public class Gruppe
     private String                 mandant;
     @JsonProperty(UserInfoAttributeNames.ORG_ID)
     private String                 orgid;
-    @JsonProperty(UserInfoAttributeNames.GRUPPE_REFERRER)
+    @JsonProperty(UserInfoAttributeNames.REFERRER)
     private GruppenId              referrer;
     @JsonProperty(UserInfoAttributeNames.GRUPPE_BEZEICHNUNG)
     private String                 bezeichnung;
