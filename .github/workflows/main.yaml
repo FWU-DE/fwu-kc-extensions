@@ -7,6 +7,7 @@ on:
     paths:
       - 'pom.xml'
       - '*/pom.xml'
+      - '.github/workflows/main.yaml'
 
 jobs:
   package:
@@ -43,7 +44,7 @@ jobs:
         uses: mavrosxristoforos/get-xml-info@1.0
         with:
           xml-file: 'pom.xml'
-          xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='projectVersion']"
+          xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='revision']"
       - name: Get modules
         id: get-modules
         uses: mavrosxristoforos/get-xml-info@1.0
