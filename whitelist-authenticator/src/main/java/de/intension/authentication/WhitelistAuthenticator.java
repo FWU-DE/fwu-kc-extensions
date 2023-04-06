@@ -35,11 +35,6 @@ public class WhitelistAuthenticator
     public static final String  IDP_ALIAS = "idpAlias";
     private static final Logger logger    = Logger.getLogger(WhitelistAuthenticator.class);
 
-    private static String getProviderIdFromUserAttributes(AuthenticationFlowContext context)
-    {
-        return Optional.ofNullable(context.getUser()).map(user -> user.getFirstAttribute(IDP_ALIAS)).orElse(null);
-    }
-
     /**
      * Get provider id from context.
      */
@@ -132,6 +127,11 @@ public class WhitelistAuthenticator
         else {
             return null;
         }
+    }
+
+    private static String getProviderIdFromUserAttributes(AuthenticationFlowContext context)
+    {
+        return Optional.ofNullable(context.getUser()).map(user -> user.getFirstAttribute(IDP_ALIAS)).orElse(null);
     }
 
     @Override
