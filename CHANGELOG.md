@@ -1,5 +1,10 @@
 # Change Log
+
 All notable changes to this project will be documented here.
+
+## Version [3.4.4]
+
+- Fix: Whitelist authenticator stores Identity Provider into User-Attribute to fallback if no IDP could be determined
 
 ## Version [3.4.3]
 

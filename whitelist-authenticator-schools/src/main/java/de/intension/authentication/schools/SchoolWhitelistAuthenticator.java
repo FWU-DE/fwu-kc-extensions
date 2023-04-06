@@ -29,10 +29,10 @@ public class SchoolWhitelistAuthenticator
     implements Authenticator
 {
 
-    private static final Logger logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
+    private static final Logger logger    = Logger.getLogger(SchoolWhitelistAuthenticator.class);
     static final String         ALLOW_ALL = "AllowAll";
 
-    private final Object lock = new Object();
+    private final Object        lock      = new Object();
 
     @Override
     public void authenticate(AuthenticationFlowContext context)
@@ -41,6 +41,8 @@ public class SchoolWhitelistAuthenticator
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         List<String> schoolIds = getSchoolIdsFromUser(context);
         if (isPermittedServiceRequest(entries, clientId, schoolIds)) {
+            logger.infof("Login succeeded clientId=%s whitelist=%s School-Id=%s", clientId, entries, Arrays.toString(schoolIds.toArray()),
+                         context.getUser().getId());
             context.success();
         }
         else {
@@ -50,7 +52,8 @@ public class SchoolWhitelistAuthenticator
         }
     }
 
-    protected Response createErrorPage(AuthenticationFlowContext context){
+    protected Response createErrorPage(AuthenticationFlowContext context)
+    {
         return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
                                Response.Status.FORBIDDEN, "spNotConfigured");
     }
@@ -62,7 +65,7 @@ public class SchoolWhitelistAuthenticator
     {
         WhiteListCache cache = WhiteListCache.getInstance();
         CacheStatus cacheStatus;
-        synchronized(lock){
+        synchronized(lock) {
             //wait until cache is initialized for the first time
             //first User LOGIN will initialize the cache after server restart
             cacheStatus = cache.getState(getCacheIntervalFromConfig(context));
@@ -75,7 +78,7 @@ public class SchoolWhitelistAuthenticator
         else if (cacheStatus == CacheStatus.NOT_INITIALIZED) {
             //first call, trigger and wait
             logger.info("trigger cache update synchronous");
-            synchronized(lock){
+            synchronized(lock) {
                 triggerCacheUpdate(context);
             }
             logger.info("cache updated synchronous");
@@ -92,7 +95,7 @@ public class SchoolWhitelistAuthenticator
         String schoolsAttributeName = getConfigParam(context, SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM);
         if (StringUtil.isNotBlank(schoolsAttributeName)) {
             UserModel user = context.getUser();
-            if(user != null){
+            if (user != null) {
                 schoolIds = user.getAttributes().get(schoolsAttributeName);
             }
         }

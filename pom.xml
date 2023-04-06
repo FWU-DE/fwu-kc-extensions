@@ -8,7 +8,7 @@
 
   <groupId>de.intension</groupId>
   <artifactId>fwu-kc-extensions</artifactId>
-  <version>${projectVersion}</version>
+  <version>${revision}</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -25,8 +25,8 @@
   </modules>
 
   <properties>
-    <projectVersion>3.4.3</projectVersion>
-    <keycloak.version>20.0.3</keycloak.version>
+    <revision>3.4.4</revision>
+    <keycloak.version>20.0.5</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -183,7 +183,7 @@
       <dependency>
         <groupId>de.intension</groupId>
         <artifactId>user-info-api</artifactId>
-        <version>${projectVersion}</version>
+        <version>${project.version}</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
@@ -224,6 +224,31 @@
             <include>**/*Test.java</include>
           </includes>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.4.1</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
