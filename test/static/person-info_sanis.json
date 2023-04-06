@@ -1,6 +1,7 @@
 {
   "pid": "0d41a726-e3c2-4a50-a73a-0d22d89f8bcc",
   "person": {
+    "referrer": "referrer",
     "name": {
       "familienname": "Muster",
       "vorname": "Hans",
@@ -9,7 +10,8 @@
     },
     "geburt": {
       "datum": "2022-11-09",
-      "geburtsort": "Musterstadt"
+      "geburtsort": "Musterstadt",
+      "vollljaehrig": "nein"
     },
     "geschlecht": "m",
     "lokalisierung": "de-DE",
@@ -17,7 +19,8 @@
   },
   "personenkontexte": [
     {
-      "ktid": "0d41a726-e3c2-4a50-a73a-0d22d89f8bcc",
+      "id": "0d41a726-e3c2-4a50-a73a-0d22d89f8bcc",
+      "referrer": "referrer",
       "rolle": "LEHR",
       "organisation": {
         "kennung": "NI_0815",
@@ -29,7 +32,7 @@
       "gruppen": [
         {
           "gruppe": {
-            "id": "string",
+            "id": "gruppe1",
             "bezeichnung": "string",
             "typ": "string",
             "bereich": "string",
@@ -49,6 +52,39 @@
             "organisation": {
               "kennung": "string",
               "orgid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "name": "string",
+              "typ": "string"
+            },
+            "referrer": "string"
+          },
+          "gruppenzugehoerigkeit": {
+            "rollen": [
+              "string"
+            ]
+          }
+        },
+        {
+          "gruppe": {
+            "id": "gruppe2",
+            "bezeichnung": "string",
+            "typ": "string",
+            "bereich": "string",
+            "optionen": [
+              "string"
+            ],
+            "differenzierung": "string",
+            "bildungsziele": [
+              "string"
+            ],
+            "jahrgangsstufen": [
+              "string"
+            ],
+            "faecher": [
+              "string"
+            ],
+            "organisation": {
+              "kennung": "string",
+              "orgid": "0815",
               "name": "string",
               "typ": "string"
             },

@@ -3,7 +3,10 @@ on:
   push:
     branches:
       - main
-      - bugfix/FWUV-159/whiteListAuthenticatorSupportForPostLogin
+      - release/*
+    paths:
+      - 'pom.xml'
+      - '*/pom.xml'
 
 jobs:
   package:
@@ -51,18 +54,39 @@ jobs:
         id: check-release
         run: |
           rm modules.txt || true
-          echo "version=$TAG" >> $GITHUB_OUTPUT
-          IFS="," read -a modules <<< ${{ steps.get-modules.outputs.info }}
-          for module in ${modules[@]}; do
-            echo "Found module: $module"
-            if [ "$module" != "fwu-kc-extensions" ]; then
-              echo "$module/target/$module-$TAG.jar" >> modules.txt
-            fi
-          done
-          csv=$(paste -s -d , modules.txt)
-          echo "Generated CSV: $csv"
-          echo "artifacts=$csv" >> $GITHUB_OUTPUT
-
+          TAG=${{ steps.get-version.outputs.info }}
+          echo "TAG: $TAG"
+          response=$(curl --silent -H 'Accept: application/vnd.github.v3+json' "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
+          message=$(echo $response | jq -r .message)
+          echo "Message: $message"
+          if [ "$message" = "Not Found" ]; then
+            echo "version=$TAG" >> $GITHUB_OUTPUT
+            IFS="," read -a modules <<< ${{ steps.get-modules.outputs.info }}
+            for module in ${modules[@]}; do
+              echo "Found module: $module"
+              if [ "$module" != "fwu-kc-extensions" ]; then
+                echo "$module/target/$module-$TAG.jar" >> modules.txt
+              fi
+            done
+            csv=$(paste -s -d , modules.txt)
+            echo "Generated CSV: $csv"
+            echo "artifacts=$csv" >> $GITHUB_OUTPUT
+          else
+            echo "Release $TAG already exists!"
+          fi
+      - name: Deploy to GitHub packages
+        if: ${{ steps.check-release.outputs.version != '' }}
+        run: mvn --batch-mode clean deploy -DskipTests -Dmaven.resolver.transport=wagon
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish GitHub release
+        if: ${{ steps.check-release.outputs.version != '' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.check-release.outputs.version }}
+          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          bodyFile: "CHANGELOG.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish Gitlab release
         if: ${{ steps.check-release.outputs.version != '' }}
         env:
@@ -93,5 +117,5 @@ jobs:
         env:
           GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=dev -F variables[CI_COMMIT_SHA]=${{ needs.publish.outputs.publishedVersion }} "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
+        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F "variables[CI_COMMIT_SHA]=${GITHUB_SHA}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
 

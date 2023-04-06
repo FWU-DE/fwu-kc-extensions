@@ -7,7 +7,7 @@
   <parent>
     <groupId>de.intension</groupId>
     <artifactId>fwu-kc-extensions</artifactId>
-    <version>${projectVersion}</version>
+    <version>${revision}</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>

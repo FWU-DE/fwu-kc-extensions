@@ -1,5 +1,6 @@
 #!/bin/bash
 
+provider_dir=test/providers
 which docker-compose
 if [ $? != 0 ]; then
   compose="docker compose"
@@ -14,8 +15,17 @@ function cleanup {
 
 trap cleanup EXIT
 
-# build extension without SNAPSHOT suffix
-mvn clean package -DskipTests -DprojectVersion=docker
+mvn clean package -DskipTests
+if [ -d $provider_dir ];then
+  rm $provider_dir/* || true
+else
+  mkdir $provider_dir
+fi
+
+for jar in $(find . -name "*.jar" |grep target); do
+  echo "cp $jar $provider_dir/"
+  cp $jar $provider_dir/
+done
 if [[ "$?" -ne 0 ]] ; then
   echo 'could not run maven package'; exit $rc
 fi
