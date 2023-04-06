@@ -35,24 +35,9 @@ public class WhitelistAuthenticator
     public static final String  IDP_ALIAS = "idpAlias";
     private static final Logger logger    = Logger.getLogger(WhitelistAuthenticator.class);
 
-    @Override
-    public void authenticate(AuthenticationFlowContext context)
+    private static String getProviderIdFromUserAttributes(AuthenticationFlowContext context)
     {
-        String clientId = context.getAuthenticationSession().getClient().getClientId();
-        logger.infof("authenticate - clientId=%s realm=%s", clientId, context.getRealm().getId());
-        String providerId = getProviderIdFromContext(context);
-        if (StringUtil.isNotBlank(providerId) && StringUtil.isBlank(context.getUser().getFirstAttribute(IDP_ALIAS))) {
-            context.getUser().setSingleAttribute(IDP_ALIAS, providerId);
-        }
-        if (!isAllowedIdP(context, clientId, providerId)) {
-            logger.infof("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
-            Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                                                Response.Status.FORBIDDEN, "idpNotConfigured", providerId, clientId);
-            context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, response);
-        }
-        else {
-            context.success();
-        }
+        return Optional.ofNullable(context.getUser()).map(user -> user.getFirstAttribute(IDP_ALIAS)).orElse(null);
     }
 
     /**
@@ -90,9 +75,24 @@ public class WhitelistAuthenticator
         return providerId;
     }
 
-    private static String getProviderIdFromUserAttributes(AuthenticationFlowContext context)
+    @Override
+    public void authenticate(AuthenticationFlowContext context)
     {
-        return context.getUser().getFirstAttribute(IDP_ALIAS);
+        String clientId = context.getAuthenticationSession().getClient().getClientId();
+        logger.infof("authenticate - clientId=%s realm=%s", clientId, context.getRealm().getId());
+        String providerId = getProviderIdFromContext(context);
+        if (StringUtil.isNotBlank(providerId)) {
+            Optional.ofNullable(context.getUser()).ifPresent(user -> user.setSingleAttribute(IDP_ALIAS, providerId));
+        }
+        if (!isAllowedIdP(context, clientId, providerId)) {
+            logger.infof("IdP with providerId=%s is not configured for clientId=%s", providerId, clientId);
+            Response response = ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
+                                                Response.Status.FORBIDDEN, "idpNotConfigured", providerId, clientId);
+            context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, response);
+        }
+        else {
+            context.success();
+        }
     }
 
     private String getProviderIdFromIdpHint(AuthenticationFlowContext context)
