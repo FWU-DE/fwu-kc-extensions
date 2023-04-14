@@ -1,28 +1,36 @@
 package de.intension.acronym;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Identity provider mapper that will combine the first two letters of the first and last name to a lowercase acronym.
+ * Identity provider mapper that will combine the first two letters of the first and last name to a
+ * lowercase acronym.
  */
-public class AcronymMapper extends AbstractIdentityProviderMapper {
+public class AcronymMapper extends AbstractIdentityProviderMapper
+{
 
-    public static final String PROVIDER_ID = "acronym-idp-mapper";
-    public static final String[] COMPATIBLE_PROVIDERS = {ANY_PROVIDER};
+    public static final String                          PROVIDER_ID             = "acronym-idp-mapper";
+    public static final String[]                        COMPATIBLE_PROVIDERS    = {ANY_PROVIDER};
 
-    public static final String ATTRIBUTE = "attribute";
-    private static final String ATTRIBUTE_DEFAULT_VALUE = "acronym";
+    public static final String                          ATTRIBUTE               = "attribute";
+    private static final String                         ATTRIBUTE_DEFAULT_VALUE = "acronym";
 
-    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+    public static final String                          MODIFIER_LOWER_CASE     = "lower case";
+    public static final String                          MODIFIER_CAMEL_CASE     = "camel case";
 
-    private static final Logger LOG = Logger.getLogger(AcronymMapper.class);
+    public static final String                          MODIFIER                = "modifier";
+
+    protected static final List<ProviderConfigProperty> configProperties        = new ArrayList<>();
+
+    private static final Logger                         LOG                     = Logger.getLogger(AcronymMapper.class);
 
     static {
         ProviderConfigProperty property;
@@ -32,6 +40,16 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
         property.setHelpText("Name of the user attribute, which will contain the acronym. Defaults to 'acronym' when left empty.");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setDefaultValue(ATTRIBUTE_DEFAULT_VALUE);
+        configProperties.add(property);
+        property = new ProviderConfigProperty();
+        property.setName(MODIFIER);
+        property.setLabel("Modifier");
+        List<String> options = Arrays.asList(MODIFIER_LOWER_CASE, MODIFIER_CAMEL_CASE);
+        property.setType(ProviderConfigProperty.LIST_TYPE);
+        property.setOptions(options);
+        property.setDefaultValue(MODIFIER_LOWER_CASE);
+        property.setHelpText("Defines, how the acronym should be converted ('lower case': Max Muster -> mamu) "
+                + "'camel case': Max Muster -> MaMu). Default behaviour is 'lower case'");
         configProperties.add(property);
     }
 
@@ -83,12 +101,13 @@ public class AcronymMapper extends AbstractIdentityProviderMapper {
 
     private void updateUser(UserModel user, IdentityProviderMapperModel mapperModel) {
         var attribute = mapperModel.getConfig().getOrDefault(ATTRIBUTE, ATTRIBUTE_DEFAULT_VALUE);
+        String modifier = mapperModel.getConfig().getOrDefault(MODIFIER, MODIFIER_LOWER_CASE);
 
         var firstName = getFirstName(user);
         var lastName = getLastName(user);
 
         if (firstName != null && lastName != null) {
-            user.setSingleAttribute(attribute, AcronymUtil.createAcronym(firstName, lastName));
+            user.setSingleAttribute(attribute, AcronymUtil.createAcronym(firstName, lastName, modifier));
         }
     }
 

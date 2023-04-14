@@ -14,3 +14,6 @@ This identity provider mapper combines the first two letters of the first and la
 6. Choose a name
 7. Select the user attribute to hold the acronym value
     - this will default to `acronym` if left empty
+8. Choose a modifier for the `acronym`
+    - `lower case` (default, if nothing is selected)
+    - `camel case`

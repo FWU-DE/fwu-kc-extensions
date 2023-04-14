@@ -1532,7 +1532,7 @@
         "authorizationUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/auth",
         "clientAuthMethod": "client_secret_basic",
         "syncMode": "IMPORT",
-        "clientSecret": "**********",
+        "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true"
       }
     },
@@ -1623,6 +1623,16 @@
         "attributes": "[]",
         "attribute": "acronym",
         "REST_API_URL": "http://mockserver:1080/person-info"
+      }
+    },
+    {
+      "id": "61055e34-e766-4706-88b7-661152372b43",
+      "name": "Default Role - manage-account",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "role": "account.manage-account"
       }
     }
   ],

@@ -1,5 +1,10 @@
 # Change Log
 All notable changes to this project will be documented here.
+
+## Version [3.7.0]
+
+- Improvement: Acronym Mapper supports now camel case acronyms as well.
+
 ## Version [3.6.1]
 
 Fix: Whitelist authenticator to support Post Login Flow
