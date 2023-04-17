@@ -1,5 +1,10 @@
 # Change Log
+
 All notable changes to this project will be documented here.
+
+## Version [3.8.0]
+
+- Update: Support SANIS API V1.0003.
 
 ## Version [3.7.1]
 
