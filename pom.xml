@@ -25,7 +25,7 @@
   </modules>
 
   <properties>
-    <projectVersion>3.6.1</projectVersion>
+    <projectVersion>3.7.0</projectVersion>
     <keycloak.version>20.0.5</keycloak.version>
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
