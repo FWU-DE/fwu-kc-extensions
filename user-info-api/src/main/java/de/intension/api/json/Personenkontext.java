@@ -36,7 +36,8 @@ public class Personenkontext
     @JsonIgnore
     public boolean isEmpty()
     {
-        return id == null || (organisation == null || organisation.isEmpty()) && rolle == null && (referrer == null || referrer.isEmpty()) && loeschung == null;
+        return id == null || (organisation == null || organisation.isEmpty()) && rolle == null && (referrer == null || referrer.isEmpty()) && loeschung == null
+                && (gruppen == null || gruppen.isEmpty());
     }
 
 }
