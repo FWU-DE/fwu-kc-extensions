@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
-import org.keycloak.models.AuthenticatorConfigModel;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockserver.integration.ClientAndServer;
@@ -221,6 +219,15 @@ class SchoolWhitelistAuthenticatorTest
         assertEquals(false, context.getSuccess());
     }
 
+    @ParameterizedTest
+    @CsvSource({IDP_VALID + ",true", IDP_INVALID + ",false"})
+    void should_allow_access_because_of_valid_user_idp_attribute(String idp, boolean expected){
+        SchoolWhitelistAuthenticator authenticator = new TestSchoolWhitelistAuthenticator();
+        TestAuthenticationFlowContext context = mockContext("test-client", List.of("1234"), idp, LoginActionsService.AUTHENTICATE_PATH);
+        authenticator.authenticate(context);
+        assertEquals(expected, context.getSuccess());
+    }
+
     private TestAuthenticationFlowContext mockContext(String clientId, List<String> usersSchoolIds)
     {
         return mockContext(clientId, usersSchoolIds, IDP_VALID, LoginActionsService.FIRST_BROKER_LOGIN_PATH);
@@ -246,6 +253,16 @@ class SchoolWhitelistAuthenticatorTest
         when(context.getUser()).thenReturn(userModel);
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM_DEFAULT, usersSchoolIds);
+        if(LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)){
+            attributes.put(SchoolWhitelistAuthenticator.IDP_ALIAS, List.of(brokeredIdp));
+            var keycloakSession = mock(KeycloakSession.class);
+            when(context.getSession()).thenReturn(keycloakSession);
+            UserProvider userProvider = mock(UserProvider.class);
+            when(keycloakSession.users()).thenReturn(userProvider);
+            FederatedIdentityModel fim = mock(FederatedIdentityModel.class);
+            when(userProvider.getFederatedIdentitiesStream(any(), any())).thenReturn(Stream.of(fim));
+            when(fim.getIdentityProvider()).thenReturn(brokeredIdp);
+        }
         when(userModel.getAttributes()).thenReturn(attributes);
         when(userModel.getId()).thenReturn("0983762");
         //mock clientId
@@ -264,7 +281,7 @@ class SchoolWhitelistAuthenticatorTest
                     + "    \"identityProviderId\": \"%s\"\n"
                     + "}", brokeredIdp));
         }
-        else {
+        else if(LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)){
             when(model.getAuthNote(PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT)).thenReturn(String.format("{"
                     + "\"id\":\"2b01a832-8337-4c9d-b260-2e0b6558786b\","
                     + "\"brokerUsername\":\"idpuser\","
