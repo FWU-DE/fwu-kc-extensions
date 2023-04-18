@@ -12,6 +12,7 @@ import static org.mockserver.model.HttpStatusCode.NOT_FOUND_404;
 import static org.mockserver.model.HttpStatusCode.OK_200;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -25,10 +26,7 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.AuthenticatorConfigModel;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.*;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockito.Mockito;
@@ -180,7 +178,25 @@ class WhitelistAuthenticatorTest
     @CsvSource({"google,true", "facebook,false"})
     void should_whitelist_based_on_post_broker_context(String brokeredIdp, boolean expected)
     {
-        var context = mockContext(CLIENT_CONFIGURED_GOOGLE, null, brokeredIdp, LoginActionsService.POST_BROKER_LOGIN_PATH);
+        var context = mockContext(CLIENT_CONFIGURED_GOOGLE, null, brokeredIdp, LoginActionsService.POST_BROKER_LOGIN_PATH, null);
+        authenticate(context);
+        assertEquals(expected, context.getSuccess());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"google,true", "facebook,false"})
+    void should_whitelist_based_on_user_idp_attribute(String idp, boolean expected){
+        UserModel userModel = mock(UserModel.class);
+        when(userModel.getFirstAttribute(WhitelistAuthenticator.IDP_ALIAS)).thenReturn(idp);
+        var context = mockContext(CLIENT_CONFIGURED_GOOGLE, null, null, LoginActionsService.AUTHENTICATE_PATH, userModel);
+        authenticate(context);
+        assertEquals(expected, context.getSuccess());
+    }
+    @ParameterizedTest
+    @CsvSource({"google,true", "facebook,false"})
+    void should_whitelist_based_on_federatedIdentity(String idp, boolean expected){
+        UserModel userModel = mock(UserModel.class);
+        var context = mockContext(CLIENT_CONFIGURED_GOOGLE, null, idp, LoginActionsService.AUTHENTICATE_PATH, userModel);
         authenticate(context);
         assertEquals(expected, context.getSuccess());
     }
@@ -203,10 +219,10 @@ class WhitelistAuthenticatorTest
         if (brokeredIdp != null) {
             flowPath = LoginActionsService.FIRST_BROKER_LOGIN_PATH;
         }
-        return mockContext(clientId, kcIdpHint, brokeredIdp, flowPath);
+        return mockContext(clientId, kcIdpHint, brokeredIdp, flowPath, null);
     }
 
-    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, String brokeredIdp, String flowPath)
+    private TestAuthenticationFlowContext mockContext(String clientId, String kcIdpHint, String brokeredIdp, String flowPath, UserModel user)
     {
         var context = mock(TestAuthenticationFlowContext.class);
 
@@ -233,7 +249,7 @@ class WhitelistAuthenticatorTest
         else if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
             when(authSession.getAuthNote(AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE)).thenReturn(null);
         }
-        else {
+        else if(LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)){
             when(authSession.getAuthNote(PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT)).thenReturn(String.format("{"
                     + "\"id\":\"2b01a832-8337-4c9d-b260-2e0b6558786b\","
                     + "\"brokerUsername\":\"idpuser\","
@@ -244,8 +260,11 @@ class WhitelistAuthenticatorTest
                     + "\"firstName\":\"idp\","
                     + "\"modelUsername\":\"idpuser\","
                     + "\"identityProviderId\":\"%s\""
-                    + "}",
-                                                                                                                           brokeredIdp));
+                    + "}", brokeredIdp));
+        }
+
+        if(user != null){
+            when(context.getUser()).thenReturn(user);
         }
 
         when(client.getClientId()).thenReturn(clientId);
@@ -273,6 +292,13 @@ class WhitelistAuthenticatorTest
         // error page
         var keycloakSession = mock(KeycloakSession.class);
         when(context.getSession()).thenReturn(keycloakSession);
+        if(user != null){
+            UserProvider userProvider = mock(UserProvider.class);
+            when(keycloakSession.users()).thenReturn(userProvider);
+            FederatedIdentityModel fim = mock(FederatedIdentityModel.class);
+            when(userProvider.getFederatedIdentitiesStream(any(), any())).thenReturn(Stream.of(fim));
+            when(fim.getIdentityProvider()).thenReturn(brokeredIdp);
+        }
         var provider = mock(LoginFormsProvider.class);
         when(keycloakSession.getProvider(LoginFormsProvider.class)).thenReturn(provider);
         when(provider.setAuthenticationSession(Mockito.any())).thenReturn(provider);

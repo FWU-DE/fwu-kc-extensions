@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented here.
 
+## Version [3.7.1]
+
+- Improvement: Whitelist authenticators validates user by the federated identities
+- Fix: Whitelist authenticators stores Identity Provider into User-Attribute to fallback if no IDP could be determined
+
 ## Version [3.7.0]
 
 - Improvement: Acronym Mapper supports now camel case acronyms as well.

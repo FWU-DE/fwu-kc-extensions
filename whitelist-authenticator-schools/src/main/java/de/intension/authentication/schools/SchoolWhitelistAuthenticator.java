@@ -2,10 +2,7 @@ package de.intension.authentication.schools;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.ws.rs.core.Response;
 
@@ -16,6 +13,7 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
+import org.keycloak.models.FederatedIdentityModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -33,7 +31,8 @@ public class SchoolWhitelistAuthenticator
     implements Authenticator
 {
 
-    private static final Logger           logger = Logger.getLogger(SchoolWhitelistAuthenticator.class);
+    public static final String            IDP_ALIAS = "idpAlias";
+    private static final Logger           logger    = Logger.getLogger(SchoolWhitelistAuthenticator.class);
     private final SchoolAssignmentsClient client;
 
     public SchoolWhitelistAuthenticator(SchoolAssignmentsClient client)
@@ -46,12 +45,13 @@ public class SchoolWhitelistAuthenticator
     {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         List<String> schoolIds = getSchoolIdsFromUser(context);
-        if (isPermittedServiceRequest(context, clientId, schoolIds)) {
+        String identityProvider = getProviderIdFromContext(context);
+        if (isPermittedServiceRequest(context, clientId, schoolIds, identityProvider)) {
             context.success();
         }
         else {
-            logger.infof("Service Provider with clientId=%s not configured for schools=%s for User-Id=%s", clientId, Arrays.toString(schoolIds.toArray()),
-                         context.getUser().getId());
+            logger.infof("Combination of IdP=%s and Service Provider with clientId=%s not configured for schools=%s for User-Id=%s", identityProvider, clientId,
+                         Arrays.toString(schoolIds.toArray()), context.getUser().getId());
             context.failure(AuthenticationFlowError.IDENTITY_PROVIDER_DISABLED, createErrorPage(context));
         }
     }
@@ -88,12 +88,11 @@ public class SchoolWhitelistAuthenticator
      * Checks, whether the combination of Service Provider ID (clientID) and School ID is part of the
      * whitelist.
      */
-    private boolean isPermittedServiceRequest(AuthenticationFlowContext context, String clientId, List<String> schoolIds)
+    private boolean isPermittedServiceRequest(AuthenticationFlowContext context, String clientId, List<String> schoolIds, String identityProvider)
     {
         String apiRealm = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
         String apiClientId = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
         String apiClientSecret = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
-        String identityProvider = getProviderIdFromContext(context);
 
         boolean permitted = false;
         try {
@@ -177,28 +176,66 @@ public class SchoolWhitelistAuthenticator
     private String getProviderIdFromContext(AuthenticationFlowContext context)
     {
         String flowPath = context.getFlowPath();
+        logger.infof("getProviderId - flowPath=%s", flowPath);
         String providerId = null;
         try {
-            if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
-                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
-                    .readFromAuthenticationSession(context.getAuthenticationSession(),
-                                                   AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
-                if (serializedCtx != null) {
-                    providerId = serializedCtx.getIdentityProviderId();
-                }
+            if (LoginActionsService.AUTHENTICATE_PATH.equals(flowPath)) {
+                providerId = getProviderIdFromFederatedIdentitesStream(context);
+                logger.infof("getProviderId - from FederatedIdentitesStream = %s", providerId);
+            }
+            else if (LoginActionsService.FIRST_BROKER_LOGIN_PATH.equals(flowPath)) {
+                providerId = getProviderIdFromBrokeredContextNote(context);
+                logger.infof("First Broker Login: getProviderId - from brokered context = %s", providerId);
             }
             else if (LoginActionsService.POST_BROKER_LOGIN_PATH.equals(flowPath)) {
-                SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
-                    .readFromAuthenticationSession(context.getAuthenticationSession(),
-                                                   PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
-                if (serializedCtx != null) {
-                    providerId = serializedCtx.getIdentityProviderId();
-                }
+                providerId = getProviderIdFromPostBrokerLoginContext(context);
+                logger.infof("Post Broker Login: getProviderId - from brokered context = %s", providerId);
+            }
+            if (StringUtil.isBlank(providerId)) {
+                providerId = getProviderIdFromUserAttributes(context);
+                logger.infof("getProviderId - from userattribute = %s", providerId);
             }
         } catch (Exception e) {
             logger.warn(e.getLocalizedMessage());
         }
         return providerId;
+    }
+
+    private String getProviderIdFromFederatedIdentitesStream(AuthenticationFlowContext context)
+    {
+        if (context.getSession().users() != null && context.getRealm() != null && context.getUser() != null) {
+            return context.getSession().users()
+                .getFederatedIdentitiesStream(context.getRealm(), context.getUser()).findFirst().map(FederatedIdentityModel::getIdentityProvider)
+                .orElse(null);
+        }
+        return null;
+    }
+
+    private String getProviderIdFromPostBrokerLoginContext(AuthenticationFlowContext context)
+    {
+        return Optional.ofNullable(SerializedBrokeredIdentityContext
+            .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                           PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT))
+            .map(SerializedBrokeredIdentityContext::getIdentityProviderId).orElse(null);
+    }
+
+    private String getProviderIdFromBrokeredContextNote(AuthenticationFlowContext context)
+    {
+
+        SerializedBrokeredIdentityContext serializedCtx = SerializedBrokeredIdentityContext
+            .readFromAuthenticationSession(context.getAuthenticationSession(),
+                                           AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+        if (serializedCtx != null) {
+            return serializedCtx.getIdentityProviderId();
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static String getProviderIdFromUserAttributes(AuthenticationFlowContext context)
+    {
+        return Optional.ofNullable(context.getUser()).map(user -> user.getFirstAttribute(IDP_ALIAS)).orElse(null);
     }
 
     public SchoolAssignmentsClient getClient()
