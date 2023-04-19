@@ -13,6 +13,9 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.representations.IDToken;
 import org.keycloak.utils.StringUtil;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.hash.Hashing;
 
 import de.intension.api.UserInfoAttribute;
@@ -22,10 +25,17 @@ import de.intension.api.json.*;
 public class UserInfoHelper
 {
 
-    protected static final Logger           logger                = Logger.getLogger(UserInfoHelper.class);
-    private static final String             LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
-    private static final UserBirthdayHelper birthdayHelper        = new UserBirthdayHelper();
-    private static final IdpHelper          idpHelper             = new IdpHelper();
+    protected static final Logger                  logger                = Logger.getLogger(UserInfoHelper.class);
+    private static final String                    LOG_UNSUPPORTED_VALUE = "Unsupported value %s for %s";
+    private static final UserBirthdayHelper        birthdayHelper        = new UserBirthdayHelper();
+    private static final UserVolljaehrigkeitHelper volljaehrigkeitHelper = new UserVolljaehrigkeitHelper();
+    private static final IdpHelper                 idpHelper             = new IdpHelper();
+    private static final ObjectMapper              objectMapper          = new ObjectMapper();
+    private static final String                    INDEXED_ATTR_FORMAT   = "%s[%d]";
+
+    static {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     /**
      * Create userInfo attribute from users attributes.
@@ -67,8 +77,7 @@ public class UserInfoHelper
     {
         Personenkontext kontext = new Personenkontext();
         Rolle rolle = getRolle(user, -1);
-        kontext.setKtid(getKit(user, heimatOrgId, rolle, -1));
-        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgId, rolle, userInfo);
+        kontext.setId(getKit(user, heimatOrgId, rolle, -1));
         if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
             kontext.setRolle(rolle);
         }
@@ -82,8 +91,15 @@ public class UserInfoHelper
                 }
             }
         }
+        Organisation organisation = getOrganisation(mappingModel, user, heimatOrgId, rolle, userInfo);
         if (!organisation.isEmpty()) {
             kontext.setOrganisation(organisation);
+        }
+        if (isActive(PERSON_KONTEXT_GRUPPEN, mappingModel)) {
+            addGruppenToKontext(user, kontext, PERSON_KONTEXT_GRUPPEN.getAttributeName());
+        }
+        if (isActive(PERSON_KONTEXT_LOESCHUNG, mappingModel)) {
+            addLoeschungToPersonenkontext(user, kontext);
         }
         if (!kontext.isEmpty()) {
             userInfo.getPersonenKontexte().add(kontext);
@@ -169,24 +185,9 @@ public class UserInfoHelper
         }
     }
 
-    /**
-     * Add @{@link Geburt} to @{@link Person} json structure.
-     */
-    private void addGeburt(Person person, ProtocolMapperModel mappingModel, UserModel user)
+    private void addLoeschungToPersonenkontext(UserModel user, Personenkontext personenkontext)
     {
-        String geburtsdatum = resolveSingleAttributeValue(user, PERSON_GEBURTSDATUM);
-        if (birthdayHelper.isValidBirthdayFormat(geburtsdatum)) {
-            Geburt geburt = new Geburt();
-            if (isActive(PERSON_GEBURTSDATUM, mappingModel)) {
-                geburt.setDatum(geburtsdatum);
-            }
-            if (isActive(PERSON_ALTER, mappingModel)) {
-                geburt.setAlter(birthdayHelper.calculateAge(geburtsdatum));
-            }
-            if (!geburt.isEmpty()) {
-                person.setGeburt(geburt);
-            }
-        }
+        addLoeschungToPersonenkontext(user, personenkontext, null);
     }
 
     /**
@@ -219,7 +220,7 @@ public class UserInfoHelper
             }
         }
         if (!personName.isEmpty()) {
-            person.setPerson(personName);
+            person.setPersonName(personName);
         }
     }
 
@@ -264,6 +265,65 @@ public class UserInfoHelper
         }
     }
 
+    private void addLoeschungToPersonenkontext(UserModel user, Personenkontext kontext, Integer indexOfPersonenkontext)
+    {
+        UserInfoAttribute attribute = indexOfPersonenkontext == null ? PERSON_KONTEXT_LOESCHUNG : PERSON_KONTEXT_ARRAY_LOESCHUNG;
+        String loeschungJson = resolveSingleAttributeValue(user, attribute, indexOfPersonenkontext);
+        if (StringUtil.isNotBlank(loeschungJson)) {
+            try {
+                kontext.setLoeschung(objectMapper.readValue(loeschungJson, Loeschung.class));
+            } catch (JsonProcessingException e) {
+                logger.errorf(e, "Could not read Attribute %s from user %s", PERSON_KONTEXT_ARRAY_LOESCHUNG.getAttributeName(), user.getUsername());
+            }
+        }
+    }
+
+    /**
+     * Resolve single user attribute value with array support (index >= 0).
+     */
+    private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute, Integer index)
+    {
+        Collection<String> values;
+        if (index == null) {
+            values = KeycloakModelUtils.resolveAttribute(user, attribute.getAttributeName(), false);
+        }
+        else {
+            values = KeycloakModelUtils.resolveAttribute(user, getIndexedAttributeName(attribute, index), false);
+        }
+        if (!values.isEmpty()) {
+            return values.stream().iterator().next();
+        }
+        else if (attribute.getDefaultValue() != null) {
+            return attribute.getDefaultValue().toString();
+        }
+        return null;
+    }
+
+    public static String getIndexedAttributeName(UserInfoAttribute attribute, int index)
+    {
+        return attribute.getAttributeName().replace("#", String.valueOf(index));
+    }
+
+    private void addGruppenToKontext(UserModel user, Personenkontext kontext, String attributeName)
+    {
+        int index = 0;
+        String indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, index);
+        String json = resolveSplittedAttribute(user, indexedAttribute);
+        while (StringUtil.isNotBlank(json)) {
+            try {
+                GruppeWithZugehoerigkeit gruppe = objectMapper.readValue(json, GruppeWithZugehoerigkeit.class);
+                if (kontext.getGruppen() == null) {
+                    kontext.setGruppen(new ArrayList<>());
+                }
+                kontext.getGruppen().add(gruppe);
+            } catch (JsonProcessingException e) {
+                logger.errorf(e, "Could not deserialize person.kontext.gruppen[%d] for user %s" + index, user.getUsername());
+            }
+            indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, ++index);
+            json = resolveSplittedAttribute(user, indexedAttribute);
+        }
+    }
+
     /**
      * Add personenkontext arrays.
      */
@@ -278,32 +338,19 @@ public class UserInfoHelper
         }
     }
 
-    /**
-     * Get single Kontext from array structure.
-     */
-    private Personenkontext getKontextArr(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId, Integer i)
+    private String resolveSplittedAttribute(UserModel user, String attributeName)
     {
-        Rolle rolle = getRolle(user, i);
-        Personenkontext kontext = new Personenkontext();
-        kontext.setKtid(getKit(user, heimatOrgId, rolle, i));
-        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgId, rolle, i, userInfo);
-        if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
-            kontext.setRolle(rolle);
+        StringBuilder jsonBuilder = new StringBuilder();
+        int partialIndex = 0;
+        Optional<String> partial = KeycloakModelUtils.resolveAttribute(user, attributeName, false).stream()
+            .findFirst();
+        while (partial.isPresent() && partial.get().length() == 255) {
+            jsonBuilder.append(partial.get());
+            partialIndex++;
+            partial = KeycloakModelUtils.resolveAttribute(user, attributeName + "_" + partialIndex, false).stream().findFirst();
         }
-        if (isActive(PERSON_KONTEXT_STATUS, mappingModel)) {
-            String status = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_STATUS, i);
-            if (status != null) {
-                try {
-                    kontext.setPersonenstatus(PersonenStatus.valueOf(status));
-                } catch (IllegalArgumentException e) {
-                    logger.errorf(LOG_UNSUPPORTED_VALUE, status, PERSON_KONTEXT_STATUS.getAttributeName());
-                }
-            }
-        }
-        if (!organisation.isEmpty()) {
-            kontext.setOrganisation(organisation);
-        }
-        return kontext;
+        partial.ifPresent(jsonBuilder::append);
+        return jsonBuilder.toString();
     }
 
     /**
@@ -383,28 +430,70 @@ public class UserInfoHelper
      */
     private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute)
     {
-        return resolveSingleAttributeValue(user, attribute, -1);
+        return resolveSingleAttributeValue(user, attribute, null);
     }
 
     /**
-     * Resolve single user attribute value with array support (index >= 0).
+     * Add @{@link Geburt} to @{@link Person} json structure.
      */
-    private String resolveSingleAttributeValue(UserModel user, UserInfoAttribute attribute, int index)
+    private void addGeburt(Person person, ProtocolMapperModel mappingModel, UserModel user)
     {
-        Collection<String> values;
-        if (index == -1) {
-            values = KeycloakModelUtils.resolveAttribute(user, attribute.getAttributeName(), false);
+        String geburtsdatum = resolveSingleAttributeValue(user, PERSON_GEBURTSDATUM);
+        Integer age = null;
+        if (birthdayHelper.isValidBirthdayFormat(geburtsdatum)) {
+            Geburt geburt = new Geburt();
+            if (isActive(PERSON_GEBURTSDATUM, mappingModel)) {
+                geburt.setDatum(geburtsdatum);
+            }
+            if (isActive(PERSON_GEBURTSORT, mappingModel)) {
+                geburt.setGeburtsort(resolveSingleAttributeValue(user, PERSON_GEBURTSORT));
+            }
+            if (isActive(PERSON_ALTER, mappingModel)) {
+                age = birthdayHelper.calculateAge(geburtsdatum);
+                geburt.setAlter(age);
+            }
+            if (isActive(PERSON_VOLLJAEHRIG, mappingModel)) {
+                age = age == null ? birthdayHelper.calculateAge(geburtsdatum) : age;
+                geburt.setVolljaehrig(volljaehrigkeitHelper.isVolljaehrig(age));
+            }
+            if (!geburt.isEmpty()) {
+                person.setGeburt(geburt);
+            }
         }
-        else {
-            values = KeycloakModelUtils.resolveAttribute(user, attribute.getAttributeName().replace("#", String.valueOf(index)), false);
+    }
+
+    /**
+     * Get single Kontext from array structure.
+     */
+    private Personenkontext getKontextArr(UserInfo userInfo, ProtocolMapperModel mappingModel, UserModel user, String heimatOrgId, Integer i)
+    {
+        Rolle rolle = getRolle(user, i);
+        Personenkontext kontext = new Personenkontext();
+        kontext.setId(getKit(user, heimatOrgId, rolle, i));
+        Organisation organisation = getOrganisationArray(mappingModel, user, heimatOrgId, rolle, i, userInfo);
+        if (isActive(PERSON_KONTEXT_ROLLE, mappingModel)) {
+            kontext.setRolle(rolle);
         }
-        if (!values.isEmpty()) {
-            return values.stream().iterator().next();
+        if (isActive(PERSON_KONTEXT_STATUS, mappingModel)) {
+            String status = resolveSingleAttributeValue(user, PERSON_KONTEXT_ARRAY_STATUS, i);
+            if (status != null) {
+                try {
+                    kontext.setPersonenstatus(PersonenStatus.valueOf(status));
+                } catch (IllegalArgumentException e) {
+                    logger.errorf(LOG_UNSUPPORTED_VALUE, status, PERSON_KONTEXT_STATUS.getAttributeName());
+                }
+            }
         }
-        else if (attribute.getDefaultValue() != null) {
-            return attribute.getDefaultValue().toString();
+        if (isActive(PERSON_KONTEXT_GRUPPEN, mappingModel)) {
+            addGruppenToKontext(user, kontext, getIndexedAttributeName(PERSON_KONTEXT_ARRAY_GRUPPEN, i));
         }
-        return null;
+        if (isActive(PERSON_KONTEXT_LOESCHUNG, mappingModel)) {
+            addLoeschungToPersonenkontext(user, kontext, i);
+        }
+        if (!organisation.isEmpty()) {
+            kontext.setOrganisation(organisation);
+        }
+        return kontext;
     }
 
     /**
@@ -472,7 +561,7 @@ public class UserInfoHelper
     private boolean isActive(UserInfoAttribute userInfoAttribute, ProtocolMapperModel mappingModel)
     {
         String value = mappingModel.getConfig().get(userInfoAttribute.getAttributeName());
-        return Boolean.valueOf(value);
+        return Boolean.parseBoolean(value);
     }
 
 }

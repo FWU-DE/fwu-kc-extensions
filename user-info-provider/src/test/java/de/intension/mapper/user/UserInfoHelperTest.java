@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import de.intension.api.enumerations.GermanBoolean;
 import de.intension.api.enumerations.OrganisationsTyp;
 import de.intension.api.json.*;
 
@@ -16,7 +17,7 @@ class UserInfoHelperTest
     {
         UserInfo userInfo = new UserInfo();
         Person person = new Person();
-        person.setPerson(new PersonName("Muster", "Hans", "M", "H", "hamu"));
+        person.setPersonName(new PersonName("Muster", "Hans", "M", "H", "hamu"));
         userInfo.setPerson(person);
         Assertions.assertTrue(userInfo.isEmpty());
     }
@@ -36,7 +37,7 @@ class UserInfoHelperTest
         UserInfo userInfo = new UserInfo();
         userInfo.setPid("2757c7a9-bb12-44d8-adf4-32e8d1afd3a0");
         Person person = new Person();
-        person.setPerson(new PersonName("Muster", "Hans", "M", "H", "hamu"));
+        person.setPersonName(new PersonName("Muster", "Hans", "M", "H", "hamu"));
         userInfo.setPerson(person);
         Assertions.assertFalse(userInfo.isEmpty());
     }
@@ -71,21 +72,23 @@ class UserInfoHelperTest
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"'',null,",
-            "null,null"}, nullValues = {"null"})
-    void should_mark_as_empty_geburt(String datum, Integer alter)
+    @CsvSource(value = {"'',null,null,null",
+            "null,null,null,null"}, nullValues = {"null"})
+    void should_mark_as_empty_geburt(String datum, Integer alter, String volljaehrig, String geburtsort)
     {
-        Geburt geburt = new Geburt(datum, alter);
+        Geburt geburt = new Geburt(datum, alter, volljaehrig == null ? null : GermanBoolean.valueOf(volljaehrig.toUpperCase()), geburtsort);
         Assertions.assertTrue(geburt.isEmpty());
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1980-01-01,null,",
-            "null,18",
-            "1980-01-01,18",}, nullValues = {"null"})
-    void should_mark_as_not_empty_geburt(String datum, Integer alter)
+    @CsvSource(value = {"1980-01-01,null,null,null",
+            "null,18,null,null",
+            "null,null,ja,null",
+            "null,null,null,Ostfildern, Deutschland",
+            "1980-01-01,18,ja,Ostfildern",}, nullValues = {"null"})
+    void should_mark_as_not_empty_geburt(String datum, Integer alter, String volljaehrig, String geburtsort)
     {
-        Geburt geburt = new Geburt(datum, alter);
+        Geburt geburt = new Geburt(datum, alter, volljaehrig == null ? null : GermanBoolean.valueOf(volljaehrig.toUpperCase()), geburtsort);
         Assertions.assertFalse(geburt.isEmpty());
     }
 

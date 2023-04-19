@@ -213,6 +213,194 @@
 			]
 		},
 		{
+			"name": "Client Mapper Config Checks",
+			"item": [
+				{
+					"name": "Check oidc-hmac-pairwise-email-mapper config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'oidc-hmac-pairwise-email-mapper'",
+									"const requiredProperties = ['sectorIdentifierUri', 'emailDomain', 'pairwiseSubHashAlgorithm', 'pairwiseSubAlgorithmSalt', 'pairwiseLocalSubIdentifier','id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+									"",
+									"function checkConfig(value, key, map) {",
+									"    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+									"        requiredProperties.forEach(property => {",
+									"            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+									"            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+									"        });",
+									"    });",
+									"};",
+									"",
+									"const clients = pm.response.json()",
+									"",
+									"const configMap = new Map();",
+									"clients.forEach(client => {",
+									"    if (typeof client.protocolMappers !== 'undefined') {",
+									"        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+									"            .flatMap(mapper => mapper.config);",
+									"        if (config.length > 0) {",
+									"            configMap.set(client.clientId, config);",
+									"        }",
+									"    }",
+									"});",
+									"configMap.forEach(checkConfig);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "viewableOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check oidc-hmac-pairwise-email-mapper config Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'oidc-hmac-pairwise-subject-mapper';",
+									"const requiredProperties = ['sectorIdentifierUri', 'pairwiseSubHashAlgorithm', 'pairwiseSubAlgorithmSalt', 'pairwiseLocalSubIdentifier', 'id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+									"",
+									"function checkConfig(value, key, map) {",
+									"    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+									"        requiredProperties.forEach(property => {",
+									"            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+									"            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+									"        });",
+									"    });",
+									"};",
+									"",
+									"const clients = pm.response.json()",
+									"",
+									"const configMap = new Map();",
+									"clients.forEach(client => {",
+									"    if (typeof client.protocolMappers !== 'undefined') {",
+									"        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+									"            .flatMap(mapper => mapper.config);",
+									"        if (config.length > 0) {",
+									"            configMap.set(client.clientId, config);",
+									"        }",
+									"    }",
+									"});",
+									"configMap.forEach(checkConfig);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "viewableOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check oidc-hmac-pairwise-subject-list-mapper config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'oidc-hmac-pairwise-subject-list-mapper';",
+									"const requiredProperties = ['clients', 'pseudonymListClaimName', 'id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+									"",
+									"function checkConfig(value, key, map) {",
+									"    pm.test(`Client ${key}: Check ${mapperToCheck} config`, function () {",
+									"        requiredProperties.forEach(property => {",
+									"            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+									"            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+									"        });",
+									"    });",
+									"};",
+									"",
+									"const clients = pm.response.json()",
+									"",
+									"const configMap = new Map();",
+									"clients.forEach(client => {",
+									"    if (typeof client.protocolMappers !== 'undefined') {",
+									"        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+									"            .flatMap(mapper => mapper.config);",
+									"        if (config.length > 0) {",
+									"            configMap.set(client.clientId, config);",
+									"        }",
+									"    }",
+									"});",
+									"configMap.forEach(checkConfig);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "viewableOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Check Post Login-Flow matches First Broker Login",
 			"event": [
 				{

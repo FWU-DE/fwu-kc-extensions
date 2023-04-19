@@ -7,7 +7,7 @@
   <parent>
     <groupId>de.intension</groupId>
     <artifactId>fwu-kc-extensions</artifactId>
-    <version>${projectVersion}</version>
+    <version>${revision}</version>
   </parent>
 
   <artifactId>remove-user-on-logout</artifactId>

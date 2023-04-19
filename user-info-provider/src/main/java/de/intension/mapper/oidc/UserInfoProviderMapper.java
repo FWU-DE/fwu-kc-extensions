@@ -47,15 +47,20 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         addConfigEntry(PERSON_AKRONYM);
         addConfigEntry(PERSON_GEBURTSDATUM);
         addConfigEntry(PERSON_ALTER);
+        addConfigEntry(PERSON_GEBURTSORT);
+        addConfigEntry(PERSON_VOLLJAEHRIG);
         addConfigEntry(PERSON_GESCHLECHT);
         addConfigEntry(PERSON_LOKALISIERUNG);
         addConfigEntry(PERSON_VERTRAUENSSTUFE);
+        addConfigEntry(PERSON_REFERRER);
         addConfigEntry(PERSON_KONTEXT_ORG_VIDIS_ID);
         addConfigEntry(PERSON_KONTEXT_ORG_KENNUNG);
         addConfigEntry(PERSON_KONTEXT_ORG_NAME);
         addConfigEntry(PERSON_KONTEXT_ORG_TYP);
         addConfigEntry(PERSON_KONTEXT_ROLLE);
         addConfigEntry(PERSON_KONTEXT_STATUS);
+        addConfigEntry(PERSON_KONTEXT_GRUPPEN);
+        addConfigEntry(PERSON_KONTEXT_LOESCHUNG);
         addOnlyChildrenClaims();
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserInfoProviderMapper.class);
         setDefaultTokenClaimNameValue();
@@ -70,9 +75,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
     {
         Optional<ProviderConfigProperty> config = configProperties.stream().filter(p -> p.getName().equals(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME))
             .findFirst();
-        if (!config.isEmpty()) {
-            config.get().setDefaultValue(USER_INFO_ATTRIBUTE_NAME);
-        }
+        config.ifPresent(providerConfigProperty -> providerConfigProperty.setDefaultValue(USER_INFO_ATTRIBUTE_NAME));
     }
 
     /**
@@ -82,9 +85,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
     {
         Optional<ProviderConfigProperty> config = configProperties.stream().filter(p -> p.getName().equals(OIDCAttributeMapperHelper.JSON_TYPE))
             .findFirst();
-        if (!config.isEmpty()) {
-            config.get().setDefaultValue("JSON");
-        }
+        config.ifPresent(providerConfigProperty -> providerConfigProperty.setDefaultValue("JSON"));
     }
 
     /**
@@ -94,9 +95,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
     {
         Optional<ProviderConfigProperty> config = configProperties.stream().filter(p -> p.getName().equals(OIDCAttributeMapperHelper.INCLUDE_IN_ACCESS_TOKEN))
             .findFirst();
-        if (!config.isEmpty()) {
-            config.get().setDefaultValue("false");
-        }
+        config.ifPresent(providerConfigProperty -> providerConfigProperty.setDefaultValue("false"));
     }
 
     /**

@@ -23,6 +23,10 @@ public enum UserInfoAttribute
             "Akronym in Kleinbuchstaben - Zusammengesetzt aus den ersten beiden Buchstaben von Vorname und Familienname"),
     PERSON_GEBURTSDATUM(UserInfoAttributeNames.PERSON_GEBURTSDATUM, UserInfoAttributeNames.PERSON_GEBURTSDATUM, Boolean.FALSE, null,
             "Geburtsdatum im Format ISO-8601 (YYYY-MM-DD)"),
+    PERSON_GEBURTSORT(UserInfoAttributeNames.PERSON_GEBURTSORT, UserInfoAttributeNames.PERSON_GEBURTSORT, Boolean.FALSE, null,
+            "Geburtsort im Form Stadt, Land. Wenn kein Land angegeben dann wird Deutschland angenommen."),
+    PERSON_VOLLJAEHRIG(UserInfoAttributeNames.PERSON_VOLLJAEHRIG, UserInfoAttributeNames.PERSON_VOLLJAEHRIG, Boolean.FALSE, null,
+            "Ist die Person volljährig. [Ja,Nein]"),
     PERSON_ALTER(UserInfoAttributeNames.PERSON_ALTER, UserInfoAttributeNames.PERSON_ALTER, Boolean.FALSE, null,
             "Alter - Wird aus dem Geburtsdatum errechnet (falls vorhanden)"),
     PERSON_GESCHLECHT(UserInfoAttributeNames.PERSON_GESCHLECHT, UserInfoAttributeNames.PERSON_GESCHLECHT, Boolean.FALSE, null,
@@ -31,9 +35,12 @@ public enum UserInfoAttribute
             "Lokalisierung im Format RFC 5646 <ISO-639-1>-<ISO-3166> (z.B. de-DE)"),
     PERSON_VERTRAUENSSTUFE(UserInfoAttributeNames.PERSON_VERTRAUENSSTUFE, UserInfoAttributeNames.PERSON_VERTRAUENSSTUFE, Boolean.TRUE, Vertrauensstufe.VOLL,
             "Vertrauensstufe (default 'VOLL'). Werte: " + Vertrauensstufe.prettyPrint()),
-
+    PERSON_REFERRER(UserInfoAttributeNames.PERSON_REFERRER, UserInfoAttributeNames.PERSON_REFERRER, Boolean.FALSE, null,
+            "ID der Gruppe im Quellsystem. Wird vom Quellsystem vergeben und muss im Quellsystem eindeutig sein."),
     PERSON_KONTEXT_ID(UserInfoAttributeNames.PERSON_KONTEXT_ID, UserInfoAttributeNames.PERSON_KONTEXT_ID, Boolean.TRUE, null,
             "ID des Personenkontexts, welchem die Gruppe zugeordnet ist "),
+    PERSON_KONTEXT_REFERRER(UserInfoAttributeNames.PERSON_KONTEXT_REFERRER, UserInfoAttributeNames.PERSON_KONTEXT_REFERRER, Boolean.TRUE, null,
+            "ID der Gruppe im Quellsystem. Wird vom Quellsystem vergeben und muss im Quellsystem eindeutig sein."),
     PERSON_KONTEXT_ORG_VIDIS_ID(UserInfoAttributeNames.PERSON_KONTEXT_ORG_VIDIS_ID, UserInfoAttributeNames.PERSON_KONTEXT_ORG_VIDIS_ID, Boolean.TRUE, null,
             "Vidis Schulidentifikator"),
     PERSON_KONTEXT_ORG_ID(UserInfoAttributeNames.PERSON_KONTEXT_ORG_ID, UserInfoAttributeNames.PERSON_KONTEXT_ORG_ID, Boolean.TRUE, null,
@@ -48,8 +55,14 @@ public enum UserInfoAttribute
             "Rolle der Person innerhalb der Organisation. Werte: " + Rolle.prettyPrint()),
     PERSON_KONTEXT_STATUS(UserInfoAttributeNames.PERSON_KONTEXT_STATUS, UserInfoAttributeNames.PERSON_KONTEXT_STATUS, Boolean.TRUE, PersonenStatus.AKTIV,
             "Status, den eine Person in einer Organisation in Bezug auf eine bestimmte Rolle hat. Werte: " + PersonenStatus.prettyPrint()),
-    //person context array
+    PERSON_KONTEXT_GRUPPEN(UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, Boolean.TRUE, null,
+            "Gruppen im Personenkontext, denen die Person zugeordnet ist."),
+    PERSON_KONTEXT_LOESCHUNG(UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, Boolean.TRUE, null,
+            "Datum zu dem dieser Personenkontext nicht mehr gültig ist und gelöscht wird."),
     PERSON_KONTEXT_ARRAY_ID(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ID, UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ID, Boolean.TRUE, null,
+            null),
+    PERSON_KONTEXT_ARRAY_REFERRER(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_REFERRER, UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_REFERRER, Boolean.TRUE,
+            null,
             null),
     PERSON_KONTEXT_ARRAY_ORG_ID(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_ID, UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_ID, Boolean.TRUE,
             null, null),
@@ -62,9 +75,13 @@ public enum UserInfoAttribute
             null),
     PERSON_KONTEXT_ARRAY_ORG_TYP(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ORG_TYP, UserInfoAttributeNames.PERSON_KONTEXT_ORG_TYP, Boolean.TRUE,
             OrganisationsTyp.SCHULE, null),
+
     PERSON_KONTEXT_ARRAY_ROLLE(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_ROLLE, UserInfoAttributeNames.PERSON_KONTEXT_ROLLE, Boolean.FALSE, null, null),
     PERSON_KONTEXT_ARRAY_STATUS(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_STATUS, UserInfoAttributeNames.PERSON_KONTEXT_STATUS, Boolean.TRUE,
-            PersonenStatus.AKTIV, null);
+            PersonenStatus.AKTIV, null),
+    PERSON_KONTEXT_ARRAY_GRUPPEN(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_GRUPPEN, UserInfoAttributeNames.PERSON_KONTEXT_GRUPPEN, Boolean.TRUE, null, null),
+    PERSON_KONTEXT_ARRAY_LOESCHUNG(UserInfoAttributeNames.PERSON_KONTEXT_ARRAY_LOESCHUNG, UserInfoAttributeNames.PERSON_KONTEXT_LOESCHUNG, Boolean.TRUE, null,
+            null);
 
     private final String  attributeName;
     private final String  label;

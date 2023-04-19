@@ -1,8 +1,8 @@
 version: '3.7'
 services:
   keycloak:
-    container_name: fwu-keycloak
-    image: quay.io/keycloak/keycloak:20.0
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:20.0.5
     ports:
       - 18080:8080
       - 8787:8787
@@ -13,9 +13,9 @@ services:
       KC_DB_URL_HOST: postgres
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: password
-      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
+      KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:8080/auth
       KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/service-provider/%s/idp-assignments
-      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://keycloak:8080/auth
+      KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:8080/auth
       KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/school-assignments
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
@@ -31,20 +31,12 @@ services:
       - "../../fwu-idp-theme/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
       - "../../fwu-idp-theme/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
-      - "../remove-user-on-logout/target/remove-user-on-logout-docker.jar:/opt/keycloak/providers/remove-user-on-logout.jar"
-      - "../hmac-mapper/target/hmac-mapper-docker.jar:/opt/keycloak/providers/hmac-mapper.jar"
-      - "../whitelist-authenticator/target/whitelist-authenticator-docker.jar:/opt/keycloak/providers/whitelist-authenticator.jar"
-      - "../whitelist-authenticator-schools/target/whitelist-authenticator-schools-docker.jar:/opt/keycloak/providers/whitelist-authenticator-schools.jar"
-      - "../multi-value-user-attribute-mapper/target/multi-value-user-attribute-mapper-docker.jar:/opt/keycloak/providers/multi-value-user-attribute-mapper.jar"
-      - "../acronym-mapper/target/acronym-mapper-docker.jar:/opt/keycloak/providers/acronym-mapper.jar"
-      - "../school-mapper/target/school-mapper-docker.jar:/opt/keycloak/providers/school-mapper.jar"
-      - "../user-info-provider/target/user-info-provider-docker.jar:/opt/keycloak/providers/user-info-provider.jar"
-      - "../user-info-requester/target/user-info-requester-docker.jar:/opt/keycloak/providers/user-info-requester.jar"
-      - "../user-info-api/target/user-info-api-docker.jar:/opt/keycloak/providers/user-info-api.jar"
+      - "./providers:/opt/keycloak/providers/"
     networks:
       - fwunet
     depends_on:
       - idp_mock
+      - postgres
 
   postgres:
     container_name: postgres

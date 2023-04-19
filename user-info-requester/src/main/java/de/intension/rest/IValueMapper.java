@@ -1,10 +1,11 @@
 package de.intension.rest;
 
+import java.util.List;
+
 public interface IValueMapper
 {
 
     String getJsonPath();
 
-    String mapValue(String value);
-
+    List<String> mapValue(Object document, String jsonPath);
 }

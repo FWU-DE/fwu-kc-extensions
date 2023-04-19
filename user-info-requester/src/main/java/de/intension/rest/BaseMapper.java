@@ -1,5 +1,10 @@
 package de.intension.rest;
 
+import java.util.Collections;
+import java.util.List;
+
+import com.jayway.jsonpath.JsonPath;
+
 public class BaseMapper
     implements IValueMapper
 {
@@ -17,8 +22,9 @@ public class BaseMapper
     }
 
     @Override
-    public String mapValue(String value)
+    public List<String> mapValue(Object document, String jsonPath)
     {
-        return value;
+        String value = JsonPath.read(document, jsonPath);
+        return Collections.singletonList(value);
     }
 }
