@@ -363,7 +363,8 @@
             "emailDomain": "vidis.schule",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
-            "pairwiseLocalSubIdentifier": "username"
+            "pairwiseLocalSubIdentifier": "username",
+            "access.token.claim": "true"
           }
         },
         {
@@ -390,7 +391,8 @@
             "sectorIdentifierUri": "https://sector.identifier.de",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
-            "pairwiseLocalSubIdentifier": "username"
+            "pairwiseLocalSubIdentifier": "username",
+            "access.token.claim": "true"
           }
         }
       ],
@@ -508,7 +510,8 @@
             "sectorIdentifierUri": "https://different.sector.identifier.de",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
-            "pairwiseLocalSubIdentifier": "username"
+            "pairwiseLocalSubIdentifier": "username",
+            "access.token.claim": "true"
           }
         },
         {
@@ -600,7 +603,8 @@
             "sectorIdentifierUri": "https://sector.identifier.de",
             "pairwiseSubHashAlgorithm": "HmacSHA3-256",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
-            "pairwiseLocalSubIdentifier": "username"
+            "pairwiseLocalSubIdentifier": "username",
+            "access.token.claim": "true"
           }
         },
         {
@@ -707,7 +711,8 @@
             "sectorIdentifierUri": "https://sector.identifier.de",
             "pairwiseSubHashAlgorithm": "HmacSHA3-512",
             "pairwiseSubAlgorithmSalt": "a6a6fcc9-ad33-4b59-a05a-7e0c4930e75e",
-            "pairwiseLocalSubIdentifier": "username"
+            "pairwiseLocalSubIdentifier": "username",
+            "access.token.claim": "true"
           }
         }
       ],
@@ -1563,6 +1568,7 @@
       "authenticateByDefault": false,
       "linkOnly": false,
       "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "Vidis Post Login Flow",
       "config": {
         "validateSignature": "false",
         "hideOnLoginPage": "false",
@@ -2697,6 +2703,34 @@
           "userSetupAllowed": false
         }
       ]
+    },
+    {
+      "id": "7df4d805-8291-42b7-921d-5f4920a52939",
+      "alias": "Vidis Post Login Flow",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "idp whitelist config",
+          "authenticator": "whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "vidis school ids",
+          "authenticator": "school-whitelist-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
     }
   ],
   "authenticatorConfig": [
@@ -2707,6 +2741,16 @@
         "authWhitelistRealm": "fwu",
         "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
         "userAttributeName": "prefixedSchools",
+        "authWhiteListClientId": "school-test"
+      }
+    },
+    {
+      "id": "756c9084-919f-4f1b-b1e2-1496868b0e4f",
+      "alias": "idp whitelist config",
+      "config": {
+        "authWhitelistRealm": "fwu",
+        "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
+        "idpHintParamName": "vidis_idp_hint",
         "authWhiteListClientId": "school-test"
       }
     },
@@ -2722,6 +2766,16 @@
       "alias": "review profile config",
       "config": {
         "update.profile.on.first.login": "missing"
+      }
+    },
+    {
+      "id": "d0d7cbf6-43a1-469b-8c6e-001fbe49c2b8",
+      "alias": "vidis school ids",
+      "config": {
+        "authWhitelistRealm": "fwu",
+        "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
+        "userAttributeName": "prefixedSchools",
+        "authWhiteListClientId": "school-test"
       }
     }
   ],

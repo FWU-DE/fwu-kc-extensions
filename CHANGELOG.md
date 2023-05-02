@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [3.8.1]
+
+- Fix: Remove registered user without sessions 
+
 ## Version [3.8.0]
 
 - Update: Support SANIS API V1.0003.

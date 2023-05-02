@@ -7,11 +7,7 @@ import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.FederatedIdentityModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserProvider;
+import org.keycloak.models.*;
 import org.keycloak.services.resources.KeycloakApplication;
 import org.keycloak.services.scheduled.ScheduledTaskRunner;
 import org.keycloak.timer.TimerProvider;
@@ -40,38 +36,57 @@ public class RemoveUserOnLogOutEventListenerProvider
     {
         EventType eventType = event.getType();
 
-        if (EventType.LOGIN.equals(eventType) || EventType.LOGOUT.equals(eventType)) {
+        if (EventType.LOGIN.equals(eventType) || EventType.LOGOUT.equals(eventType) || EventType.REGISTER.equals(eventType)) {
             RealmModel realm = keycloakSession.getContext().getRealm();
-            TimerProvider timer = keycloakSession.getProvider(TimerProvider.class);
             String userId = event.getUserId();
             UserProvider provider = this.keycloakSession.getProvider(UserProvider.class, "jpa");
             UserModel userModel = provider.getUserById(realm, userId);
             Stream<FederatedIdentityModel> federatedIdentity = keycloakSession.users()
                 .getFederatedIdentitiesStream(realm, userModel);
-            
+
             if (federatedIdentity.findAny().isPresent()) {
-
-                if (EventType.LOGIN.equals(eventType)) {
-                    // keep one session per user 
-                    keycloakSession.sessions().getUserSessionsStream(realm, userModel).forEach(userSession -> {
-                        if (!userSession.getId().equals(event.getSessionId())) {
-                            keycloakSession.sessions().removeUserSession(realm, userSession);
-                        }
-                    });
-                    timer.schedule(new ScheduledTaskRunner(KeycloakApplication.getSessionFactory(), new RemoveExpiredSessionUsers(realm, userId)),
-                                   realm.getSsoSessionIdleTimeout() * 1000, userId);
-                    LOG.debugf("Task created to check and remove user with id [%s] on session expiration.", userId);
-
-                }
-
                 if (EventType.LOGOUT.equals(eventType)) {
-                    keycloakSession.users().removeUser(realm, userModel);
-                    keycloakSession.getTransactionManager().commit();
-                    timer.cancelTask(userId);
-                    LOG.debugf("User with id [%s] is removed on logout.", userId);                    
+                    removeUserAndCancelTask(realm, userModel, userId);
+                }
+                else {
+                    addUserRemovalTask(realm, event, userModel, userId, EventType.LOGIN.equals(eventType));
                 }
             }
         }
+    }
+
+    /**
+     * Add user removal task.
+     */
+    private void addUserRemovalTask(RealmModel realm, Event event, UserModel userModel, String userId, boolean removeSession)
+    {
+        TimerProvider timer = keycloakSession.getProvider(TimerProvider.class);
+        if (removeSession) {
+            // keep one session per user
+            keycloakSession.sessions().getUserSessionsStream(realm, userModel).forEach(userSession -> {
+                if (!userSession.getId().equals(event.getSessionId())) {
+                    keycloakSession.sessions().removeUserSession(realm, userSession);
+                }
+            });
+        }
+
+        timer.schedule(new ScheduledTaskRunner(KeycloakApplication.getSessionFactory(), new RemoveExpiredSessionUsers(realm, userId)),
+                       realm.getSsoSessionIdleTimeout() * 1000L, userId);
+        LOG.debugf("Task created to check and remove user with id [%s] on session expiration.", userId);
+    }
+
+    /**
+     * Remove user by userId and cancel related 'remove expired session users' task.
+     */
+    private void removeUserAndCancelTask(RealmModel realm, UserModel userModel, String userId)
+    {
+        TimerProvider timer = keycloakSession.getProvider(TimerProvider.class);
+        keycloakSession.users().removeUser(realm, userModel);
+        keycloakSession.getTransactionManager().commit();
+        if (timer.cancelTask(userId) != null) {
+            LOG.debugf("Task with id [%s] is removed on logout.");
+        }
+        LOG.debugf("User with id [%s] is removed on logout.", userId);
     }
 
     @Override
