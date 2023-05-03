@@ -11,6 +11,17 @@
     }
   },
   {
+    "id": "allow_account",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/service-provider/account/idp-assignments"
+    },
+    "httpResponse": {
+      "body": "[\"keycloak-oidc\"]"
+    }
+  },
+  {
     "id": "deny",
     "priority": 0,
     "httpRequest": {
