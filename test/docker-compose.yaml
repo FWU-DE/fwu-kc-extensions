@@ -2,7 +2,7 @@ version: '3.7'
 services:
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:20.0
+    image: quay.io/keycloak/keycloak:20.0.5
     ports:
       - 18080:8080
       - 8787:8787
@@ -32,6 +32,7 @@ services:
       - fwunet
     depends_on:
       - idp_mock
+      - postgres
 
   postgres:
     container_name: postgres
@@ -86,5 +87,3 @@ networks:
     driver: bridge
     ipam:
       driver: default
-      config:
-        - subnet: 172.18.0.0/16

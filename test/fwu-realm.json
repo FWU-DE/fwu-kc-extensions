@@ -1374,11 +1374,19 @@
       "firstBrokerLoginFlowAlias": "vidis first broker login",
       "postBrokerLoginFlowAlias": "Vidis Post Login Flow",
       "config": {
-        "loginHint": "true",
+        "validateSignature": "false",
+        "hideOnLoginPage": "false",
+        "tokenUrl": "http://keycloak:8080/auth/realms/idp/protocol/openid-connect/token",
+        "authorizationUrl": "http://localhost:18080/auth/realms/idp/protocol/openid-connect/auth",
+        "acceptsPromptNoneForwardFromClient": "false",
         "clientId": "identity-broker",
-        "tokenUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/token",
-        "authorizationUrl": "http://172.18.0.1:18080/auth/realms/idp/protocol/openid-connect/auth",
+        "uiLocales": "false",
+        "backchannelSupported": "false",
+        "useJwksUrl": "true",
+        "loginHint": "true",
+        "pkceEnabled": "false",
         "clientAuthMethod": "client_secret_basic",
+        "disableUserInfo": "false",
         "syncMode": "IMPORT",
         "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true"
@@ -1400,7 +1408,7 @@
       "config": {
         "validateSignature": "false",
         "postBindingLogout": "true",
-        "singleLogoutServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "singleLogoutServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
         "postBindingResponse": "true",
         "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
         "entityId": "saml-identity-broker",
@@ -1409,13 +1417,13 @@
         "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
         "wantAssertionsEncrypted": "false",
         "signatureAlgorithm": "RSA_SHA256",
-        "idpEntityId": "http://172.18.0.1:18443/auth/realms/saml",
+        "idpEntityId": "http://localhost:18443/auth/realms/saml",
         "loginHint": "false",
         "allowCreate": "true",
         "wantAssertionsSigned": "false",
         "postBindingAuthnRequest": "true",
         "forceAuthn": "false",
-        "singleSignOnServiceUrl": "http://172.18.0.1:18443/auth/realms/saml/protocol/saml",
+        "singleSignOnServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
         "wantAuthnRequestsSigned": "true",
         "guiOrder": "0",
         "principalType": "Subject NameID"
@@ -1424,7 +1432,7 @@
   ],
   "identityProviderMappers": [
     {
-      "id": "ecff0e7f-32de-4c29-bc31-6354a10978cc",
+      "id": "591a4af4-8b16-49c8-bd54-062817fdd7c8",
       "name": "Test",
       "identityProviderAlias": "keycloak-saml",
       "identityProviderMapper": "prefixed-attr-saml-idp-mapper",
@@ -2682,7 +2690,7 @@
     "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0"
   },
-  "keycloakVersion": "20.0.3",
+  "keycloakVersion": "20.0.5",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []
