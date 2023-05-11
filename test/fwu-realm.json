@@ -1382,7 +1382,6 @@
         "clientId": "identity-broker",
         "uiLocales": "false",
         "backchannelSupported": "false",
-        "useJwksUrl": "true",
         "loginHint": "true",
         "pkceEnabled": "false",
         "clientAuthMethod": "client_secret_basic",
