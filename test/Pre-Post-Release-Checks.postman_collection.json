@@ -6,6 +6,139 @@
 	},
 	"item": [
 		{
+			"name": "Check Server Extension",
+			"item": [
+				{
+					"name": "Check mapper extensions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"const componentType = 'org.keycloak.broker.provider.IdentityProviderMapper'",
+									"const extensions = ['acronym-idp-mapper', 'mapped-value-oidc-user-attribute-idp-mapper', 'mapped-value-saml-user-attribute-idp-mapper', 'prefixed-attribute-idp-mapper', 'prefixed-attr-saml-idp-mapper', 'vidis-info-request-mapper_oidc'];",
+									"",
+									"pm.test(\"Should have Status code 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"extensions.forEach(id => {",
+									"    pm.test(`Check extension ${id}`, function () {",
+									"    const arrExtensions = response.componentTypes[\"org.keycloak.broker.provider.IdentityProviderMapper\"];",
+									"    const ext = arrExtensions.find((extension) => extension.id === id);",
+									"    pm.expect(ext, `Extension ${id} is not deployed`).to.be.not.undefined;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/serverinfo",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"serverinfo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check authenticator extensions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"const extensions = ['whitelist-authenticator', 'school-whitelist-authenticator'];",
+									"",
+									"pm.test(\"Should have Status code 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"extensions.forEach(id => {",
+									"    pm.test(`Check extension ${id}`, function () {",
+									"    const arrExtensions = response.componentTypes[\"org.keycloak.authentication.Authenticator\"];",
+									"    const ext = arrExtensions.find((extension) => extension.id === id);",
+									"    pm.expect(ext, `Extension ${id} is not deployed`).to.be.not.undefined;",
+									"    });",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/serverinfo",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"serverinfo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check event-listener extensions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"const extensions = ['remove-user-on-logout', 'metrics-listener'];",
+									"",
+									"pm.test(\"Should have Status code 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"extensions.forEach(id => {",
+									"    pm.test(`Check extension ${id}`, function () {",
+									"    const eventsListener = response.providers.eventsListener.providers[`${id}`];",
+									"    pm.expect(eventsListener, `Extension ${id} is not deployed`).to.be.not.undefined;",
+									"    });",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/serverinfo",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"serverinfo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Check Authenticator Config",
 			"item": [
 				{
@@ -277,7 +410,7 @@
 					"response": []
 				},
 				{
-					"name": "Check oidc-hmac-pairwise-email-mapper config Copy",
+					"name": "Check oidc-hmac-pairwise-subject-mapper config",
 					"event": [
 						{
 							"listen": "test",
@@ -393,6 +526,123 @@
 									"key": "viewableOnly",
 									"value": "true"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Check Event Listener",
+			"item": [
+				{
+					"name": "Check event-listener configuration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"const listeners = ['remove-user-on-logout', 'metrics-listener'];",
+									"",
+									"pm.test(\"Should have Status code 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Store admin events should be active\", function () {",
+									"  pm.expect(response.adminEventsEnabled).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Store user events should be active\", function () {",
+									"  pm.expect(response.eventsEnabled).to.be.true;",
+									"});",
+									"",
+									"listeners.forEach(id => {",
+									"    pm.test(`Check if listener ${id} is active`, function () {",
+									"    const listener = response.eventsListeners.find((listener) => listener === `${id}`);",
+									"    pm.expect(listener, `Listener ${id} is not active`).to.be.not.undefined;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/events/config",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"events",
+								"config"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IdP Mapper Config Checks",
+			"item": [
+				{
+					"name": "Check mapped-value-oidc-user-attribute-idp-mapper config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const identityProviders = pm.response.json()",
+									"",
+									"identityProviders.forEach(idp => {",
+									"var request = { ",
+									"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/identity-provider/instances/\" + idp.alias + \"/mappers\",",
+									"        header:  {",
+									"            'Accept': 'application/json',",
+									"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+									"        }",
+									"    }",
+									"    pm.sendRequest(request, function (err, response) {",
+									"        const body = response.json();",
+									"        console.log(body)",
+									"        /*",
+									"        pm.test(\"Flow \"+ decodeURI(flow) + \" should have executions\", function () {",
+									"            pm.expect(response).to.have.status(200);",
+									"        });",
+									"        body.filter(execution => execution.configurable === true).filter(execution => ",
+									"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution, flow));",
+									"            */",
+									"    })",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"identity-provider",
+								"instances"
 							]
 						}
 					},
