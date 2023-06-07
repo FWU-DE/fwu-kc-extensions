@@ -197,9 +197,9 @@
 									"            pm.expect(response, \"No config found\").to.have.status(200);",
 									"            pm.expect(typeof body.config).to.not.eql('undefined');",
 									"            const config = body.config",
-									"            pm.expect(config.authWhitelistRealm, \"Realm must not be empty\").to.not.undefined;",
-									"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must not be empty\").to.not.undefined;",
-									"            pm.expect(config.authWhiteListClientId, \"Client ID must not be empty\").to.not.undefined;",
+									"            pm.expect(config.authWhitelistRealm, \"Realm must be correct\").to.equal(pm.environment.get('iam-clientRealm'));",
+									"            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must be correct\").to.equal(pm.environment.get('iam-clientSecret'));",
+									"            pm.expect(config.authWhiteListClientId, \"Client ID must be correct\").to.equal(pm.environment.get('iam-clientId'));",
 									"            if(providerId === 'school-whitelist-authenticator') {",
 									"                pm.expect(config.userAttributeName, \"User Attribute must not be empty\").to.not.undefined;",
 									"            }",
@@ -246,7 +246,7 @@
 									"pm.collectionVariables.set(\"config_alias\", response.alias);",
 									"pm.collectionVariables.set(\"config_id\", response.id);",
 									"if(typeof response.config.listOfAllowedIdPs != 'undefined'){",
-									"    pm.collectionVariables.set(\"idp-whitelist\", response.config.listOfAllowedIdPs);",
+									"    pm.collectionVariables.set(\"idp-whitelist\", response.config.listOfAllowedIdPs.replace(/\\\"/g,'\\\\\"').replace(/\\s/g,''));",
 									"} else {",
 									"    pm.collectionVariables.set(\"idp-whitelist\", null);",
 									"}",
@@ -313,7 +313,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"{{config_id}}\",\n    \"alias\": \"{{config_alias}}\",\n    \"config\": {\n        \"authWhiteListClientId\": \"{{iam-clientId}}\",\n        \"authWhiteListClientIdSecret\": \"{{iam-clientSecret}}\",\n        \"authWhitelistRealm\": \"{{realm-to-check}}\",\n        \"idpHintParamName\": \"{{idp-hint-param-name}}\",\n        \"listOfAllowedIdPs\": \"{{idp-whitelist}}\",\n        \"userAttributeName\": \"{{userAttributeName}}\"\n\t}\n}",
+							"raw": "{\n    \"id\": \"{{config_id}}\",\n    \"alias\": \"{{config_alias}}\",\n    \"config\": {\n        \"authWhiteListClientId\": \"{{iam-clientId}}\",\n        \"authWhiteListClientIdSecret\": \"{{iam-clientSecret}}\",\n        \"authWhitelistRealm\": \"{{iam-clientRealm}}\",\n        \"idpHintParamName\": \"{{idp-hint-param-name}}\",\n        \"listOfAllowedIdPs\": \"{{idp-whitelist}}\",\n        \"userAttributeName\": \"{{userAttributeName}}\"\n\t}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -594,6 +594,118 @@
 			"name": "IdP Mapper Config Checks",
 			"item": [
 				{
+					"name": "Check Sanis Mapper Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'vidis-info-request-mapper_oidc';",
+									"const requiredProperties = [''];",
+									"",
+									"const idpAliases = pm.response.json().map(idp => idp.alias);",
+									"",
+									"function getMapperRequest(idp) {",
+									"\treturn {",
+									"\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+									"\t\theader: {",
+									"\t\t\t'Accept': 'application/json',",
+									"\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"idpAliases.forEach(idp => {",
+									"\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+									"\t\tconst mapper = response.json();",
+									"        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+									"            pm.test(`Mapper ${mapperToCheck} of idp ${idp} should have correct REST_API_URL set.`, () => {",
+									"                pm.expect(mapper.config.REST_API_URL).to.equal(pm.environment.get('sanis_api_url'));",
+									"            });",
+									"        });",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"identity-provider",
+								"instances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Acronym Mapper Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'acronym-idp-mapper';",
+									"const requiredProperties = [''];",
+									"",
+									"const idpAliases = pm.response.json().map(idp => idp.alias);",
+									"",
+									"function getMapperRequest(idp) {",
+									"\treturn {",
+									"\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+									"\t\theader: {",
+									"\t\t\t'Accept': 'application/json',",
+									"\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"idpAliases.forEach(idp => {",
+									"\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+									"\t\tconst mapper = response.json();",
+									"        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+									"            pm.test(`Mapper ${mapperToCheck} of idp ${idp} should have correct User Attribute set.`, () => {",
+									"                pm.expect(mapper.config.attribute).to.equal(pm.environment.get('akronym-mapper-attribute'));",
+									"            });",
+									"        });",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"identity-provider",
+								"instances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Check mapped-value-oidc-user-attribute-idp-mapper config",
 					"event": [
 						{
@@ -725,8 +837,8 @@
 					"            mode: 'urlencoded',",
 					"            urlencoded: [",
 					"                { key: 'grant_type', value: 'client_credentials' },",
-					"                { key: 'client_id', value: pm.environment.get(\"post-release-check-client-id\") },",
-					"                { key: 'client_secret', value: pm.environment.get(\"post-release-check-client-secret\") }",
+					"                { key: 'client_id', value: pm.environment.get(\"admin-client-id\") },",
+					"                { key: 'client_secret', value: pm.environment.get(\"admin-client-secret\") }",
 					"            ]",
 					"        }",
 					"    };",
