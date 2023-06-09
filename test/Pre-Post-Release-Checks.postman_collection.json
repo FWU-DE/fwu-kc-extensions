@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "d5d2f9fc-3fcd-42f8-882e-296fa77faf28",
+		"_postman_id": "d5cf7fba-4955-4538-8ab6-e24976a7cd12",
 		"name": "Pre-/Post Release Checks",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27700231"
 	},
 	"item": [
 		{
@@ -410,6 +411,68 @@
 					"response": []
 				},
 				{
+					"name": "Check User Info Provider config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'vidis-info-provider-mapper'",
+									"const requiredProperties = ['claim.name'];",
+									"",
+									"function checkConfig(value, key, map) {",
+									"    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+									"        requiredProperties.forEach(property => {",
+									"            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+									"            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+									"            pm.expect(\"true\").to.be.oneOf([value[0]['id.token.claim'], value[0]['access.token.claim'], value[0]['userinfo.token.claim']]);",
+									"        });",
+									"    });",
+									"};",
+									"",
+									"const clients = pm.response.json()",
+									"",
+									"const configMap = new Map();",
+									"clients.forEach(client => {",
+									"    if (typeof client.protocolMappers !== 'undefined') {",
+									"        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+									"            .flatMap(mapper => mapper.config);",
+									"        if (config.length > 0) {",
+									"            configMap.set(client.clientId, config);",
+									"        }",
+									"    }",
+									"});",
+									"configMap.forEach(checkConfig);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "viewableOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Check oidc-hmac-pairwise-subject-mapper config",
 					"event": [
 						{
@@ -650,7 +713,7 @@
 					"response": []
 				},
 				{
-					"name": "Check Acronym Mapper Config",
+					"name": "Check Acronym Mapper Config (SAML+OIDC)",
 					"event": [
 						{
 							"listen": "test",
@@ -706,36 +769,161 @@
 					"response": []
 				},
 				{
+					"name": "Check SAML Prefixedd Attribute Mapper Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'prefixed-attr-saml-idp-mapper';",
+									"const requiredProperties = [{ 'id': 'syncMode', 'name': 'Sync Mode Override'}, { 'id':'prefix', 'name':'Prefix'}, { 'id':'user.attribute', 'name': 'User Attribute Name'}];",
+									"",
+									"const idpAliases = pm.response.json().map(idp => idp.alias);",
+									"",
+									"function getMapperRequest(idp) {",
+									"\treturn {",
+									"\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+									"\t\theader: {",
+									"\t\t\t'Accept': 'application/json',",
+									"\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"idpAliases.forEach(idp => {",
+									"\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+									"\t\tconst mapper = response.json();",
+									"        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+									"            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+									"                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).not.to.empty);",
+									"                if (typeof mapper.config['attribute.name'] != 'undefined' && mapper.config['attribute.name'].length != 0) {",
+									"                    console.log('not empty');",
+									"                    pm.expect(mapper.config['attribute.friendly.name'], 'Either Attribute Friendly Name or Attribute Name must be set. Not both').not.ok;",
+									"                } else if (typeof mapper.config['attribute.friendly.name'] == 'undefined' && mapper.config['attribute.friendly.name'].length != 0) {",
+									"                    pm.expect(mapper.config['attribute.name'], 'Either Attribute Friendly Name or Attribute Name must be set. Not both').not.ok;",
+									"                    console.log('not empty again');",
+									"                }",
+									"            });",
+									"        });",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"identity-provider",
+								"instances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check OIDC Prefixed Attribute Mapper Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const mapperToCheck = 'prefixed-attribute-idp-mapper';",
+									"const requiredProperties = [{ 'id': 'syncMode', 'name': 'Sync Mode Override'}, { 'id':'prefix', 'name':'Prefix'}, { 'id':'attribute', 'name': 'User Attribute Name'}, { 'id': 'claim', 'name': 'claim'}];",
+									"",
+									"const idpAliases = pm.response.json().map(idp => idp.alias);",
+									"",
+									"function getMapperRequest(idp) {",
+									"\treturn {",
+									"\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+									"\t\theader: {",
+									"\t\t\t'Accept': 'application/json',",
+									"\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"idpAliases.forEach(idp => {",
+									"\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+									"\t\tconst mapper = response.json();",
+									"        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+									"            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+									"                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).to.not.empty);",
+									"            });",
+									"        });",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"admin",
+								"realms",
+								"{{realm-to-check}}",
+								"identity-provider",
+								"instances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Check mapped-value-oidc-user-attribute-idp-mapper config",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"const identityProviders = pm.response.json()",
+									"const mapperToCheck = 'mapped-value-oidc-user-attribute-idp-mapper';",
+									"const requiredProperties = [{ 'id':'syncMode', 'name': 'Sync Override Mode'},{ 'id': 'claim', 'name': 'Claim'} ,{ 'id':'user.attribute', 'name':'User Attribute Name'},{'id':'attribute.value.mappings', 'name':'User Value Mappings'}];",
 									"",
-									"identityProviders.forEach(idp => {",
-									"var request = { ",
-									"        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/identity-provider/instances/\" + idp.alias + \"/mappers\",",
-									"        header:  {",
-									"            'Accept': 'application/json',",
-									"            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
-									"        }",
-									"    }",
-									"    pm.sendRequest(request, function (err, response) {",
-									"        const body = response.json();",
-									"        console.log(body)",
-									"        /*",
-									"        pm.test(\"Flow \"+ decodeURI(flow) + \" should have executions\", function () {",
-									"            pm.expect(response).to.have.status(200);",
+									"const idpAliases = pm.response.json().map(idp => idp.alias);",
+									"",
+									"function getMapperRequest(idp) {",
+									"\treturn {",
+									"\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+									"\t\theader: {",
+									"\t\t\t'Accept': 'application/json',",
+									"\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+									"\t\t}",
+									"\t}",
+									"}",
+									"",
+									"idpAliases.forEach(idp => {",
+									"\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+									"\t\tconst mapper = response.json();",
+									"        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+									"            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+									"                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).not.to.empty);",
+									"                //console.log(mapper.config['attribute.value.mappings']);",
+									"                JSON.parse(mapper.config['attribute.value.mappings']).forEach( entry => {",
+									"                    pm.expect(entry.key, 'Value-Mapping  Key should not be empty').to.not.empty;",
+									"                    pm.expect(entry.key, 'Value-Mapping Value should not be empty').to.not.empty;",
+									"                });",
+									"            });",
 									"        });",
-									"        body.filter(execution => execution.configurable === true).filter(execution => ",
-									"            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution, flow));",
-									"            */",
-									"    })",
-									"});",
-									"",
-									""
+									"    });",
+									"});"
 								],
 								"type": "text/javascript"
 							}

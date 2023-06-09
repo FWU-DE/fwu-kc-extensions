@@ -25,6 +25,7 @@ import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
 import de.intension.authentication.rest.IdPAssignmentsClient;
+import twitter4j.JSONException;
 
 /**
  * Check IdP hint against a configured whitelist.
@@ -186,11 +187,14 @@ public class WhitelistAuthenticator
                 String apiClientId = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
                 String apiClientSecret = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
                 List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientSecret);
+                logger.tracef("Retrieve allowed IDPs using client %s, realm %s, secret %s from %s", apiClientId, apiRealm, apiClientSecret.substring(0, 3),
+                              client.getUrl());
+                logger.debugf("Retrieved allowed IDPs %s for sp %s from %s", allowedIdPs, providerId);
                 if (allowedIdPs != null && allowedIdPs.contains(providerId)) {
                     isAllowed = true;
                 }
-            } catch (IOException | URISyntaxException e) {
-                logger.errorf(e, "List of assigned IdPs could not fetched clientId=%s, providerId=%s, url=%s", clientId, providerId, client.getUrl());
+            } catch (IOException | URISyntaxException | JSONException e) {
+                logger.errorf(e, "List of assigned IdPs could not be fetched clientId=%s, providerId=%s, url=%s", clientId, providerId, client.getUrl());
             }
         }
         return isAllowed;
