@@ -185,7 +185,7 @@ public class WhitelistAuthenticator
             try {
                 String apiRealm = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
                 String apiClientId = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
-                String apiClientSecret = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
+                String apiClientSecret = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, "n/a");
                 List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientSecret);
                 logger.tracef("Retrieve allowed IDPs using client %s, realm %s, secret %s from %s", apiClientId, apiRealm, apiClientSecret.substring(0, 3),
                               client.getUrl());
