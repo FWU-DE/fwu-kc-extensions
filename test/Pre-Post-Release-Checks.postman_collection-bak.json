@@ -1,0 +1,1080 @@
+{
+  "info": {
+    "_postman_id": "d5cf7fba-4955-4538-8ab6-e24976a7cd12",
+    "name": "Pre-/Post Release Checks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "27700231"
+  },
+  "item": [
+    {
+      "name": "Check Server Extension",
+      "item": [
+        {
+          "name": "Check mapper extensions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "const componentType = 'org.keycloak.broker.provider.IdentityProviderMapper'",
+                  "const extensions = ['acronym-idp-mapper', 'mapped-value-oidc-user-attribute-idp-mapper', 'mapped-value-saml-user-attribute-idp-mapper', 'prefixed-attribute-idp-mapper', 'prefixed-attr-saml-idp-mapper', 'vidis-info-request-mapper_oidc'];",
+                  "",
+                  "pm.test(\"Should have Status code 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "extensions.forEach(id => {",
+                  "    pm.test(`Check extension ${id}`, function () {",
+                  "    const arrExtensions = response.componentTypes[\"org.keycloak.broker.provider.IdentityProviderMapper\"];",
+                  "    const ext = arrExtensions.find((extension) => extension.id === id);",
+                  "    pm.expect(ext, `Extension ${id} is not deployed`).to.be.not.undefined;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/serverinfo",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "serverinfo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check authenticator extensions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "const extensions = ['whitelist-authenticator', 'school-whitelist-authenticator'];",
+                  "",
+                  "pm.test(\"Should have Status code 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "extensions.forEach(id => {",
+                  "    pm.test(`Check extension ${id}`, function () {",
+                  "    const arrExtensions = response.componentTypes[\"org.keycloak.authentication.Authenticator\"];",
+                  "    const ext = arrExtensions.find((extension) => extension.id === id);",
+                  "    pm.expect(ext, `Extension ${id} is not deployed`).to.be.not.undefined;",
+                  "    });",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/serverinfo",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "serverinfo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check event-listener extensions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "const extensions = ['remove-user-on-logout', 'metrics-listener'];",
+                  "",
+                  "pm.test(\"Should have Status code 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "extensions.forEach(id => {",
+                  "    pm.test(`Check extension ${id}`, function () {",
+                  "    const eventsListener = response.providers.eventsListener.providers[`${id}`];",
+                  "    pm.expect(eventsListener, `Extension ${id} is not deployed`).to.be.not.undefined;",
+                  "    });",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/serverinfo",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "serverinfo"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Check Authenticator Config",
+      "item": [
+        {
+          "name": "CheckAuthenticatorConfig",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "const customFlowsToCheck = [\"school-whitelist-authenticator\", \"whitelist-authenticator\"];",
+                  "const flows = response.filter(flow => flow.builtIn === false).map(flow => encodeURI(flow.alias));",
+                  "// flows.forEach(flow => console.log(flow));",
+                  "pm.test(\"Should have Status code 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Should have custom Authentication flows\", function () {",
+                  "   pm.expect(flows.length).to.greaterThan(0);",
+                  "});",
+                  "",
+                  "flows.forEach( flow => {",
+                  "    var request = { ",
+                  "        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/flows/\" + flow + \"/executions\",",
+                  "        header:  {",
+                  "            'Accept': 'application/json',",
+                  "            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+                  "        }",
+                  "    }",
+                  "    pm.sendRequest(request, function (err, response) {",
+                  "        const body = response.json();",
+                  "        pm.test(\"Flow \"+ decodeURI(flow) + \" should have executions\", function () {",
+                  "            pm.expect(response).to.have.status(200);",
+                  "        });",
+                  "        body.filter(execution => execution.configurable === true).filter(execution => ",
+                  "            customFlowsToCheck.includes(execution.providerId)).forEach( execution => validateExecutionConfig(execution, flow));",
+                  "    })",
+                  "});",
+                  "",
+                  "function validateExecutionConfig(execution, flow) {",
+                  "    const configId = execution.authenticationConfig;",
+                  "    const providerId = execution.providerId;",
+                  "    ",
+                  "    console.log(`Checking flow \"${decodeURI(flow)}\": config ${configId} provider: ${providerId}`);",
+                  "    const request = { ",
+                  "        url: pm.environment.get(\"authUrl\") + \"/admin/realms/\" + pm.environment.get(\"realm-to-check\") + \"/authentication/config/\" + configId,",
+                  "        header: {",
+                  "            'Accept': 'application/json',",
+                  "            'Authorization': 'Bearer ' + pm.globals.get(\"token\")",
+                  "        }",
+                  "    }",
+                  "    const alias = execution.alias;",
+                  "    pm.sendRequest(request, function (err, response) {",
+                  "        const body = response.json();",
+                  "        pm.test(`\"${decodeURI(flow)}\" config for provider ${providerId} with ID ${configId} and alias ${alias} Should have all config set`, function () {",
+                  "            pm.expect(response, \"No config found\").to.have.status(200);",
+                  "            pm.expect(typeof body.config).to.not.eql('undefined');",
+                  "            const config = body.config",
+                  "            pm.expect(config.authWhitelistRealm, \"Realm must be correct\").to.equal(pm.environment.get('iam-clientRealm'));",
+                  "            pm.expect(config.authWhiteListClientIdSecret, \"Client Secret must be correct\").to.equal(pm.environment.get('iam-clientSecret'));",
+                  "            pm.expect(config.authWhiteListClientId, \"Client ID must be correct\").to.equal(pm.environment.get('iam-clientId'));",
+                  "            if(providerId === 'school-whitelist-authenticator') {",
+                  "                pm.expect(config.userAttributeName, \"User Attribute must not be empty\").to.not.undefined;",
+                  "            }",
+                  "            ",
+                  "        });",
+                  "    }) ",
+                  "}",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/flows",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "authentication",
+                "flows"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get WhitelistAuth Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.test(\"Config should have alias\", function () {",
+                  "   pm.expect(response.alias).to.not.undefined;",
+                  "});",
+                  "pm.collectionVariables.set(\"config_alias\", response.alias);",
+                  "pm.collectionVariables.set(\"config_id\", response.id);",
+                  "if(typeof response.config.listOfAllowedIdPs != 'undefined'){",
+                  "    pm.collectionVariables.set(\"idp-whitelist\", response.config.listOfAllowedIdPs.replace(/\\\"/g,'\\\\\"').replace(/\\s/g,''));",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"idp-whitelist\", null);",
+                  "}",
+                  "",
+                  "if(typeof response.config.idpHintParamName != 'undefined'){",
+                  "    pm.collectionVariables.set(\"idp-hint-param-name\", response.config.idpHintParamName);",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"idp-hint-param-name\", null);",
+                  "    console.log(\"setting idpHintParamName to n.a.\")",
+                  "}",
+                  "if(typeof response.userAttributeName != 'undefined'){",
+                  "    pm.collectionVariables.set(\"userAttributeName\", response.config.userAttributeName);",
+                  "} else {",
+                  "    console.log(\"setting userAttributeName to null\")",
+                  "    pm.collectionVariables.set(\"userAttributeName\", null)",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/config/:config_id",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "authentication",
+                "config",
+                ":config_id"
+              ],
+              "variable": [
+                {
+                  "key": "config_id",
+                  "value": "1a8b5cf5-0b50-4939-916e-783654b0d0c0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update WhitelistAuthenticator",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": \"{{config_id}}\",\n    \"alias\": \"{{config_alias}}\",\n    \"config\": {\n        \"authWhiteListClientId\": \"{{iam-clientId}}\",\n        \"authWhiteListClientIdSecret\": \"{{iam-clientSecret}}\",\n        \"authWhitelistRealm\": \"{{iam-clientRealm}}\",\n        \"idpHintParamName\": \"{{idp-hint-param-name}}\",\n        \"listOfAllowedIdPs\": \"{{idp-whitelist}}\",\n        \"userAttributeName\": \"{{userAttributeName}}\"\n\t}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/authentication/config/:config_id",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "authentication",
+                "config",
+                ":config_id"
+              ],
+              "variable": [
+                {
+                  "key": "config_id",
+                  "value": "{{config_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Client Mapper Config Checks",
+      "item": [
+        {
+          "name": "Check oidc-hmac-pairwise-email-mapper config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'oidc-hmac-pairwise-email-mapper'",
+                  "const requiredProperties = ['sectorIdentifierUri', 'emailDomain', 'pairwiseSubHashAlgorithm', 'pairwiseSubAlgorithmSalt', 'pairwiseLocalSubIdentifier','id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+                  "",
+                  "function checkConfig(value, key, map) {",
+                  "    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+                  "        requiredProperties.forEach(property => {",
+                  "            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+                  "            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+                  "        });",
+                  "    });",
+                  "};",
+                  "",
+                  "const clients = pm.response.json()",
+                  "",
+                  "const configMap = new Map();",
+                  "clients.forEach(client => {",
+                  "    if (typeof client.protocolMappers !== 'undefined') {",
+                  "        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+                  "            .flatMap(mapper => mapper.config);",
+                  "        if (config.length > 0) {",
+                  "            configMap.set(client.clientId, config);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "configMap.forEach(checkConfig);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "viewableOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check User Info Provider config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'vidis-info-provider-mapper'",
+                  "const requiredProperties = ['claim.name'];",
+                  "",
+                  "function checkConfig(value, key, map) {",
+                  "    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+                  "        requiredProperties.forEach(property => {",
+                  "            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+                  "            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+                  "            pm.expect(\"true\").to.be.oneOf([value[0]['id.token.claim'], value[0]['access.token.claim'], value[0]['userinfo.token.claim']]);",
+                  "        });",
+                  "    });",
+                  "};",
+                  "",
+                  "const clients = pm.response.json()",
+                  "",
+                  "const configMap = new Map();",
+                  "clients.forEach(client => {",
+                  "    if (typeof client.protocolMappers !== 'undefined') {",
+                  "        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+                  "            .flatMap(mapper => mapper.config);",
+                  "        if (config.length > 0) {",
+                  "            configMap.set(client.clientId, config);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "configMap.forEach(checkConfig);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "viewableOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check oidc-hmac-pairwise-subject-mapper config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'oidc-hmac-pairwise-subject-mapper';",
+                  "const requiredProperties = ['sectorIdentifierUri', 'pairwiseSubHashAlgorithm', 'pairwiseSubAlgorithmSalt', 'pairwiseLocalSubIdentifier', 'id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+                  "",
+                  "function checkConfig(value, key, map) {",
+                  "    pm.test(`Check ${mapperToCheck} config for Client ${key}`, function () {",
+                  "        requiredProperties.forEach(property => {",
+                  "            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+                  "            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+                  "        });",
+                  "    });",
+                  "};",
+                  "",
+                  "const clients = pm.response.json()",
+                  "",
+                  "const configMap = new Map();",
+                  "clients.forEach(client => {",
+                  "    if (typeof client.protocolMappers !== 'undefined') {",
+                  "        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+                  "            .flatMap(mapper => mapper.config);",
+                  "        if (config.length > 0) {",
+                  "            configMap.set(client.clientId, config);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "configMap.forEach(checkConfig);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "viewableOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check oidc-hmac-pairwise-subject-list-mapper config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'oidc-hmac-pairwise-subject-list-mapper';",
+                  "const requiredProperties = ['clients', 'pseudonymListClaimName', 'id.token.claim', 'access.token.claim', 'userinfo.token.claim'];",
+                  "",
+                  "function checkConfig(value, key, map) {",
+                  "    pm.test(`Client ${key}: Check ${mapperToCheck} config`, function () {",
+                  "        requiredProperties.forEach(property => {",
+                  "            pm.expect(value, 'There should only be one mapper of same type').to.have.length(1);",
+                  "            pm.expect(value[0][property], property).to.be.a('string').that.is.not.empty;",
+                  "        });",
+                  "    });",
+                  "};",
+                  "",
+                  "const clients = pm.response.json()",
+                  "",
+                  "const configMap = new Map();",
+                  "clients.forEach(client => {",
+                  "    if (typeof client.protocolMappers !== 'undefined') {",
+                  "        const config = client.protocolMappers.filter(mapper => mapper.protocolMapper === mapperToCheck)",
+                  "            .flatMap(mapper => mapper.config);",
+                  "        if (config.length > 0) {",
+                  "            configMap.set(client.clientId, config);",
+                  "        }",
+                  "    }",
+                  "});",
+                  "configMap.forEach(checkConfig);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/clients?viewableOnly=true",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "viewableOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Check Event Listener",
+      "item": [
+        {
+          "name": "Check event-listener configuration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var response = pm.response.json();",
+                  "const listeners = ['remove-user-on-logout', 'metrics-listener'];",
+                  "",
+                  "pm.test(\"Should have Status code 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Store admin events should be active\", function () {",
+                  "  pm.expect(response.adminEventsEnabled).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Store user events should be active\", function () {",
+                  "  pm.expect(response.eventsEnabled).to.be.true;",
+                  "});",
+                  "",
+                  "listeners.forEach(id => {",
+                  "    pm.test(`Check if listener ${id} is active`, function () {",
+                  "    const listener = response.eventsListeners.find((listener) => listener === `${id}`);",
+                  "    pm.expect(listener, `Listener ${id} is not active`).to.be.not.undefined;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/events/config",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "events",
+                "config"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "IdP Mapper Config Checks",
+      "item": [
+        {
+          "name": "Check Sanis Mapper Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'vidis-info-request-mapper_oidc';",
+                  "const requiredProperties = [''];",
+                  "",
+                  "const idpAliases = pm.response.json().map(idp => idp.alias);",
+                  "",
+                  "function getMapperRequest(idp) {",
+                  "\treturn {",
+                  "\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+                  "\t\theader: {",
+                  "\t\t\t'Accept': 'application/json',",
+                  "\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+                  "\t\t}",
+                  "\t}",
+                  "}",
+                  "",
+                  "idpAliases.forEach(idp => {",
+                  "\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+                  "\t\tconst mapper = response.json();",
+                  "        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+                  "            pm.test(`Mapper ${mapperToCheck} of idp ${idp} should have correct REST_API_URL set.`, () => {",
+                  "                pm.expect(mapper.config.REST_API_URL).to.equal(pm.environment.get('sanis_api_url'));",
+                  "            });",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "identity-provider",
+                "instances"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Acronym Mapper Config (SAML+OIDC)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'acronym-idp-mapper';",
+                  "const requiredProperties = [''];",
+                  "",
+                  "const idpAliases = pm.response.json().map(idp => idp.alias);",
+                  "",
+                  "function getMapperRequest(idp) {",
+                  "\treturn {",
+                  "\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+                  "\t\theader: {",
+                  "\t\t\t'Accept': 'application/json',",
+                  "\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+                  "\t\t}",
+                  "\t}",
+                  "}",
+                  "",
+                  "idpAliases.forEach(idp => {",
+                  "\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+                  "\t\tconst mapper = response.json();",
+                  "        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+                  "            pm.test(`Mapper ${mapperToCheck} of idp ${idp} should have correct User Attribute set.`, () => {",
+                  "                pm.expect(mapper.config.attribute).to.equal(pm.environment.get('akronym-mapper-attribute'));",
+                  "            });",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "identity-provider",
+                "instances"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check SAML Prefixedd Attribute Mapper Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'prefixed-attr-saml-idp-mapper';",
+                  "const requiredProperties = [{ 'id': 'syncMode', 'name': 'Sync Mode Override'}, { 'id':'prefix', 'name':'Prefix'}, { 'id':'user.attribute', 'name': 'User Attribute Name'}];",
+                  "",
+                  "const idpAliases = pm.response.json().map(idp => idp.alias);",
+                  "",
+                  "function getMapperRequest(idp) {",
+                  "\treturn {",
+                  "\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+                  "\t\theader: {",
+                  "\t\t\t'Accept': 'application/json',",
+                  "\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+                  "\t\t}",
+                  "\t}",
+                  "}",
+                  "",
+                  "idpAliases.forEach(idp => {",
+                  "\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+                  "\t\tconst mapper = response.json();",
+                  "        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+                  "            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+                  "                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).not.to.empty);",
+                  "                if (typeof mapper.config['attribute.name'] != 'undefined' && mapper.config['attribute.name'].length != 0) {",
+                  "                    console.log('not empty');",
+                  "                    pm.expect(mapper.config['attribute.friendly.name'], 'Either Attribute Friendly Name or Attribute Name must be set. Not both').not.ok;",
+                  "                } else if (typeof mapper.config['attribute.friendly.name'] == 'undefined' && mapper.config['attribute.friendly.name'].length != 0) {",
+                  "                    pm.expect(mapper.config['attribute.name'], 'Either Attribute Friendly Name or Attribute Name must be set. Not both').not.ok;",
+                  "                    console.log('not empty again');",
+                  "                }",
+                  "            });",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "identity-provider",
+                "instances"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check OIDC Prefixed Attribute Mapper Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'prefixed-attribute-idp-mapper';",
+                  "const requiredProperties = [{ 'id': 'syncMode', 'name': 'Sync Mode Override'}, { 'id':'prefix', 'name':'Prefix'}, { 'id':'attribute', 'name': 'User Attribute Name'}, { 'id': 'claim', 'name': 'claim'}];",
+                  "",
+                  "const idpAliases = pm.response.json().map(idp => idp.alias);",
+                  "",
+                  "function getMapperRequest(idp) {",
+                  "\treturn {",
+                  "\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+                  "\t\theader: {",
+                  "\t\t\t'Accept': 'application/json',",
+                  "\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+                  "\t\t}",
+                  "\t}",
+                  "}",
+                  "",
+                  "idpAliases.forEach(idp => {",
+                  "\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+                  "\t\tconst mapper = response.json();",
+                  "        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+                  "            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+                  "                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).to.not.empty);",
+                  "            });",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "identity-provider",
+                "instances"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check mapped-value-oidc-user-attribute-idp-mapper config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const mapperToCheck = 'mapped-value-oidc-user-attribute-idp-mapper';",
+                  "const requiredProperties = [{ 'id':'syncMode', 'name': 'Sync Override Mode'},{ 'id': 'claim', 'name': 'Claim'} ,{ 'id':'user.attribute', 'name':'User Attribute Name'},{'id':'attribute.value.mappings', 'name':'User Value Mappings'}];",
+                  "",
+                  "const idpAliases = pm.response.json().map(idp => idp.alias);",
+                  "",
+                  "function getMapperRequest(idp) {",
+                  "\treturn {",
+                  "\t\turl: `${pm.environment.get('authUrl')}/admin/realms/${pm.environment.get('realm-to-check')}/identity-provider/instances/${idp}/mappers`,",
+                  "\t\theader: {",
+                  "\t\t\t'Accept': 'application/json',",
+                  "\t\t\t'Authorization': `Bearer ${pm.globals.get('token')}`",
+                  "\t\t}",
+                  "\t}",
+                  "}",
+                  "",
+                  "idpAliases.forEach(idp => {",
+                  "\tpm.sendRequest(getMapperRequest(idp), function (err, response) {",
+                  "\t\tconst mapper = response.json();",
+                  "        mapper.filter(mapper => mapper.identityProviderMapper == mapperToCheck).forEach( mapper => {",
+                  "            pm.test(`Mapper ${mapper.name} of idp ${idp} should have valid Config.`, () => {",
+                  "                requiredProperties.forEach( property => pm.expect(mapper.config[property.id], `${property.name} should not be empty`).not.to.empty);",
+                  "                //console.log(mapper.config['attribute.value.mappings']);",
+                  "                JSON.parse(mapper.config['attribute.value.mappings']).forEach( entry => {",
+                  "                    pm.expect(entry.key, 'Value-Mapping  Key should not be empty').to.not.empty;",
+                  "                    pm.expect(entry.key, 'Value-Mapping Value should not be empty').to.not.empty;",
+                  "                });",
+                  "            });",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "admin",
+                "realms",
+                "{{realm-to-check}}",
+                "identity-provider",
+                "instances"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Check Post Login-Flow matches First Broker Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const identityProviders = pm.response.json()",
+              "",
+              "identityProviders.forEach(idp => {",
+              "    if (idp.firstBrokerLoginFlowAlias === 'VIDIS Login Flow') {",
+              "        pm.test( `IDP ${idp.alias} with Vidis Login Flow should use Vidis Post Login Flow as postBrokerLoginFlow`, () => {",
+              "            pm.expect(idp.postBrokerLoginFlowAlias).to.eq('VIDIS Post Login Flow');",
+              "        });",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{authUrl}}/admin/realms/{{realm-to-check}}/identity-provider/instances",
+          "host": [
+            "{{authUrl}}"
+          ],
+          "path": [
+            "admin",
+            "realms",
+            "{{realm-to-check}}",
+            "identity-provider",
+            "instances"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.globals.get(\"token\");",
+          "const tokenExpiresAt = pm.globals.get(\"token_expires_at\");",
+          "",
+          "// If token is null or expired",
+          "if (!token || tokenExpiresAt < (new Date()).getTime()) {",
+          "  ",
+          "    // Prepare a request to Keycloak for password grant",
+          "    const request = {",
+          "        url: pm.environment.get(\"authUrl\") + \"/realms/\" + \"master\" + \"/protocol/openid-connect/token\",",
+          "        method: 'POST',",
+          "        header: {",
+          "            'Accept': 'application/json',",
+          "            'Content-Type': 'application/x-www-form-urlencoded',",
+          "        },",
+          "        body: {",
+          "            mode: 'urlencoded',",
+          "            urlencoded: [",
+          "                { key: 'grant_type', value: 'client_credentials' },",
+          "                { key: 'client_id', value: pm.environment.get(\"admin-client-id\") },",
+          "                { key: 'client_secret', value: pm.environment.get(\"admin-client-secret\") }",
+          "            ]",
+          "        }",
+          "    };",
+          "",
+          "    // Send the request and store access_token and expiration time in the environment variables",
+          "    pm.sendRequest(request,  function (err, response) {",
+          "        const body = response.json();",
+          "        pm.globals.set(\"token\", body.access_token);",
+          "        pm.globals.set(\"token_expires_at\", (new Date()).getTime() + body.expires_in);",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "config_id",
+      "value": "9ec791cd-e595-4485-83de-8f46e2040d48",
+      "type": "default"
+    },
+    {
+      "key": "config_alias",
+      "value": "client IdP config",
+      "type": "default"
+    },
+    {
+      "key": "idp-hint-param-name",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "userAttributeName",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "idp-whitelist",
+      "value": ""
+    }
+  ]
+}
