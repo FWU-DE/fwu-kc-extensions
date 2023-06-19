@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented here.
 
-## Version [3.8.2]
+## Version [3.9.0]
 
 - Improvement: Add logging for malformed JSON-responses from whitelist-authenticator
+- Testing: Add Config Test to Pre-/Post-Release Postman Collection
 
 ## Version [3.8.1]
 
