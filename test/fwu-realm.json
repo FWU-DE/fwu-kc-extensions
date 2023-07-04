@@ -1549,7 +1549,8 @@
   "eventsEnabled": false,
   "eventsListeners": [
     "remove-user-on-logout",
-    "jboss-logging"
+    "jboss-logging",
+    "login-event-publisher"
   ],
   "enabledEventTypes": [],
   "adminEventsEnabled": false,

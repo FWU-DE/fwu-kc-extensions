@@ -22,6 +22,7 @@
     <module>user-info-provider</module>
     <module>acronym-mapper</module>
     <module>school-mapper</module>
+    <module>login-event-publisher</module>
   </modules>
 
     <properties>
