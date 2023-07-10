@@ -52,6 +52,9 @@ For more details please check [here](./acronym-mapper/README.md).
 Identity provider mapper regarding school IDs made up of a home organization and a school ID.
 For more details please check [here](./school-mapper/README.md).
 
+### Login event publisher
+
+It holds the customization to publish a message in RABBITMQ on LOGIN event in KC. For more details please check [here](./login-event-publisher/README.md).
 
 ### Extension of User Info endpoint with school details
 
