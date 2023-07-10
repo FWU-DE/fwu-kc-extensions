@@ -1,4 +1,4 @@
-package de.intension.providers;
+package de.intension.events;
 
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
@@ -7,13 +7,8 @@ import org.keycloak.events.EventListenerTransaction;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.util.JsonSerialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.rabbitmq.client.Channel;
-
-import de.intension.publishers.EventPublisher;
+import de.intension.events.publishers.EventPublisher;
 
 /**
  * Provider for the user login event in Keycloak
@@ -28,10 +23,11 @@ public class LoginEventListenerProvider implements EventListenerProvider {
 	private final KeycloakSession keycloakSession;
 	private EventPublisher publisher;
 
+	// Will eventually call the methods publishEvent and publishAdminEvent
 	private final EventListenerTransaction tx = new EventListenerTransaction(this::publishAdminEvent,
 			this::publishEvent);
 
-	protected LoginEventListenerProvider(KeycloakSession session, EventPublisher publisher) {
+	public LoginEventListenerProvider(KeycloakSession session, EventPublisher publisher) {
 		this.keycloakSession = session;
 		this.publisher = publisher;
 		session.getTransactionManager().enlistAfterCompletion(tx);
@@ -43,6 +39,8 @@ public class LoginEventListenerProvider implements EventListenerProvider {
 		// Nothing to do here
 	}
 
+	// On the LOGIN event add event in the pool which will eventually be published
+	// by the method publishEvent
 	@Override
 	public void onEvent(Event event) {
 		EventType eventType = event.getType();

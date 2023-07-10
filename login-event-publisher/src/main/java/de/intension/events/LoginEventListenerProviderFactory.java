@@ -1,4 +1,4 @@
-package de.intension.providers;
+package de.intension.events;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
@@ -7,11 +7,8 @@ import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-import com.rabbitmq.client.ConnectionFactory;
-
-import de.intension.publishers.EventPublisher;
-import de.intension.publishers.rabbitmq.RabbitMqConnectionManager;
-import de.intension.publishers.rabbitmq.RabbitMqEventPublisher;
+import de.intension.events.publishers.EventPublisher;
+import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
 
 /**
  * Factory for the user login event listener
@@ -21,7 +18,9 @@ import de.intension.publishers.rabbitmq.RabbitMqEventPublisher;
  */
 public class LoginEventListenerProviderFactory implements EventListenerProviderFactory {
 
-	private EventPublisher publisher = new RabbitMqEventPublisher();
+	private static final Logger logger = Logger.getLogger(LoginEventListenerProviderFactory.class);
+	private EventPublisher publisher;
+	public static final String PROVIDER_ID = "login-event-publisher";
 
 	@Override
 	public EventListenerProvider create(KeycloakSession session) {
@@ -30,14 +29,18 @@ public class LoginEventListenerProviderFactory implements EventListenerProviderF
 
 	@Override
 	public void init(Scope config) {
-		RabbitMqConnectionManager.INSTANCE.init(config, new ConnectionFactory());
+		publisher = new RabbitMqEventPublisher();
+		this.publisher.initConnection(config);
+		logger.info("init of login event provider factory completed successfully");
 	}
 
 	@Override
 	public void postInit(KeycloakSessionFactory factory) {
-
+		// Nothing to do here
 	}
 
+	// Call the publisher close method to close the connection and channel to
+	// publisher
 	@Override
 	public void close() {
 		this.publisher.close();
@@ -45,7 +48,7 @@ public class LoginEventListenerProviderFactory implements EventListenerProviderF
 
 	@Override
 	public String getId() {
-		return "login-event-publisher";
+		return PROVIDER_ID;
 	}
 
 }

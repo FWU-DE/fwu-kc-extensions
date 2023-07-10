@@ -17,11 +17,11 @@ services:
       KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/service-provider/%s/idp-assignments
       KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:8080/auth
       KC_SPI_AUTHENTICATOR_SCHOOL_WHITELIST_AUTHENTICATOR_REST_URL: http://mockserver:1080/school-assignments
-      KK_TO_RMQ_URL: test-rabbitmq
-      KK_TO_RMQ_PORT: 5672
-      KK_TO_RMQ_EXCHANGE: amq.direct
-      KK_TO_RMQ_USERNAME: guest
-      KK_TO_RMQ_PASSWORD: guest
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_URL: test-rabbitmq
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_PORT: 5672
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_EXCHANGE: login-details
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_USERNAME: guest
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_PASSWORD: guest
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
@@ -98,6 +98,8 @@ services:
     image: rabbitmq:3-management
     container_name: test-rabbitmq
     volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmqdefinitions.json:/etc/rabbitmq/rabbitmqdefinitions.json:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 15672:15672
