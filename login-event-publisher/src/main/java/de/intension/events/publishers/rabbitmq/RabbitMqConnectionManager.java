@@ -29,7 +29,6 @@ public enum RabbitMqConnectionManager {
 	// Initiates and configures the connection factory using the environment
 	// variables
 	public void init(Scope config, ConnectionFactory connectionFactory) {
-		logger.info("init of Rabbitmq started");
 		this.connectionFactory = connectionFactory;
 		this.connectionFactory.setUsername(config.get("rmq-username", "guest"));
 		this.connectionFactory.setPassword(config.get("rmq-password", "guest"));
