@@ -32,10 +32,10 @@ public enum RabbitMqConnectionManager {
 		this.connectionFactory = connectionFactory;
 		this.connectionFactory.setUsername(config.get("rmq-username", "guest"));
 		this.connectionFactory.setPassword(config.get("rmq-password", "guest"));
-		this.connectionFactory.setVirtualHost(config.get("rmq-vhopst", "/"));
-		this.connectionFactory.setHost(config.get("rmq-url", "localhost"));
+		this.connectionFactory.setVirtualHost(config.get("rmq-vhost", "/"));
+		this.connectionFactory.setHost(config.get("rmq-host", "localhost"));
 		this.connectionFactory.setPort(Integer.valueOf(config.get("rmq-port", "5672")));
-		this.connectionFactory.setAutomaticRecoveryEnabled(false);
+		this.connectionFactory.setAutomaticRecoveryEnabled(true);
 		logger.info("init of Rabbitmq successful");
 	}
 
