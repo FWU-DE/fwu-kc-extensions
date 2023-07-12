@@ -169,7 +169,7 @@ public class SchoolWhitelistAuthenticator
             value = defaultValue;
         }
         else {
-            logger.errorv("Provider %s - Parameter %s must not be null", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
+            logger.errorf("Provider %s - Parameter %s must not be null", SchoolWhitelistAuthenticatorFactory.PROVIDER_ID, configKey);
         }
         return value;
     }

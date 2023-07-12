@@ -30,6 +30,7 @@ public class SchoolWhitelistAuthenticatorFactory
     public static final String           AUTH_WHITELIST_API_PASSWORD      = "authWhitelistClientPassword";
     private static final String          CONF_KC_AUTH_URL                 = "kcAuthUrl";
     private static final String          CONF_REST_URL                    = "restUrl";
+    private static final String          DEFAULT_GRANT_TYPE               = OAuth2Constants.CLIENT_CREDENTIALS;
 
     private SchoolWhitelistAuthenticator whitelistAuthenticator;
 
@@ -96,8 +97,9 @@ public class SchoolWhitelistAuthenticatorFactory
                                "REST-API Client ID",
                                ProviderConfigProperty.STRING_TYPE, null),
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_GRANT_TYPE, "OAuth Grant Type",
-                               "REST-API Authentication Granttype on of " + OAuth2Constants.CLIENT_CREDENTIALS + " or " + OAuth2Constants.PASSWORD,
-                               ProviderConfigProperty.STRING_TYPE, null),
+                               "REST-API Authentication Granttype one of " + OAuth2Constants.CLIENT_CREDENTIALS + " or " + OAuth2Constants.PASSWORD,
+                               ProviderConfigProperty.LIST_TYPE, DEFAULT_GRANT_TYPE, OAuth2Constants.CLIENT_CREDENTIALS,
+                               OAuth2Constants.PASSWORD),
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_SECRET, "Client Secret",
                                "REST-API Client Secret. Only needed when GRANT_TYPE=" + OAuth2Constants.CLIENT_CREDENTIALS,
                                ProviderConfigProperty.PASSWORD, null),
