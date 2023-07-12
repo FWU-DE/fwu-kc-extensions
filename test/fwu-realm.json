@@ -380,8 +380,8 @@
   "otpPolicyPeriod": 30,
   "otpPolicyCodeReusable": false,
   "otpSupportedApplications": [
-    "totpAppGoogleName",
-    "totpAppFreeOTPName"
+    "totpAppFreeOTPName",
+    "totpAppGoogleName"
   ],
   "webAuthnPolicyRpEntityName": "keycloak",
   "webAuthnPolicySignatureAlgorithms": [
@@ -423,6 +423,66 @@
       ],
       "notBefore": 0,
       "groups": []
+    },
+    {
+      "username": "misty",
+      "enabled": true,
+      "email": "",
+      "firstName": "Misty",
+      "lastName": "",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "attributes": {
+        "prefixedSchools": [
+          "DE-SN-Schullogin.0815",
+          "DE-SN-Schullogin.1337",
+          "DE-SN-Schullogin.421"
+        ],
+        "clientId": "bettermarks-o"
+      },
+      "realmRoles": [
+        "default-roles-fwu"
+      ],
+      "clientRoles": {
+        "iam-service": [
+          "iam-user"
+        ]
+      }
+    },
+    {
+      "username": "brock",
+      "enabled": true,
+      "email": "brock.harrison@pewter.com",
+      "firstName": "Brock",
+      "lastName": "",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ]
+    },
+    {
+      "username": "iam-admin",
+      "enabled": true,
+      "email": "",
+      "firstName": "",
+      "lastName": "",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "clientRoles": {
+        "iam-service": [
+          "iam-admins"
+        ]
+      }
     }
   ],
   "scopeMappings": [
@@ -518,8 +578,8 @@
           "consentRequired": false,
           "config": {
             "person.alter": "true",
-            "person.vorname": "true",
             "person.geburtsort": "true",
+            "person.vorname": "true",
             "person.kontext.org.kennung": "true",
             "person.kontext.org.name": "true",
             "person.kontext.gruppen": "true",
@@ -957,6 +1017,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
+        "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "backchannel.logout.revoke.offline.tokens": "false"
@@ -988,8 +1049,8 @@
           "consentRequired": false,
           "config": {
             "aggregate.attrs": "false",
-            "userinfo.token.claim": "true",
             "multivalued": "false",
+            "userinfo.token.claim": "true",
             "user.attribute": "clientId",
             "id.token.claim": "true",
             "access.token.claim": "true",
@@ -1171,8 +1232,8 @@
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
-        "oauth2.device.authorization.grant.enabled": "false",
         "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
@@ -1258,8 +1319,8 @@
         "client.secret.creation.time": "1675763869",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
-        "oauth2.device.authorization.grant.enabled": "false",
         "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
@@ -1949,11 +2010,11 @@
       "firstBrokerLoginFlowAlias": "first broker login",
       "postBrokerLoginFlowAlias": "Vidis Post Login Flow",
       "config": {
-        "validateSignature": "false",
         "hideOnLoginPage": "false",
-        "tokenUrl": "http://keycloak:8080/auth/realms/idp/protocol/openid-connect/token",
+        "validateSignature": "false",
         "acceptsPromptNoneForwardFromClient": "false",
         "clientId": "identity-broker",
+        "tokenUrl": "http://keycloak:8080/auth/realms/idp/protocol/openid-connect/token",
         "uiLocales": "false",
         "backchannelSupported": "false",
         "useJwksUrl": "true",
@@ -1982,15 +2043,15 @@
       "config": {
         "validateSignature": "false",
         "postBindingLogout": "true",
-        "singleLogoutServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
-        "postBindingResponse": "true",
         "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+        "postBindingResponse": "true",
+        "singleLogoutServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
         "entityId": "saml-identity-broker",
         "backchannelSupported": "false",
         "signSpMetadata": "false",
-        "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
-        "wantAssertionsEncrypted": "false",
         "signatureAlgorithm": "RSA_SHA256",
+        "wantAssertionsEncrypted": "false",
+        "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
         "idpEntityId": "http://localhost:18443/auth/realms/saml",
         "loginHint": "false",
         "allowCreate": "true",
@@ -2006,20 +2067,52 @@
   ],
   "identityProviderMappers": [
     {
-      "id": "6b558af9-b482-4a34-8530-931ec7de1b5f",
+      "id": "512ff882-1a68-4b84-8d2f-0f6589a49b4f",
+      "name": "Default Role - manage-account",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "role": "account.manage-account"
+      }
+    },
+    {
+      "id": "484a4627-6c63-43c1-82bd-8434ed02b6c6",
+      "name": "Acronym",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "acronym-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT"
+      }
+    },
+    {
+      "id": "331355df-16fb-4f5d-bf45-9123bdf732ee",
       "name": "Sanis Import",
       "identityProviderAlias": "keycloak-oidc",
       "identityProviderMapper": "vidis-info-request-mapper_oidc",
       "config": {
-        "syncMode": "IMPORT",
         "claims": "[]",
+        "syncMode": "IMPORT",
         "attributes": "[]",
         "attribute": "acronym",
         "REST_API_URL": "http://mockServer:1080/person-info"
       }
     },
     {
-      "id": "bf42e410-1a81-4de3-965d-511b32b355c6",
+      "id": "110bef06-e7e0-44fd-a414-9ee0b1a5d147",
+      "name": "Prefix school IDs",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "prefixed-attribute-idp-mapper",
+      "config": {
+        "claims": "[]",
+        "syncMode": "INHERIT",
+        "claim": "schools",
+        "attribute": "prefixedSchools",
+        "prefix": "DE-SN-Schullogin."
+      }
+    },
+    {
+      "id": "f8b8b08c-a08b-4dd8-aa32-0a1f882e150b",
       "name": "Test",
       "identityProviderAlias": "keycloak-saml",
       "identityProviderMapper": "prefixed-attr-saml-idp-mapper",
@@ -2031,38 +2124,6 @@
         "user.attribute": "prefixedSchoolsSaml",
         "attribute": "acronym",
         "attribute.name": "schools"
-      }
-    },
-    {
-      "id": "c63ab2fc-6a08-42ff-96af-8c212de5665f",
-      "name": "Default Role - manage-account",
-      "identityProviderAlias": "keycloak-oidc",
-      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
-      "config": {
-        "syncMode": "INHERIT",
-        "role": "account.manage-account"
-      }
-    },
-    {
-      "id": "1b7485d5-cd53-4813-924b-3712a8cc18b2",
-      "name": "Acronym",
-      "identityProviderAlias": "keycloak-oidc",
-      "identityProviderMapper": "acronym-idp-mapper",
-      "config": {
-        "syncMode": "INHERIT"
-      }
-    },
-    {
-      "id": "67e1e8fc-5490-4fe1-9284-8f1db010aedd",
-      "name": "Prefix school IDs",
-      "identityProviderAlias": "keycloak-oidc",
-      "identityProviderMapper": "prefixed-attribute-idp-mapper",
-      "config": {
-        "claims": "[]",
-        "syncMode": "INHERIT",
-        "claim": "schools",
-        "attribute": "prefixedSchools",
-        "prefix": "DE-SN-Schullogin."
       }
     }
   ],
@@ -2084,15 +2145,15 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-property-mapper",
             "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
             "saml-role-list-mapper",
+            "oidc-usermodel-property-mapper",
+            "saml-user-attribute-mapper",
             "saml-user-property-mapper",
             "oidc-address-mapper",
-            "oidc-hmac-pairwise-subject-mapper"
+            "oidc-hmac-pairwise-subject-mapper",
+            "oidc-sha256-pairwise-sub-mapper"
           ]
         }
       },
@@ -2113,13 +2174,13 @@
         "config": {
           "allowed-protocol-mapper-types": [
             "oidc-address-mapper",
-            "oidc-full-name-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-attribute-mapper",
             "saml-user-attribute-mapper",
-            "saml-role-list-mapper",
-            "saml-user-property-mapper",
             "oidc-usermodel-property-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "saml-user-property-mapper",
+            "oidc-full-name-mapper",
             "oidc-hmac-pairwise-subject-mapper"
           ]
         }
@@ -2241,7 +2302,7 @@
   "supportedLocales": [],
   "authenticationFlows": [
     {
-      "id": "16e4eea3-612b-4bb8-bd53-b87b16472bce",
+      "id": "29317b67-074b-4868-a3ba-a053fe6a6f3e",
       "alias": "Account verification options",
       "description": "Method with which to verity the existing account",
       "providerId": "basic-flow",
@@ -2267,7 +2328,7 @@
       ]
     },
     {
-      "id": "f43582c9-348e-46cb-ad80-354609993c0e",
+      "id": "acd6acc9-6d8d-428a-bdd8-7e2af13a0ae0",
       "alias": "Authentication Options",
       "description": "Authentication options.",
       "providerId": "basic-flow",
@@ -2301,7 +2362,7 @@
       ]
     },
     {
-      "id": "6b460aad-046e-44df-9c3d-4d094109a6d8",
+      "id": "4b3cedca-8b19-4c02-804b-b712eebd1ba7",
       "alias": "Browser - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -2327,7 +2388,7 @@
       ]
     },
     {
-      "id": "72025af6-12e1-4dec-8875-5cb7f03e8d87",
+      "id": "6b540df9-d819-4a35-921e-b3e49f8246d5",
       "alias": "Browser Forms",
       "description": "",
       "providerId": "basic-flow",
@@ -2345,7 +2406,7 @@
       ]
     },
     {
-      "id": "fba219db-1df7-4f41-9c37-e477e67a071f",
+      "id": "7631b685-2e39-4fb4-b34d-365c75f649af",
       "alias": "Default",
       "description": "",
       "providerId": "basic-flow",
@@ -2379,7 +2440,7 @@
       ]
     },
     {
-      "id": "a10f96e9-d5c2-4a4e-b494-73c2553df82d",
+      "id": "9180ab8f-e1c4-4b4b-ac64-451a8e869c0c",
       "alias": "Direct Grant - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -2405,7 +2466,7 @@
       ]
     },
     {
-      "id": "f07899c1-c4e6-447f-9604-39ff22ed9c3c",
+      "id": "2e6a8b7c-c37c-4b55-b868-e470d9df877f",
       "alias": "First broker login - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -2431,7 +2492,7 @@
       ]
     },
     {
-      "id": "0895dfc3-f667-45de-8c15-7aa8f93a1123",
+      "id": "6462d420-4df1-4614-a485-7c8dece090dd",
       "alias": "Handle Existing Account",
       "description": "Handle what to do if there is existing account with same email/username like authenticated identity provider",
       "providerId": "basic-flow",
@@ -2457,7 +2518,7 @@
       ]
     },
     {
-      "id": "ce53d8ad-aaaa-49e8-8030-1c71efff1775",
+      "id": "67f2a9b6-f42b-429e-9e22-dfb2f849db39",
       "alias": "Prefixed school whitelist Browser",
       "description": "browser based authentication",
       "providerId": "basic-flow",
@@ -2484,7 +2545,7 @@
       ]
     },
     {
-      "id": "9412ec90-4dbe-4edd-86b3-8782b9fc6082",
+      "id": "18fb0d34-07e7-4963-9e20-3bd2b2e2f4aa",
       "alias": "Prefixed school whitelist Browser Browser - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -2510,7 +2571,7 @@
       ]
     },
     {
-      "id": "931acf81-1418-471d-a161-e9487226af30",
+      "id": "c90748a4-352c-42c9-8718-8bff7fffd483",
       "alias": "Reset - Conditional OTP",
       "description": "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
       "providerId": "basic-flow",
@@ -2536,7 +2597,7 @@
       ]
     },
     {
-      "id": "b19fbcba-606d-48a4-a83a-31d209b422d2",
+      "id": "fa1d4cca-5058-4e29-a748-7a1ad5e6f764",
       "alias": "User creation or linking",
       "description": "Flow for the existing/non-existing user alternatives",
       "providerId": "basic-flow",
@@ -2563,7 +2624,7 @@
       ]
     },
     {
-      "id": "79cebb2d-1d6d-4e43-b5f8-3b08472fa53a",
+      "id": "0317cdd3-54c1-4b9f-88bf-1ae06fe7a953",
       "alias": "Verify Existing Account by Re-authentication",
       "description": "Reauthentication of existing account",
       "providerId": "basic-flow",
@@ -2589,7 +2650,7 @@
       ]
     },
     {
-      "id": "58dd4481-ab6d-4f42-a896-da154216c9f4",
+      "id": "1b3cd33d-eda1-4e8b-bdb7-beefbcdca9a8",
       "alias": "Vidis Post Login Flow",
       "description": "",
       "providerId": "basic-flow",
@@ -2617,7 +2678,7 @@
       ]
     },
     {
-      "id": "7a8da0cb-c653-436b-8469-3e543f24179e",
+      "id": "311c2a42-0cc6-49d0-bf6a-5f0d606d7ff9",
       "alias": "browser",
       "description": "browser based authentication",
       "providerId": "basic-flow",
@@ -2659,7 +2720,7 @@
       ]
     },
     {
-      "id": "536d752a-d998-4ff3-bfad-6455b1178a8e",
+      "id": "f5c53579-0c0d-4028-ab3c-f131d0517327",
       "alias": "clients",
       "description": "Base authentication for clients",
       "providerId": "client-flow",
@@ -2701,7 +2762,7 @@
       ]
     },
     {
-      "id": "8cf1bae5-433a-4a01-860d-4187419fce17",
+      "id": "1837eab5-1328-4d97-9869-6225ca886cbc",
       "alias": "direct grant",
       "description": "OpenID Connect Resource Owner Grant",
       "providerId": "basic-flow",
@@ -2735,7 +2796,7 @@
       ]
     },
     {
-      "id": "7760f4cc-2598-4d9b-88ed-1ef1593fa976",
+      "id": "6eb6b589-a1fd-49ad-a5d9-92ad9e9506f6",
       "alias": "docker auth",
       "description": "Used by Docker clients to authenticate against the IDP",
       "providerId": "basic-flow",
@@ -2753,7 +2814,7 @@
       ]
     },
     {
-      "id": "b4ab6200-f6fe-40c3-a06c-6da756db8911",
+      "id": "79d59d74-1b0e-442b-95cd-66a23b10d9c1",
       "alias": "first broker login",
       "description": "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
       "providerId": "basic-flow",
@@ -2780,7 +2841,7 @@
       ]
     },
     {
-      "id": "21680a32-a7d2-4fda-af6d-8d40dade6e6d",
+      "id": "a73c873d-cf97-4863-8888-91659fc70f56",
       "alias": "forms",
       "description": "Username, password, otp and other auth forms.",
       "providerId": "basic-flow",
@@ -2806,7 +2867,7 @@
       ]
     },
     {
-      "id": "efbef26c-c16e-48aa-938b-ec6ba738e0e7",
+      "id": "56adc143-abfd-424b-90c1-c4d29b2164b8",
       "alias": "http challenge",
       "description": "An authentication flow based on challenge-response HTTP Authentication Schemes",
       "providerId": "basic-flow",
@@ -2832,7 +2893,7 @@
       ]
     },
     {
-      "id": "bd923084-2aa5-439e-aff6-24a379a27a12",
+      "id": "1d6ee629-2387-4063-a291-0efbe18c7fdb",
       "alias": "registration",
       "description": "registration flow",
       "providerId": "basic-flow",
@@ -2851,7 +2912,7 @@
       ]
     },
     {
-      "id": "dcb9fc6c-6511-43ff-ab08-9962c56d01b2",
+      "id": "73bfc6ee-a49a-40c0-9cef-fd0e6a4151ad",
       "alias": "registration form",
       "description": "registration form",
       "providerId": "form-flow",
@@ -2893,7 +2954,7 @@
       ]
     },
     {
-      "id": "d1191678-f62c-4744-a19b-e0df842f3c64",
+      "id": "8cafe24b-91bb-4162-8e43-afd504445a3e",
       "alias": "reset credentials",
       "description": "Reset credentials for a user if they forgot their password or something",
       "providerId": "basic-flow",
@@ -2935,7 +2996,7 @@
       ]
     },
     {
-      "id": "26752818-7e07-449a-b8ce-7857ba13d319",
+      "id": "34282f7d-9986-420c-912d-257b5d95402f",
       "alias": "saml ecp",
       "description": "SAML ECP Profile Authentication Flow",
       "providerId": "basic-flow",
@@ -2953,7 +3014,7 @@
       ]
     },
     {
-      "id": "95ee50c3-8e96-4166-82aa-32a188f2c75a",
+      "id": "d3ff9d4c-aeba-4bb9-8126-333d4401e8a7",
       "alias": "vidis first broker login",
       "description": "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
       "providerId": "basic-flow",
@@ -2980,7 +3041,7 @@
       ]
     },
     {
-      "id": "c9756aa4-75ef-49a1-ac2f-0280d9bb8030",
+      "id": "f284755c-66e9-4922-969f-4ab745e5893d",
       "alias": "vidis first broker login Account verification options",
       "description": "Method with which to verity the existing account",
       "providerId": "basic-flow",
@@ -3006,7 +3067,7 @@
       ]
     },
     {
-      "id": "0534e6d9-78e1-4524-b61b-5eb2355d381f",
+      "id": "9f5d25e6-0d92-4a2a-92d4-d8f713ffa1ee",
       "alias": "vidis first broker login First broker login - Conditional OTP",
       "description": "Flow to determine if the OTP is required for the authentication",
       "providerId": "basic-flow",
@@ -3032,7 +3093,7 @@
       ]
     },
     {
-      "id": "c0137bf9-7549-4f65-8351-51145a99f1a7",
+      "id": "cb916959-64ed-4cc0-ae43-a2b8b9fb8824",
       "alias": "vidis first broker login Handle Existing Account",
       "description": "Handle what to do if there is existing account with same email/username like authenticated identity provider",
       "providerId": "basic-flow",
@@ -3058,7 +3119,7 @@
       ]
     },
     {
-      "id": "c7dbfa54-2bc6-4442-bda1-127673fc5827",
+      "id": "6c2c78de-470a-41fe-9916-15006e3b7ccc",
       "alias": "vidis first broker login User creation or linking",
       "description": "Flow for the existing/non-existing user alternatives",
       "providerId": "basic-flow",
@@ -3085,7 +3146,7 @@
       ]
     },
     {
-      "id": "cb4baa30-9f23-44b5-8676-8beae1a71c40",
+      "id": "eb7c6e32-85f8-4cdd-98f4-e944f4a9c6ec",
       "alias": "vidis first broker login Verify Existing Account by Re-authentication",
       "description": "Reauthentication of existing account",
       "providerId": "basic-flow",
@@ -3113,7 +3174,7 @@
   ],
   "authenticatorConfig": [
     {
-      "id": "f6c5383c-55e5-4896-85af-1898aff91001",
+      "id": "8376c23c-db28-4fdf-ab6e-e44110878b89",
       "alias": "Prefixes",
       "config": {
         "authWhiteListClientUser": "iam-admin",
@@ -3121,41 +3182,48 @@
         "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
         "authWhitelistClientPassword": "test",
         "userAttributeName": "prefixedSchools",
+        "authWhiteListClientGrantType": "password",
         "authWhiteListClientId": "iam-service"
       }
     },
     {
-      "id": "b340b146-7139-4d49-849b-f021a305b037",
+      "id": "73eadcd6-1385-42eb-9a49-3037f892d1fe",
       "alias": "create unique user config",
       "config": {
         "require.password.update.after.registration": "false"
       }
     },
     {
-      "id": "b12ac704-8b6f-4172-9cbd-b37ddae927fe",
+      "id": "4c12408e-3c3c-4386-a990-70b89c665020",
       "alias": "idp whitelist config",
       "config": {
+        "authWhiteListClientPassword": "test",
+        "authWhiteListClientUser": "iam-admin",
         "authWhitelistRealm": "fwu",
         "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
         "idpHintParamName": "vidis_idp_hint",
-        "authWhiteListClientId": "school-test"
+        "authWhiteListClientGrantType": "password",
+        "authWhiteListClientId": "iam-service"
       }
     },
     {
-      "id": "82228f51-145e-48d0-a20c-0255f597995e",
+      "id": "4d1bde77-4f60-411c-840c-e402179fa08a",
       "alias": "review profile config",
       "config": {
         "update.profile.on.first.login": "missing"
       }
     },
     {
-      "id": "41405cc4-b52f-4796-9352-18f477dd81f4",
+      "id": "9f5268ce-1988-483d-b399-a6fcd149da0e",
       "alias": "vidis school ids",
       "config": {
+        "authWhiteListClientUser": "iam-admin",
         "authWhitelistRealm": "fwu",
         "authWhiteListClientIdSecret": "zBmv7Tt5q1ztlKjXkAd8s82NsCkHS7aW",
+        "authWhitelistClientPassword": "test",
         "userAttributeName": "prefixedSchools",
-        "authWhiteListClientId": "school-test"
+        "authWhiteListClientGrantType": "password",
+        "authWhiteListClientId": "iam-service"
       }
     }
   ],
