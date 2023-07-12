@@ -109,7 +109,7 @@ public class SchoolAssignmentsClient
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, grantType));
         params.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-        if (grantType.equals(OAuth2Constants.PASSWORD)) {
+        if (OAuth2Constants.PASSWORD.equals(grantType)) {
             params.add(new BasicNameValuePair(OAuth2Constants.USERNAME, username));
             params.add(new BasicNameValuePair(OAuth2Constants.PASSWORD, password));
         }
