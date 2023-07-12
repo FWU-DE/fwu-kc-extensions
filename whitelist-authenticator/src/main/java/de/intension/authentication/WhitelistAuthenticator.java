@@ -186,8 +186,12 @@ public class WhitelistAuthenticator
                 String apiRealm = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
                 String apiClientId = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
                 String apiClientSecret = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, "n/a");
-                List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientSecret);
-                logger.tracef("Retrieve allowed IDPs using client %s, realm %s, secret %s from %s", apiClientId, apiRealm, apiClientSecret.substring(0, 3),
+                String apiClientGrantType = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_GRANT_TYPE, "n/a");
+                String apiCLientUser = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_API_USER, "n/a");
+                String apiClientPassword = getConfigEntry(context, WhitelistAuthenticatorFactory.AUTH_WHITELIST_API_PASSWORD, "n/a");
+                List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientGrantType, apiClientSecret, apiCLientUser,
+                                                                       apiClientPassword);
+                logger.tracef("Retrieve allowed IDPs using client %s, realm %s, secret %s from %s", apiClientId, apiRealm, apiCLientUser.substring(0, 3),
                               client.getUrl());
                 logger.debugf("Retrieved allowed IDPs %s for sp %s from %s", allowedIdPs, providerId);
                 if (allowedIdPs != null && allowedIdPs.contains(providerId)) {

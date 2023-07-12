@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.keycloak.Config;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.constants.AdapterConstants;
@@ -21,12 +22,15 @@ public class WhitelistAuthenticatorFactory
     implements AuthenticatorFactory, AdapterConstants
 {
 
-    public static final String     PROVIDER_ID                  = "whitelist-authenticator";
-    private static final String    CONF_KC_AUTH_URL             = "kcAuthUrl";
-    private static final String    CONF_REST_URL                = "restUrl";
-    public static final String     AUTH_WHITELIST_REALM         = "authWhitelistRealm";
-    public static final String     AUTH_WHITELIST_CLIENT_ID     = "authWhiteListClientId";
+    public static final String     PROVIDER_ID                      = "whitelist-authenticator";
+    public static final String     AUTH_WHITELIST_REALM             = "authWhitelistRealm";
+    public static final String     AUTH_WHITELIST_CLIENT_ID         = "authWhiteListClientId";
+    public static final String     AUTH_WHITELIST_CLIENT_GRANT_TYPE = "authWhiteListClientGrantType";
+    public static final String     AUTH_WHITELIST_API_USER          = "authWhiteListClientUser";
+    public static final String     AUTH_WHITELIST_API_PASSWORD      = "authWhiteListClientPassword";
     public static final String     AUTH_WHITELIST_CLIENT_SECRET = "authWhiteListClientIdSecret";
+    private static final String    CONF_KC_AUTH_URL                 = "kcAuthUrl";
+    private static final String    CONF_REST_URL                    = "restUrl";
 
     private WhitelistAuthenticator whitelistAuthenticator;
 
@@ -92,8 +96,17 @@ public class WhitelistAuthenticatorFactory
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_ID, "Client ID",
                                "REST-API Client ID",
                                ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_GRANT_TYPE, "OAuth Grant Type",
+                               "REST-API Authentication Granttype on of " + OAuth2Constants.CLIENT_CREDENTIALS + " or " + OAuth2Constants.PASSWORD,
+                               ProviderConfigProperty.STRING_TYPE, null),
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_SECRET, "Client Secret",
-                               "REST-API Client Secret",
+                               "REST-API Client Secret. Only needed when GRANT_TYPE=" + OAuth2Constants.CLIENT_CREDENTIALS,
+                               ProviderConfigProperty.PASSWORD, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_API_USER, "Client User",
+                               "REST-API Client User. Only needed when GRANT_TYPE=" + OAuth2Constants.PASSWORD,
+                               ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_API_PASSWORD, "Client Password",
+                               "REST-API Client Password. Only needed when GRANT_TYPE=" + OAuth2Constants.PASSWORD,
                                ProviderConfigProperty.PASSWORD, null));
     }
 
@@ -115,7 +128,7 @@ public class WhitelistAuthenticatorFactory
     @Override
     public void close()
     {
-        if(whitelistAuthenticator != null){
+        if (whitelistAuthenticator != null) {
             try {
                 whitelistAuthenticator.getClient().close();
             } catch (IOException e) {
