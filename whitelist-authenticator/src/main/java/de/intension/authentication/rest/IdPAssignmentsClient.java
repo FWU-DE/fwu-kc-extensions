@@ -58,12 +58,14 @@ public class IdPAssignmentsClient
     /**
      * Get list of allowed identity providers assigned to the given clientId.
      */
-    public List<String> getListOfAllowedIdPs(String clientId, String apiRealm, String apiClientId, String apiClientSecret)
+    public List<String> getListOfAllowedIdPs(String clientId, String apiRealm, String apiClientId, String apiClientGrantType, String apiClientSecret,
+                                             String apiClientUser, String apiClientPassword)
         throws JSONException, IOException, URISyntaxException
     {
         List<String> listOfIdps;
         HttpGet httpGet = new HttpGet(new URIBuilder(String.format(restApiUrl, clientId)).build());
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken(apiRealm, apiClientId, apiClientSecret));
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION,
+                          "Bearer " + getAccessToken(apiRealm, apiClientId, apiClientGrantType, apiClientSecret, apiClientUser, apiClientPassword));
         httpGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
         CloseableHttpResponse response = httpClient.execute(httpGet);
@@ -91,7 +93,7 @@ public class IdPAssignmentsClient
     /**
      * Calls the token endpoint to get a valid token that can be used to send the events to IMS.
      */
-    private String getAccessToken(String realm, String clientId, String clientSecret)
+    private String getAccessToken(String realm, String clientId, String grantType, String clientSecret, String username, String password)
         throws JSONException, IOException
     {
         String tokenUrl = String.format("%s/realms/%s/protocol/openid-connect/token", kcAuthUrl, realm);
@@ -101,9 +103,15 @@ public class IdPAssignmentsClient
         httpPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
         List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, OAuth2Constants.CLIENT_CREDENTIALS));
+        params.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, grantType));
         params.add(new BasicNameValuePair(OAuth2Constants.CLIENT_ID, clientId));
-        params.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, clientSecret));
+        if (grantType.equals(OAuth2Constants.PASSWORD)) {
+            params.add(new BasicNameValuePair(OAuth2Constants.USERNAME, username));
+            params.add(new BasicNameValuePair(OAuth2Constants.PASSWORD, password));
+        }
+        else {
+            params.add(new BasicNameValuePair(OAuth2Constants.CLIENT_SECRET, clientSecret));
+        }
 
         httpPost.setEntity(new UrlEncodedFormEntity(params));
 
