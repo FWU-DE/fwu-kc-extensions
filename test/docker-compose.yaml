@@ -11,6 +11,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: keycloak
       KC_DB_URL_HOST: postgres
+      KC_DB: postgres
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: password
       KC_SPI_AUTHENTICATOR_WHITELIST_AUTHENTICATOR_KC_AUTH_URL: http://localhost:8080/auth
@@ -42,11 +43,13 @@ services:
     container_name: postgres
     image: postgres
     restart: always
+    volumes:
+      - ./pg-init-scripts:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_MULTIPLE_DATABASES: keycloak,iam
       POSTGRES_PASSWORD: password
     networks:
       - fwunet

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [3.10.0]
+
+- Update: Support new Authentication in whitelist-authenticator for iam-service 1.1.0
+
 ## Version [3.9.0]
 
 - Improvement: Add logging for malformed JSON-responses from whitelist-authenticator

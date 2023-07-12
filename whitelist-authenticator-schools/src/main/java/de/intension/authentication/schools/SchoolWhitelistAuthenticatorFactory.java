@@ -3,8 +3,8 @@ package de.intension.authentication.schools;
 import java.io.IOException;
 import java.util.List;
 
-import de.intension.authentication.rest.SchoolAssignmentsClient;
 import org.keycloak.Config;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.constants.AdapterConstants;
@@ -13,18 +13,23 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 
+import de.intension.authentication.rest.SchoolAssignmentsClient;
+
 public class SchoolWhitelistAuthenticatorFactory
     implements AuthenticatorFactory, AdapterConstants
 {
 
-    public static final String                 PROVIDER_ID                  = "school-whitelist-authenticator";
-    public static final String                 USER_ATTRIBUTE_PARAM         = "userAttributeName";
-    public static final String                 USER_ATTRIBUTE_PARAM_DEFAULT = "ucsschoolSchool";
-    private static final String                CONF_KC_AUTH_URL             = "kcAuthUrl";
-    private static final String                CONF_REST_URL                = "restUrl";
-    public static final String                 AUTH_WHITELIST_REALM         = "authWhitelistRealm";
-    public static final String                 AUTH_WHITELIST_CLIENT_ID     = "authWhiteListClientId";
-    public static final String                 AUTH_WHITELIST_CLIENT_SECRET = "authWhiteListClientIdSecret";
+    public static final String           PROVIDER_ID                      = "school-whitelist-authenticator";
+    public static final String           USER_ATTRIBUTE_PARAM             = "userAttributeName";
+    public static final String           USER_ATTRIBUTE_PARAM_DEFAULT     = "ucsschoolSchool";
+    public static final String           AUTH_WHITELIST_REALM             = "authWhitelistRealm";
+    public static final String           AUTH_WHITELIST_CLIENT_ID         = "authWhiteListClientId";
+    public static final String           AUTH_WHITELIST_CLIENT_GRANT_TYPE = "authWhiteListClientGrantType";
+    public static final String           AUTH_WHITELIST_CLIENT_SECRET     = "authWhiteListClientIdSecret";
+    public static final String           AUTH_WHITELIST_API_USER          = "authWhiteListClientUser";
+    public static final String           AUTH_WHITELIST_API_PASSWORD      = "authWhitelistClientPassword";
+    private static final String          CONF_KC_AUTH_URL                 = "kcAuthUrl";
+    private static final String          CONF_REST_URL                    = "restUrl";
 
     private SchoolWhitelistAuthenticator whitelistAuthenticator;
 
@@ -84,24 +89,33 @@ public class SchoolWhitelistAuthenticatorFactory
                                "User attribute which contains the school ids",
                                ProviderConfigProperty.STRING_TYPE, USER_ATTRIBUTE_PARAM_DEFAULT),
                        new ProviderConfigProperty(AUTH_WHITELIST_REALM, "Realm",
-                                                  "Specifies the name of the realm that contains the configured client "
-                                                      + "for the REST API. If no value is specified, then the current realm is used.",
-                                                  ProviderConfigProperty.STRING_TYPE, null),
+                               "Specifies the name of the realm that contains the configured client "
+                                       + "for the REST API. If no value is specified, then the current realm is used.",
+                               ProviderConfigProperty.STRING_TYPE, null),
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_ID, "Client ID",
-                                                  "REST-API Client ID",
-                                                  ProviderConfigProperty.STRING_TYPE, null),
+                               "REST-API Client ID",
+                               ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_GRANT_TYPE, "OAuth Grant Type",
+                               "REST-API Authentication Granttype on of " + OAuth2Constants.CLIENT_CREDENTIALS + " or " + OAuth2Constants.PASSWORD,
+                               ProviderConfigProperty.STRING_TYPE, null),
                        new ProviderConfigProperty(AUTH_WHITELIST_CLIENT_SECRET, "Client Secret",
-                                                  "REST-API Client Secret",
-                                                  ProviderConfigProperty.PASSWORD, null));
+                               "REST-API Client Secret. Only needed when GRANT_TYPE=" + OAuth2Constants.CLIENT_CREDENTIALS,
+                               ProviderConfigProperty.PASSWORD, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_API_USER, "Client User",
+                               "REST-API Client User",
+                               ProviderConfigProperty.STRING_TYPE, null),
+                       new ProviderConfigProperty(AUTH_WHITELIST_API_PASSWORD, "Client Password",
+                               "REST-API Client Password",
+                               ProviderConfigProperty.PASSWORD, null));
     }
 
     @Override
     public void init(Config.Scope scope)
     {
         whitelistAuthenticator = new SchoolWhitelistAuthenticator(
-            new SchoolAssignmentsClient(
-                scope.get(CONF_KC_AUTH_URL),
-                scope.get(CONF_REST_URL)));
+                new SchoolAssignmentsClient(
+                        scope.get(CONF_KC_AUTH_URL),
+                        scope.get(CONF_REST_URL)));
     }
 
     @Override
@@ -113,7 +127,7 @@ public class SchoolWhitelistAuthenticatorFactory
     @Override
     public void close()
     {
-        if(whitelistAuthenticator != null){
+        if (whitelistAuthenticator != null) {
             try {
                 whitelistAuthenticator.getClient().close();
             } catch (IOException e) {
