@@ -98,6 +98,10 @@ public enum RabbitMqConnectionManager {
 			return connectionFactory.newConnection();
 		} catch (IOException | TimeoutException e) {
 			logger.errorf("Unable to open new connection: %s", e.getMessage());
+			logger.errorf("Stack trace is: ", e);
+			logger.errorf("User name is ", this.connectionFactory.getUsername());
+			logger.errorf("Host name is ", this.connectionFactory.getHost());
+			logger.errorf("User name is ", this.connectionFactory.getPort());
 		}
 		return null;
 	}
