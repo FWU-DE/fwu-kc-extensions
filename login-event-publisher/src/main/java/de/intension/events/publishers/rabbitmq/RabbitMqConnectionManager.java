@@ -101,7 +101,7 @@ public enum RabbitMqConnectionManager {
 			logger.errorf("Stack trace is: ", e);
 			logger.errorf("User name is ", this.connectionFactory.getUsername());
 			logger.errorf("Host name is ", this.connectionFactory.getHost());
-			logger.errorf("User name is ", this.connectionFactory.getPort());
+			logger.errorf("Port number is ", this.connectionFactory.getPort());
 		}
 		return null;
 	}
