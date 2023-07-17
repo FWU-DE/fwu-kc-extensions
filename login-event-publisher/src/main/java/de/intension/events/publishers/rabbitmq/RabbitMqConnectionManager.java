@@ -78,7 +78,7 @@ public enum RabbitMqConnectionManager {
 				ch.exchangeDeclare(EXCHANGE_LOGIN_DETAILS, BuiltinExchangeType.TOPIC, true);
 			}
 		} catch (IOException e) {
-			logger.errorf("Unable to create channel: %s", e.getMessage());
+			logger.errorf("Unable to create channel: %s", e.getMessage(), e);
 		}
 		return ch;
 	}
@@ -96,8 +96,10 @@ public enum RabbitMqConnectionManager {
 	private Connection createConnection() {
 		try {
 			return connectionFactory.newConnection();
-		} catch (IOException | TimeoutException e) {
-			logger.errorf("Unable to open new connection: %s", e.getMessage());
+		} catch (IOException | TimeoutException exception) {
+			logger.errorf("Unable to open new connection: %s with hostname: %s, username: %s and portnumber: %d",
+					exception.getMessage(), this.connectionFactory.getHost(), this.connectionFactory.getUsername(),
+					this.connectionFactory.getPort(), exception);
 		}
 		return null;
 	}
