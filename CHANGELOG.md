@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented here.
 
+
 ## Version [3.11.0]
 
 - Feature: New KC extension which publishes the login event of the user to Rabbitmq
