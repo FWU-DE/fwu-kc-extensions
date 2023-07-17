@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+
+## Version [3.11.0]
+
+- Feature: New KC extension which publishes the login event of the user to Rabbitmq
+
 ## Version [3.10.0]
 
 - Update: Support new Authentication in whitelist-authenticator for iam-service 1.1.0

@@ -1,0 +1,56 @@
+{
+	"queues": [
+		{
+			"name": "login-details",
+			"vhost": "/",
+			"durable": true,
+			"auto_delete": false
+		}
+	],
+	"exchanges": [
+		{
+			"name": "login-details",
+			"vhost": "/",
+			"type": "topic",
+			"durable": true,
+			"auto_delete": false,
+			"internal": false,
+			"arguments": {}
+		}
+	],
+	"bindings": [
+		{
+			"source": "login-details",
+			"vhost": "/",
+			"destination": "login-details",
+			"destination_type": "queue",
+			"routing_key": "KC.EVENT.LOGIN",
+			"arguments": {}
+		}
+	],
+	"users": [
+		{
+			"name": "guest",
+			"password_hash": "BMfxN8drrYcIqXZMr+pWTpDT0nMcOagMduLX0bjr4jwud/pN",
+			"hashing_algorithm": "rabbit_password_hashing_sha256",
+			"tags": [
+				"administrator"
+			],
+			"limits": {}
+		}
+	],
+	"vhosts": [
+		{
+			"name": "/"
+		}
+	],
+	"permissions": [
+		{
+			"user": "guest",
+			"vhost": "/",
+			"configure": ".*",
+			"write": ".*",
+			"read": ".*"
+		}
+	]
+}

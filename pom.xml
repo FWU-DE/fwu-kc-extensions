@@ -22,10 +22,11 @@
     <module>user-info-provider</module>
     <module>acronym-mapper</module>
     <module>school-mapper</module>
+    <module>login-event-publisher</module>
   </modules>
 
     <properties>
-        <revision>3.10.0</revision>
+        <revision>3.11.0</revision>
         <keycloak.version>20.0.5</keycloak.version>
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
