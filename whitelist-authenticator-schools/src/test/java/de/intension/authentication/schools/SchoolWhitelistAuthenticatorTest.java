@@ -301,7 +301,7 @@ class SchoolWhitelistAuthenticatorTest
         config.put(SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM, SchoolWhitelistAuthenticatorFactory.USER_ATTRIBUTE_PARAM_DEFAULT);
         config.put(SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, "test");
         config.put(SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, "rest-client");
-        config.put(SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_API_USER, "superSecret");
+        config.put(SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, "superSecret");
         when(authenticatorConfigModel.getConfig()).thenReturn(config);
         return context;
     }

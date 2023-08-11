@@ -92,15 +92,11 @@ public class SchoolWhitelistAuthenticator
     {
         String apiRealm = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_REALM, context.getRealm().getName());
         String apiClientId = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_ID, null);
-        String apiClientGrantType = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_GRANT_TYPE, null);
         String apiClientSecret = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_CLIENT_SECRET, null);
-        String apiClientUser = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_API_USER, null);
-        String apiClientPassword = getConfigEntry(context, SchoolWhitelistAuthenticatorFactory.AUTH_WHITELIST_API_PASSWORD, null);
 
         boolean permitted = false;
         try {
-            SchoolConfigDTO config = client.getListOfAllowedSchools(identityProvider, clientId, apiRealm, apiClientId, apiClientGrantType, apiClientSecret,
-                                                                    apiClientUser, apiClientPassword);
+            SchoolConfigDTO config = client.getListOfAllowedSchools(identityProvider, clientId, apiRealm, apiClientId, apiClientSecret);
             if (config != null && config.isAllowAll()) {
                 permitted = true;
             }

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [3.11.2]
+
+- Revert Changes from 3.10.0- Only use whitelist-authenticator via client-credentials
+
 ## Version [3.11.1]
 
 - Improvement: Add loggers for rabbitmq connection
