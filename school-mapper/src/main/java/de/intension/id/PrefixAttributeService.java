@@ -1,6 +1,11 @@
 package de.intension.id;
 
+import org.jboss.logging.Logger;
+
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 /**
@@ -8,16 +13,26 @@ import java.util.stream.Collectors;
  */
 public class PrefixAttributeService {
 
-    private final String prefix;
+    private static final Logger LOG = Logger.getLogger(PrefixAttributeService.class);
+    private final        String prefix;
     private final boolean toLowerCase;
 
+    private Pattern regExPattern = null;
+
     public PrefixAttributeService(String prefix) {
-        this(prefix, false);
+        this(prefix, false, null);
     }
 
-    public PrefixAttributeService(String prefix, boolean toLowerCase) {
+    public PrefixAttributeService(String prefix, boolean toLowerCase, String extractValueRegEx) {
         this.prefix = prefix;
         this.toLowerCase = toLowerCase;
+        initRegExPattern(extractValueRegEx);
+    }
+
+    private void initRegExPattern(String extractValueRegEx) throws PatternSyntaxException{
+        if(extractValueRegEx != null && !extractValueRegEx.isBlank()){
+            regExPattern = Pattern.compile(extractValueRegEx);
+        }
     }
 
     /**
@@ -39,6 +54,16 @@ public class PrefixAttributeService {
         }
         if (value == null || value.isBlank()) {
             return value;
+        }
+        if (regExPattern != null) {
+            Matcher matcher = regExPattern.matcher(value);
+            if(matcher.matches() && matcher.groupCount() > 0){
+                //extract first group only
+                value = matcher.group(1);
+            } else {
+                LOG.warnf("Regular expression '%s' does not match value '%s'", regExPattern.pattern(), value);
+                return null;
+            }
         }
         String prefixed = prefix + value;
         return toLowerCase ? prefixed.toLowerCase() : prefixed;

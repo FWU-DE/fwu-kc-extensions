@@ -1,9 +1,14 @@
 package de.intension.id;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -61,4 +66,60 @@ class PrefixAttributeServiceTest {
         assertThat(prefixed, iterableWithSize(1));
         assertThat(prefixed, contains(equalTo("DE-BY-Schullogin.example")));
     }
+
+    @Test
+    void should_prefix_extracted_single_value(){
+        String prefix = "DE-BY-Schullogin.";
+        String prefixed = new PrefixAttributeService(prefix, false, "^ou=([^,]*),.*").prefix("ou=school_id_103,o=something,c=de");
+
+        assertThat(prefixed, equalTo("DE-BY-Schullogin.school_id_103"));
+    }
+
+    @Test
+    void should_prefix_extracted_single_value_with_lower_case(){
+        String prefix = "DE-BY-Schullogin.";
+        String prefixed = new PrefixAttributeService(prefix, true, "^ou=([^,]*),.*").prefix("ou=school_id_103,o=something,c=de");
+
+        assertThat(prefixed, equalTo("de-by-schullogin.school_id_103"));
+    }
+
+    @Test
+    void should_prefix_extracted_list_of_values() {
+        var prefix = "DE-BY-Schullogin.";
+
+        var prefixed = new PrefixAttributeService(prefix, false, "^ou=([^,]*),.*").prefix(List.of("ou=school_id_103,o=something,c=de", "ou=school_id_503,o=something,c=de"));
+
+        assertThat(prefixed, iterableWithSize(2));
+        assertThat(prefixed, contains("DE-BY-Schullogin.school_id_103", "DE-BY-Schullogin.school_id_503"));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {""})
+    void should_prefix_only_if_regex_is_empty_or_null(String regex){
+        var prefix = "DE-BY-Schullogin.";
+
+        var prefixed = new PrefixAttributeService(prefix, false, regex).prefix(List.of("ou=school_id_103,o=something,c=de", "ou=school_id_503,o=something,c=de"));
+
+        assertThat(prefixed, iterableWithSize(2));
+        assertThat(prefixed, contains("DE-BY-Schullogin.ou=school_id_103,o=something,c=de", "DE-BY-Schullogin.ou=school_id_503,o=something,c=de"));
+    }
+
+    @Test
+    void should_not_return_prefixed_value_because_of_no_matching_value_available(){
+        String prefix = "DE-BY-Schullogin.";
+        String prefixed = new PrefixAttributeService(prefix, false, "^ou=([^,]*),.*").prefix("oa=school_id_103,o=something,c=de");
+
+        Assertions.assertNull(prefixed);
+    }
+
+    @Test
+    void should_throw_exception_because_of_invalid_regex(){
+        String prefix = "DE-BY-Schullogin.";
+        Assertions.assertThrows(PatternSyntaxException.class, () -> {
+            new PrefixAttributeService(prefix, false, "^ou=([[[^,]*),.*");
+        });
+    }
+
+
 }

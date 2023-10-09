@@ -17,10 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import static de.intension.id.PrefixAttributeConstants.LOWER_CASE;
 import static de.intension.id.PrefixAttributeConstants.PREFIX;
+import static de.intension.id.PrefixAttributeConstants.REG_EX;
 import static org.keycloak.broker.saml.mappers.UserAttributeMapper.*;
 
 /**
@@ -90,6 +92,13 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper {
         property.setDefaultValue(false);
         configProperties.add(property);
 
+        property = new ProviderConfigProperty();
+        property.setName(REG_EX);
+        property.setLabel("User Attribute Value extraction (regex)");
+        property.setHelpText("Regular expression to get a specific part out of the attribute value. If empty, the whole string will be used.");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        configProperties.add(property);
+
         return configProperties;
     }
 
@@ -134,20 +143,25 @@ public class PrefixAttributeSamlMapper extends AbstractIdentityProviderMapper {
         }
         String attributeName = mapperModel.getConfig().get(ATTRIBUTE_NAME);
         String attributeFriendlyName = mapperModel.getConfig().get(ATTRIBUTE_FRIENDLY_NAME);
+        String attributeValueRegEx = mapperModel.getConfig().get(REG_EX);
 
         List<String> attributeValuesInContext = findAttributeValuesInContext(context, attributeName, attributeFriendlyName);
         if (!attributeValuesInContext.isEmpty()) {
-            PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase);
-            var prefixedValues = prefixer.prefix(attributeValuesInContext);
+            try {
+                PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase, attributeValueRegEx);
+                var prefixedValues = prefixer.prefix(attributeValuesInContext);
 
-            if (attribute.equalsIgnoreCase(EMAIL)) {
-                setIfNotEmpty(user::setEmail, prefixedValues);
-            } else if (attribute.equalsIgnoreCase(FIRST_NAME)) {
-                setIfNotEmpty(user::setFirstName, prefixedValues);
-            } else if (attribute.equalsIgnoreCase(LAST_NAME)) {
-                setIfNotEmpty(user::setLastName, prefixedValues);
-            } else {
-                user.setAttribute(attribute, prefixedValues);
+                if (attribute.equalsIgnoreCase(EMAIL)) {
+                    setIfNotEmpty(user::setEmail, prefixedValues);
+                } else if (attribute.equalsIgnoreCase(FIRST_NAME)) {
+                    setIfNotEmpty(user::setFirstName, prefixedValues);
+                } else if (attribute.equalsIgnoreCase(LAST_NAME)) {
+                    setIfNotEmpty(user::setLastName, prefixedValues);
+                } else {
+                    user.setAttribute(attribute, prefixedValues);
+                }
+            } catch(PatternSyntaxException e){
+                LOG.errorf("Invalid regular expression '%s' configured", attributeValueRegEx);
             }
         }
     }

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [3.11.3]
+
+- Improvement - Prefix mapper now supports regular expressions
+
 ## Version [3.11.2]
 
 - Revert Changes from 3.10.0- Only use whitelist-authenticator via client-credentials

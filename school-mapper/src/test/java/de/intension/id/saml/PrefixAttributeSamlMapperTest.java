@@ -104,10 +104,62 @@ class PrefixAttributeSamlMapperTest {
         assertThat(prefixCaptor.getValue().get(0), equalTo("PREFIX.1234"));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        ",PREFIX.1234,'^ou=([^,]*).*'",
+        "false,PREFIX.1234,'^ou=([^,]*).*'",
+        "true,prefix.1234,'^ou=([^,]*).*'"
+    })
+    @SuppressWarnings("unchecked")
+    void should_map_school_id_by_regex_with_prefix(Boolean lowercase, String expected, String regex) {
+        ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
+        var token = samlStatement("schoolId", "ou=1234,o=something,c=de");
+        var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase, regex);
+
+        var user = testMapping(token, config);
+
+        Mockito.verify(user, times(1)).setAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+        assertThat(String.format("Expected %s for lowercase %b", expected, lowercase), prefixCaptor.getValue().get(0), equalTo(expected));
+    }
+
+    @Test
+    void should_not_map_school_id_because_of_invalid_regex() {
+        ArgumentCaptor<String> prefixCaptor = ArgumentCaptor.forClass(String.class);
+        var token = samlStatement("schoolId", "ou=1234,o=something,c=de");
+        var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", false, "^ou=([[[^,]*),.*invalid_regex");
+
+        var user = testMapping(token, config);
+
+        Mockito.verify(user, times(0)).setSingleAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        ",PREFIX.1234,'^ou=([^,]*).*'",
+        "false,,'^ou=(234324234).*'",
+        "true,prefix.1234,'^ou=([^,]*).*'"
+    })
+    @SuppressWarnings("unchecked")
+    void should_map_matching_school_id_only_by_regex_with_prefix(Boolean lowercase, String expected, String regex) {
+        ArgumentCaptor<List<String>> prefixCaptor = ArgumentCaptor.forClass(List.class);
+        var token = samlStatement("schoolId", "ou=1234,o=something,c=de");
+        var config = mapperConfig("schoolId", "prefixedId", "PREFIX.", lowercase, regex);
+
+        var user = testMapping(token, config);
+
+        Mockito.verify(user, times(1)).setAttribute(Mockito.matches("prefixedId"), prefixCaptor.capture());
+        assertThat(String.format("Expected %s for lowercase %b", expected, lowercase), prefixCaptor.getValue().get(0), equalTo(expected));
+    }
+
     private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase) {
+        return mapperConfig(samlValue, userAttribute, prefix, lowercase, "");
+    }
+
+    private Map<String, String> mapperConfig(String samlValue, String userAttribute, String prefix, Boolean lowercase, String regex) {
         var config = new HashMap<>(Map.of(UserAttributeMapper.ATTRIBUTE_NAME, samlValue,
-                UserAttributeMapper.USER_ATTRIBUTE, userAttribute,
-                PrefixAttributeConstants.PREFIX, prefix));
+                                          UserAttributeMapper.USER_ATTRIBUTE, userAttribute,
+                                          PrefixAttributeConstants.PREFIX, prefix,
+                                          PrefixAttributeConstants.REG_EX, regex));
         if (lowercase != null) {
             config.put(PrefixAttributeConstants.LOWER_CASE, Boolean.toString(lowercase));
         }
