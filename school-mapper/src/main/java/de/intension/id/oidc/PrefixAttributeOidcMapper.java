@@ -1,6 +1,13 @@
 package de.intension.id.oidc;
 
-import de.intension.id.PrefixAttributeService;
+import static de.intension.id.PrefixAttributeConstants.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.PatternSyntaxException;
+
+import org.jboss.logging.Logger;
 import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.mappers.AbstractClaimMapper;
@@ -8,32 +15,29 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static de.intension.id.PrefixAttributeConstants.LOWER_CASE;
-import static de.intension.id.PrefixAttributeConstants.PREFIX;
+import de.intension.id.PrefixAttributeService;
 
 /**
  * Identity provider mapper to map OIDC token claims to user attributes.
  */
-public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
+public class PrefixAttributeOidcMapper extends AbstractClaimMapper
+{
 
-    public static final String PROVIDER_ID = "prefixed-attribute-idp-mapper";
-    public static final String[] COMPATIBLE_PROVIDERS = {
+    public static final String                          PROVIDER_ID          = "prefixed-attribute-idp-mapper";
+    protected static final String[]                        COMPATIBLE_PROVIDERS = {
             KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
             OIDCIdentityProviderFactory.PROVIDER_ID
     };
-    public static final String ATTRIBUTE = "attribute";
-    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+    public static final String                          ATTRIBUTE            = "attribute";
+    protected static final List<ProviderConfigProperty> configProperties     = new ArrayList<>();
+    private static final Logger LOG = Logger.getLogger(PrefixAttributeOidcMapper.class);
 
     static {
         ProviderConfigProperty property = new ProviderConfigProperty();
         property.setName(CLAIM);
         property.setLabel("Claim");
         property
-                .setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
+            .setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         configProperties.add(property);
 
@@ -56,6 +60,13 @@ public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
         property.setName(ATTRIBUTE);
         property.setLabel("User Attribute Name");
         property.setHelpText("User attribute name to store claim.");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        configProperties.add(property);
+
+        property = new ProviderConfigProperty();
+        property.setName(REG_EX);
+        property.setLabel("User Attribute Value extraction (regex)");
+        property.setHelpText("Regular expression to get a specific part out of the attribute value. If empty or null, the whole attribute value will be used.");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         configProperties.add(property);
     }
@@ -120,22 +131,27 @@ public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
         String userAttribute = config.get(ATTRIBUTE);
         String prefix = config.get(PREFIX);
         boolean toLowerCase = Boolean.parseBoolean(config.getOrDefault(LOWER_CASE, Boolean.FALSE.toString()));
+        String attributeValueRegEx = config.getOrDefault(REG_EX, null);
         Object claimValue = getClaimValue(context, claim);
         if (claimValue == null) {
             return;
         }
-        PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase);
-        if (claimValue instanceof List) {
-            var prefixedValues = prefixer.prefix((List<String>) claimValue);
-            if (!prefixedValues.isEmpty()) {
-                user.setAttribute(userAttribute, prefixedValues);
+        try {
+            PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase, attributeValueRegEx);
+            if (claimValue instanceof List) {
+                var prefixedValues = prefixer.prefix((List<String>) claimValue);
+                if (!prefixedValues.isEmpty()) {
+                    user.setAttribute(userAttribute, prefixedValues);
+                }
+            } else {
+                String stringValue = (String) claimValue;
+                if (stringValue.isBlank()) {
+                    return;
+                }
+                user.setSingleAttribute(userAttribute, prefixer.prefix(stringValue));
             }
-        } else {
-            String stringValue = (String) claimValue;
-            if (stringValue.isBlank()) {
-                return;
-            }
-            user.setSingleAttribute(userAttribute, prefixer.prefix(stringValue));
+        } catch( PatternSyntaxException e){
+            LOG.errorf("Invalid regular expression '%s' configured", attributeValueRegEx);
         }
     }
 }
