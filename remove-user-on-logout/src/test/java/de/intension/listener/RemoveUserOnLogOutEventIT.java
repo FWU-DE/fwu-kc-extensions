@@ -86,7 +86,7 @@ class RemoveUserOnLogOutEventIT
         KeycloakPage kcPage = KeycloakPage
             .start(driver, wait)
             .openAccountConsole()
-            .normalLogin("misty", "test");
+                .login("misty", "test");
         int usersCountBeforeLogout = usersResource.count();
 
         kcPage.logout();
@@ -169,21 +169,12 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage openAccountConsole()
         {
-            driver.get("http://test:8080/auth/realms/fwu/account/");
+            driver.get("http://test:8080/auth/realms/fwu/account/#/personal-info");
             return this;
-        }
-
-        public KeycloakPage normalLogin(String username, String password)
-        {
-            wait.until(ExpectedConditions.elementToBeClickable(By.id("landingSignInButton")));
-            driver.findElement(By.id("landingSignInButton")).click();
-            return login(username, password);
         }
 
         public KeycloakPage idpLogin(String username, String password)
         {
-            wait.until(ExpectedConditions.elementToBeClickable(By.id("landingSignInButton")));
-            driver.findElement(By.id("landingSignInButton")).click();
             wait.until(ExpectedConditions.elementToBeClickable(By.id("social-keycloak-oidc")));
             driver.findElement(By.id("social-keycloak-oidc")).click();
             return login(username, password);
@@ -191,8 +182,10 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage login(String username, String password)
         {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#username")));
-            driver.findElement(By.cssSelector("input#username")).sendKeys(username);
+            By usernameInput = By.cssSelector("input#username");
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("kc-login")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(usernameInput));
+            driver.findElement(usernameInput).sendKeys(username);
             driver.findElement(By.cssSelector("input#password")).sendKeys(password);
             driver.findElement(By.cssSelector("input#kc-login")).click();
             return this;
@@ -200,10 +193,9 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage updateLastName(String lastName)
         {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.linkText("Personal info")));
-            driver.findElement(By.linkText("Personal info")).click();
             ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
-            wait.withTimeout(Duration.of(20, ChronoUnit.SECONDS)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("save-btn")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
 
             driver.findElement(By.cssSelector("input#last-name")).clear();
             driver.findElement(By.cssSelector("input#last-name")).sendKeys(lastName);
@@ -214,10 +206,10 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage logout()
         {
-            String signOutButtonId = "landingSignOutButton";
+            By signOutButton = By.xpath("//button[text()='Sign out']");
             ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
-            wait.until(ExpectedConditions.elementToBeClickable(By.id(signOutButtonId)));
-            driver.findElement(By.id(signOutButtonId)).click();
+            wait.until(ExpectedConditions.elementToBeClickable(signOutButton));
+            driver.findElement(signOutButton).click();
             return this;
         }
 
