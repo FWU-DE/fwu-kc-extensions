@@ -23,13 +23,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.utils.MediaType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import twitter4j.JSONException;
-import twitter4j.JSONObject;
 
 public class SchoolAssignmentsClient
     implements Closeable
@@ -61,7 +59,7 @@ public class SchoolAssignmentsClient
      * Get list of allowed schools for a combination of Identity-Provider and Service-Provider
      */
     public SchoolConfigDTO getListOfAllowedSchools(String idp, String clientId, String apiRealm, String apiClientId, String apiClientSecret)
-        throws JSONException, IOException, URISyntaxException
+            throws IOException, URISyntaxException
     {
         SchoolConfigDTO schoolConfig = null;
         HttpGet httpGet = new HttpGet(restApiUrl);
@@ -96,7 +94,7 @@ public class SchoolAssignmentsClient
      * Calls the token endpoint to get a valid token that can be used to send the events to IMS.
      */
     private String getAccessToken(String realm, String clientId, String clientSecret)
-        throws JSONException, IOException
+            throws IOException
     {
         String tokenUrl = String.format("%s/realms/%s/protocol/openid-connect/token", kcAuthUrl, realm);
 
@@ -111,14 +109,13 @@ public class SchoolAssignmentsClient
 
         httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-        CloseableHttpResponse response = httpClient.execute(httpPost);
+        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 
-        LOG.debugv("Get access token. Status = {0, number, integer}", response.getStatusLine().getStatusCode());
+            LOG.debugv("Get access token. Status = {0, number, integer}", response.getStatusLine().getStatusCode());
 
-        JSONObject readEntity = new JSONObject(EntityUtils.toString(response.getEntity()));
-
-        response.close();
-        return readEntity.getString(OAuth2Constants.ACCESS_TOKEN);
+            AccessTokenResponse accessTokenResponse = objectMapper.readValue(EntityUtils.toString(response.getEntity()), AccessTokenResponse.class);
+            return accessTokenResponse.getToken();
+        }
     }
 
     /**

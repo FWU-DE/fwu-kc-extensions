@@ -2,7 +2,7 @@ version: '3.7'
 services:
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:20.0.5
+    image: quay.io/keycloak/keycloak:22.0.4
     ports:
       - 18080:8080
       - 8787:8787
@@ -70,7 +70,7 @@ services:
 
   saml_idp:
     container_name: saml-idp-mock
-    image: quay.io/keycloak/keycloak:20.0
+    image: quay.io/keycloak/keycloak:22.0.4
     ports:
       - 18443:8080
     environment:

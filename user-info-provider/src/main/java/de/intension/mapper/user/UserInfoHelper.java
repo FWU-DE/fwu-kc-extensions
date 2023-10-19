@@ -317,7 +317,7 @@ public class UserInfoHelper
                 }
                 kontext.getGruppen().add(gruppe);
             } catch (JsonProcessingException e) {
-                logger.errorf(e, "Could not deserialize person.kontext.gruppen[%d] for user %s" + index, user.getUsername());
+                logger.errorv(e, "Could not deserialize person.kontext.gruppen[{0}] for user {1}" + index, user.getUsername());
             }
             indexedAttribute = String.format(INDEXED_ATTR_FORMAT, attributeName, ++index);
             json = resolveSplittedAttribute(user, indexedAttribute);

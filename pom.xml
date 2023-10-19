@@ -26,9 +26,9 @@
   </modules>
 
     <properties>
-      <revision>3.11.3</revision>
-        <keycloak.version>20.0.5</keycloak.version>
-        <java.version>11</java.version>
+      <revision>4.0.0</revision>
+      <keycloak.version>22.0.4</keycloak.version>
+      <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -149,7 +149,7 @@
       <dependency>
         <groupId>com.github.dasniko</groupId>
         <artifactId>testcontainers-keycloak</artifactId>
-        <version>2.4.0</version>
+        <version>3.0.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>

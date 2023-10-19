@@ -7,13 +7,10 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -37,7 +34,7 @@ class RemoveUserOnLogOutEventIT
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
 
     @Container
-    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:20.0.1")
+    private static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
         .withProviderClassesFrom("target/classes")
         .withContextPath("/auth")
         .withNetwork(network)
@@ -178,11 +175,15 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage normalLogin(String username, String password)
         {
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("landingSignInButton")));
+            driver.findElement(By.id("landingSignInButton")).click();
             return login(username, password);
         }
 
         public KeycloakPage idpLogin(String username, String password)
         {
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("landingSignInButton")));
+            driver.findElement(By.id("landingSignInButton")).click();
             wait.until(ExpectedConditions.elementToBeClickable(By.id("social-keycloak-oidc")));
             driver.findElement(By.id("social-keycloak-oidc")).click();
             return login(username, password);
@@ -199,20 +200,24 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage updateLastName(String lastName)
         {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#lastName")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.linkText("Personal info")));
+            driver.findElement(By.linkText("Personal info")).click();
+            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            wait.withTimeout(Duration.of(20, ChronoUnit.SECONDS)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
 
-            driver.findElement(By.cssSelector("input#lastName")).clear();
-            driver.findElement(By.cssSelector("input#lastName")).sendKeys(lastName);
-            driver.findElement(By.className("btn-primary")).click();
+            driver.findElement(By.cssSelector("input#last-name")).clear();
+            driver.findElement(By.cssSelector("input#last-name")).sendKeys(lastName);
+            driver.findElement(By.id("save-btn")).click();
 
             return this;
         }
 
         public KeycloakPage logout()
         {
-            String signOutButton = "Sign out";
-            wait.until(ExpectedConditions.elementToBeClickable(By.linkText(signOutButton)));
-            driver.findElement(By.linkText(signOutButton)).click();
+            String signOutButtonId = "landingSignOutButton";
+            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            wait.until(ExpectedConditions.elementToBeClickable(By.id(signOutButtonId)));
+            driver.findElement(By.id(signOutButtonId)).click();
             return this;
         }
 

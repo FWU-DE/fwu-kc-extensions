@@ -1,7 +1,7 @@
 package de.intension.authentication;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
+import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.constants.AdapterConstants.KC_IDP_HINT;
 import static org.mockito.Mockito.*;
@@ -13,10 +13,6 @@ import static org.mockserver.model.HttpStatusCode.OK_200;
 
 import java.util.Map;
 import java.util.stream.Stream;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +33,9 @@ import org.mockserver.model.MediaType;
 
 import de.intension.authentication.rest.IdPAssignmentsClient;
 import de.intension.authentication.test.TestAuthenticationFlowContext;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = {18733})

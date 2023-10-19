@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.UriInfo;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.constants.AdapterConstants;
@@ -23,6 +20,8 @@ import org.keycloak.sessions.AuthenticationSessionProvider;
 import org.keycloak.sessions.RootAuthenticationSessionModel;
 
 import de.intension.authentication.test.TestAuthenticationFlowContext;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.UriInfo;
 
 class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
 {

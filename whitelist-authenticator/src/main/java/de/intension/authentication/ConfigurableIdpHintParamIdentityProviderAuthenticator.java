@@ -4,9 +4,6 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -18,6 +15,9 @@ import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.utils.StringUtil;
+
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Same as {@link IdentityProviderAuthenticator} but with configurable IdP hint
