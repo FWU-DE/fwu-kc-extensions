@@ -1,9 +1,9 @@
 package de.intension.authentication.test;
 
-import javax.ws.rs.core.Response;
-
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
+
+import jakarta.ws.rs.core.Response;
 
 public abstract class TestAuthenticationFlowContext
     implements AuthenticationFlowContext

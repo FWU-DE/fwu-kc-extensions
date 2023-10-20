@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import javax.ws.rs.core.Response;
-
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -23,6 +21,7 @@ import org.keycloak.utils.StringUtil;
 
 import de.intension.authentication.rest.SchoolAssignmentsClient;
 import de.intension.authentication.rest.SchoolConfigDTO;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Check users school id against service provider white list.

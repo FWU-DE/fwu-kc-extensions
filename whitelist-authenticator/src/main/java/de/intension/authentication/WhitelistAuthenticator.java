@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -25,7 +23,7 @@ import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
 import de.intension.authentication.rest.IdPAssignmentsClient;
-import twitter4j.JSONException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Check IdP hint against a configured whitelist.
@@ -193,7 +191,7 @@ public class WhitelistAuthenticator
                 if (allowedIdPs != null && allowedIdPs.contains(providerId)) {
                     isAllowed = true;
                 }
-            } catch (IOException | URISyntaxException | JSONException e) {
+            } catch (IOException | URISyntaxException e) {
                 logger.errorf(e, "List of assigned IdPs could not be fetched clientId=%s, providerId=%s, url=%s", clientId, providerId, client.getUrl());
             }
         }

@@ -7,13 +7,10 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -37,7 +34,7 @@ class RemoveUserOnLogOutEventIT
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
 
     @Container
-    private static KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:20.0.1")
+    private static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
         .withProviderClassesFrom("target/classes")
         .withContextPath("/auth")
         .withNetwork(network)
@@ -89,7 +86,7 @@ class RemoveUserOnLogOutEventIT
         KeycloakPage kcPage = KeycloakPage
             .start(driver, wait)
             .openAccountConsole()
-            .normalLogin("misty", "test");
+                .login("misty", "test");
         int usersCountBeforeLogout = usersResource.count();
 
         kcPage.logout();
@@ -172,13 +169,8 @@ class RemoveUserOnLogOutEventIT
 
         public KeycloakPage openAccountConsole()
         {
-            driver.get("http://test:8080/auth/realms/fwu/account/");
+            driver.get("http://test:8080/auth/realms/fwu/account/#/personal-info");
             return this;
-        }
-
-        public KeycloakPage normalLogin(String username, String password)
-        {
-            return login(username, password);
         }
 
         public KeycloakPage idpLogin(String username, String password)
@@ -190,8 +182,10 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage login(String username, String password)
         {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#username")));
-            driver.findElement(By.cssSelector("input#username")).sendKeys(username);
+            By usernameInput = By.cssSelector("input#username");
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("kc-login")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(usernameInput));
+            driver.findElement(usernameInput).sendKeys(username);
             driver.findElement(By.cssSelector("input#password")).sendKeys(password);
             driver.findElement(By.cssSelector("input#kc-login")).click();
             return this;
@@ -199,20 +193,23 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage updateLastName(String lastName)
         {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#lastName")));
+            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("save-btn")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
 
-            driver.findElement(By.cssSelector("input#lastName")).clear();
-            driver.findElement(By.cssSelector("input#lastName")).sendKeys(lastName);
-            driver.findElement(By.className("btn-primary")).click();
+            driver.findElement(By.cssSelector("input#last-name")).clear();
+            driver.findElement(By.cssSelector("input#last-name")).sendKeys(lastName);
+            driver.findElement(By.id("save-btn")).click();
 
             return this;
         }
 
         public KeycloakPage logout()
         {
-            String signOutButton = "Sign out";
-            wait.until(ExpectedConditions.elementToBeClickable(By.linkText(signOutButton)));
-            driver.findElement(By.linkText(signOutButton)).click();
+            By signOutButton = By.xpath("//button[text()='Sign out']");
+            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            wait.until(ExpectedConditions.elementToBeClickable(signOutButton));
+            driver.findElement(signOutButton).click();
             return this;
         }
 

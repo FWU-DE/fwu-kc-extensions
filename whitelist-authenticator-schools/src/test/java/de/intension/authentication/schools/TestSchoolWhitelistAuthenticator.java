@@ -1,10 +1,9 @@
 package de.intension.authentication.schools;
 
-import javax.ws.rs.core.Response;
-
 import org.keycloak.authentication.AuthenticationFlowContext;
 
 import de.intension.authentication.rest.SchoolAssignmentsClient;
+import jakarta.ws.rs.core.Response;
 
 /**
  * This class is used to simplify JUnit tests.
