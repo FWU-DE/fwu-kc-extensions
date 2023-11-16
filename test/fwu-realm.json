@@ -2034,6 +2034,37 @@
       }
     },
     {
+      "alias": "keycloak-oidc2",
+      "displayName": "IDP Login 2",
+      "internalId": "2ab45bba-98ab-4084-921b-76553da2eac7",
+      "providerId": "keycloak-oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": true,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "fbl - attribute account linking",
+      "config": {
+        "hideOnLoginPage": "false",
+        "validateSignature": "false",
+        "acceptsPromptNoneForwardFromClient": "false",
+        "clientId": "keycloak-broker",
+        "tokenUrl": "http://keycloak:8080/auth/realms/idp2/protocol/openid-connect/token",
+        "uiLocales": "false",
+        "backchannelSupported": "false",
+        "useJwksUrl": "true",
+        "loginHint": "true",
+        "pkceEnabled": "false",
+        "authorizationUrl": "http://localhost:18080/auth/realms/idp2/protocol/openid-connect/auth",
+        "clientAuthMethod": "client_secret_basic",
+        "disableUserInfo": "false",
+        "syncMode": "IMPORT",
+        "clientSecret": "MOD2QhzW2trterJPN09eauNByCkGw8Nw"
+      }
+    },
+    {
       "alias": "keycloak-saml",
       "displayName": "SAML Test",
       "internalId": "eca1b3af-b2b5-4ce1-b22d-47b45f06ab1d",
@@ -2130,6 +2161,28 @@
         "user.attribute": "prefixedSchoolsSaml",
         "attribute": "acronym",
         "attribute.name": "schools"
+      }
+    },
+    {
+      "id": "471a4409-6de2-4f2c-a002-58277c73d0e0",
+      "name": "uuid",
+      "identityProviderAlias": "keycloak-oidc2",
+      "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+      "config": {
+        "syncMode": "FORCE",
+        "claim": "uuid",
+        "user.attribute": "uuid"
+      }
+    },
+    {
+      "id": "40458617-f2ba-44b9-90b3-ef9fada3870c",
+      "name": "attribute_idp2",
+      "identityProviderAlias": "keycloak-oidc2",
+      "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+      "config": {
+        "syncMode": "FORCE",
+        "claim": "attribute_idp2",
+        "user.attribute": "attribute_idp2"
       }
     }
   ],
@@ -3176,6 +3229,104 @@
           "userSetupAllowed": false
         }
       ]
+    },
+    {
+      "id": "f7a614e0-3afe-40ea-bdd6-1a2791dcf92a",
+      "alias": "idp chaining post broker flow",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "user-attribute-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "Forward to default provider",
+          "authenticator": "configurable-hint-idp-redirector",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 2,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "d05a1280-3748-4d02-a8e7-eddd09546c2d",
+      "alias": "fbl - attribute account linking",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "idp-review-profile",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "priority": 1,
+          "autheticatorFlow": true,
+          "flowAlias": "User Creation or linking",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "92d32796-4c33-4219-90a3-93f592f96f68",
+      "alias": "User Creation or linking",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 0,
+          "autheticatorFlow": true,
+          "flowAlias": "Handle existing account",
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "idp-create-user-if-unique",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 1,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "cf018fb7-a088-41df-bf37-7b912dd0668a",
+      "alias": "Handle existing account",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "account_linking_key",
+          "authenticator": "custom-attribute-idp-linking",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
     }
   ],
   "authenticatorConfig": [
@@ -3230,6 +3381,23 @@
         "userAttributeName": "prefixedSchools",
         "authWhiteListClientGrantType": "password",
         "authWhiteListClientId": "iam-service"
+      }
+    },
+    {
+      "id": "587fd070-fb36-4e43-90ed-76f20817bc21",
+      "alias": "Forward to default provider",
+      "config": {
+        "defaultProvider": "keycloak-oidc2",
+        "idpHintParamName": "not_a_valid_hint"
+      }
+    },
+    {
+      "id": "534840ab-a211-4ea9-baae-f24cae571013",
+      "alias": "account_linking_key",
+      "config": {
+        "caila-fail-on-no-match": "false",
+        "caila-lookup-attribute": "account_linking_key",
+        "caila-idp-attribute": "user.attributes.email"
       }
     }
   ],

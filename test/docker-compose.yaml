@@ -32,12 +32,14 @@ services:
       - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
       - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
       - "./idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
+      - "./idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
       #    - themes
       - "../../fwu-idp-theme/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
       - "../../fwu-idp-theme/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
       - "../../fwu-idp-theme/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
       - "./providers:/opt/keycloak/providers/"
+      - "./lib/keycloak-custom-attribute-idp-linking-2.1.1-SNAPSHOT.jar:/opt/keycloak/providers/keycloak-custom-attribute-idp-linking.jar"
     networks:
       - fwunet
     depends_on:
