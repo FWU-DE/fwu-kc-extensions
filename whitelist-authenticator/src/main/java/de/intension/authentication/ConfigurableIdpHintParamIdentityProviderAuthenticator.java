@@ -9,6 +9,7 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticator;
+import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticatorFactory;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -34,7 +35,11 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
     public void authenticate(AuthenticationFlowContext context)
     {
         String idpHintParamName = getIdpHintParamName(context);
+        String defaultProvider = context.getAuthenticatorConfig().getConfig().get(IdentityProviderAuthenticatorFactory.DEFAULT_PROVIDER);
         String providerId = context.getUriInfo().getQueryParameters().getFirst(idpHintParamName);
+        if (providerId == null) {
+            providerId = defaultProvider;
+        }
         if (AdapterConstants.KC_IDP_HINT.equals(idpHintParamName) || StringUtil.isBlank(providerId)) {
             super.authenticate(context);
         }
@@ -52,7 +57,8 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
             .findFirst();
         if (idp.isPresent()) {
             String accessCode = new ClientSessionCode<>(context.getSession(), context.getRealm(),
-                    context.getAuthenticationSession()).getOrGenerateCode();
+                    context.getAuthenticationSession())
+                .getOrGenerateCode();
             String clientId = context.getAuthenticationSession().getClient().getClientId();
             String tabId = context.getAuthenticationSession().getTabId();
             URI location = Urls.identityProviderAuthnRequest(context.getUriInfo().getBaseUri(), providerId,
@@ -61,6 +67,13 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
                 location = UriBuilder.fromUri(location).queryParam(OAuth2Constants.DISPLAY,
                                                                    context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
                     .build();
+            }
+            if (context.getUser() != null) {
+                String accountLinkingValue = context.getUser().getFirstAttribute("account_linking_key");
+                if (accountLinkingValue != null && !accountLinkingValue.isEmpty()) {
+                    location = UriBuilder.fromUri(location).queryParam("login_hint", accountLinkingValue)
+                        .build();
+                }
             }
             Response response = Response.seeOther(location)
                 .build();
