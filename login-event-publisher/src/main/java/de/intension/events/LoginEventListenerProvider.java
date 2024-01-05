@@ -18,6 +18,8 @@ import de.intension.events.publishers.EventPublisher;
  */
 public class LoginEventListenerProvider implements EventListenerProvider {
 
+    public static final String             SCHOOLIDS_ATTRIBUTE_CONFIG_KEY = "schoolids-attribute-key";
+
 	private static final Logger logger = Logger.getLogger(LoginEventListenerProvider.class);
 
 	private final KeycloakSession keycloakSession;

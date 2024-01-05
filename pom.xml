@@ -26,8 +26,8 @@
   </modules>
 
     <properties>
-      <revision>4.0.0</revision>
-      <keycloak.version>22.0.4</keycloak.version>
+      <revision>4.1.0</revision>
+      <keycloak.version>22.0.5</keycloak.version>
       <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

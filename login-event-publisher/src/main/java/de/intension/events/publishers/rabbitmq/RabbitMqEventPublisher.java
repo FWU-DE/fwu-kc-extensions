@@ -13,7 +13,7 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import de.intension.events.exception.LoginEventException;
 import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.dto.EventDTO;
+import de.intension.events.publishers.dto.DetailedLoginEvent;
 
 public class RabbitMqEventPublisher implements EventPublisher {
 
@@ -23,7 +23,7 @@ public class RabbitMqEventPublisher implements EventPublisher {
 
 	@Override
 	public void publish(Event event) {
-		EventDTO eventDetails = populateEventDetails(event);
+        DetailedLoginEvent eventDetails = populateEventDetails(event);
 		String routingKey = calculateRoutingKey(event);
 
 		try {
@@ -45,8 +45,9 @@ public class RabbitMqEventPublisher implements EventPublisher {
 		RabbitMqConnectionManager.INSTANCE.init(config, new ConnectionFactory());
 	}
 
-	private EventDTO populateEventDetails(Event event) {
-		EventDTO eventMessage = new EventDTO();
+    private DetailedLoginEvent populateEventDetails(Event event)
+    {
+        DetailedLoginEvent eventMessage = new DetailedLoginEvent();
 		eventMessage.setRealmId(event.getRealmId());
 		eventMessage.setClientId(event.getClientId());
 		eventMessage.setTimeStamp(new Date(event.getTime()));
