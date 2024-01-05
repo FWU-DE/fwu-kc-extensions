@@ -14,41 +14,49 @@ import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
  * Factory for the user login event listener
  * 
  * @author kdeshpande
- *
  */
-public class LoginEventListenerProviderFactory implements EventListenerProviderFactory {
+public class LoginEventListenerProviderFactory
+    implements EventListenerProviderFactory
+{
 
-	private static final Logger logger = Logger.getLogger(LoginEventListenerProviderFactory.class);
-	private EventPublisher publisher;
-	public static final String PROVIDER_ID = "login-event-publisher";
+    public static final String        PROVIDER_ID                    = "login-event-publisher";
+    public static final String        SCHOOLIDS_ATTRIBUTE_CONFIG_KEY = "schoolids-attribute-key";
+    private static final Logger       logger                         = Logger.getLogger(LoginEventListenerProviderFactory.class);
+    private EventPublisher            publisher;
+    private DetailedLoginEventFactory eventFactory;
 
-	@Override
-	public EventListenerProvider create(KeycloakSession session) {
-		return new LoginEventListenerProvider(session, publisher);
-	}
+    @Override
+    public EventListenerProvider create(KeycloakSession session)
+    {
+        return new LoginEventListenerProvider(session, publisher, eventFactory);
+    }
 
-	@Override
+    @Override
 	public void init(Scope config) {
 		publisher = new RabbitMqEventPublisher();
 		this.publisher.initConnection(config);
+        this.eventFactory = new DetailedLoginEventFactory(config.get(SCHOOLIDS_ATTRIBUTE_CONFIG_KEY));
 		logger.info("init of login event provider factory completed successfully");
 	}
 
-	@Override
-	public void postInit(KeycloakSessionFactory factory) {
-		// Nothing to do here
-	}
+    @Override
+    public void postInit(KeycloakSessionFactory factory)
+    {
+        // Nothing to do here
+    }
 
-	// Call the publisher close method to close the connection and channel to
-	// publisher
-	@Override
-	public void close() {
-		this.publisher.close();
-	}
+    // Call the publisher close method to close the connection and channel to
+    // publisher
+    @Override
+    public void close()
+    {
+        this.publisher.close();
+    }
 
-	@Override
-	public String getId() {
-		return PROVIDER_ID;
-	}
+    @Override
+    public String getId()
+    {
+        return PROVIDER_ID;
+    }
 
 }

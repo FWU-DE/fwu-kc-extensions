@@ -9,6 +9,7 @@ import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 
 import de.intension.events.publishers.EventPublisher;
+import de.intension.events.publishers.dto.DetailedLoginEvent;
 
 /**
  * Provider for the user login event in Keycloak
@@ -18,20 +19,21 @@ import de.intension.events.publishers.EventPublisher;
  */
 public class LoginEventListenerProvider implements EventListenerProvider {
 
-    public static final String             SCHOOLIDS_ATTRIBUTE_CONFIG_KEY = "schoolids-attribute-key";
-
 	private static final Logger logger = Logger.getLogger(LoginEventListenerProvider.class);
 
 	private final KeycloakSession keycloakSession;
-	private EventPublisher publisher;
+    private final EventPublisher            publisher;
+    private final DetailedLoginEventFactory eventFactory;
 
 	// Will eventually call the methods publishEvent and publishAdminEvent
 	private final EventListenerTransaction tx = new EventListenerTransaction(this::publishAdminEvent,
 			this::publishEvent);
 
-	public LoginEventListenerProvider(KeycloakSession session, EventPublisher publisher) {
+    public LoginEventListenerProvider(KeycloakSession session, EventPublisher publisher, DetailedLoginEventFactory eventFactory)
+    {
 		this.keycloakSession = session;
 		this.publisher = publisher;
+        this.eventFactory = eventFactory;
 		session.getTransactionManager().enlistAfterCompletion(tx);
 		logger.infof("[%s] instantiated.", this.getClass());
 	}
@@ -57,7 +59,8 @@ public class LoginEventListenerProvider implements EventListenerProvider {
 	}
 
 	private void publishEvent(Event event) {
-		this.publisher.publish(event);
+        DetailedLoginEvent detailedLoginEvent = eventFactory.create(event, keycloakSession);
+        this.publisher.publish(detailedLoginEvent);
 	}
 
 	private void publishAdminEvent(AdminEvent event, boolean includeRepresentation) {

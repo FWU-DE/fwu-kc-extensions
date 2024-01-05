@@ -1,20 +1,15 @@
 package de.intension.events.publishers;
 
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.keycloak.common.util.Time.currentTimeMillis;
 import static org.keycloak.events.EventType.LOGIN;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.stream.Stream;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.events.Event;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -25,11 +20,13 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+import de.intension.events.publishers.dto.DetailedLoginEvent;
 import de.intension.events.publishers.rabbitmq.RabbitMqConnectionManager;
 import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
 import de.intension.events.testhelper.MockScope;
 
-public class RabbitMqEventPublisherTest {
+class RabbitMqEventPublisherTest
+{
 
 	private static ConnectionFactory factory;
 	private static Channel channel;
@@ -57,7 +54,8 @@ public class RabbitMqEventPublisherTest {
 	}
 
 	@BeforeEach
-	void mockAMQPClient() throws Exception {
+    void mockAMQPClient()
+    {
 		Mockito.clearInvocations(factory, channel);
 	}
 
@@ -65,12 +63,10 @@ public class RabbitMqEventPublisherTest {
 	void publish_login_event() throws Exception {
 		RabbitMqEventPublisher publisher = new RabbitMqEventPublisher();
 
-		Event event = new Event();
-		event.setType(LOGIN);
-		event.setTime(now);
+        DetailedLoginEvent event = new DetailedLoginEvent();
+        event.setType(LOGIN.toString());
+        event.setTimeStamp(new Date(now));
 		event.setRealmId("test");
-		event.setDetails(Stream.of(new SimpleEntry<>("username", "test@test.de"))
-				.collect(toMap((e) -> e.getKey(), (e) -> e.getValue())));
 		publisher.publish(event);
 
 		verify(channel).basicPublish(exchangeArg.capture(), routingKeyArg.capture(), propsArg.capture(),

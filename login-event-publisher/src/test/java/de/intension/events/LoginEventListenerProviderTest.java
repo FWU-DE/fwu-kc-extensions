@@ -3,6 +3,7 @@ package de.intension.events;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,38 +14,47 @@ import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
 
 import de.intension.events.publishers.EventPublisher;
+import de.intension.events.publishers.dto.DetailedLoginEvent;
 import de.intension.events.testhelper.KeycloakSessionMock;
 import de.intension.events.testhelper.RealmModelMock;
 import de.intension.events.testhelper.TestEventFactory;
+import de.intension.events.testhelper.UserModelMock;
 
 class LoginEventListenerProviderTest
 {
 
-    private final KeycloakSession kcSession = KeycloakSessionMock.create(RealmModelMock.create("realm-test"));
-    private TestPublisher         publisher;
+    private final KeycloakSession     kcSession = KeycloakSessionMock
+        .create(RealmModelMock.create("realm-test"), UserModelMock.create(TestEventFactory.USER_ID, Arrays.asList("DE_BY-1234", "DE_BY-4321")));
+    private TestPublisher             publisher;
+    private DetailedLoginEventFactory eventFactory;
 
     @BeforeEach
-    void initPublisher()
-        throws Exception
+    void init()
     {
         publisher = new TestPublisher();
+        eventFactory = new DetailedLoginEventFactory("schulkennung");
     }
 
     @Test
     void publish_login_events()
     {
-        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher);
+        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, eventFactory);
         Event event = TestEventFactory.create();
         provider.onEvent(event);
         kcSession.getTransactionManager().commit();
         assertThat(publisher.events).hasSize(1)
-            .contains(event);
+            .first().usingRecursiveComparison().ignoringFields("timeStamp", "idpName", "schoolIds", "type").isEqualTo(event);
+        DetailedLoginEvent actual = publisher.events.get(0);
+        assertThat(actual.getType()).isEqualTo("LOGIN");
+        assertThat(actual.getTimeStamp()).isEqualTo(TestEventFactory.TIMESTAMP);
+        assertThat(actual.getIdpName()).isEqualTo(TestEventFactory.IDP_NAME);
+        assertThat(actual.getSchoolIds()).hasSize(2).containsExactlyInAnyOrder("DE_BY-1234", "DE_BY-4321");
     }
 
     @Test
     void check_non_login_events()
     {
-        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher);
+        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, eventFactory);
         Event event = TestEventFactory.create(EventType.LOGOUT);
         provider.onEvent(event);
         kcSession.getTransactionManager().commit();
@@ -55,7 +65,7 @@ class LoginEventListenerProviderTest
         implements EventPublisher
     {
 
-        private final List<Event> events = new ArrayList<>();
+        private final List<DetailedLoginEvent> events = new ArrayList<>();
 
         @Override
         public void close()
@@ -64,7 +74,7 @@ class LoginEventListenerProviderTest
         }
 
         @Override
-        public void publish(Event event)
+        public void publish(DetailedLoginEvent event)
         {
             events.add(event);
         }
