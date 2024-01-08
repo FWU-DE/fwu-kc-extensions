@@ -1,5 +1,6 @@
 package de.intension.events;
 
+import static de.intension.events.DetailedLoginEventFactory.SCHOOLIDS_ATTRIBUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -15,10 +16,7 @@ import org.keycloak.models.KeycloakSession;
 
 import de.intension.events.publishers.EventPublisher;
 import de.intension.events.publishers.dto.DetailedLoginEvent;
-import de.intension.events.testhelper.KeycloakSessionMock;
-import de.intension.events.testhelper.RealmModelMock;
-import de.intension.events.testhelper.TestEventFactory;
-import de.intension.events.testhelper.UserModelMock;
+import de.intension.events.testhelper.*;
 
 class LoginEventListenerProviderTest
 {
@@ -32,7 +30,9 @@ class LoginEventListenerProviderTest
     void init()
     {
         publisher = new TestPublisher();
-        eventFactory = new DetailedLoginEventFactory("schulkennung");
+        MockScope config = MockScope.create();
+        config.put(SCHOOLIDS_ATTRIBUTE, "schulkennung");
+        eventFactory = new DetailedLoginEventFactory(config);
     }
 
     @Test

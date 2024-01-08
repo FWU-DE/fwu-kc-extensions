@@ -20,7 +20,6 @@ public class LoginEventListenerProviderFactory
 {
 
     public static final String        PROVIDER_ID                    = "login-event-publisher";
-    public static final String        SCHOOLIDS_ATTRIBUTE_CONFIG_KEY = "schoolids-attribute-key";
     private static final Logger       logger                         = Logger.getLogger(LoginEventListenerProviderFactory.class);
     private EventPublisher            publisher;
     private DetailedLoginEventFactory eventFactory;
@@ -35,7 +34,7 @@ public class LoginEventListenerProviderFactory
 	public void init(Scope config) {
 		publisher = new RabbitMqEventPublisher();
 		this.publisher.initConnection(config);
-        this.eventFactory = new DetailedLoginEventFactory(config.get(SCHOOLIDS_ATTRIBUTE_CONFIG_KEY));
+        this.eventFactory = new DetailedLoginEventFactory(config);
 		logger.info("init of login event provider factory completed successfully");
 	}
 
