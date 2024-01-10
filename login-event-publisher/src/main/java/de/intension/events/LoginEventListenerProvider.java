@@ -39,7 +39,7 @@ public class LoginEventListenerProvider
         this.publisher = publisher;
         this.schoolIdsAttributeName = schoolIdsAttributeName;
         session.getTransactionManager().enlistAfterCompletion(tx);
-        logger.infof("[%s] instantiated.", this.getClass());
+        logger.tracef("[%s] instantiated.", this.getClass());
     }
 
     @Override
