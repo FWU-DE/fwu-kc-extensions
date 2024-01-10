@@ -1,18 +1,33 @@
 package de.intension.events.testhelper;
 
+import java.util.Collections;
+
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import org.mockito.Mockito;
 
 public abstract class KeycloakContextMock implements KeycloakContext {
 
 	private RealmModelMock realmFragment;
+    private AuthenticationSessionMock authenticationSessionMock;
 
 	public static KeycloakContextMock create() {
 		KeycloakContextMock inst;
 
 		inst = Mockito.mock(KeycloakContextMock.class, Mockito.CALLS_REAL_METHODS);
+        inst.authenticationSessionMock = AuthenticationSessionMock.create(UserModelMock.create("test-user", Collections.EMPTY_LIST));
 		return init(inst);
+    }
+
+    public static KeycloakContextMock create(UserModel user)
+    {
+        KeycloakContextMock inst;
+
+        inst = Mockito.mock(KeycloakContextMock.class, Mockito.CALLS_REAL_METHODS);
+        inst.authenticationSessionMock = AuthenticationSessionMock.create(user);
+        return init(inst);
 	}
 
 	private static KeycloakContextMock init(KeycloakContextMock inst) {
@@ -36,4 +51,9 @@ public abstract class KeycloakContextMock implements KeycloakContext {
 		return this.realmFragment;
 	}
 
+    @Override
+    public AuthenticationSessionModel getAuthenticationSession()
+    {
+        return authenticationSessionMock;
+    }
 }

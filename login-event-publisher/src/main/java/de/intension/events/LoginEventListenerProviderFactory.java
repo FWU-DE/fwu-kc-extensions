@@ -19,24 +19,26 @@ public class LoginEventListenerProviderFactory
     implements EventListenerProviderFactory
 {
 
-    public static final String        PROVIDER_ID                    = "login-event-publisher";
-    private static final Logger       logger                         = Logger.getLogger(LoginEventListenerProviderFactory.class);
+    public static final String  PROVIDER_ID         = "login-event-publisher";
+    public static final String  SCHOOLIDS_ATTRIBUTE = "schoolids-attribute";
+    private static final Logger logger              = Logger.getLogger(LoginEventListenerProviderFactory.class);
     private EventPublisher            publisher;
-    private DetailedLoginEventFactory eventFactory;
+    private String              schoolIdsAttributeName;
 
     @Override
     public EventListenerProvider create(KeycloakSession session)
     {
-        return new LoginEventListenerProvider(session, publisher, eventFactory);
+        return new LoginEventListenerProvider(session, publisher, schoolIdsAttributeName);
     }
 
     @Override
-	public void init(Scope config) {
-		publisher = new RabbitMqEventPublisher();
-		this.publisher.initConnection(config);
-        this.eventFactory = new DetailedLoginEventFactory(config);
-		logger.info("init of login event provider factory completed successfully");
-	}
+    public void init(Scope config)
+    {
+        publisher = new RabbitMqEventPublisher();
+        this.publisher.initConnection(config);
+        this.schoolIdsAttributeName = config.get(SCHOOLIDS_ATTRIBUTE);
+        logger.info("init of login event provider factory completed successfully");
+    }
 
     @Override
     public void postInit(KeycloakSessionFactory factory)

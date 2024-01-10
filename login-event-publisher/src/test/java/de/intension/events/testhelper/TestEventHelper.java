@@ -6,7 +6,7 @@ import java.util.Map;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 
-public class TestEventFactory
+public class TestEventHelper
 {
 
     public static final String    REALM_ID   = "test-realm";

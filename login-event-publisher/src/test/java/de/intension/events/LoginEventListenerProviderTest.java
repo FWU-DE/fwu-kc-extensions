@@ -1,6 +1,5 @@
 package de.intension.events;
 
-import static de.intension.events.DetailedLoginEventFactory.SCHOOLIDS_ATTRIBUTE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -16,46 +15,47 @@ import org.keycloak.models.KeycloakSession;
 
 import de.intension.events.publishers.EventPublisher;
 import de.intension.events.publishers.dto.DetailedLoginEvent;
-import de.intension.events.testhelper.*;
+import de.intension.events.testhelper.KeycloakSessionMock;
+import de.intension.events.testhelper.RealmModelMock;
+import de.intension.events.testhelper.TestEventHelper;
+import de.intension.events.testhelper.UserModelMock;
 
 class LoginEventListenerProviderTest
 {
 
-    private final KeycloakSession     kcSession = KeycloakSessionMock
-        .create(RealmModelMock.create("realm-test"), UserModelMock.create(TestEventFactory.USER_ID, Arrays.asList("DE_BY-1234", "DE_BY-4321")));
-    private TestPublisher             publisher;
-    private DetailedLoginEventFactory eventFactory;
+    public static final String SCHOOL_IDS_ATTRIBUTE_NAME = "schulkennung";
+    private KeycloakSession    kcSession;
+    private TestPublisher      publisher;
 
     @BeforeEach
     void init()
     {
         publisher = new TestPublisher();
-        MockScope config = MockScope.create();
-        config.put(SCHOOLIDS_ATTRIBUTE, "schulkennung");
-        eventFactory = new DetailedLoginEventFactory(config);
+        kcSession = KeycloakSessionMock
+            .create(RealmModelMock.create("realm-test"), UserModelMock.create("idp-user", Arrays.asList("DE_BY-1234", "DE_BY-4321")));
     }
 
     @Test
     void publish_login_events()
     {
-        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, eventFactory);
-        Event event = TestEventFactory.create();
+        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, SCHOOL_IDS_ATTRIBUTE_NAME);
+        Event event = TestEventHelper.create();
         provider.onEvent(event);
         kcSession.getTransactionManager().commit();
         assertThat(publisher.events).hasSize(1)
             .first().usingRecursiveComparison().ignoringFields("timeStamp", "idpName", "schoolIds", "type").isEqualTo(event);
         DetailedLoginEvent actual = publisher.events.get(0);
         assertThat(actual.getType()).isEqualTo("LOGIN");
-        assertThat(actual.getTimeStamp()).isEqualTo(TestEventFactory.TIMESTAMP);
-        assertThat(actual.getIdpName()).isEqualTo(TestEventFactory.IDP_NAME);
+        assertThat(actual.getTimeStamp()).isEqualTo(TestEventHelper.TIMESTAMP);
+        assertThat(actual.getIdpName()).isEqualTo(TestEventHelper.IDP_NAME);
         assertThat(actual.getSchoolIds()).hasSize(2).containsExactlyInAnyOrder("DE_BY-1234", "DE_BY-4321");
     }
 
     @Test
     void check_non_login_events()
     {
-        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, eventFactory);
-        Event event = TestEventFactory.create(EventType.LOGOUT);
+        LoginEventListenerProvider provider = new LoginEventListenerProvider(kcSession, publisher, SCHOOL_IDS_ATTRIBUTE_NAME);
+        Event event = TestEventHelper.create(EventType.LOGOUT);
         provider.onEvent(event);
         kcSession.getTransactionManager().commit();
         assertThat(publisher.events).isEmpty();
