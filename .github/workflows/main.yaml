@@ -51,6 +51,12 @@ jobs:
         with:
           xml-file: 'pom.xml'
           xpath: "//*[local-name()='project']/*[local-name()='modules']/*[local-name()='module']"
+      - name: Get keycloak version
+        id: get-keycloak-version
+        uses: mavrosxristoforos/get-xml-info@1.0
+        with:
+          xml-file: 'pom.xml'
+          xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='keycloak.version']"
       - name: Check release exists
         id: check-release
         run: |
@@ -118,5 +124,7 @@ jobs:
         env:
           GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F "variables[CI_COMMIT_SHA]=${GITHUB_SHA}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
+          VERSION: ${{ steps.check-release.outputs.version }}
+          KEYCLOAK_VERSION: ${{ steps.get-keycloak-version.outputs.info }}
+        run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F "variables[keycloak_version]=${KEYCLOAK_VERSION}" -F "variables[extensions_version]=${VERSION}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
 
