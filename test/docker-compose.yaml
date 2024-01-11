@@ -23,6 +23,7 @@ services:
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_EXCHANGE: login-details
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_USERNAME: guest
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_PASSWORD: guest
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_SCHOOLIDS_ATTRIBUTE: prefixedSchools
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
@@ -55,7 +56,7 @@ services:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_MULTIPLE_DATABASES: keycloak,iam
+      POSTGRES_MULTIPLE_DATABASES: keycloak,iam,logindetails
       POSTGRES_PASSWORD: password
     networks:
       - fwunet

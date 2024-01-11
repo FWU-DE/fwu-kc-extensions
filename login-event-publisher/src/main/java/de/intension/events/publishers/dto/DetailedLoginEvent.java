@@ -1,8 +1,10 @@
 package de.intension.events.publishers.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
@@ -10,7 +12,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EventDTO {
+public class DetailedLoginEvent
+{
+
+    @JsonIgnore
+    private String       type;
 
 	@JsonProperty("realmId")
 	private String realmId;
@@ -24,5 +30,8 @@ public class EventDTO {
 
 	@JsonProperty("idpName")
 	private String idpName;
+
+    @JsonProperty
+    private List<String> schoolIds;
 
 }
