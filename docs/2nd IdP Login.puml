@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/de/activity-diagram-legacy
+
+(*) --> "Aufruf SP Website"
+"Aufruf SP Website" --> "IdP-Suche via vidis button"
+"IdP-Suche via vidis button" --> "Auswahl des Stadt-IdPs"
+"Auswahl des Stadt-IdPs" --> "Forward via Vidis-Broker an Stadt-IdP"
+"Forward via Vidis-Broker an Stadt-IdP" --> "Login an Stadt-IdP"
+if "Stadt-Benutzer bereits verlinkt mit Landesportal-Benutzer" then
+    -->[true] "Forward - Login IdP-Landesportal"
+else
+    if "Existiert ein Account im Landesportal" then
+        -->[true] "Abfrage Login-Name Landesportal"
+            --> "Forward - Login IdP-Landesportal"
+            --> "Login IdP-Landesportal"
+            if "First Broker Login" then
+                -->[true] "Verlinke Stadt-Benutzer mit Landesportal-Benutzer"
+                -right-> "Forward zur Website SP"
+            else
+                -right->[false] "Forward zur Website SP"
+            endif
+    else
+        -right->[false] "Forward zur Website SP"
+    endif
+endif
+"Forward zur Website SP" --> (*)
+
+@enduml
