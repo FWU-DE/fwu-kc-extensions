@@ -443,7 +443,7 @@
 			"name": "HMAC Resource",
 			"item": [
 				{
-					"name": "Find user ID",
+					"name": "Find original value",
 					"request": {
 						"method": "POST",
 						"header": [],
