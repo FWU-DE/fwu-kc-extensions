@@ -17,7 +17,7 @@ token=$(curl --location --request POST "${baseUrl}/realms/${realm}/protocol/open
 --data-urlencode "password=${password}" \
 --data-urlencode "client_id=${clientId}" \
 --data-urlencode "client_secret=${clientSecret}" | jq --raw-output ".access_token")
-echo $token
+echo "$token"
 
 curl --location --request POST "${baseUrl}/realms/${realm}/hmac" \
 --header "Authorization: Bearer $token" \
