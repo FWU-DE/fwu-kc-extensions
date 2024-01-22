@@ -25,11 +25,16 @@ public class HmacMappingResource implements RealmResourceProvider {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUserId(final HmacMappingRequest request) {
-        var client = session.clients().getClientById(session.getContext().getRealm(), request.getClientId());
+        var client = session.getContext().getRealm().getClientByClientId(request.getClientId());
+        if (client == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Client '" + request.getClientId() + "' does not exist")
+                    .build();
+        }
         var hmacMapper = client.getProtocolMapperById(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
         if (hmacMapper == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured.")
+                    .entity("Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured")
                     .build();
         }
         String testId = request.getTestId();
