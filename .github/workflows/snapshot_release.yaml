@@ -68,7 +68,7 @@ jobs:
           do
               filename=${archive##*/}
               artifact=${filename%-*}
-              curl --request PUT \
+              curl --fail --request PUT \
                   --upload-file ${archive} \
                   --header "Deploy-Token: ${GITLAB_TOKEN}" \
                   "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
