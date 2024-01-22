@@ -9,6 +9,6 @@ import java.util.List;
 @Setter
 public class HmacMappingRequest {
     private String clientId;
-    private List<String> originalIds;
-    private String testId;
+    private List<String> originalValues;
+    private String testValue;
 }

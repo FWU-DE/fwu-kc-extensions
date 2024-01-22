@@ -1,13 +1,5 @@
 package de.intension.protocol.oidc.mappers;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.crypto.Mac;
-
 import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.ProtocolMapperConfigException;
@@ -19,6 +11,13 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 
+import javax.crypto.Mac;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Pairwise identifier mapper using
  * <a href="https://datatracker.ietf.org/doc/html/rfc2104">HMAC</a>.
@@ -29,7 +28,7 @@ import org.keycloak.representations.IDToken;
  * on the remote host, but re-direct URLs are ignored.
  *
  * @see <a href=
- *      "https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#mac-algorithms">mac-algorithms</a>
+ * "https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#mac-algorithms">mac-algorithms</a>
  */
 public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         implements IPairwiseMapper {
@@ -38,7 +37,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     private static final String HASH_ALGORITHM_PROP_LABEL = "Hash algorithm";
     private static final String HASH_ALGORITHM_PROP_HELP = "Mac hash algorithm used when calculating the pairwise subject identifier.";
 
-    protected static final String LOCAL_SUB_IDENTIFIER_PROP_NAME = "pairwiseLocalSubIdentifier";
+    public static final String LOCAL_SUB_IDENTIFIER_PROP_NAME = "pairwiseLocalSubIdentifier";
     private static final String LOCAL_SUB_IDENTIFIER_PROP_LABEL = "Local sub identifier";
     private static final String LOCAL_SUB_IDENTIFIER_PROP_HELP = "Local sub identifier is used when calculating the pairwise subject identifier. The identifier should match the attribute name of the keycloak user.";
 
@@ -49,8 +48,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public IDToken transformIDToken(IDToken token, ProtocolMapperModel mappingModel, KeycloakSession session,
-            UserSessionModel userSession,
-            ClientSessionContext clientSessionCtx) {
+                                    UserSessionModel userSession,
+                                    ClientSessionContext clientSessionCtx) {
         if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
             return token;
         }
@@ -64,8 +63,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public AccessToken transformAccessToken(AccessToken token, ProtocolMapperModel mappingModel,
-            KeycloakSession session, UserSessionModel userSession,
-            ClientSessionContext clientSessionCtx) {
+                                            KeycloakSession session, UserSessionModel userSession,
+                                            ClientSessionContext clientSessionCtx) {
         if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
             return token;
         }
@@ -80,8 +79,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public AccessToken transformUserInfoToken(AccessToken token, ProtocolMapperModel mappingModel,
-            KeycloakSession session, UserSessionModel userSession,
-            ClientSessionContext clientSessionCtx) {
+                                              KeycloakSession session, UserSessionModel userSession,
+                                              ClientSessionContext clientSessionCtx) {
         if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
             return token;
         }
@@ -147,8 +146,8 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
      */
     @Override
     public void validateAdditionalConfig(KeycloakSession session, RealmModel realm,
-            ProtocolMapperContainerModel mapperContainer,
-            ProtocolMapperModel mapperModel)
+                                         ProtocolMapperContainerModel mapperContainer,
+                                         ProtocolMapperModel mapperModel)
             throws ProtocolMapperConfigException {
         // Generate random salt if needed
         String salt = PairwiseSubMapperHelper.getSalt(mapperModel);
@@ -198,7 +197,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
 
     @Override
     public void validateConfig(KeycloakSession session, RealmModel realm, ProtocolMapperContainerModel mapperContainer,
-            ProtocolMapperModel mapperModel)
+                               ProtocolMapperModel mapperModel)
             throws ProtocolMapperConfigException {
         ClientModel client = null;
         if (mapperContainer instanceof ClientModel) {

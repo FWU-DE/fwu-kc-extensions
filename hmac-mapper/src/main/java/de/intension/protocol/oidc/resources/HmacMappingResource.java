@@ -31,17 +31,19 @@ public class HmacMappingResource implements RealmResourceProvider {
                     .entity("Client '" + request.getClientId() + "' does not exist")
                     .build();
         }
-        var hmacMapper = client.getProtocolMapperById(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
-        if (hmacMapper == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured")
-                    .build();
+        var mappers = client.getProtocolMappersStream().filter(m -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(m.getProtocolMapper())).toList();
+        if (mappers.size() != 1) {
+            String error = mappers.isEmpty() ?
+                    "Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured"
+                    : "Client has more than one protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured";
+            return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
-        String testId = request.getTestId();
-        for (String id : request.getOriginalIds()) {
-            var encryptedId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, id);
-            if (encryptedId.equals(testId)) {
-                return Response.ok(testId).build();
+        var hmacMapper = mappers.get(0);
+        String testValue = request.getTestValue();
+        for (String value : request.getOriginalValues()) {
+            var encryptedId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, value);
+            if (encryptedId.equals(testValue)) {
+                return Response.ok(value).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
