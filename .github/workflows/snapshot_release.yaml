@@ -15,7 +15,7 @@ jobs:
         with:
           java-version: 17
       - name: Deploy to GitHub packages
-        run: mvn --batch-mode deploy -DprojectVersion=$GITHUB_REF_NAME -DskipTests
+        run: mvn --batch-mode deploy -Drevision=$GITHUB_REF_NAME -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get maven group
