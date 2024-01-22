@@ -7,7 +7,7 @@ clientSecret=""
 username="iam-admin"
 password="test"
 token=""
-values="\"brock\",\"misty\",\"iam-admin\""
+values='"brock","misty","iam-admin"'
 testValue="49060eab-7c61-3989-9da2-33a680255961"
 
 token=$(curl --location --request POST "${baseUrl}/realms/${realm}/protocol/openid-connect/token" \
