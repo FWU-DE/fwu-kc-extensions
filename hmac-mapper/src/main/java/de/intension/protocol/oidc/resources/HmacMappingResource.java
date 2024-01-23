@@ -40,6 +40,12 @@ public class HmacMappingResource implements RealmResourceProvider {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    /**
+     * Check whether requesting user has access to request for this client.
+     * User needs to have realm role "hmac-mapping-resource" with attribute "clientId" matching the client ID.
+     *
+     * @return Client found with parameter clientId
+     */
     private ClientModel checkAccess(String clientId) {
         var realm = session.getContext().getRealm();
         var client = realm.getClientByClientId(clientId);
@@ -64,6 +70,9 @@ public class HmacMappingResource implements RealmResourceProvider {
         return client;
     }
 
+    /**
+     * Get the mapper with id "oidc-hmac-pairwise-subject-mapper" from the client's configuration.
+     */
     private ProtocolMapperModel getHmacMapper(ClientModel client) {
         var mappers = client.getProtocolMappersStream().filter(m -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(m.getProtocolMapper())).toList();
         if (mappers.size() != 1) {
