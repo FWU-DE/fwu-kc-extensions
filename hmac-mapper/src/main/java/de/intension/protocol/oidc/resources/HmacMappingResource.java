@@ -18,7 +18,6 @@ public class HmacMappingResource implements RealmResourceProvider {
     private static final String ATTRIBUTE_NAME = "hmac-clientId";
 
     public HmacMappingResource(KeycloakSession session) {
-
         this.session = session;
     }
 
