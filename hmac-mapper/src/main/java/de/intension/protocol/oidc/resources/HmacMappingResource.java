@@ -15,7 +15,7 @@ public class HmacMappingResource implements RealmResourceProvider {
 
     private KeycloakSession session;
 
-    private static final String ROLE_NAME = "hmac-mapping-resource";
+    private static final String ATTRIBUTE_NAME = "hmac-clientId";
 
     public HmacMappingResource(KeycloakSession session) {
 
@@ -43,7 +43,7 @@ public class HmacMappingResource implements RealmResourceProvider {
 
     /**
      * Check whether requesting user has access to request for this client.
-     * User needs to have realm role "hmac-mapping-resource" with attribute "clientId" matching the client ID.
+     * User needs to have attribute "hmac-clientId" matching the client ID.
      *
      * @return Client found with parameter clientId
      */
@@ -53,20 +53,10 @@ public class HmacMappingResource implements RealmResourceProvider {
         if (client == null) {
             throw new NotFoundException("Client '" + clientId + "' does not exist");
         }
-        var role = realm.getRole(ROLE_NAME);
-        if (role != null) {
-            var user = new AppAuthManager.BearerTokenAuthenticator(session).authenticate().getSession().getUser();
-            var roptional = user.getRealmRoleMappingsStream()
-                    .filter(r -> ROLE_NAME.equals(r.getName()))
-                    .findFirst();
-            if (roptional.isEmpty()) {
-                throw new ForbiddenException();
-            }
-            var roleAssignment = roptional.get();
-            var clientIds = roleAssignment.getAttributeStream("clientId").toList();
-            if (!clientIds.contains(client.getClientId())) {
-                throw new ForbiddenException();
-            }
+        var user = new AppAuthManager.BearerTokenAuthenticator(session).authenticate().getSession().getUser();
+        var clientIds = user.getAttributeStream(ATTRIBUTE_NAME).toList();
+        if (!clientIds.contains(client.getClientId())) {
+            throw new ForbiddenException();
         }
         return client;
     }

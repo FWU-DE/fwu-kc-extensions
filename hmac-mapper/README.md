@@ -170,4 +170,4 @@ Example:
 
 ### Authorization
 
-The request has to be protected with Bearer authorization and the user needs to have the realm_role foo with parameter bar matching the client(s) he can access.
+The request has to be protected with Bearer authorization and the user needs to have the attribute `hmac-clientId` containing the ID of the client(s) he can access.
