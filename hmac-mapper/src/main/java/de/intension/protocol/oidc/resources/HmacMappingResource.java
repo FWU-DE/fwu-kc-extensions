@@ -13,7 +13,7 @@ import org.keycloak.services.resource.RealmResourceProvider;
 
 public class HmacMappingResource implements RealmResourceProvider {
 
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     private static final String ATTRIBUTE_NAME = "hmac-clientId";
 
