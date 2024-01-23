@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.resource.RealmResourceProvider;
 
 public class HmacMappingResource implements RealmResourceProvider {
@@ -54,7 +55,7 @@ public class HmacMappingResource implements RealmResourceProvider {
         }
         var role = realm.getRole(ROLE_NAME);
         if (role != null) {
-            var user = session.getContext().getAuthenticationSession().getAuthenticatedUser();
+            var user = new AppAuthManager.BearerTokenAuthenticator(session).authenticate().getSession().getUser();
             var roptional = user.getRealmRoleMappingsStream()
                     .filter(r -> ROLE_NAME.equals(r.getName()))
                     .findFirst();
