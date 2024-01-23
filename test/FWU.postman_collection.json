@@ -78,13 +78,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/protocol/openid-connect/token",
+							"raw": "{{authUrl}}/realms/{{realm}}/protocol/openid-connect/token",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -164,13 +164,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/protocol/openid-connect/token",
+							"raw": "{{authUrl}}/realms/{{realm}}/protocol/openid-connect/token",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -254,13 +254,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/protocol/openid-connect/token",
+							"raw": "{{authUrl}}/realms/{{realm}}/protocol/openid-connect/token",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -344,13 +344,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/protocol/openid-connect/token",
+							"raw": "{{authUrl}}/realms/{{realm}}/protocol/openid-connect/token",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -422,13 +422,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/protocol/openid-connect/token",
+							"raw": "{{authUrl}}/realms/{{realm}}/protocol/openid-connect/token",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"protocol",
 								"openid-connect",
 								"token"
@@ -457,13 +457,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{authUrl}}/realms/fwu/hmac",
+							"raw": "{{authUrl}}/realms/{{realm}}/hmac",
 							"host": [
 								"{{authUrl}}"
 							],
 							"path": [
 								"realms",
-								"fwu",
+								"{{realm}}",
 								"hmac"
 							]
 						}
