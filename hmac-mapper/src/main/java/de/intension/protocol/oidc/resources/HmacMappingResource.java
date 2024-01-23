@@ -2,10 +2,7 @@ package de.intension.protocol.oidc.resources;
 
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.models.KeycloakSession;
@@ -14,6 +11,8 @@ import org.keycloak.services.resource.RealmResourceProvider;
 public class HmacMappingResource implements RealmResourceProvider {
 
     private KeycloakSession session;
+
+    private static final String ROLE_NAME = "hmac-mapping-resource";
 
     public HmacMappingResource(KeycloakSession session) {
 
@@ -25,7 +24,23 @@ public class HmacMappingResource implements RealmResourceProvider {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response getUserId(final HmacMappingRequest request) {
-        var client = session.getContext().getRealm().getClientByClientId(request.getClientId());
+        var user = session.getContext().getAuthenticationSession().getAuthenticatedUser();
+        var realm = session.getContext().getRealm();
+        var role = realm.getRole(ROLE_NAME);
+        var client = realm.getClientByClientId(request.getClientId());
+        if (role != null) {
+            var roptional = user.getRealmRoleMappingsStream()
+                    .filter(r -> ROLE_NAME.equals(r.getName()))
+                    .findFirst();
+            if (roptional.isEmpty()) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+            var roleAssignment = roptional.get();
+            var clientIds = roleAssignment.getAttributeStream("clientId").toList();
+            if (!clientIds.contains(client.getClientId())) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+        }
         if (client == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Client '" + request.getClientId() + "' does not exist")
