@@ -52,7 +52,11 @@ public class HmacMappingResource implements RealmResourceProvider {
         if (client == null) {
             throw new NotFoundException("Client '" + clientId + "' does not exist");
         }
-        var user = new AppAuthManager.BearerTokenAuthenticator(session).authenticate().getSession().getUser();
+        var authenticate = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
+        if (authenticate == null) {
+            throw new ClientErrorException(Response.Status.UNAUTHORIZED);
+        }
+        var user = authenticate.getSession().getUser();
         var clientIds = user.getAttributeStream(ATTRIBUTE_NAME).toList();
         if (!clientIds.contains(client.getClientId())) {
             throw new ForbiddenException();
