@@ -5,6 +5,7 @@ import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
@@ -16,6 +17,8 @@ public class HmacMappingResource implements RealmResourceProvider {
     private final KeycloakSession session;
 
     private static final String ATTRIBUTE_NAME = "hmac-clientId";
+
+    private final Logger logger = Logger.getLogger(this.getClass());
 
     public HmacMappingResource(KeycloakSession session) {
         this.session = session;
@@ -47,18 +50,21 @@ public class HmacMappingResource implements RealmResourceProvider {
      * @return Client found with parameter clientId
      */
     private ClientModel checkAccess(String clientId) {
-        var realm = session.getContext().getRealm();
-        var client = realm.getClientByClientId(clientId);
-        if (client == null) {
-            throw new NotFoundException("Client '" + clientId + "' does not exist");
-        }
         var authenticate = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
         if (authenticate == null) {
+            logger.warn("Unauthorized request to resource");
             throw new ClientErrorException(Response.Status.UNAUTHORIZED);
         }
         var user = authenticate.getSession().getUser();
+        var realm = session.getContext().getRealm();
+        var client = realm.getClientByClientId(clientId);
+        if (client == null) {
+            logger.warnf("Request from user '%s' for unknown client '%s'", user.getUsername(), clientId);
+            throw new NotFoundException("Client '" + clientId + "' does not exist");
+        }
         var clientIds = user.getAttributeStream(ATTRIBUTE_NAME).toList();
         if (!clientIds.contains(client.getClientId())) {
+            logger.warnf("Request from user '%s' for forbidden client '%s'", user.getUsername(), clientId);
             throw new ForbiddenException();
         }
         return client;
@@ -73,6 +79,7 @@ public class HmacMappingResource implements RealmResourceProvider {
             String error = mappers.isEmpty() ?
                     "Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured"
                     : "Client has more than one protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured";
+            logger.warn(error);
             throw new BadRequestException(error);
         }
         return mappers.get(0);
