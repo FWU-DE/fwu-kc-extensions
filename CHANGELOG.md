@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.2.0]
+
+- New Feature: Account linking of two users from different identity providers
+
 ## Version [4.1.0]
 
 - Improvement Login-Event-Listener now adds schoolids of the user to the events

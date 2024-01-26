@@ -3511,7 +3511,8 @@
       "alias": "forward2",
       "config": {
         "defaultProvider": "keycloak-oidc2",
-        "idpHintParamName": "not_valid_hint"
+        "idpHintParamName": "not_valid_hint",
+        "login_hint_attribute": "account_linking_key"
       }
     },
     {

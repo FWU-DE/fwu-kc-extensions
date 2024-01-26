@@ -13,6 +13,7 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticatorFactory
 {
 
     public static final String PROVIDER_ID = "configurable-hint-idp-redirector";
+    public static final String CONF_LOGIN_HINT_ATTRIBUTE = "login_hint_attribute";
 
     @Override
     public String getId()
@@ -41,7 +42,10 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticatorFactory
                                ProviderConfigProperty.STRING_TYPE, null),
                        new ProviderConfigProperty(IdpHintParamName.IDP_HINT_PARAM_NAME, "IdP hint parameter name",
                                "Name of the URL query parameter which contains the allowed IdP.",
-                               ProviderConfigProperty.STRING_TYPE, AdapterConstants.KC_IDP_HINT));
+                               ProviderConfigProperty.STRING_TYPE, AdapterConstants.KC_IDP_HINT),
+                       new ProviderConfigProperty(CONF_LOGIN_HINT_ATTRIBUTE, "Login hint user attribute",
+                                                  "Name of the user attribute which contains the login_hint.",
+                                                  ProviderConfigProperty.STRING_TYPE, null));
     }
 
     @Override

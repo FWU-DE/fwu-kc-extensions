@@ -68,12 +68,10 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
                                                                    context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
                     .build();
             }
-            if (context.getUser() != null) {
-                String accountLinkingValue = context.getUser().getFirstAttribute("account_linking_key");
-                if (accountLinkingValue != null && !accountLinkingValue.isEmpty()) {
-                    location = UriBuilder.fromUri(location).queryParam("login_hint", accountLinkingValue)
-                        .build();
-                }
+            String loginHint = getLoginHintFromUserAttribute(context);
+            if(loginHint != null){
+                location = UriBuilder.fromUri(location).queryParam(OIDCLoginProtocol.LOGIN_HINT_PARAM, loginHint)
+                                     .build();
             }
             Response response = Response.seeOther(location)
                 .build();
@@ -90,5 +88,19 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
 
         LOG.warnf("Provider not found or not enabled for realm %s", providerId);
         context.attempted();
+    }
+
+    private String getLoginHintFromUserAttribute(AuthenticationFlowContext context){
+        String loginHint = null;
+        if (context.getUser() != null) {
+            String loginHintAttribute = context.getAuthenticatorConfig().getConfig().get(ConfigurableIdpHintParamIdentityProviderAuthenticatorFactory.CONF_LOGIN_HINT_ATTRIBUTE);
+            if(loginHintAttribute != null){
+                String accountLinkingValue = context.getUser().getFirstAttribute(loginHintAttribute);
+                if (accountLinkingValue != null) {
+                    loginHint = accountLinkingValue;
+                }
+            }
+        }
+        return loginHint;
     }
 }
