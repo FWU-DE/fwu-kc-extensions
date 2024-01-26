@@ -3239,7 +3239,107 @@
       "builtIn": false,
       "authenticationExecutions": [
         {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 2,
+          "autheticatorFlow": true,
+          "flowAlias": "the user is ready linked to the IdP",
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 5,
+          "autheticatorFlow": true,
+          "flowAlias": "ask for first login",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "ba9b3908-3bea-4110-a015-e203402231d5",
+      "alias": "the user is ready linked to the IdP",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorFlow": true,
+          "requirement": "CONDITIONAL",
+          "priority": 0,
+          "autheticatorFlow": true,
+          "flowAlias": "link exists?",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "a9599c55-bed2-4b01-a15a-201072de4467",
+      "alias": "ask for first login",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "accountLinkAttrKey",
           "authenticator": "user-attribute-authenticator",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "CONDITIONAL",
+          "priority": 3,
+          "autheticatorFlow": true,
+          "flowAlias": "Does the linked attribute exist on the user?",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "a2c74651-2b81-468e-812c-3f4fdb0cf978",
+      "alias": "Does the linked attribute exist on the user?",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "account_linking_key_exists",
+          "authenticator": "conditional-user-attribute-key",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "forward2",
+          "authenticator": "configurable-hint-idp-redirector",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 1,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "b38e8cf9-9823-49d3-ba34-524c149180eb",
+      "alias": "link exists?",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "keycloak-oidc2",
+          "authenticator": "conditional-idp-link",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 0,
@@ -3251,7 +3351,7 @@
           "authenticator": "configurable-hint-idp-redirector",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 2,
+          "priority": 1,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
@@ -3392,12 +3492,42 @@
       }
     },
     {
+      "id": "290ba5f2-2cc5-4d2c-88eb-d87737b90a6d",
+      "alias": "keycloak-oidc2",
+      "config": {
+        "idp_name": "keycloak-oidc2"
+      }
+    },
+    {
+      "id": "290ba5f2-2cc5-4d2c-88eb-d87737b93454",
+      "alias": "accountLinkAttrKey",
+      "config": {
+        "account_link_attribute": "account_linking_key",
+        "idp_name": "keycloak-oidc2"
+      }
+    },
+    {
+      "id": "f027a85b-208d-4994-9fc3-c603080f4970",
+      "alias": "forward2",
+      "config": {
+        "defaultProvider": "keycloak-oidc2",
+        "idpHintParamName": "not_valid_hint"
+      }
+    },
+    {
       "id": "534840ab-a211-4ea9-baae-f24cae571013",
       "alias": "account_linking_key",
       "config": {
         "caila-fail-on-no-match": "false",
         "caila-lookup-attribute": "account_linking_key",
         "caila-idp-attribute": "user.attributes.email"
+      }
+    },
+    {
+      "id": "dfc90b54-fabf-4bef-b0a7-ebbbe079b5cd",
+      "alias": "account_linking_key_exists",
+      "config": {
+        "attribute_name": "account_linking_key"
       }
     }
   ],

@@ -60,7 +60,7 @@
 							"script": {
 								"exec": [
 									"var response = pm.response.json();",
-									"const extensions = ['whitelist-authenticator', 'school-whitelist-authenticator'];",
+									"const extensions = ['whitelist-authenticator', 'school-whitelist-authenticator', 'conditional-user-attribute-key', 'conditional-idp-link', 'user-attribute-authenticator'];",
 									"",
 									"pm.test(\"Should have Status code 200\", function () {",
 									"  pm.response.to.have.status(200);",

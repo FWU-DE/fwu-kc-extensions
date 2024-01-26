@@ -73,6 +73,11 @@ For more details please check [here](./user-info-requester/README.md).
 OIDC Protocol mapper to add vidis user metadata to client tokens.
 For more details please check [here](./user-info-provider/README.md).
 
+### Account Linking
+
+Authenticators required to enable the linking of accounts with only one authentication process
+For more details please check [here](./account-linking/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
