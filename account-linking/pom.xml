@@ -7,8 +7,7 @@
     <version>${revision}</version>
   </parent>
 
-  <artifactId>user-attribute-authenticator</artifactId>
-  <name>user-attribute-authenticator</name>
+  <artifactId>account-linking</artifactId>
 
   <dependencies>
     <dependency>
@@ -29,6 +28,11 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

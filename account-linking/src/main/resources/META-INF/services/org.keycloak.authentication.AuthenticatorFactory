@@ -1,0 +1,3 @@
+de.intension.authenticator.UserAttributeAuthenticatorFactory
+de.intension.authenticator.IdPLinkConditionalAuthenticatorFactory
+de.intension.authenticator.ConditionalUserAttributeFactory
