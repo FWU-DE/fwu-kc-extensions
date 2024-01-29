@@ -1,6 +1,7 @@
 # HMAC pairwise mappers with static sectorIdentifier
 
-There are two mappers available for pseudonymizing OIDC token claims with HMAC.
+1. There are two mappers available for pseudonymizing OIDC token claims with HMAC.
+2. Also endpoints have been added for pseudonymization related requests
 
 # HMAC Pairwise subject with static sectorIdentifier
 
@@ -137,3 +138,36 @@ To verify if the pseudonyms are added you can use the postman collection like fo
 
 <img src="../docs/pseudo/pseudonymList-jwt-visual.png" width="70%" />
 
+# HMAC endpoints
+
+This extension also exposes an endpoint at `/realms/{realm}/hmac` to check HMAC pseudonymization.
+
+## Find original value from pseudonymized value
+
+    POST /realms/{realm}/hmac
+
+### Request body
+
+1. `clientId`: References the client which has the mapper 'HMAC Pairwise subject with static sectorIdentifier' configured.
+   * :warning: The mapper must be configured exactly once.
+2. `originalValues`: List of non-pseudonymized values for checking.
+   * Depending on the client's mapper configuration, this can be user IDs or usernames, etc.
+3. `testValue`: Pseudonymized value that may match one of the IDs in *originalValues*.
+
+Example:
+
+```json
+{
+    "clientId": "bayerncloud",
+    "originalValues": [
+        "181d5275-6333-4b32-a810-e0777d034fd0",
+        "f069913b-1bcf-4a1a-a1d3-d12d1cdf2e59",
+        "13203c86-fd09-4ce7-8583-87adea0a2c6c"
+    ],
+    "testValue": "eccc5675-0f2c-4ae6-923e-94059fc8c71f"
+}
+```
+
+### Authorization
+
+The request has to be protected with Bearer authorization and the user needs to have the attribute `hmac-clientId` containing the ID of the client(s) he can access.

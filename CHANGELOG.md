@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.2.0]
+
+- Feature: Endpoint to check HMAC encrypted value in list of unencrypted values
+
 ## Version [4.1.0]
 
-- Improvement Login-Event-Listener now adds schoolids of the user to the events
+- Improvement: Login-Event-Listener now adds schoolids of the user to the events
 
 ## Version [4.0.0]
 
