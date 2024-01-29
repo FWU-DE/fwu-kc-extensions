@@ -15,7 +15,7 @@ jobs:
         with:
           java-version: 17
       - name: Deploy to GitHub packages
-        run: mvn --batch-mode deploy -DprojectVersion=$GITHUB_REF_NAME -DskipTests
+        run: mvn --batch-mode deploy -Drevision=$GITHUB_REF_NAME -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get maven group
@@ -59,7 +59,6 @@ jobs:
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
           ARTIFACTS: "${{ steps.get-artifacts.outputs.artifacts }}"
           GROUP_NAME: ${{ steps.get-group.outputs.info }}
-          VERSION: $GITHUB_REF_NAME
         run: |
           group=${GROUP_NAME/.//}
           echo "group: ${group}"
@@ -67,9 +66,11 @@ jobs:
           for archive in ${archives[@]}
           do
               filename=${archive##*/}
-              artifact=${filename%-*}
-              curl --request PUT \
+              artifact=${filename%-[0-9]*}
+              url="https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${GITHUB_REF_NAME}/${filename}"
+              echo "Uploading ${archive} to ${url}" 
+              curl --fail --request PUT \
                   --upload-file ${archive} \
                   --header "Deploy-Token: ${GITLAB_TOKEN}" \
-                  "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
+                  ${url}
           done

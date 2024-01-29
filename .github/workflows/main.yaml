@@ -120,11 +120,17 @@ jobs:
     if: ${{ needs.publish.outputs.publishedVersion }} != ""
     runs-on: ubuntu-latest
     steps:
+      - name: Get keycloak version
+        id: get-keycloak-version
+        uses: mavrosxristoforos/get-xml-info@1.0
+        with:
+          xml-file: 'pom.xml'
+          xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='keycloak.version']"
       - name: Trigger image build and deployment on Gitlab
         env:
           GITLAB_TRIGGER_TOKEN: ${{ secrets.GITLAB_TRIGGER_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          VERSION: ${{ steps.check-release.outputs.version }}
+          VERSION: ${{ needs.publish.outputs.publishedVersion }}
           KEYCLOAK_VERSION: ${{ steps.get-keycloak-version.outputs.info }}
         run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F "variables[keycloak_version]=${KEYCLOAK_VERSION}" -F "variables[extensions_version]=${VERSION}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
 
