@@ -4,14 +4,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.http.HttpRequest;
-import org.keycloak.models.AuthenticatorConfigModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -24,18 +23,19 @@ class UserAttributeAuthenticatorTest
     private static final String IDP_LINK_ATTRIBUTE = "idp_link_attribute";
 
     /**
-     * GIVEN Keycloak user with a configured idp link attribute
+     * GIVEN Keycloak user with a configured idp link attribute, but without a linked idp
      * WHEN authenticator config is set
-     * THEN input form should be skipped (auth context is success)
+     * THEN input form should be shown with prefilled username
      */
     @Test
-    void should_have_context_success_when_idp_link_attribute_already_set()
+    void should_show_form_with_prefilled_username_when_idp_link_attribute_already_set()
     {
         UserModel user = mock(UserModel.class);
         UserAttributeAuthenticator authenticator = new UserAttributeAuthenticator();
         AuthenticationFlowContext context = mockContext(user, true, true);
         authenticator.authenticate(context);
-        verify(context, times(1)).success();
+        verify(context, times(1)).challenge(any());
+        verify(context.form(), times(1)).setAttribute(UserAttributeAuthenticator.FROM_FIELD_USERNAME_DEFAULT, USERNAME);
     }
 
     /**
@@ -118,19 +118,19 @@ class UserAttributeAuthenticatorTest
     }
 
     /**
-     * GIVEN Keycloak user without a configured idp link attribute which is empty
-     * WHEN authenticator config is set
-     * THEN failure should be shown to the user (auth context failure)
+     * GIVEN Keycloak user without a configured idp link attribute
+     * WHEN authenticator config is set and user did not enter a value for username
+     * THEN form should be shown to the user with missing input error (mandatory field)
      */
     @Test
-    void should_have_context_failure_when_user_entered_empty_linked_user()
+    void should_form_with_error_when_user_entered_empty_linked_user()
     {
         UserModel user = mock(UserModel.class);
         UserAttributeAuthenticator authenticator = new UserAttributeAuthenticator();
         AuthenticationFlowContext context = mockContext(user, true, false, false, true);
         authenticator.action(context);
         verify(user, times(0)).setSingleAttribute(IDP_LINK_ATTRIBUTE, USERNAME);
-        verify(context, times(1)).failureChallenge(any(), any());
+        verify(context, times(1)).challenge(any());
     }
 
     private AuthenticationFlowContext mockContext(UserModel user, boolean hasConfig, boolean userHasAttribute)
@@ -145,6 +145,12 @@ class UserAttributeAuthenticatorTest
         when(context.getSession()).thenReturn(session);
         LoginFormsProvider provider = mock(LoginFormsProvider.class);
         when(context.form()).thenReturn(provider);
+        RealmModel realm = mock(RealmModel.class);
+        when(context.getRealm()).thenReturn(realm);
+        IdentityProviderModel idpModel = new IdentityProviderModel();
+        idpModel.setAlias("oidc-test");
+        idpModel.setDisplayName("OIDC Test IdP");
+        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idpModel));
         when(session.getProvider(any())).thenReturn(provider);
         when(provider.setAuthenticationSession(any())).thenReturn(provider);
         when(provider.setError(any())).thenReturn(provider);
@@ -169,6 +175,7 @@ class UserAttributeAuthenticatorTest
         HashMap<String, String> config = new HashMap<>();
         if (hasConfig) {
             config.put(UserAttributeAuthenticatorFactory.CONF_ACCOUNT_LINK_ATTRIBUTE, IDP_LINK_ATTRIBUTE);
+            config.put(UserAttributeAuthenticatorFactory.CONF_IDP_NAME, "oidc-test");
         }
         when(authConfig.getConfig()).thenReturn(config);
         //mock user

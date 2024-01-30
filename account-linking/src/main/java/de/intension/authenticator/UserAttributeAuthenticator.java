@@ -29,6 +29,7 @@ public class UserAttributeAuthenticator
 
     private static final Logger logger = Logger.getLogger(UserAttributeAuthenticator.class);
     private static final String FORM_FIELD_USERNAME = "username";
+    public static final String FROM_FIELD_USERNAME_DEFAULT = "username_attr";
 
     @Override
     public void authenticate(AuthenticationFlowContext context)
@@ -125,7 +126,7 @@ public class UserAttributeAuthenticator
         forms.setAttribute("idpAlias", getIdpName(context, idpAlias));
         String accountLinkValue = getAccountLinkAttrValueFromUser(context, accountLinkAttrKey);
         if(accountLinkValue != null){
-            forms.setAttribute("username_attr", accountLinkValue);
+            forms.setAttribute(FROM_FIELD_USERNAME_DEFAULT, accountLinkValue);
         }
         if (errors != null && !errors.isEmpty()) {
             forms.setErrors(errors);
