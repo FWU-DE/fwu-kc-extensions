@@ -23,7 +23,7 @@
     <module>acronym-mapper</module>
     <module>school-mapper</module>
     <module>login-event-publisher</module>
-    <module>account-linking</module>
+    <module>account-linking-authenticator</module>
   </modules>
 
     <properties>

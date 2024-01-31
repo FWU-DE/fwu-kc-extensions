@@ -1,4 +1,4 @@
-# Account Linking
+# Account Linking Authenticators
 
 Contains a list of authenticators that are required to link two accounts from different identity providers.
 

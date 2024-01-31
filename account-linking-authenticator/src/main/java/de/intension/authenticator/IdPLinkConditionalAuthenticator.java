@@ -20,6 +20,10 @@ public class IdPLinkConditionalAuthenticator
 
     static final IdPLinkConditionalAuthenticator SINGLETON = new IdPLinkConditionalAuthenticator();
 
+    private IdPLinkConditionalAuthenticator()
+    {
+    }
+
     @Override
     public boolean matchCondition(AuthenticationFlowContext context)
     {

@@ -78,18 +78,6 @@ public class UserAttributeAuthenticator
         }
     }
 
-    private String getAccountLinkAttrValueFromUser(AuthenticationFlowContext context, String attributeKey)
-    {
-        String accountLinkingValue = null;
-        if (context.getUser() != null) {
-            String alValue = context.getUser().getFirstAttribute(attributeKey);
-            if (alValue != null && !alValue.isEmpty()) {
-                accountLinkingValue = alValue;
-            }
-        }
-        return accountLinkingValue;
-    }
-
     private String getConfigValue(AuthenticationFlowContext context, String key)
     {
         Map<String, String> config = context.getAuthenticatorConfig().getConfig();
@@ -132,6 +120,18 @@ public class UserAttributeAuthenticator
             forms.setErrors(errors);
         }
         return forms.createForm("custom-account-link.ftl");
+    }
+
+    private String getAccountLinkAttrValueFromUser(AuthenticationFlowContext context, String attributeKey)
+    {
+        String accountLinkingValue = null;
+        if (context.getUser() != null) {
+            String alValue = context.getUser().getFirstAttribute(attributeKey);
+            if (alValue != null && !alValue.isEmpty()) {
+                accountLinkingValue = alValue;
+            }
+        }
+        return accountLinkingValue;
     }
 
     @Override

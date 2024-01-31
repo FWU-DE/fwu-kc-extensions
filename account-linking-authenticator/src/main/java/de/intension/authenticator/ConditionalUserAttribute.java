@@ -17,6 +17,10 @@ public class ConditionalUserAttribute
 
     static final ConditionalUserAttribute SINGLETON = new ConditionalUserAttribute();
 
+    private ConditionalUserAttribute()
+    {
+    }
+
     @Override
     public boolean matchCondition(AuthenticationFlowContext context)
     {
