@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+
+## Version [4.3.0]
+
+- New Feature: Account linking of two users from different identity providers
+
 ## Version [4.2.0]
 
 - Feature: Endpoint to check HMAC encrypted value in list of unencrypted values

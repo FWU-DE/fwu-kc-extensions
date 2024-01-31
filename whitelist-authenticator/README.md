@@ -101,7 +101,7 @@ The following steps are valid for "Browser" and "First Broker Login" authenticat
 7. Enter the query parameter name that should be used for IdP redirection
 8. Hit 'Save'
 
-<img src="../docs/whitelist/08_3_configure_redirector.png" width="70%"/>
+<img src="../docs/whitelist/08_3_configure_redirector.png" width="30%"/>
 
 **Step 4: Set authentication flow as default**
 
