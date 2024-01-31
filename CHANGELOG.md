@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented here.
 
+
 ## Version [4.3.0]
 
 - New Feature: Account linking of two users from different identity providers
