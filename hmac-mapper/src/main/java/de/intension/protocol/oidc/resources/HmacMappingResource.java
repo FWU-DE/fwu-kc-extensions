@@ -6,11 +6,13 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.Cors;
 
 public class HmacMappingResource implements RealmResourceProvider {
 
@@ -22,6 +24,13 @@ public class HmacMappingResource implements RealmResourceProvider {
 
     public HmacMappingResource(KeycloakSession session) {
         this.session = session;
+    }
+
+    @OPTIONS
+    @Path("{any:.*}")
+    public Response preflight() {
+        HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
+        return Cors.add(request, Response.ok()).auth().preflight().build();
     }
 
     @POST
