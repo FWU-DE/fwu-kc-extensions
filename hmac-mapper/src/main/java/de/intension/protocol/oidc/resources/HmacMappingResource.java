@@ -1,43 +1,63 @@
 package de.intension.protocol.oidc.resources;
 
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-import org.keycloak.http.HttpRequest;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.models.RealmModel;
 import org.keycloak.services.managers.AppAuthManager;
-import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.Cors;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
-public class HmacMappingResource implements RealmResourceProvider {
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+public class HmacMappingResource
+    implements AdminRealmResourceProvider
+{
 
     private final KeycloakSession session;
 
-    private static final String ATTRIBUTE_NAME = "hmac-clientId";
+    private String                verifierRealm;
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private static final String   ATTRIBUTE_NAME = "hmac-clientId";
 
-    public HmacMappingResource(KeycloakSession session) {
+    private final Logger          logger         = Logger.getLogger(this.getClass());
+
+    public HmacMappingResource(KeycloakSession session, String verifierRealm)
+    {
         this.session = session;
+        this.verifierRealm = verifierRealm;
     }
 
-    @OPTIONS
-    @Path("{any:.*}")
-    public Response preflight() {
-        HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
-        return Cors.add(request, Response.ok()).auth().preflight().build();
+    @Override
+    public void close()
+    {
+    }
+
+    @Override
+    public Object getResource(KeycloakSession session, RealmModel realm, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent)
+    {
+        return this;
     }
 
     @POST
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getUserId(final HmacMappingRequest request) {
+    public Response getUserId(final HmacMappingRequest request)
+    {
         var client = checkAccess(request.getClientId());
 
         var hmacMapper = getHmacMapper(client);
@@ -58,14 +78,15 @@ public class HmacMappingResource implements RealmResourceProvider {
      *
      * @return Client found with parameter clientId
      */
-    private ClientModel checkAccess(String clientId) {
+    private ClientModel checkAccess(String clientId)
+    {
         var authenticate = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
         if (authenticate == null) {
             logger.warn("Unauthorized request to resource");
             throw new ClientErrorException(Response.Status.UNAUTHORIZED);
         }
         var user = authenticate.getSession().getUser();
-        var realm = session.getContext().getRealm();
+        var realm = session.realms().getRealmByName(this.verifierRealm);
         var client = realm.getClientByClientId(clientId);
         if (client == null) {
             logger.warnf("Request from user '%s' for unknown client '%s'", user.getUsername(), clientId);
@@ -82,11 +103,11 @@ public class HmacMappingResource implements RealmResourceProvider {
     /**
      * Get the mapper with id "oidc-hmac-pairwise-subject-mapper" from the client's configuration.
      */
-    private ProtocolMapperModel getHmacMapper(ClientModel client) {
+    private ProtocolMapperModel getHmacMapper(ClientModel client)
+    {
         var mappers = client.getProtocolMappersStream().filter(m -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(m.getProtocolMapper())).toList();
         if (mappers.size() != 1) {
-            String error = mappers.isEmpty() ?
-                    "Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured"
+            String error = mappers.isEmpty() ? "Client does not have protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured"
                     : "Client has more than one protocol mapper '" + HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID + "' configured";
             logger.warn(error);
             throw new BadRequestException(error);
@@ -94,12 +115,4 @@ public class HmacMappingResource implements RealmResourceProvider {
         return mappers.get(0);
     }
 
-    @Override
-    public Object getResource() {
-        return new HmacMappingResource(session);
-    }
-
-    @Override
-    public void close() {
-    }
 }
