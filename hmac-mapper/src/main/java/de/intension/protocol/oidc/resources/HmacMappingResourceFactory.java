@@ -1,34 +1,53 @@
 package de.intension.protocol.oidc.resources;
 
-import org.keycloak.Config;
+import org.keycloak.Config.Scope;
+import org.keycloak.common.Profile;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
-import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resource.RealmResourceProviderFactory;
+import org.keycloak.provider.EnvironmentDependentProviderFactory;
+import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
+import org.keycloak.services.resources.admin.ext.AdminRealmResourceProviderFactory;
 
-public class HmacMappingResourceFactory implements RealmResourceProviderFactory {
+public class HmacMappingResourceFactory
+    implements AdminRealmResourceProviderFactory, EnvironmentDependentProviderFactory
+{
 
-    public static final String ID = "hmac";
+    public static final String PROVIDER_ID    = "hmac";
+    public static final String VERIFIER_REALM = "verifier-realm";
+    private String             verifierRealm;
 
     @Override
-    public RealmResourceProvider create(KeycloakSession session) {
-        return new HmacMappingResource(session);
+    public AdminRealmResourceProvider create(KeycloakSession session)
+    {
+        return new HmacMappingResource(session, this.verifierRealm);
     }
 
     @Override
-    public void init(Config.Scope config) {
+    public void init(Scope config)
+    {
+        this.verifierRealm = config.get(VERIFIER_REALM);
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory factory) {
+    public void postInit(KeycloakSessionFactory factory)
+    {
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
     }
 
     @Override
-    public String getId() {
-        return ID;
+    public String getId()
+    {
+        return PROVIDER_ID;
     }
+
+    @Override
+    public boolean isSupported()
+    {
+        return Profile.isFeatureEnabled(Profile.Feature.ADMIN_API);
+    }
+
 }

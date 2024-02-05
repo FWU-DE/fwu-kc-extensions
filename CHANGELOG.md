@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.4.0]
+
+- Improvement: HMAC mapping resource
+  - Cross realm allowed
+  - Changed resource to custom admin rest api
 
 ## Version [4.3.0]
 
