@@ -12,20 +12,23 @@ public class HmacMappingResourceFactory
     implements AdminRealmResourceProviderFactory, EnvironmentDependentProviderFactory
 {
 
-    public static final String PROVIDER_ID    = "hmac";
-    public static final String VERIFIER_REALM = "verifier-realm";
+    public static final String PROVIDER_ID      = "hmac";
+    public static final String VERIFIER_REALM   = "verifier-realm";
+    public static final String MANAGEMENT_REALM = "management-realm";
     private String             verifierRealm;
+    private String             managementRealm;
 
     @Override
     public AdminRealmResourceProvider create(KeycloakSession session)
     {
-        return new HmacMappingResource(session, this.verifierRealm);
+        return new HmacMappingResource(session, this.verifierRealm, this.managementRealm);
     }
 
     @Override
     public void init(Scope config)
     {
         this.verifierRealm = config.get(VERIFIER_REALM);
+        this.managementRealm = config.get(MANAGEMENT_REALM);
     }
 
     @Override

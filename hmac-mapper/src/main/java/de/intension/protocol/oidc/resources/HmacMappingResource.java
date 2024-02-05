@@ -30,15 +30,17 @@ public class HmacMappingResource
     private final KeycloakSession session;
 
     private String                verifierRealm;
+    private String                managementRealm;
 
     private static final String   ATTRIBUTE_NAME = "hmac-clientId";
 
     private final Logger          logger         = Logger.getLogger(this.getClass());
 
-    public HmacMappingResource(KeycloakSession session, String verifierRealm)
+    public HmacMappingResource(KeycloakSession session, String verifierRealm, String managementRealm)
     {
         this.session = session;
         this.verifierRealm = verifierRealm;
+        this.managementRealm = managementRealm;
     }
 
     @Override
@@ -80,7 +82,8 @@ public class HmacMappingResource
      */
     private ClientModel checkAccess(String clientId)
     {
-        var authenticate = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
+        RealmModel managementRealm = this.session.realms().getRealmByName(this.managementRealm);
+        var authenticate = new AppAuthManager.BearerTokenAuthenticator(session).setRealm(managementRealm).authenticate();
         if (authenticate == null) {
             logger.warn("Unauthorized request to resource");
             throw new ClientErrorException(Response.Status.UNAUTHORIZED);
