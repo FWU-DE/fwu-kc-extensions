@@ -5,9 +5,8 @@ All notable changes to this project will be documented here.
 ## Version [4.4.0]
 
 - Improvement: HMAC mapping resource
-  - add preflight response for OPTIONS
-  - add authorization with Bearer token
-  - add possibility for cross-realm analyzing
+  - Cross realm allowed
+  - Changed resource to custom admin rest api
 
 ## Version [4.3.0]
 
