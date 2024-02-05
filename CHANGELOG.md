@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.5.0]
+
+- Improvement: HMAC mapping admin resource
+	- Authenticate on different realm
+
 ## Version [4.4.0]
 
 - Improvement: HMAC mapping resource
