@@ -67,6 +67,7 @@ public class HmacMappingResource
         String testValue = request.getTestValue();
         for (String value : request.getOriginalValues()) {
             var encryptedId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, value);
+            logger.infof("Encrypted value for original value '%s' is '%s'", testValue, encryptedId);
             if (encryptedId.equals(testValue)) {
                 return Response.ok(value).build();
             }
