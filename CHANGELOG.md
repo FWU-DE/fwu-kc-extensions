@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.6.0]
+
+- Improvement: HMAC mapping admin resource
+	- Added additional logging
+
 ## Version [4.5.0]
 
 - Improvement: HMAC mapping admin resource
