@@ -24,7 +24,7 @@ This OIDC mapper can be used to pseudonymize one of the attributes of user like 
 
 ### Remove user on logout
 
-It holds the customization to remove the user on logout or session expiration. For more details please check [here](./remove-user-on-logout/README.md).
+It holds the customization to remove the user on logout or inactive users. For more details please check [here](./remove-user-on-logout/README.md).
 
 ### Whitelist Authenticator
 

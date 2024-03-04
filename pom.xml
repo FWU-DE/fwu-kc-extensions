@@ -27,7 +27,7 @@
   </modules>
 
     <properties>
-      <revision>4.6.0</revision>
+      <revision>4.7.0</revision>
       <keycloak.version>22.0.5</keycloak.version>
       <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -117,6 +117,24 @@
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-saml-core-public</artifactId>
         <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-model-legacy</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-model-jpa</artifactId>
+        <version>${keycloak.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.persistence</groupId>
+        <artifactId>jakarta.persistence-api</artifactId>
+        <version>3.1.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
