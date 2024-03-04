@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
@@ -55,8 +56,11 @@ public class VidisAdminRealmResourceProvider
         UserPermissionEvaluator userPermissionEvaluator = auth.users();
         userPermissionEvaluator.requireQuery();
 
+        StopWatch watch = new StopWatch();
+        watch.start();
         int amountOfDeletedUsers = deleteIdPUserWithoutSession(Math.min(max, 1000));
-        LOG.infof("%s users were cleaned up", amountOfDeletedUsers);
+        watch.stop();
+        LOG.infof("%s users were cleaned up in %s ms", amountOfDeletedUsers, watch.getTime());
         return Response.ok().type(MediaType.APPLICATION_JSON).build();
     }
 
