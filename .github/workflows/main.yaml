@@ -26,7 +26,7 @@ jobs:
     needs: package
     outputs:
       publishedVersion: ${{ steps.check-release.outputs.version }}
-      keycloak_version: ${{ steps.get-keycloak-version.outputs.version }}
+      keycloak_version: ${{ steps.get-keycloak-version.outputs.info }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -116,6 +116,7 @@ jobs:
                   --header "Deploy-Token: ${GITLAB_TOKEN}" \
                   "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
           done
+
   startImageBuild:
     needs: publish
     if: ${{ needs.publish.outputs.publishedVersion }} != ""
