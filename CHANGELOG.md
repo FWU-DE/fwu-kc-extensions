@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.7.0]
+
+- Feature: Custom REST-Endpoint for deleting inactive users
+- Improvement: No internal user removal tasks created for user registration or login
+
 ## Version [4.6.0]
 
 - Improvement: HMAC mapping admin resource
