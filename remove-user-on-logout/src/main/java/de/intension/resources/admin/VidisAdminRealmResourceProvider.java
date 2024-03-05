@@ -1,11 +1,11 @@
 package de.intension.resources.admin;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
+import org.keycloak.common.util.Time;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -19,6 +19,8 @@ import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 public class VidisAdminRealmResourceProvider
@@ -76,8 +78,11 @@ public class VidisAdminRealmResourceProvider
             if (!idpUsers.isEmpty()) {
                 for (UserEntity ue : idpUsers) {
                     lastCreationDate = ue.getCreatedTimestamp();
+                    if (lastCreationDate > Time.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)) {
+                        continue;
+                    }
                     UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
-                    if (usp.getUserSessionsStream(realmModel, ua).filter(userSession -> !userSession.isOffline()).noneMatch(userSession -> true)) {
+                    if (usp.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
                         session.users().removeUser(realmModel, ua);
                         numberOfDeletedUsers++;
                     }
