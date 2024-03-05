@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.7.1]
+
+- update: reduce wait time before user deletion
+- bugfix: count deleted users only
+
 ## Version [4.7.0]
 
 - Feature: Custom REST-Endpoint for deleting inactive users

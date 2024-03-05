@@ -78,13 +78,14 @@ public class VidisAdminRealmResourceProvider
             if (!idpUsers.isEmpty()) {
                 for (UserEntity ue : idpUsers) {
                     lastCreationDate = ue.getCreatedTimestamp();
-                    if (lastCreationDate > Time.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)) {
+                    if (lastCreationDate > Time.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5)) {
                         continue;
                     }
                     UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
                     if (usp.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
-                        session.users().removeUser(realmModel, ua);
-                        numberOfDeletedUsers++;
+                        if(session.users().removeUser(realmModel, ua)){
+                            numberOfDeletedUsers++;
+                        }
                     }
                 }
             }
