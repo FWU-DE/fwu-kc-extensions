@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.8.0]
+
+- Improvement: update error messages for both whitelist authenticators
+
 ## Version [4.7.1]
 
 - update: reduce wait time before user deletion
