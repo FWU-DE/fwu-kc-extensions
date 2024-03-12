@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## Version [4.7.2]
+## Version [4.8.0]
 
 - Improvement: update error messages for both whitelist authenticators
 
