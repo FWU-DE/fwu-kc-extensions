@@ -102,4 +102,10 @@ public class UserInfo
         return personenKontexte;
     }
 
+    public void removePersonNameTag()
+    {
+        Person person = this.getPerson();
+        person.setPersonName(null);
+    }
+
 }

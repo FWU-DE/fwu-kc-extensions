@@ -1,14 +1,59 @@
 package de.intension.mapper.user;
 
-import static de.intension.api.UserInfoAttribute.*;
+import static de.intension.api.UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND;
+import static de.intension.api.UserInfoAttribute.HEIMATORGANISATION_NAME;
+import static de.intension.api.UserInfoAttribute.PERSON_AKRONYM;
+import static de.intension.api.UserInfoAttribute.PERSON_ALTER;
+import static de.intension.api.UserInfoAttribute.PERSON_FAMILIENNAME;
+import static de.intension.api.UserInfoAttribute.PERSON_FAMILIENNAME_INITIALEN;
+import static de.intension.api.UserInfoAttribute.PERSON_GEBURTSDATUM;
+import static de.intension.api.UserInfoAttribute.PERSON_GEBURTSORT;
+import static de.intension.api.UserInfoAttribute.PERSON_GESCHLECHT;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_GRUPPEN;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_LOESCHUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_KENNUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_NAME;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_TYP;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ORG_VIDIS_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_ROLLE;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ARRAY_STATUS;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_GRUPPEN;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_LOESCHUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_KENNUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_NAME;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_TYP;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_VIDIS_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ROLLE;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_STATUS;
+import static de.intension.api.UserInfoAttribute.PERSON_LOKALISIERUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_VERTRAUENSSTUFE;
+import static de.intension.api.UserInfoAttribute.PERSON_VOLLJAEHRIG;
+import static de.intension.api.UserInfoAttribute.PERSON_VORNAME;
+import static de.intension.api.UserInfoAttribute.PERSON_VORNAME_INITIALEN;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
-import org.keycloak.models.*;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.representations.IDToken;
 import org.keycloak.utils.StringUtil;
@@ -19,8 +64,20 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.hash.Hashing;
 
 import de.intension.api.UserInfoAttribute;
-import de.intension.api.enumerations.*;
-import de.intension.api.json.*;
+import de.intension.api.enumerations.Geschlecht;
+import de.intension.api.enumerations.OrganisationsTyp;
+import de.intension.api.enumerations.PersonenStatus;
+import de.intension.api.enumerations.Rolle;
+import de.intension.api.enumerations.Vertrauensstufe;
+import de.intension.api.json.Geburt;
+import de.intension.api.json.GruppeWithZugehoerigkeit;
+import de.intension.api.json.HeimatOrganisation;
+import de.intension.api.json.Loeschung;
+import de.intension.api.json.Organisation;
+import de.intension.api.json.Person;
+import de.intension.api.json.PersonName;
+import de.intension.api.json.Personenkontext;
+import de.intension.api.json.UserInfo;
 
 public class UserInfoHelper
 {
@@ -32,6 +89,9 @@ public class UserInfoHelper
     private static final IdpHelper                 idpHelper             = new IdpHelper();
     private static final ObjectMapper              objectMapper          = new ObjectMapper();
     private static final String                    INDEXED_ATTR_FORMAT   = "%s[%d]";
+    private static final String                    COMMA_DELIMITER       = ",";
+    public static final String                     ROLES_ATTRIBUTE_NAME  = "professionalRoles";
+    public static final String                     NEGATE_OUTPUT_NAME    = "negateOutput";
 
     static {
         objectMapper.registerModule(new JavaTimeModule());
@@ -564,4 +624,45 @@ public class UserInfoHelper
         return Boolean.parseBoolean(value);
     }
 
+    public boolean checkUserAttributeRoles(String rolesToCheck, List<String> multiValuedAttributes, UserModel user, boolean negateOutput)
+    {
+        boolean roleFound = true;
+        List<String> roles = splitAndTrimUsingStreams(rolesToCheck);
+        if (multiValuedAttributes != null && !multiValuedAttributes.isEmpty()) {
+            for (String multiValuedAttribute : multiValuedAttributes) {
+                Collection<String> values;
+                values = KeycloakModelUtils.resolveAttribute(user, multiValuedAttribute, false);
+                if (!roles.isEmpty()) {
+                    if (values.containsAll(roles)) {
+                        return roleFound != negateOutput;
+                    }
+                }
+            }
+        }
+
+        Rolle rolle = getRolle(user, -1);
+        if (rolle != null) {
+            if (roles.contains(rolle.name())) {
+                return roleFound != negateOutput;
+            }
+        }
+
+        Set<Integer> indizes = getPersonenKontexteIndizes(user);
+        for (Integer i : indizes) {
+            rolle = getRolle(user, i);
+            if (rolle != null) {
+                if (roles.contains(rolle.name())) {
+                    return roleFound != negateOutput;
+                }
+            }
+        }
+        return negateOutput;
+    }
+
+    private static List<String> splitAndTrimUsingStreams(String inputString)
+    {
+        return Arrays.stream(inputString.split(COMMA_DELIMITER))
+            .map(String::trim)
+            .collect(Collectors.toList());
+    }
 }

@@ -1,6 +1,28 @@
 package de.intension.mapper.oidc;
 
-import static de.intension.api.UserInfoAttribute.*;
+import static de.intension.api.UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND;
+import static de.intension.api.UserInfoAttribute.HEIMATORGANISATION_NAME;
+import static de.intension.api.UserInfoAttribute.PERSON_AKRONYM;
+import static de.intension.api.UserInfoAttribute.PERSON_ALTER;
+import static de.intension.api.UserInfoAttribute.PERSON_FAMILIENNAME;
+import static de.intension.api.UserInfoAttribute.PERSON_FAMILIENNAME_INITIALEN;
+import static de.intension.api.UserInfoAttribute.PERSON_GEBURTSDATUM;
+import static de.intension.api.UserInfoAttribute.PERSON_GEBURTSORT;
+import static de.intension.api.UserInfoAttribute.PERSON_GESCHLECHT;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_GRUPPEN;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_LOESCHUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_KENNUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_NAME;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_TYP;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ORG_VIDIS_ID;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_ROLLE;
+import static de.intension.api.UserInfoAttribute.PERSON_KONTEXT_STATUS;
+import static de.intension.api.UserInfoAttribute.PERSON_LOKALISIERUNG;
+import static de.intension.api.UserInfoAttribute.PERSON_REFERRER;
+import static de.intension.api.UserInfoAttribute.PERSON_VERTRAUENSSTUFE;
+import static de.intension.api.UserInfoAttribute.PERSON_VOLLJAEHRIG;
+import static de.intension.api.UserInfoAttribute.PERSON_VORNAME;
+import static de.intension.api.UserInfoAttribute.PERSON_VORNAME_INITIALEN;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +34,11 @@ import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.UserSessionModel;
-import org.keycloak.protocol.oidc.mappers.*;
+import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
+import org.keycloak.protocol.oidc.mappers.OIDCAccessTokenMapper;
+import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
+import org.keycloak.protocol.oidc.mappers.OIDCIDTokenMapper;
+import org.keycloak.protocol.oidc.mappers.UserInfoTokenMapper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
 
@@ -32,6 +58,9 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
     protected static final Logger                     logger                   = Logger.getLogger(UserInfoProviderMapper.class);
     private static final String                       CATEGORY                 = "Vidis Info Mapper";
     private static final String                       ONLY_CHILDREN_ATTR_NAME  = "childrenOnly";
+    private static final String                       PROFESSIONAL_ROLES       = "professionalRoles";
+    public static final String                        NEGATE_OUTPUT_NAME       = "negateOutput";
+    public static final String                        NEGATE_OUTPUT_LABEL_NAME = "Negate output";
 
     private static final List<ProviderConfigProperty> configProperties         = new ArrayList<>();
 
@@ -62,6 +91,7 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         addConfigEntry(PERSON_KONTEXT_GRUPPEN);
         addConfigEntry(PERSON_KONTEXT_LOESCHUNG);
         addOnlyChildrenClaims();
+        addAttributesBasedOnRole();
         OIDCAttributeMapperHelper.addAttributeConfig(configProperties, UserInfoProviderMapper.class);
         setDefaultTokenClaimNameValue();
         setDefaultTokenClaimType();
@@ -123,6 +153,26 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         configProperties.add(property);
     }
 
+    private static void addAttributesBasedOnRole()
+    {
+        ProviderConfigProperty property = new ProviderConfigProperty();
+        property.setName(PROFESSIONAL_ROLES);
+        property.setLabel("Professional roles");
+        property.setDefaultValue("LEHR");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setHelpText("Roles based on which attributes should be mapped");
+        configProperties.add(property);
+
+        ProviderConfigProperty negateOutput = new ProviderConfigProperty();
+        negateOutput.setName(NEGATE_OUTPUT_NAME);
+        negateOutput.setLabel(NEGATE_OUTPUT_LABEL_NAME);
+        negateOutput.setDefaultValue(false);
+        negateOutput.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        negateOutput
+            .setHelpText("Apply a NOT to the check result of roles. When this is true, then the condition will evaluate to true just if user does NOT have the specified role present in the user attributes. When this is false, the condition will evaluate to true just if user has the specified role");
+        configProperties.add(negateOutput);
+    }
+
     @Override
     protected void setClaim(IDToken token, ProtocolMapperModel mappingModel, UserSessionModel userSession, KeycloakSession keycloakSession,
                             ClientSessionContext clientSessionCtx)
@@ -130,6 +180,16 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
         UserInfo userInfo = userInfoHelper.getUserInfoFromKeycloakUser(keycloakSession, userSession, token, mappingModel);
         if (!userInfo.isEmpty()) {
             String onlyChildren = mappingModel.getConfig().get(ONLY_CHILDREN_ATTR_NAME);
+
+            String rolesToCheck = mappingModel.getConfig().get(PROFESSIONAL_ROLES);
+            boolean negateOutput = Boolean.parseBoolean(mappingModel.getConfig().get(NEGATE_OUTPUT_NAME));
+            if (rolesToCheck != null && !rolesToCheck.trim().isEmpty()) {
+                boolean roleInUser = userInfoHelper.checkUserAttributeRoles(rolesToCheck, null, userSession.getUser(), negateOutput);
+                if (!roleInUser) {
+                    userInfo.removePersonNameTag();
+                }
+            }
+
             try {
                 if (!Boolean.parseBoolean(onlyChildren)) {
                     OIDCAttributeMapperHelper.mapClaim(token, mappingModel, userInfo.getJsonRepresentation());
