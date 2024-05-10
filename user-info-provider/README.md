@@ -135,3 +135,57 @@ This mapper produces the following standardized metadata JSON-structure
 }
 ```
 
+## Configuration based on role
+There is now a possibility to hide the person tag in the claim based on the role attribute which the user has. If this
+needs to be used please add the professional roles which need to be checked in the mapper and select the negate output
+accordingly.
+
+<img src="../docs/userinfo/Vidis-role-based-info-mapper.png" width="70%"/>
+
+# Role based info Mapper
+
+Service Provider Mapper similar to the user property mapper provided by Keycloak, which reads provided property from the
+user attribute based on the role which is assigned to the user and adds them to the token. Role is checked in the following
+user attributes : rolle, person.kontext.rolle, person.kontext.<number>.rolle.
+
+## Input
+This mapper uses the following standardized user attributes for roles as an input:
+[user-info-api](./../user-info-api/README.md)
+
+## Configuration
+If a Service Provider supports processing users metadata, a new mapper has to be configured for it.
+1. Go to "Clients" and select the client to configure
+2. Go to Tab "Mappers" and click on Button "create" adding a new mapper
+3. Select "Role based user property mapper" as mapper type
+4. Add the professional roles to be checked in the user attributes
+5. Also select if the output should be negated or not
+6. Set "Token Claim Name" for the metada data JSON structure
+7. Define which token should contain this data
+
+<img src="../docs/userinfo/Role-based-info-mapper.png" width="70%"/>
+
+### Example JSON - Users metadata
+```json
+{
+  "exp": 1715356637,
+  "iat": 1715356337,
+  "auth_time": 0,
+  "jti": "911d8277-4e55-4e8e-a528-760425b00a05",
+  "iss": "http://localhost:18080/auth/realms/fwu",
+  "aud": "role-based-mapping-test",
+  "sub": "95e4ea82-c643-4300-b96d-04e88506490b",
+  "typ": "ID",
+  "azp": "role-based-mapping-test",
+  "session_state": "93da8cc0-8d18-453c-b5dc-2f5d7bea0c27",
+  "acr": "1",
+  "sid": "93da8cc0-8d18-453c-b5dc-2f5d7bea0c27",
+  "email_verified": false,
+  "name": "idp user",
+  "preferred_username": "idpuser",
+  "testClaimName": "idp",
+  "given_name": "idp",
+  "family_name": "user",
+  "email": "idpuser@test.de"
+}
+```
+In the above example testClaimName corresponds to the firstName attribute of the user.

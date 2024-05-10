@@ -55,16 +55,6 @@ public class RoleBasedUserInfoProviderMapperTest
         String userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
         Assertions.assertNotNull(userInfo);
         Assertions.assertEquals("testFirstName", userInfo);
-
-        idToken = new IDToken();
-        idToken.setSubject(SUB);
-        mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, true), session, createUserModel("LEHR"), context);
-        userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
-        Assertions.assertNull(userInfo);
-
-        mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, false), session, createUserModel("NO_ROLE"), context);
-        userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
-        Assertions.assertNull(userInfo);
     }
 
     @ParameterizedTest
@@ -80,11 +70,51 @@ public class RoleBasedUserInfoProviderMapperTest
         mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, false), session, createUserModel("LEHR"), context);
         String userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
         Assertions.assertNull(userInfo);
+    }
 
-        idToken = new IDToken();
+    @ParameterizedTest
+    @ValueSource(strings = {"NO_ROLE", "NO_ROLE,EXTERN"})
+    void should_map_first_name_with_negate_output_to_claim(String roleName)
+        throws IOException
+    {
+        RoleBasedUserInfoProviderMapper mapper = new RoleBasedUserInfoProviderMapper();
+        IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
+        KeycloakSession session = mock(KeycloakSession.class);
+        ClientSessionContext context = mock(ClientSessionContext.class);
         mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, true), session, createUserModel("LEHR"), context);
-        userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
+        String userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
+        Assertions.assertNotNull(userInfo);
+        Assertions.assertEquals("testFirstName", userInfo);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"LEHR", "LEHR,EXTERN"})
+    void should_not_map_first_name_with_negate_output_to_claim(String roleName)
+        throws IOException
+    {
+        RoleBasedUserInfoProviderMapper mapper = new RoleBasedUserInfoProviderMapper();
+        IDToken idToken = new IDToken();
+        idToken.setSubject(SUB);
+        KeycloakSession session = mock(KeycloakSession.class);
+        ClientSessionContext context = mock(ClientSessionContext.class);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, true), session, createUserModel("LEHR"), context);
+        String userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
+        Assertions.assertNull(userInfo);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"LEHR,EXTERN"})
+    void should_test_multi_value_first_name_to_claim(String roleName)
+        throws IOException
+    {
+        RoleBasedUserInfoProviderMapper mapper = new RoleBasedUserInfoProviderMapper();
+        IDToken idToken = new IDToken();
+        idToken.setSubject(SUB);
+        KeycloakSession session = mock(KeycloakSession.class);
+        ClientSessionContext context = mock(ClientSessionContext.class);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, roleName, false), session, createUserModel("EXTERN"), context);
+        String userInfo = (String)idToken.getOtherClaims().get("userNameCustom");
         Assertions.assertNotNull(userInfo);
         Assertions.assertEquals("testFirstName", userInfo);
     }

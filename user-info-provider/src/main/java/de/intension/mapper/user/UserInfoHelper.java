@@ -90,8 +90,6 @@ public class UserInfoHelper
     private static final ObjectMapper              objectMapper          = new ObjectMapper();
     private static final String                    INDEXED_ATTR_FORMAT   = "%s[%d]";
     private static final String                    COMMA_DELIMITER       = ",";
-    public static final String                     ROLES_ATTRIBUTE_NAME  = "professionalRoles";
-    public static final String                     NEGATE_OUTPUT_NAME    = "negateOutput";
 
     static {
         objectMapper.registerModule(new JavaTimeModule());

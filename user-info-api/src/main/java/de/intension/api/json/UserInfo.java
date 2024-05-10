@@ -105,7 +105,9 @@ public class UserInfo
     public void removePersonNameTag()
     {
         Person person = this.getPerson();
-        person.setPersonName(null);
+        if (person != null) {
+            person.setPersonName(null);
+        }
     }
 
 }

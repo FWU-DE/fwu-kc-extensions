@@ -109,8 +109,8 @@ public class RoleBasedUserInfoProviderMapper extends AbstractOIDCProtocolMapper
         UserModel user = userSession.getUser();
         String rolesToCheck = mappingModel.getConfig().get(ROLES_ATTRIBUTE_NAME);
         boolean negateOutput = Boolean.parseBoolean(mappingModel.getConfig().get(NEGATE_OUTPUT_NAME));
-        boolean roleInUser = userInfoHelper.checkUserAttributeRoles(rolesToCheck, Collections.singletonList("rolle"), user, negateOutput);
-        if (roleInUser) {
+        boolean showPersonDetails = userInfoHelper.checkUserAttributeRoles(rolesToCheck, Collections.singletonList("rolle"), user, negateOutput);
+        if (showPersonDetails) {
             String propertyName = mappingModel.getConfig().get(ProtocolMapperUtils.USER_ATTRIBUTE);
 
             if (propertyName == null || propertyName.trim().isEmpty())

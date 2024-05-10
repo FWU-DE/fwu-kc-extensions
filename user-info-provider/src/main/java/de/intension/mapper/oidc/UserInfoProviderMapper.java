@@ -184,8 +184,8 @@ public class UserInfoProviderMapper extends AbstractOIDCProtocolMapper
             String rolesToCheck = mappingModel.getConfig().get(PROFESSIONAL_ROLES);
             boolean negateOutput = Boolean.parseBoolean(mappingModel.getConfig().get(NEGATE_OUTPUT_NAME));
             if (rolesToCheck != null && !rolesToCheck.trim().isEmpty()) {
-                boolean roleInUser = userInfoHelper.checkUserAttributeRoles(rolesToCheck, null, userSession.getUser(), negateOutput);
-                if (!roleInUser) {
+                boolean showPersonDetails = userInfoHelper.checkUserAttributeRoles(rolesToCheck, null, userSession.getUser(), negateOutput);
+                if (!showPersonDetails) {
                     userInfo.removePersonNameTag();
                 }
             }
