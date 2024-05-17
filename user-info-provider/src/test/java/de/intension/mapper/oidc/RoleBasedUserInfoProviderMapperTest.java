@@ -20,7 +20,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
-import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,24 +123,11 @@ public class RoleBasedUserInfoProviderMapperTest
         ProtocolMapperModel protocolMapperModel = new ProtocolMapperModel();
         protocolMapperModel.setName(mapper.getDisplayType());
         Map<String, String> config = new HashMap<>();
-        for (ProviderConfigProperty property : mapper.getConfigProperties()) {
-            String propertyName = property.getName();
-            if ("user.attribute".equals(propertyName)) {
-                config.put(propertyName, "firstName");
-            }
-            else if ("professionalRoles".equals(propertyName)) {
-                config.put(propertyName, role);
-            }
-            else if (propertyName.equals(OIDCAttributeMapperHelper.INCLUDE_IN_ID_TOKEN)) {
-                config.put(propertyName, "true");
-            }
-            else if (propertyName.equals(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME)) {
-                config.put(propertyName, "userNameCustom");
-            }
-            else if ("negateOutput".equals(propertyName)) {
-                config.put(propertyName, Boolean.toString(negateOutput));
-            }
-        }
+        config.put("user.attribute", "firstName");
+        config.put("professionalRoles", role);
+        config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ID_TOKEN, "true");
+        config.put(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME, "userNameCustom");
+        config.put("negateOutput", Boolean.toString(negateOutput));
         protocolMapperModel.setConfig(config);
         return protocolMapperModel;
     }

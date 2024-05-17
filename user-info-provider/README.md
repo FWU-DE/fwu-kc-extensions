@@ -136,9 +136,20 @@ This mapper produces the following standardized metadata JSON-structure
 ```
 
 ## Configuration based on role
-There is now a possibility to hide the person tag in the claim based on the role attribute which the user has. If this
-needs to be used please add the professional roles which need to be checked in the mapper and select the negate output
-accordingly.
+
+### Terminologies
+1. Professional role: It is the role which is associated to the person. For example, a person who is signing in the system
+can be a teacher, student, principal of the school or admin of the school. One person can have multiple roles. This role
+which is associated with the person is stored as a user attribute in one of the following keys: rolle, person.kontext.rolle
+and person.kontext.<number>.rolle.
+2. Negate output: Apply a NOT to the check result of roles. When this is true, then the condition will evaluate to true 
+just if user does NOT have the specified role present in the user attributes. When this is false, the condition will evaluate
+to true just if user has the specified role.
+
+### Overview
+There is now a possibility to hide the person.name tag in the token claim [User Metadata](#Output) based on the role of 
+the user. If this needs to be used please add the professional roles which need to be checked in the mapper. There is also
+an option to use negate output feature which will just negate the output after checking the roles.
 
 <img src="../docs/userinfo/Vidis-role-based-info-mapper.png" width="70%"/>
 
@@ -158,13 +169,25 @@ If a Service Provider supports processing users metadata, a new mapper has to be
 2. Go to Tab "Mappers" and click on Button "create" adding a new mapper
 3. Select "Role based user property mapper" as mapper type
 4. Add the professional roles to be checked in the user attributes
-5. Also select if the output should be negated or not
-6. Set "Token Claim Name" for the metada data JSON structure
+5. Also select if the output should be negated or not [Negate Output](#Terminologies)
+6. Set "Token Claim Name" for the meta-data JSON structure
 7. Define which token should contain this data
 
 <img src="../docs/userinfo/Role-based-info-mapper.png" width="70%"/>
 
 ### Example JSON - Users metadata
+
+#### Case 1
+
+If the user has the following attributes:
+
+<img src="../docs/userinfo/UserAttribute.png" width="70%"/>
+
+Mapper is configured as follows:
+
+<img src="../docs/userinfo/Vidis-role-based-info-mapper.png" width="70%"/>
+
+Output claim would be as follows:
 ```json
 {
   "exp": 1715356637,
@@ -188,4 +211,39 @@ If a Service Provider supports processing users metadata, a new mapper has to be
   "email": "idpuser@test.de"
 }
 ```
-In the above example testClaimName corresponds to the firstName attribute of the user.
+In the above example testClaimName corresponds to the firstName of the user.
+
+#### Case 2
+
+If the user has the following attributes:
+
+<img src="../docs/userinfo/UserAttribute.png" width="70%"/>
+
+Mapper is configured as follows:
+
+<img src="../docs/userinfo/NegateOutput.png" width="70%"/>
+
+Output claim would be as follows:
+```json
+{
+  "exp": 1715969875,
+  "iat": 1715969575,
+  "auth_time": 0,
+  "jti": "fb6cb852-5334-49ab-b00d-fdfd66a47e1c",
+  "iss": "http://localhost:18080/auth/realms/fwu",
+  "aud": "role-based-mapping-test",
+  "sub": "63ee98a0-7710-479e-b4e9-54efe3884ef9",
+  "typ": "ID",
+  "azp": "role-based-mapping-test",
+  "session_state": "9049f4b0-5fb8-4f06-a713-69b7ffb785f7",
+  "acr": "1",
+  "sid": "9049f4b0-5fb8-4f06-a713-69b7ffb785f7",
+  "email_verified": false,
+  "name": "idp user",
+  "preferred_username": "idpuser",
+  "given_name": "idp",
+  "family_name": "user",
+  "email": "idpuser@test.de"
+}
+```
+In the above example testClaimName is not mapped as negate output was selected.
