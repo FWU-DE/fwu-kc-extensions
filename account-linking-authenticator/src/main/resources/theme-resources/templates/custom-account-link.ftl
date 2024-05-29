@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username') displayInfo=(realm.password && realm.registrationAllowed && !registrationDisabled??); section>
     <#if section = "show-username">
-        <div class="${properties.kcAccountLinkingInstructionClass!}">${kcSanitize(msg("accountLinkingInstruction", idpAlias))?no_esc}</div>
+        <div class="${properties.kcAccountLinkingInstructionClass!}" style="margin-bottom: 24px;">${kcSanitize(msg("accountLinkingInstruction", idpAlias))?no_esc}</div>
     <#elseif section = "form">
         <div id="kc-form" class="${properties.kcAccountLinkingClass!}">
             <div id="kc-form-wrapper">
@@ -28,7 +28,7 @@
                             <div class="${properties.kcFormButtonsWrapperClass!}">
                                 <input tabindex="4"
                                        class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}"
-                                       name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
+                                       name="login" id="kc-login" type="submit" value="${msg("doLogIn")}" style="margin-bottom: 8px;"/>
                                 <input tabindex="5"
                                        class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}"
                                        name="cancel" id="kc-cancel" type="submit" value="${msg("doSkipAccountLinking")}"/>

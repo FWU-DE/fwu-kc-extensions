@@ -26,6 +26,9 @@ for jar in $(find . -name "*.jar" |grep target); do
   echo "cp $jar $provider_dir/"
   cp $jar $provider_dir/
 done
+
+cp test/lib/*.jar $provider_dir/
+
 if [[ "$?" -ne 0 ]] ; then
   echo 'could not run maven package'; exit $rc
 fi
