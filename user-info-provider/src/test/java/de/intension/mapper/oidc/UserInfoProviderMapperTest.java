@@ -9,14 +9,24 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.*;
+import org.keycloak.models.ClientSessionContext;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ProtocolMapperModel;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
@@ -58,7 +68,7 @@ class UserInfoProviderMapperTest
         idToken.setSubject(SUB);
         KeycloakSession session = mock(KeycloakSession.class);
         ClientSessionContext context = mock(ClientSessionContext.class);
-        mapper.transformIDToken(idToken, createMapperModel(mapper), session, createUserModel(), context);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, false, null), session, createUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
         Assertions.assertNotNull(userInfo);
         JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo,
@@ -75,13 +85,35 @@ class UserInfoProviderMapperTest
         idToken.setSubject(SUB);
         KeycloakSession session = mock(KeycloakSession.class);
         ClientSessionContext context = mock(ClientSessionContext.class);
-        mapper.transformIDToken(idToken, createMapperModel(mapper), session, createDefaultUserModel(), context);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, true, null), session, createDefaultUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
         Assertions.assertNotNull(userInfo);
         JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfoDefault.json"), userInfo, JSONCompareMode.STRICT);
     }
 
-    private ProtocolMapperModel createMapperModel(UserInfoProviderMapper mapper)
+    @Test
+    void should_remove_person_tag_in_userInfo_claim()
+        throws URISyntaxException, IOException, JSONException
+    {
+        UserInfoProviderMapper mapper = new UserInfoProviderMapper();
+        IDToken idToken = new IDToken();
+        idToken.setSubject(SUB);
+        KeycloakSession session = mock(KeycloakSession.class);
+        ClientSessionContext context = mock(ClientSessionContext.class);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, false, "EXTERN"), session, createDefaultUserModel(), context);
+        String userInfo = (String)idToken.getOtherClaims().get("userInfo");
+        Assertions.assertNotNull(userInfo);
+        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfoWOPerson.json"), userInfo, JSONCompareMode.STRICT);
+
+        idToken = new IDToken();
+        idToken.setSubject(SUB);
+        mapper.transformIDToken(idToken, createMapperModel(mapper, true, "EXTERN"), session, createDefaultUserModel(), context);
+        userInfo = (String)idToken.getOtherClaims().get("userInfo");
+        Assertions.assertNotNull(userInfo);
+        JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfoDefault.json"), userInfo, JSONCompareMode.STRICT);
+    }
+
+    private ProtocolMapperModel createMapperModel(UserInfoProviderMapper mapper, boolean negateOutput, String roles)
     {
         ProtocolMapperModel protocolMapperModel = new ProtocolMapperModel();
         protocolMapperModel.setName(mapper.getDisplayType());
@@ -99,6 +131,13 @@ class UserInfoProviderMapperTest
             }
             else if (propertyName.equals(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME)) {
                 config.put(propertyName, "userInfo");
+            }
+
+            else if ("professionalRoles".equals(propertyName)) {
+                config.put(propertyName, roles);
+            }
+            else if ("negateOutput".equals(propertyName)) {
+                config.put(propertyName, Boolean.toString(negateOutput));
             }
         }
         protocolMapperModel.setConfig(config);

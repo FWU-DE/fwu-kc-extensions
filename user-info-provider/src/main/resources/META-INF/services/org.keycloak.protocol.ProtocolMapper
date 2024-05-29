@@ -1,1 +1,2 @@
 de.intension.mapper.oidc.UserInfoProviderMapper
+de.intension.mapper.oidc.RoleBasedUserInfoProviderMapper

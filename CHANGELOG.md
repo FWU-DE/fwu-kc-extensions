@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.9.0]
+
+- Feature: Add new protocol mapper based on role to get the user info in the tokens
+- Feature: Update the existing vidis-info-mapper to consider roles in the user attributes before adding it to claims
+
 ## Version [4.8.0]
 
 - Improvement: update error messages for both whitelist authenticators

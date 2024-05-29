@@ -73,6 +73,11 @@ For more details please check [here](./user-info-requester/README.md).
 OIDC Protocol mapper to add vidis user metadata to client tokens.
 For more details please check [here](./user-info-provider/README.md).
 
+#### Role based user info provider
+
+OIDC Protocol mapper to add vidis user metadata to client tokens based on the role which is present in the user attributes.
+For more details please check [here](./user-info-provider/README.md).
+
 ### Account Linking Authenticator
 
 Authenticators required to enable the linking of accounts with only one authentication process
