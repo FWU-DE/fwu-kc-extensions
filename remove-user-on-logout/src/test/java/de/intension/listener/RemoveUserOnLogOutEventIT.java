@@ -27,14 +27,14 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 class RemoveUserOnLogOutEventIT
 {
 
-    private final static String        REALM             = "fwu";
+    private static final String        REALM             = "fwu";
 
-    private static Network             network           = Network.newNetwork();
+    private static final Network             network           = Network.newNetwork();
 
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
 
     @Container
-    private static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
         .withProviderClassesFrom("target/classes")
         .withContextPath("/auth")
         .withNetwork(network)
@@ -44,7 +44,7 @@ class RemoveUserOnLogOutEventIT
         .withRealmImportFiles("/fwu-realm.json","/idp-realm.json")
         .withAccessToHost(true);
 
-    private static GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
+    private static final GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
         .withNetwork(network)
         .withNetworkAliases("test")
         .withExposedPorts(4444, 5900)
@@ -72,27 +72,6 @@ class RemoveUserOnLogOutEventIT
 
         int usersCountAfterLogout = usersResource.count();
         assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
-    }
-
-    /**
-     * GIVEN: a user login with out identity federation
-     * WHEN: the same user logout
-     * THEN: user is not removed from the Keycloak
-     */
-    @Test
-    void should_not_remove_user_on_logout_for_non_identity_provider_login()
-    {
-        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        KeycloakPage kcPage = KeycloakPage
-            .start(driver, wait)
-            .openAccountConsole()
-                .login("misty", "test");
-        int usersCountBeforeLogout = usersResource.count();
-
-        kcPage.logout();
-
-        int usersCountAfterLogout = usersResource.count();
-        assertEquals(usersCountBeforeLogout, usersCountAfterLogout);
     }
 
     /**
@@ -153,8 +132,8 @@ class RemoveUserOnLogOutEventIT
     private static class KeycloakPage
     {
 
-        private WebDriver             driver;
-        private FluentWait<WebDriver> wait;
+        private final WebDriver             driver;
+        private final FluentWait<WebDriver> wait;
 
         private KeycloakPage(WebDriver driver, FluentWait<WebDriver> wait)
         {

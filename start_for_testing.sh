@@ -15,7 +15,7 @@ function cleanup {
 
 trap cleanup EXIT
 
-mvn clean package -DskipTests
+mvn clean package -Dmaven.test.skip=true
 if [ -d $provider_dir ];then
   rm $provider_dir/* || true
 else

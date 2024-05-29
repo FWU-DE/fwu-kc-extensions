@@ -60,37 +60,31 @@ public class VidisAdminRealmResourceProvider
 
         StopWatch watch = new StopWatch();
         watch.start();
-        int amountOfDeletedUsers = deleteIdPUserWithoutSession(Math.min(max, 1000));
+        int amountOfDeletedUsers = deleteUsersWithoutSession(Math.min(max, 1000));
         watch.stop();
         LOG.infof("%s users were cleaned up in %s ms", amountOfDeletedUsers, watch.getTime());
         return Response.ok().type(MediaType.APPLICATION_JSON).build();
     }
 
-    private int deleteIdPUserWithoutSession(int maxNoOfUserToDelete)
+    private int deleteUsersWithoutSession(int maxNoOfUserToDelete)
     {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         RealmModel realmModel = session.getContext().getRealm();
-        UserSessionProvider usp = session.sessions();
+        UserSessionProvider sessionProvider = session.sessions();
         int numberOfDeletedUsers = 0;
-        Long lastCreationDate = 0L;
+        Long lastCreationDate = Time.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5);
         do {
             List<UserEntity> idpUsers = getListOfUserIdPUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate);
-            if (!idpUsers.isEmpty()) {
-                for (UserEntity ue : idpUsers) {
-                    lastCreationDate = ue.getCreatedTimestamp();
-                    if (lastCreationDate > Time.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5)) {
-                        continue;
-                    }
-                    UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
-                    if (usp.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
-                        if(session.users().removeUser(realmModel, ua)){
-                            numberOfDeletedUsers++;
-                        }
-                    }
-                }
-            }
-            else {
+            if (idpUsers.isEmpty()) {
                 break;
+            }
+            for (UserEntity ue : idpUsers) {
+                lastCreationDate = ue.getCreatedTimestamp();
+                UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
+                if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true) && session.users().removeUser(realmModel, ua)) {
+                    numberOfDeletedUsers++;
+                }
+
             }
         } while (numberOfDeletedUsers < maxNoOfUserToDelete);
         return numberOfDeletedUsers;
@@ -101,8 +95,7 @@ public class VidisAdminRealmResourceProvider
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         Query userQuery = em.createNativeQuery("select ue.* "
                 + "from user_entity ue "
-                + "where exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
-                + "and ue.created_timestamp > :lastTimeStamp "
+                + "where ue.created_timestamp > :lastTimeStamp "
                 + "order by ue.created_timestamp asc "
                 + "LIMIT :chunkSize", UserEntity.class);
         userQuery.setParameter("lastTimeStamp", lastCreationDate);
