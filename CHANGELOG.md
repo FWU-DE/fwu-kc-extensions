@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.9.1]
+
+- Patch: Improve CSS for account linking form
+
 ## Version [4.9.0]
 
 - Feature: Add new protocol mapper based on role to get the user info in the tokens
