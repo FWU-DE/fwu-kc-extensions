@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
+import org.keycloak.Config;
 import org.keycloak.common.util.Time;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
@@ -31,10 +32,12 @@ public class VidisAdminRealmResourceProvider
 
     private final KeycloakSession    session;
     private AdminPermissionEvaluator auth;
+    private Config.Scope             config;
 
-    public VidisAdminRealmResourceProvider(KeycloakSession session)
+    public VidisAdminRealmResourceProvider(KeycloakSession session, Config.Scope config)
     {
         this.session = session;
+        this.config = config;
     }
 
     @Override
@@ -57,16 +60,23 @@ public class VidisAdminRealmResourceProvider
     {
         UserPermissionEvaluator userPermissionEvaluator = auth.users();
         userPermissionEvaluator.requireQuery();
+        DeletableUserType deletableUserType = DeletableUserType
+            .valueOf(config.get(session.getContext().getRealm().getName().toLowerCase(), DeletableUserType.NONE.name()));
 
+        String realm = session.getContext().getRealm().getName();
+        if (realm.equals("master") || deletableUserType == DeletableUserType.NONE) {
+            LOG.info("User deletion is not allowed for realm " + realm);
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
         StopWatch watch = new StopWatch();
         watch.start();
-        int amountOfDeletedUsers = deleteUsersWithoutSession(Math.min(max, 1000));
+        int amountOfDeletedUsers = deleteUsersWithoutSession(Math.min(max, 1000), deletableUserType.equals(DeletableUserType.IDP_ONLY));
         watch.stop();
         LOG.infof("%s users were cleaned up in %s ms", amountOfDeletedUsers, watch.getTime());
-        return Response.ok().type(MediaType.APPLICATION_JSON).build();
+        return Response.ok().type(MediaType.APPLICATION_JSON).entity(new UserDeletionResponse(amountOfDeletedUsers)).build();
     }
 
-    private int deleteUsersWithoutSession(int maxNoOfUserToDelete)
+    private int deleteUsersWithoutSession(int maxNoOfUserToDelete, boolean idpOnly)
     {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         RealmModel realmModel = session.getContext().getRealm();
@@ -74,12 +84,12 @@ public class VidisAdminRealmResourceProvider
         int numberOfDeletedUsers = 0;
         Long lastCreationDate = Time.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5);
         do {
-            List<UserEntity> idpUsers = getListOfUserIdPUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate);
+            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate, idpOnly);
             if (idpUsers.isEmpty()) {
                 break;
             }
             for (UserEntity ue : idpUsers) {
-                lastCreationDate = ue.getCreatedTimestamp();
+                lastCreationDate = ue.getCreatedTimestamp() != null ? ue.getCreatedTimestamp() : lastCreationDate;
                 UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
                 if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true) && session.users().removeUser(realmModel, ua)) {
                     numberOfDeletedUsers++;
@@ -90,17 +100,22 @@ public class VidisAdminRealmResourceProvider
         return numberOfDeletedUsers;
     }
 
-    private List<UserEntity> getListOfUserIdPUsers(int chunkSize, long lastCreationDate)
+    private List<UserEntity> getListOfUsers(int chunkSize, long lastCreationDate, boolean idpOnly)
     {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
+                : "";
         Query userQuery = em.createNativeQuery("select ue.* "
                 + "from user_entity ue "
-                + "where ue.created_timestamp > :lastTimeStamp "
+                + "where (ue.created_timestamp > :lastTimeStamp "
+                + "or ue.created_timestamp is null) "
+                + "and ue.realm_id = :realmId"
+                + idpOnlyClause
                 + "order by ue.created_timestamp asc "
                 + "LIMIT :chunkSize", UserEntity.class);
         userQuery.setParameter("lastTimeStamp", lastCreationDate);
         userQuery.setParameter("chunkSize", chunkSize);
+        userQuery.setParameter("realmId", session.getContext().getRealm().getId());
         return userQuery.getResultList();
     }
-
 }

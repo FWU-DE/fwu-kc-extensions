@@ -10,6 +10,12 @@ Remove user on logout event listener should be configured to enable the removal 
 
 <img src="listener-config.png" width="500" />
 
+You can also configure if only IDP-Users(IDP_ONLY) are deleted or all users (ALL) by setting an environment Variable. Default is no User get's deleted.
+```shell
+KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_<REALM>: [IDP_ONLY|ALL|NONE]
+```
+
+
 ### Custom authentication flow
 
 Custom authentication flow should be configured to disable the profile review like below,
@@ -35,3 +41,8 @@ The maximum number of data records to be deleted can be specified as a query par
 
 https://<keycloak-host>/auth/admin/realms/<realm-name>/vidis-custom/users/inactive?max={numberOfUserToDelete}
 e.g. https://keycloak-test.ded/auth/admin/realms/test/users/inactive?max=500
+
+Like on the event-listener, you can also configure if only IDP-Users(IDP_ONLY) are deleted or all users (ALL) by setting an environment Variable. Default is no User get's deleted.
+```shell
+KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_<REALM>: [IDP_ONLY|ALL|NONE]
+```

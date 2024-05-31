@@ -13,10 +13,12 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     implements EventListenerProviderFactory
 {
 
+    private Scope config;
+
     @Override
     public EventListenerProvider create(KeycloakSession session)
     {
-        return new RemoveUserOnLogOutEventListenerProvider(session);
+        return new RemoveUserOnLogOutEventListenerProvider(session, config);
     }
 
     @Override
@@ -28,7 +30,7 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     @Override
     public void init(Scope config)
     {
-        // nothing to do
+        this.config = config;
     }
 
     @Override
