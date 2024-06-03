@@ -13,7 +13,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
-import org.keycloak.utils.StringUtil;
 
 import de.intension.resources.admin.DeletableUserType;
 import jakarta.persistence.EntityManager;
@@ -67,18 +66,12 @@ public class RemoveUserOnLogOutEventListenerProvider
             .valueOf(config.get(keycloakSession.getContext().getRealm().getName().toLowerCase(), DeletableUserType.NONE.name()));
         UserModel user = userProvider.getUserById(realm, event.getUserId());
 
-        if (userShouldBeDeleted(user, deletableUserType)) {
+        if (UserDeletionChecker.userShouldBeDeleted(user, deletableUserType)) {
             userProvider.removeUser(realm, user);
             LOG.debugf("[%s] User %s removed.", this.getClass(), user.getUsername());
         }
 
         transaction.commit();
-    }
-
-    private boolean userShouldBeDeleted(UserModel user, DeletableUserType deletableUserType)
-    {
-        return user != null && (deletableUserType == DeletableUserType.ALL || user.getFederationLink() != null
-                || user.getAttributes().get("idpAlias").stream().anyMatch(StringUtil::isNotBlank));
     }
 
     @Override

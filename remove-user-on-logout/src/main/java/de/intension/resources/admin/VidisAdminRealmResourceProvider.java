@@ -70,7 +70,7 @@ public class VidisAdminRealmResourceProvider
         }
         StopWatch watch = new StopWatch();
         watch.start();
-        int amountOfDeletedUsers = deleteUsersWithoutSession(Math.min(max, 1000), deletableUserType.equals(DeletableUserType.IDP_ONLY));
+        int amountOfDeletedUsers = deleteUsersWithoutSession(Math.min(max, 1000), deletableUserType.equals(DeletableUserType.IDP));
         watch.stop();
         LOG.infof("%s users were cleaned up in %s ms", amountOfDeletedUsers, watch.getTime());
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(new UserDeletionResponse(amountOfDeletedUsers)).build();
