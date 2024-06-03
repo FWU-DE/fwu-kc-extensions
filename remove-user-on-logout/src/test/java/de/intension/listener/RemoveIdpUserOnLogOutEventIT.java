@@ -24,7 +24,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
-class RemoveAllUserOnLogOutEventIT
+class RemoveIdpUserOnLogOutEventIT
 {
 
     private static final String              REALM             = "fwu";
@@ -42,7 +42,7 @@ class RemoveAllUserOnLogOutEventIT
         .withClasspathResourceMapping("fwu-realm.json", IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
         .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
         .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
-        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "ALL")
+        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "IDP")
         .withAccessToHost(true);
 
     private static final GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
@@ -60,18 +60,61 @@ class RemoveAllUserOnLogOutEventIT
      * THEN: user is removed from the Keycloak
      */
     @Test
-    void should_remove_user_on_logout_for_local_login()
+    void should_remove_user_on_logout_for_identity_provider_login()
     {
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage kcPage = KeycloakPage
             .start(driver, wait)
             .openAccountConsole()
             .idpLogin("idpuser", "test");
+        int usersCountBeforeLogout = usersResource.count();
 
         kcPage.logout();
 
         int usersCountAfterLogout = usersResource.count();
-        assertEquals(0, usersCountAfterLogout);
+        assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
+    }
+
+    /**
+     * GIVEN: a user login with out identity federation
+     * WHEN: the same user logout
+     * THEN: user is not removed from the Keycloak
+     */
+    @Test
+    void should_not_remove_user_on_logout_for_non_identity_provider_login()
+    {
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+        KeycloakPage kcPage = KeycloakPage
+            .start(driver, wait)
+            .openAccountConsole()
+            .login("misty", "test");
+        int usersCountBeforeLogout = usersResource.count();
+
+        kcPage.logout();
+
+        int usersCountAfterLogout = usersResource.count();
+        assertEquals(usersCountBeforeLogout, usersCountAfterLogout);
+    }
+
+    /**
+     * GIVEN: a user login with identity federation
+     * WHEN: the user's last name is updated to generate UPDATE_PROFILE event
+     * THEN: user is not removed from the Keycloak
+     */
+    @Test
+    void should_not_remove_user_when_other_event_than_logout()
+    {
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+        KeycloakPage kcPage = KeycloakPage
+            .start(driver, wait)
+            .openAccountConsole()
+            .idpLogin("idpuser", "test");
+        int usersCountBeforeLogout = usersResource.count();
+
+        kcPage.updateLastName("userTest");
+
+        int usersCountAfterLogout = usersResource.count();
+        assertEquals(usersCountBeforeLogout, usersCountAfterLogout);
     }
 
     @BeforeAll
@@ -146,6 +189,19 @@ class RemoveAllUserOnLogOutEventIT
             driver.findElement(usernameInput).sendKeys(username);
             driver.findElement(By.cssSelector("input#password")).sendKeys(password);
             driver.findElement(By.cssSelector("input#kc-login")).click();
+            return this;
+        }
+
+        private KeycloakPage updateLastName(String lastName)
+        {
+            ((RemoteWebDriver)driver).getScreenshotAs(OutputType.FILE);
+            wait.until(ExpectedConditions.elementToBeClickable(By.id("save-btn")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
+
+            driver.findElement(By.cssSelector("input#last-name")).clear();
+            driver.findElement(By.cssSelector("input#last-name")).sendKeys(lastName);
+            driver.findElement(By.id("save-btn")).click();
+
             return this;
         }
 

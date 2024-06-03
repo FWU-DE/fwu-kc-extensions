@@ -60,18 +60,33 @@ public class RemoveUserOnLogOutEventListenerProvider
         JpaKeycloakTransaction transaction = new JpaKeycloakTransaction(entityManager);
         transaction.begin();
         RealmModel realm = keycloakSession.getContext().getRealm();
-        UserProvider userProvider = keycloakSession.users();
+        UserProvider userProvider = keycloakSession.getProvider(UserProvider.class, "jpa");
 
-        DeletableUserType deletableUserType = DeletableUserType
-            .valueOf(config.get(keycloakSession.getContext().getRealm().getName().toLowerCase(), DeletableUserType.NONE.name()));
-        UserModel user = userProvider.getUserById(realm, event.getUserId());
-
-        if (UserDeletionChecker.userShouldBeDeleted(user, deletableUserType)) {
-            userProvider.removeUser(realm, user);
-            LOG.debugf("[%s] User %s removed.", this.getClass(), user.getUsername());
+        UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
+        if (userToDelete != null) {
+            userProvider.removeUser(realm, userToDelete);
+            LOG.infof("User %s removed.", userToDelete.getUsername());
         }
 
         transaction.commit();
+    }
+
+    private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId) {
+        RealmModel realm = keycloakSession.getContext().getRealm();
+        DeletableUserType deletableUserType = DeletableUserType
+                .valueOf(config.get(realm.getName().toLowerCase(), DeletableUserType.NONE.name()));
+        if (deletableUserType == DeletableUserType.NONE || "master".equals(realm.getName())) {
+            LOG.infof("Userdeletion for realm %s is disabled.", realm.getName());
+            return null;
+        }
+        UserModel user = keycloakSession.users().getUserById(realm, userId);
+        if (user == null) {
+            return null;
+        }
+        if(deletableUserType == DeletableUserType.ALL) {
+            return user;
+        }
+        return keycloakSession.users().getFederatedIdentitiesStream(realm, user).findAny().isPresent() ? user : null;
     }
 
     @Override
