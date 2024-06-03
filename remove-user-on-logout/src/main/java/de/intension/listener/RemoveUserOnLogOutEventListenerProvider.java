@@ -45,7 +45,7 @@ public class RemoveUserOnLogOutEventListenerProvider
     {
         EventType eventType = event.getType();
 
-        if (EventType.LOGOUT.equals(eventType)) {
+        if (EventType.LOGOUT.equals(eventType) && !"master".equals(keycloakSession.getContext().getRealm().getName())) {
             tx.addEvent(event);
         }
     }
