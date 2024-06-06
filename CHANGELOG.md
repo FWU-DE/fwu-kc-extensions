@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.10.0]
+
+- Improvement: Add possibility to also delete users not provided by an idenetity provider
+
 ## Version [4.9.1]
 
 - Patch: Improve CSS for account linking form
