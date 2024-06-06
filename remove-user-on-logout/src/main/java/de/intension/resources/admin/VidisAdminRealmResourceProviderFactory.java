@@ -11,17 +11,18 @@ import org.keycloak.services.resources.admin.ext.AdminRealmResourceProviderFacto
 public class VidisAdminRealmResourceProviderFactory implements AdminRealmResourceProviderFactory, EnvironmentDependentProviderFactory {
 
     public static final String PROVIDER_ID = "vidis-custom";
+    private Config.Scope config;
 
     @Override
     public AdminRealmResourceProvider create(KeycloakSession session)
     {
-        return new VidisAdminRealmResourceProvider(session);
+        return new VidisAdminRealmResourceProvider(session, config);
     }
 
     @Override
     public void init(Config.Scope config)
     {
-        //nothing to do
+        this.config = config;
     }
 
     @Override

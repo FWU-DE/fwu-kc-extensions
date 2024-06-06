@@ -24,34 +24,35 @@ import org.testcontainers.utility.DockerImageName;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 
-class RemoveUserOnLogOutEventIT
+class RemoveIdpUserOnLogOutEventIT
 {
 
-    private final static String        REALM             = "fwu";
+    private static final String              REALM             = "fwu";
 
-    private static Network             network           = Network.newNetwork();
+    private static final Network             network           = Network.newNetwork();
 
-    private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
+    private static final String              IMPORT_PATH       = "/opt/keycloak/data/import/";
 
     @Container
-    private static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
         .withProviderClassesFrom("target/classes")
         .withContextPath("/auth")
         .withNetwork(network)
         .withNetworkAliases("test")
-        .withClasspathResourceMapping("fwu-realm.json",IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
+        .withClasspathResourceMapping("fwu-realm.json", IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
         .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
-        .withRealmImportFiles("/fwu-realm.json","/idp-realm.json")
+        .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
+        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "IDP")
         .withAccessToHost(true);
 
-    private static GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
+    private static final GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
         .withNetwork(network)
         .withNetworkAliases("test")
         .withExposedPorts(4444, 5900)
         .withSharedMemorySize(2000000000L);
 
-    private RemoteWebDriver            driver;
-    private FluentWait<WebDriver>      wait;
+    private RemoteWebDriver                  driver;
+    private FluentWait<WebDriver>            wait;
 
     /**
      * GIVEN: a user is federated by idp login
@@ -86,7 +87,7 @@ class RemoveUserOnLogOutEventIT
         KeycloakPage kcPage = KeycloakPage
             .start(driver, wait)
             .openAccountConsole()
-                .login("misty", "test");
+            .login("misty", "test");
         int usersCountBeforeLogout = usersResource.count();
 
         kcPage.logout();
@@ -153,8 +154,8 @@ class RemoveUserOnLogOutEventIT
     private static class KeycloakPage
     {
 
-        private WebDriver             driver;
-        private FluentWait<WebDriver> wait;
+        private final WebDriver             driver;
+        private final FluentWait<WebDriver> wait;
 
         private KeycloakPage(WebDriver driver, FluentWait<WebDriver> wait)
         {
@@ -193,7 +194,7 @@ class RemoveUserOnLogOutEventIT
 
         private KeycloakPage updateLastName(String lastName)
         {
-            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            ((RemoteWebDriver)driver).getScreenshotAs(OutputType.FILE);
             wait.until(ExpectedConditions.elementToBeClickable(By.id("save-btn")));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
 
@@ -207,7 +208,7 @@ class RemoveUserOnLogOutEventIT
         public KeycloakPage logout()
         {
             By signOutButton = By.xpath("//button[text()='Sign out']");
-            ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+            ((RemoteWebDriver)driver).getScreenshotAs(OutputType.FILE);
             wait.until(ExpectedConditions.elementToBeClickable(signOutButton));
             driver.findElement(signOutButton).click();
             return this;
