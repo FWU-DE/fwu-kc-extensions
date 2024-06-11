@@ -27,7 +27,7 @@
     </modules>
 
     <properties>
-      <revision>4.10.0</revision>
+      <revision>4.10.1</revision>
       <keycloak.version>22.0.5</keycloak.version>
       <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -169,7 +169,7 @@
             <dependency>
                 <groupId>com.github.dasniko</groupId>
                 <artifactId>testcontainers-keycloak</artifactId>
-                <version>3.0.0</version>
+                <version>3.3.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
