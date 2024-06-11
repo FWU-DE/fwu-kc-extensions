@@ -104,12 +104,12 @@ public class VidisAdminRealmResourceProvider
     {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
-                : "";
+                : " ";
         Query userQuery = em.createNativeQuery("select ue.* "
                 + "from user_entity ue "
                 + "where (ue.created_timestamp > :lastTimeStamp "
                 + "or ue.created_timestamp is null) "
-                + "and ue.realm_id = :realmId"
+                + "and ue.realm_id = :realmId "
                 + idpOnlyClause
                 + "order by ue.created_timestamp asc "
                 + "LIMIT :chunkSize", UserEntity.class);
