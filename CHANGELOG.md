@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.10.1]
+
+- bugfix: Fix user deletion when not only idp-users but all users should be deleted
+
 ## Version [4.10.0]
 
 - Improvement: Add possibility to also delete users not provided by an idenetity provider
