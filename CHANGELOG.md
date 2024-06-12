@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.10.2]
+
+- bugfix: Fix userquery since created_timestamp is seconds not millis
+
 ## Version [4.10.1]
 
 - bugfix: Fix user deletion when not only idp-users but all users should be deleted

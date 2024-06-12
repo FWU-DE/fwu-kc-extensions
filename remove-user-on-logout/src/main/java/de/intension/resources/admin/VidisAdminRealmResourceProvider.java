@@ -1,12 +1,11 @@
 package de.intension.resources.admin;
 
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
-import org.keycloak.common.util.Time;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -28,7 +27,8 @@ public class VidisAdminRealmResourceProvider
     implements AdminRealmResourceProvider
 {
 
-    private static final Logger      LOG = Logger.getLogger(VidisAdminRealmResourceProvider.class);
+    private static final Logger      LOG                                       = Logger.getLogger(VidisAdminRealmResourceProvider.class);
+    private static final int         TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 5;
 
     private final KeycloakSession    session;
     private AdminPermissionEvaluator auth;
@@ -82,9 +82,10 @@ public class VidisAdminRealmResourceProvider
         RealmModel realmModel = session.getContext().getRealm();
         UserSessionProvider sessionProvider = session.sessions();
         int numberOfDeletedUsers = 0;
-        Long lastCreationDate = Time.currentTimeMillis() - TimeUnit.SECONDS.toMillis(5);
+        Long lastCreationDate = new Date().toInstant().getEpochSecond() - TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS;
         do {
             List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate, idpOnly);
+            LOG.debugf("Found %s users in realm %s", idpUsers.size(), realmModel.getName());
             if (idpUsers.isEmpty()) {
                 break;
             }
