@@ -41,9 +41,10 @@ services:
       - "./idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
       - "./management-realm.json:/opt/keycloak/data/import/management-realm.json"
       #    - themes
-      - "../../fwu-idp-theme/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
-      - "../../fwu-idp-theme/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
-      - "../../fwu-idp-theme/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
+      - "../../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
+      - "../../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
+      - "../../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
+      - "../../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
       - "./providers:/opt/keycloak/providers/"
     networks:
