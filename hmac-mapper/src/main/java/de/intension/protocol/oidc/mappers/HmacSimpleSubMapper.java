@@ -32,7 +32,7 @@ public class HmacSimpleSubMapper extends HmacPairwiseSubMapper {
 
     public static final String SECTOR_IDENTIFIER_PROP_NAME = "sectorIdentifier";
     private static final String SECTOR_IDENTIFIER_PROP_LABEL = "Sector identifier";
-    private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Can be **any** *string*.";
+    private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Can be any string.";
 
     public static final String PROTOCOL_MAPPER_ID = "oidc-hmac-simple-pairwise-subject-mapper";
 
