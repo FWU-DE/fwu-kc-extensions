@@ -35,18 +35,18 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       #    - realms
-      - "./fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
-      - "./whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
-      - "./idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
-      - "./idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
-      - "./management-realm.json:/opt/keycloak/data/import/management-realm.json"
+      - "./test/fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
+      - "./test/whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
+      - "./test/idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
+      - "./test/idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
+      - "./test/management-realm.json:/opt/keycloak/data/import/management-realm.json"
       #    - themes
-      - "../../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
-      - "../../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
-      - "../../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
-      - "../../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
+      - "../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
+      - "../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
+      - "../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
+      - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
-      - "./providers:/opt/keycloak/providers/"
+      - "./target:/opt/keycloak/providers/"
     networks:
       - fwunet
     depends_on:
@@ -59,7 +59,7 @@ services:
     image: postgres
     restart: always
     volumes:
-      - ./pg-init-scripts:/docker-entrypoint-initdb.d
+      - ./test/pg-init-scripts:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     environment:
@@ -89,7 +89,7 @@ services:
     command: [ "start-dev", "--import-realm" ]
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./saml-realm.json:/opt/keycloak/data/import/saml-realm.json
+      - ./test/saml-realm.json:/opt/keycloak/data/import/saml-realm.json
     networks:
       - fwunet
 
@@ -102,7 +102,7 @@ services:
     ports:
       - 11090:1080
     volumes:
-      - ./mock/mockserver.json:/config/mockserver.json
+      - ./test/mock/mockserver.json:/config/mockserver.json
     networks:
       - fwunet
 
@@ -110,9 +110,9 @@ services:
     image: rabbitmq:3-management
     container_name: test-rabbitmq
     volumes:
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
-      - ./rabbitmqdefinitions.json:/etc/rabbitmq/rabbitmqdefinitions.json:ro
       - /etc/localtime:/etc/localtime:ro
+      - ./test/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./test/rabbitmqdefinitions.json:/etc/rabbitmq/rabbitmqdefinitions.json:ro
     ports:
       - 15672:15672
       - 5672:5672

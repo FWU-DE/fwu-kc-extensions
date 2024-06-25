@@ -18,6 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
+import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper.*;
+
 /**
  * Pairwise identifier mapper using
  * <a href="https://datatracker.ietf.org/doc/html/rfc2104">HMAC</a>.
@@ -32,14 +34,6 @@ import java.util.List;
  */
 public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         implements IPairwiseMapper {
-
-    protected static final String HASH_ALGORITHM_PROP_NAME = "pairwiseSubHashAlgorithm";
-    private static final String HASH_ALGORITHM_PROP_LABEL = "Hash algorithm";
-    private static final String HASH_ALGORITHM_PROP_HELP = "Mac hash algorithm used when calculating the pairwise subject identifier.";
-
-    public static final String LOCAL_SUB_IDENTIFIER_PROP_NAME = "pairwiseLocalSubIdentifier";
-    private static final String LOCAL_SUB_IDENTIFIER_PROP_LABEL = "Local sub identifier";
-    private static final String LOCAL_SUB_IDENTIFIER_PROP_HELP = "Local sub identifier is used when calculating the pairwise subject identifier. The identifier should match the attribute name of the keycloak user.";
 
     private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Should be a valid URL where the hostname of the URL is used for hashing.";
 
@@ -57,7 +51,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setIDTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel, localSub));
+        setIDTokenSubject(token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -72,8 +66,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setAccessTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel,
-                localSub));
+        setAccessTokenSubject(token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -88,8 +81,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setUserInfoTokenSubject(token, HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel,
-                localSub));
+        setUserInfoTokenSubject(token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -104,12 +96,12 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
     }
 
     /**
-     * Set pairwise sub to {@link IDToken} object.
+     * Set pairwise sub to {@link AccessToken} object.
      *
      * @param token       Token to extend
      * @param pairwiseSub Pairwise subject identifier
      */
-    protected void setAccessTokenSubject(IDToken token, String pairwiseSub) {
+    protected void setAccessTokenSubject(AccessToken token, String pairwiseSub) {
         token.setSubject(pairwiseSub);
     }
 
@@ -149,12 +141,21 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
                                          ProtocolMapperContainerModel mapperContainer,
                                          ProtocolMapperModel mapperModel)
             throws ProtocolMapperConfigException {
+        validateSaltConfig(mapperModel);
+        validateHashAlgorithmConfig(mapperModel);
+    }
+
+
+    protected static void validateSaltConfig(ProtocolMapperModel mapperModel) {
         // Generate random salt if needed
         String salt = PairwiseSubMapperHelper.getSalt(mapperModel);
         if (salt == null || salt.trim().isEmpty()) {
             salt = KeycloakModelUtils.generateId();
             PairwiseSubMapperHelper.setSalt(mapperModel, salt);
         }
+    }
+
+    protected static void validateHashAlgorithmConfig(ProtocolMapperModel mapperModel) throws ProtocolMapperConfigException {
         // Check that hash algorithm is set
         String algorithm = getHashAlgorithm(mapperModel);
         try {
@@ -214,40 +215,6 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         return mappingModel.getConfig().get(HASH_ALGORITHM_PROP_NAME);
     }
 
-    /**
-     * Creates the mapper's configuration property for the HMAC hash algorithm.
-     *
-     * @return Config property item
-     */
-    private static ProviderConfigProperty createHashAlgorithmConfig() {
-        var property = new ProviderConfigProperty();
-        property.setName(HASH_ALGORITHM_PROP_NAME);
-        property.setType(ProviderConfigProperty.LIST_TYPE);
-        property.setOptions(List.of("HmacMD5", "HmacSHA1", "HmacSHA224",
-                "HmacSHA256", "HmacSHA384", "HmacSHA512",
-                "HmacSHA512/224", "HmacSHA512/256", "HmacSHA3-224",
-                "HmacSHA3-256", "HmacSHA3-384", "HmacSHA3-512"));
-        property.setLabel(HASH_ALGORITHM_PROP_LABEL);
-        property.setHelpText(HASH_ALGORITHM_PROP_HELP);
-        return property;
-    }
-
-    /**
-     * Creates the mapper's configuration property for the local sub identifier
-     * config to use.
-     *
-     * @return Config property item
-     */
-    private static ProviderConfigProperty createLocalSubIdentifierConfig() {
-        var property = new ProviderConfigProperty();
-        property.setName(LOCAL_SUB_IDENTIFIER_PROP_NAME);
-        property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setLabel(LOCAL_SUB_IDENTIFIER_PROP_LABEL);
-        property.setHelpText(LOCAL_SUB_IDENTIFIER_PROP_HELP);
-        property.setDefaultValue("username");
-        return property;
-    }
-
     @Override
     public void validateSectorIdentifier(KeycloakSession session, ClientModel client, ProtocolMapperModel mapperModel)
             throws ProtocolMapperConfigException {
@@ -268,12 +235,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         }
     }
 
-    public void validateSectorIdentifierNotEmpty(String sectorIdentifierUri)
+    private void validateSectorIdentifierNotEmpty(String sectorIdentifierUri)
             throws ProtocolMapperConfigException {
         if (sectorIdentifierUri == null || sectorIdentifierUri.isEmpty()) {
             throw new ProtocolMapperConfigException("Sector Identifier must not be null or empty.",
                     PAIRWISE_MISSING_SECTOR_IDENTIFIER);
         }
     }
-
 }
