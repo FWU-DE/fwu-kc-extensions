@@ -46,12 +46,6 @@ jobs:
         with:
           xml-file: 'pom.xml'
           xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='revision']"
-      - name: Get modules
-        id: get-modules
-        uses: mavrosxristoforos/get-xml-info@1.0
-        with:
-          xml-file: 'pom.xml'
-          xpath: "//*[local-name()='project']/*[local-name()='modules']/*[local-name()='module']"
       - name: Get keycloak version
         id: get-keycloak-version
         uses: mavrosxristoforos/get-xml-info@1.0
@@ -61,7 +55,6 @@ jobs:
       - name: Check release exists
         id: check-release
         run: |
-          rm modules.txt || true
           TAG=${{ steps.get-version.outputs.info }}
           echo "TAG: $TAG"
           response=$(curl --silent -H 'Accept: application/vnd.github.v3+json' "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
@@ -69,22 +62,12 @@ jobs:
           echo "Message: $message"
           if [ "$message" = "Not Found" ]; then
             echo "version=$TAG" >> $GITHUB_OUTPUT
-            IFS="," read -a modules <<< ${{ steps.get-modules.outputs.info }}
-            for module in ${modules[@]}; do
-              echo "Found module: $module"
-              if [ "$module" != "fwu-kc-extensions" ]; then
-                echo "$module/target/$module-$TAG.jar" >> modules.txt
-              fi
-            done
-            csv=$(paste -s -d , modules.txt)
-            echo "Generated CSV: $csv"
-            echo "artifacts=$csv" >> $GITHUB_OUTPUT
           else
             echo "Release $TAG already exists!"
           fi
       - name: Deploy to GitHub packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy -DskipTests -Dmaven.resolver.transport=wagon
+        run: mvn --batch-mode clean deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish GitHub release
@@ -92,7 +75,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.check-release.outputs.version }}
-          artifacts: "${{ steps.check-release.outputs.artifacts }}"
+          artifacts: "target/*.jar"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish Gitlab release
@@ -102,12 +85,11 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
           GROUP_NAME: ${{ steps.get-group.outputs.info }}
-          ARTIFACTS: ${{ steps.check-release.outputs.artifacts }}
+          ARTIFACTS: "target/*.jar"
           VERSION: ${{ steps.check-release.outputs.version }}
         run: |
           group=${GROUP_NAME/.//}
-          IFS=',' read -ra archives <<< $ARTIFACTS
-          for archive in ${archives[@]}
+          for archive in $ARTIFACTS
           do
               filename=${archive##*/}
               artifact=${filename%-*}
