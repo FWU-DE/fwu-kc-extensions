@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.11.2]
+
+- Bugfix: Publish to GitLab packages with Maven
+
 ## Version [4.11.1]
 
 - Previous release artifacts were broken by GitHub
