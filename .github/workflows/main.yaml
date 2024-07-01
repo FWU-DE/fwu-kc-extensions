@@ -65,9 +65,9 @@ jobs:
           else
             echo "Release $TAG already exists!"
           fi
-      - name: Deploy to GitHub packages
+      - name: Deploy to GitHub and GitLab packages
         if: ${{ steps.check-release.outputs.version != '' }}
-        run: mvn --batch-mode clean deploy -DskipTests
+        run: mvn --batch-mode clean deploy -DskipTests -s ci_settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish GitHub release
@@ -79,26 +79,6 @@ jobs:
           replacesArtifacts: true
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish Gitlab release
-        if: ${{ steps.check-release.outputs.version != '' }}
-        env:
-          GITLAB_HOST: ${{ secrets.GITLAB_HOST }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          GROUP_NAME: ${{ steps.get-group.outputs.info }}
-          ARTIFACTS: "target/*.jar"
-          VERSION: ${{ steps.check-release.outputs.version }}
-        run: |
-          group=${GROUP_NAME/.//}
-          for archive in $ARTIFACTS
-          do
-              filename=${archive##*/}
-              artifact=${filename%-*}
-              curl --request PUT \
-                  --upload-file ${archive} \
-                  --header "Deploy-Token: ${GITLAB_TOKEN}" \
-                  "https://${GITLAB_HOST}/api/v4/projects/${GITLAB_PROJECT_ID}/packages/maven/${group}/${artifact}/${VERSION}/${filename}"
-          done
 
   startImageBuild:
     needs: publish
