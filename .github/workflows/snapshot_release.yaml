@@ -30,24 +30,15 @@ jobs:
         with:
           xml-file: 'pom.xml'
           xpath: "//*[local-name()='project']/*[local-name()='modules']/*[local-name()='module']"
-      - name: Get artifacts
-        id: get-artifacts
+      - name: Get version
+        id: get-version
         run: |
           echo "version=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
-          IFS="," read -ra modules <<< ${{ steps.get-modules.outputs.info }}
-          for module in ${modules[@]}
-          do
-            if [ "$module" != "fwu-kc-extensions" ]; then
-              echo "$module/target/$module-$GITHUB_REF_NAME.jar" >> modules.txt
-            fi
-          done
-          csv=$(paste -s -d , modules.txt)
-          echo "artifacts=$csv" >> $GITHUB_OUTPUT
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.get-artifacts.outputs.version }}
-          artifacts: "${{ steps.get-artifacts.outputs.artifacts }}"
+          tag: ${{ steps.get-version.outputs.version }}
+          artifacts: "target/*.jar"
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: true
@@ -57,13 +48,12 @@ jobs:
           GITLAB_HOST: ${{ secrets.GITLAB_HOST }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID  }}
-          ARTIFACTS: "${{ steps.get-artifacts.outputs.artifacts }}"
+          ARTIFACTS: "target/*.jar"
           GROUP_NAME: ${{ steps.get-group.outputs.info }}
         run: |
           group=${GROUP_NAME/.//}
           echo "group: ${group}"
-          IFS=',' read -ra archives <<< $ARTIFACTS
-          for archive in ${archives[@]}
+          for archive in $ARTIFACTS
           do
               filename=${archive##*/}
               artifact=${filename%-[0-9]*}
