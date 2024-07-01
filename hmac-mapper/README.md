@@ -49,6 +49,13 @@ Outcome:
 4. The `sub` in the access tokens returned by `formand` and `desight` are **not** the same because they don't share the same sector identifier
 5. The `sub` in the access tokens returned by `applicy` are different for each user
 
+# HMAC pairwise subject with *simple* sectorIdentifier
+
+This mapper works just as the previous mapper with the following differences:
+
+- Sector identifier can be any string - not only URLs
+- Salt cannot be set - the sector identifier will be used as salt
+
 # HMAC pairwise email
 
 This mapper sets the claim value `email`.

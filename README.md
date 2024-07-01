@@ -9,7 +9,7 @@ The goal of these extensions are to make the authentication more secure and anon
 
 Run the script `start_for_testing.sh` in the root directory to start the Keycloak.
 
-This will start a Keycloak docker container and others specified in the [`docker-compose.yaml`](./test/docker-compose.yaml).
+This will start a Keycloak docker container and others specified in the [`docker-compose.yaml`](docker-compose.yaml).
 
 
 ## Features

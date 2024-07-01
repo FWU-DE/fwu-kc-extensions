@@ -1,20 +1,5 @@
 package de.intension.protocol.oidc.mappers;
 
-import static de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +14,21 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HmacPairwisePseudonymListMapperTest
@@ -239,7 +239,7 @@ class HmacPairwisePseudonymListMapperTest
         when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
-        referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
+        referencedClientConfig.put(HmacPairwiseSubMapperHelper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
         when(referencedClientMapper.getConfig()).thenReturn(referencedClientConfig);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
         when(realmMock.getClientByClientId(EXISTING_CLIENT)).thenReturn(existingClient);
@@ -282,9 +282,9 @@ class HmacPairwisePseudonymListMapperTest
         when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
-        referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
+        referencedClientConfig.put(HmacPairwiseSubMapperHelper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
         referencedClientConfig.put(PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT, "123456");
-        referencedClientConfig.put(HmacPairwiseSubMapper.HASH_ALGORITHM_PROP_NAME, "HmacSHA384");
+        referencedClientConfig.put(HmacPairwiseSubMapperHelper.HASH_ALGORITHM_PROP_NAME, "HmacSHA384");
         referencedClientConfig.put(PairwiseSubMapperHelper.SECTOR_IDENTIFIER_URI, "https://example.com");
         when(referencedClientMapper.getConfig()).thenReturn(referencedClientConfig);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));
@@ -337,9 +337,9 @@ class HmacPairwisePseudonymListMapperTest
         when(referencedClientMapper.getProtocolMapper()).thenReturn(HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
 
         Map<String, String> referencedClientConfig = new HashMap<>();
-        referencedClientConfig.put(HmacPairwiseSubMapper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
+        referencedClientConfig.put(HmacPairwiseSubMapperHelper.LOCAL_SUB_IDENTIFIER_PROP_NAME, "id");
         referencedClientConfig.put(PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT, "123456");
-        referencedClientConfig.put(HmacPairwiseSubMapper.HASH_ALGORITHM_PROP_NAME, "HmacSHA384");
+        referencedClientConfig.put(HmacPairwiseSubMapperHelper.HASH_ALGORITHM_PROP_NAME, "HmacSHA384");
         referencedClientConfig.put(PairwiseSubMapperHelper.SECTOR_IDENTIFIER_URI, "https://example.com");
         when(referencedClientMapper.getConfig()).thenReturn(referencedClientConfig);
         when(existingClient.getProtocolMappersStream()).thenReturn(Stream.of(referencedClientMapper));

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.11.0]
+
+- Feature: Add new protocol mapper to allow HMAC hashing of user IDs based on very simple sector identifier
+
 ## Version [4.10.2]
 
 - bugfix: Fix userquery since created_timestamp is seconds not millis
