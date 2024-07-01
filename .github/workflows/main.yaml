@@ -76,6 +76,7 @@ jobs:
         with:
           tag: ${{ steps.check-release.outputs.version }}
           artifacts: "target/*.jar"
+          replacesArtifacts: true
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish Gitlab release

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.11.1]
+
+- Previous release artifacts were broken by GitHub
+
 ## Version [4.11.0]
 
 - Feature: Add new protocol mapper to allow HMAC hashing of user IDs based on very simple sector identifier
