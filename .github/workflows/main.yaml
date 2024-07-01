@@ -70,6 +70,9 @@ jobs:
         run: mvn --batch-mode clean deploy -DskipTests -s ci_settings.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLAB_HOST: ${{ secrets.GITLAB_HOST }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
       - name: Publish GitHub release
         if: ${{ steps.check-release.outputs.version != '' }}
         uses: ncipollo/release-action@v1
