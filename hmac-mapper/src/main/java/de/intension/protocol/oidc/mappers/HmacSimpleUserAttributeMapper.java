@@ -4,6 +4,9 @@ import org.keycloak.models.*;
 import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.IDToken;
+import org.keycloak.utils.StringUtil;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,25 +19,25 @@ import java.util.UUID;
 
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper.createHashAlgorithmConfig;
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper.createLocalSubIdentifierConfig;
+import static org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME;
 
 /**
  * Pairwise identifier mapper using
  * <a href="https://datatracker.ietf.org/doc/html/rfc2104">HMAC</a>.
- * This OIDC mapper will replace the {@code sub} field in the token with a
- * HMAC-hashed user ID instead of the user ID.
+ * This OIDC mapper will set the dedicated claim value in the token with a HMAC-hashed user ID.
  * Sector identifier is mandatory for this mapper and may be any arbitrary string (as opposed to {@link HmacPairwiseSubMapper}).
  *
  * @see <a href=
  * * "https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#mac-algorithms">mac-algorithms</a>
  * @see HmacPairwiseSubMapper
  */
-public class HmacSimpleSubMapper extends HmacPairwiseSubMapper {
+public class HmacSimpleUserAttributeMapper extends HmacPairwiseSubMapper {
 
     public static final String SECTOR_IDENTIFIER_PROP_NAME = "sectorIdentifier";
     private static final String SECTOR_IDENTIFIER_PROP_LABEL = "Sector identifier";
     private static final String SECTOR_IDENTIFIER_PROP_HELP = "This is used to group different clients. Can be any string.";
 
-    public static final String PROTOCOL_MAPPER_ID = "oidc-hmac-simple-pairwise-subject-mapper";
+    public static final String PROTOCOL_MAPPER_ID = "oidc-hmac-simple-user-attribute-mapper";
 
     /**
      * Generates sub identifier without salt being used.
@@ -59,11 +62,41 @@ public class HmacSimpleSubMapper extends HmacPairwiseSubMapper {
     }
 
     @Override
+    protected void setIDTokenValue(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
+        setClaimValue(mapperModel, token, pairwiseSub);
+    }
+
+    @Override
+    protected void setAccessTokenValue(ProtocolMapperModel mapperModel, AccessToken token, String pairwiseSub) {
+        setClaimValue(mapperModel, token, pairwiseSub);
+    }
+
+    @Override
+    protected void setUserInfoTokenValue(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
+        setClaimValue(mapperModel, token, pairwiseSub);
+    }
+
+    private void setClaimValue(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
+        String claimName = mapperModel.getConfig().get(TOKEN_CLAIM_NAME);
+        if (StringUtil.isNotBlank(claimName)) {
+            token.setOtherClaims(claimName, pairwiseSub);
+        }
+    }
+
+    @Override
     public List<ProviderConfigProperty> getConfigProperties() {
+        List<ProviderConfigProperty> configProperties = new LinkedList<>(getAdditionalConfigProperties());
+        OIDCAttributeMapperHelper.addTokenClaimNameConfig(configProperties);
+        OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, this.getClass());
+        return configProperties;
+    }
+
+    @Override
+    public List<ProviderConfigProperty> getAdditionalConfigProperties() {
         List<ProviderConfigProperty> configProperties = new LinkedList<>();
         configProperties.add(createSectorIdentifierConfig());
-        configProperties.addAll(getAdditionalConfigProperties());
-        OIDCAttributeMapperHelper.addIncludeInTokensConfig(configProperties, this.getClass());
+        configProperties.add(createHashAlgorithmConfig());
+        configProperties.add(createLocalSubIdentifierConfig());
         return configProperties;
     }
 
@@ -74,14 +107,6 @@ public class HmacSimpleSubMapper extends HmacPairwiseSubMapper {
         property.setLabel(SECTOR_IDENTIFIER_PROP_LABEL);
         property.setHelpText(SECTOR_IDENTIFIER_PROP_HELP);
         return property;
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getAdditionalConfigProperties() {
-        List<ProviderConfigProperty> configProperties = new LinkedList<>();
-        configProperties.add(createHashAlgorithmConfig());
-        configProperties.add(createLocalSubIdentifierConfig());
-        return configProperties;
     }
 
     @Override
@@ -99,12 +124,12 @@ public class HmacSimpleSubMapper extends HmacPairwiseSubMapper {
 
     @Override
     public String getDisplayType() {
-        return "HMAC Pairwise subject with simple sectorIdentifier";
+        return "HMAC encoded claim value with simple sectorIdentifier";
     }
 
     @Override
     public String getHelpText() {
-        return "Calculates a pairwise subject identifier using an unsalted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.";
+        return "Calculates a claim value using an unsalted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.";
     }
 
     @Override

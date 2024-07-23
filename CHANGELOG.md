@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.11.3]
+
+- Bugfix: Simple HMAC mapper can map to configurable claim
+
 ## Version [4.11.2]
 
 - Bugfix: Publish to GitLab packages with Maven

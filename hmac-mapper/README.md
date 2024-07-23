@@ -55,6 +55,7 @@ This mapper works just as the previous mapper with the following differences:
 
 - Sector identifier can be any string - not only URLs
 - Salt cannot be set - the sector identifier will be used as salt
+- Value can be mapped to any claim (not only `sub`)
 
 # HMAC pairwise email
 
