@@ -62,17 +62,17 @@ public class HmacSimpleUserAttributeMapper extends HmacPairwiseSubMapper {
     }
 
     @Override
-    protected void setIDTokenSubject(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
+    protected void setIDTokenValue(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
         setClaimValue(mapperModel, token, pairwiseSub);
     }
 
     @Override
-    protected void setAccessTokenSubject(ProtocolMapperModel mapperModel, AccessToken token, String pairwiseSub) {
+    protected void setAccessTokenValue(ProtocolMapperModel mapperModel, AccessToken token, String pairwiseSub) {
         setClaimValue(mapperModel, token, pairwiseSub);
     }
 
     @Override
-    protected void setUserInfoTokenSubject(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
+    protected void setUserInfoTokenValue(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
         setClaimValue(mapperModel, token, pairwiseSub);
     }
 
@@ -124,12 +124,12 @@ public class HmacSimpleUserAttributeMapper extends HmacPairwiseSubMapper {
 
     @Override
     public String getDisplayType() {
-        return "HMAC Pairwise subject with simple sectorIdentifier";
+        return "HMAC encoded claim value with simple sectorIdentifier";
     }
 
     @Override
     public String getHelpText() {
-        return "Calculates a pairwise subject identifier using an unsalted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.";
+        return "Calculates a claim value using an unsalted HMAC hash and sectorIdentifier. See OpenID Connect specification for more info about pairwise subject identifiers.";
     }
 
     @Override
