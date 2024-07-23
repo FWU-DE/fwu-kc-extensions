@@ -20,10 +20,10 @@ class HmacSimpleUserAttributeMapperTest {
     /**
      * GIVEN: a user, hash algorithm, sector identifier
      * WHEN: sub created twice for access token with same user with same local sub value
-     * THEN: resulting subject value is same
+     * THEN: resulting claim value is same
      */
     @Test
-    void should_generate_same_subject_value_when_same_local_sub_identifier_value() {
+    void should_generate_same_claim_value_when_same_local_sub_identifier_value() {
         var mapper = new HmacSimpleUserAttributeMapper();
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME), null,
@@ -31,16 +31,16 @@ class HmacSimpleUserAttributeMapperTest {
         AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME), null,
                 mockUserSessionModel(USER_ID, USERNAME, "tom"), null);
 
-        assertEquals(accessToken.getSubject(), accessToken2.getSubject());
+        assertEquals(accessToken.getOtherClaims().get("clamClaim"), accessToken2.getOtherClaims().get("clamClaim"));
     }
 
     /**
      * GIVEN: a user, hash algorithm, sector identifier
      * WHEN: sub created twice with same user with different sector identifier sub value
-     * THEN: resulting subject value is not same
+     * THEN: resulting claim value is not same
      */
     @Test
-    void should_generate_different_subject_value_when_different_sectorIdentifier() {
+    void should_generate_different_claim_value_when_different_sectorIdentifier() {
         var mapper = new HmacSimpleUserAttributeMapper();
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME, HMAC_SHA_256, "string1"), null,
@@ -48,7 +48,7 @@ class HmacSimpleUserAttributeMapperTest {
         AccessToken accessToken2 = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME, HMAC_SHA_256, "string2"), null,
                 mockUserSessionModel(USER_ID, USERNAME, "tom"), null);
 
-        assertNotEquals(accessToken.getSubject(), accessToken2.getSubject());
+        assertNotEquals(accessToken.getOtherClaims().get("clamClaim"), accessToken2.getOtherClaims().get("clamClaim"));
     }
 
     /**
@@ -59,12 +59,13 @@ class HmacSimpleUserAttributeMapperTest {
     @Test
     void should_ignore_when_empty_local_sub_identifier_value() {
         var mapper = new HmacSimpleUserAttributeMapper();
-        AccessToken token = new AccessToken().subject("before");
+        AccessToken token = new AccessToken();
+        token.setOtherClaims("clamClaim", "before");
 
         mapper.transformAccessToken(token, createMapperModel("wrongLocalSubIdentifier"), null,
                 mockUserSessionModel(USER_ID, "wrongLocalSubIdentifier", null), null);
 
-        assertEquals("before", token.getSubject());
+        assertEquals("before", token.getOtherClaims().get("clamClaim"));
     }
 
     /**
@@ -113,6 +114,7 @@ class HmacSimpleUserAttributeMapperTest {
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ACCESS_TOKEN, Boolean.TRUE.toString());
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ID_TOKEN, Boolean.TRUE.toString());
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_USERINFO, Boolean.TRUE.toString());
+        config.put(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME, "clamClaim");
         protocolMapperModel.setConfig(config);
         return protocolMapperModel;
     }
