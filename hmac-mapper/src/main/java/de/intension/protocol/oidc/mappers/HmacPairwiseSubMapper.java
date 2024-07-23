@@ -51,7 +51,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setIDTokenSubject(token, generateIdentifier(mappingModel, localSub));
+        setIDTokenSubject(mappingModel, token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -66,7 +66,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setAccessTokenSubject(token, generateIdentifier(mappingModel, localSub));
+        setAccessTokenSubject(mappingModel, token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -81,7 +81,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (localSub == null) {
             return token;
         }
-        setUserInfoTokenSubject(token, generateIdentifier(mappingModel, localSub));
+        setUserInfoTokenSubject(mappingModel, token, generateIdentifier(mappingModel, localSub));
         return token;
     }
 
@@ -91,7 +91,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
      * @param token       Token to extend
      * @param pairwiseSub Pairwise subject identifier
      */
-    protected void setIDTokenSubject(IDToken token, String pairwiseSub) {
+    protected void setIDTokenSubject(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
         token.setSubject(pairwiseSub);
     }
 
@@ -101,7 +101,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
      * @param token       Token to extend
      * @param pairwiseSub Pairwise subject identifier
      */
-    protected void setAccessTokenSubject(AccessToken token, String pairwiseSub) {
+    protected void setAccessTokenSubject(ProtocolMapperModel mapperModel, AccessToken token, String pairwiseSub) {
         token.setSubject(pairwiseSub);
     }
 
@@ -111,7 +111,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
      * @param token       Token to extend
      * @param pairwiseSub Pairwise subject identifier
      */
-    protected void setUserInfoTokenSubject(IDToken token, String pairwiseSub) {
+    protected void setUserInfoTokenSubject(ProtocolMapperModel mapperModel, IDToken token, String pairwiseSub) {
         token.getOtherClaims().put("sub", pairwiseSub);
     }
 

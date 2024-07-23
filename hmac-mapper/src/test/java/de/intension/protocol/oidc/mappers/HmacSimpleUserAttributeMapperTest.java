@@ -14,7 +14,7 @@ import java.util.Map;
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class HmacSimpleSubMapperTest {
+class HmacSimpleUserAttributeMapperTest {
     private static final String USER_ID = "505fb0d6-bce1-3323-9ae2-60b47dad7cac";
 
     /**
@@ -24,7 +24,7 @@ class HmacSimpleSubMapperTest {
      */
     @Test
     void should_generate_same_subject_value_when_same_local_sub_identifier_value() {
-        var mapper = new HmacSimpleSubMapper();
+        var mapper = new HmacSimpleUserAttributeMapper();
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME), null,
                 mockUserSessionModel(USER_ID, USERNAME, "tom"), null);
@@ -41,7 +41,7 @@ class HmacSimpleSubMapperTest {
      */
     @Test
     void should_generate_different_subject_value_when_different_sectorIdentifier() {
-        var mapper = new HmacSimpleSubMapper();
+        var mapper = new HmacSimpleUserAttributeMapper();
 
         AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME, HMAC_SHA_256, "string1"), null,
                 mockUserSessionModel(USER_ID, USERNAME, "tom"), null);
@@ -58,7 +58,7 @@ class HmacSimpleSubMapperTest {
      */
     @Test
     void should_ignore_when_empty_local_sub_identifier_value() {
-        var mapper = new HmacSimpleSubMapper();
+        var mapper = new HmacSimpleUserAttributeMapper();
         AccessToken token = new AccessToken().subject("before");
 
         mapper.transformAccessToken(token, createMapperModel("wrongLocalSubIdentifier"), null,
@@ -75,7 +75,7 @@ class HmacSimpleSubMapperTest {
     @ParameterizedTest
     @NullAndEmptySource
     void should_throw_protocol_mapper_config_exception_when_empty_sector_identifier_configured(String localSubIdentifier) {
-        var mapper = new HmacSimpleSubMapper();
+        var mapper = new HmacSimpleUserAttributeMapper();
         ProtocolMapperModel emptySectorIdentifierProtocolMapper = createMapperModel(USERNAME, HMAC_SHA_256, localSubIdentifier);
 
         ProtocolMapperConfigException exception = assertThrows(ProtocolMapperConfigException.class,
@@ -91,7 +91,7 @@ class HmacSimpleSubMapperTest {
      */
     @Test
     void should_throw_illegal_state_exception_when_wrong_algorithm_configured() {
-        var mapper = new HmacSimpleSubMapper();
+        var mapper = new HmacSimpleUserAttributeMapper();
         ProtocolMapperModel wrongAlgorithmProtocolMapper = createMapperModel(USERNAME, "wrongAlgorithm", SECTOR_IDENTIFIER);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> mapper.generateIdentifier(wrongAlgorithmProtocolMapper, USER_ID));
@@ -109,7 +109,7 @@ class HmacSimpleSubMapperTest {
         Map<String, String> config = new HashMap<>();
         config.put("pairwiseSubHashAlgorithm", hashAlgorithm);
         config.put("pairwiseLocalSubIdentifier", localSubIdentifier);
-        config.put(HmacSimpleSubMapper.SECTOR_IDENTIFIER_PROP_NAME, sectorIdentifier);
+        config.put(HmacSimpleUserAttributeMapper.SECTOR_IDENTIFIER_PROP_NAME, sectorIdentifier);
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ACCESS_TOKEN, Boolean.TRUE.toString());
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_ID_TOKEN, Boolean.TRUE.toString());
         config.put(OIDCAttributeMapperHelper.INCLUDE_IN_USERINFO, Boolean.TRUE.toString());

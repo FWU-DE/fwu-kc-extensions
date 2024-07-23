@@ -1,4 +1,4 @@
 de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper
 de.intension.protocol.oidc.mappers.HmacPairwiseEmailMapper
 de.intension.protocol.oidc.mappers.HmacPairwisePseudonymListMapper
-de.intension.protocol.oidc.mappers.HmacSimpleSubMapper
+de.intension.protocol.oidc.mappers.HmacSimpleUserAttributeMapper
