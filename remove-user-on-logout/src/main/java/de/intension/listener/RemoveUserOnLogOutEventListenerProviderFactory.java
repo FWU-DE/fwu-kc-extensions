@@ -1,5 +1,7 @@
 package de.intension.listener;
 
+import java.io.IOException;
+
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -13,12 +15,14 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     implements EventListenerProviderFactory
 {
 
-    private Scope config;
+    private RemoveUserOnLogOutEventListenerProvider removeUserOnLogOutEventListenerProvider;
+    private Scope                                   config;
 
     @Override
     public EventListenerProvider create(KeycloakSession session)
     {
-        return new RemoveUserOnLogOutEventListenerProvider(session, config);
+        removeUserOnLogOutEventListenerProvider = new RemoveUserOnLogOutEventListenerProvider(session, config);
+        return removeUserOnLogOutEventListenerProvider;
     }
 
     @Override
@@ -42,7 +46,13 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     @Override
     public void close()
     {
-        // nothing to do
+        if (this.removeUserOnLogOutEventListenerProvider != null) {
+            try {
+                this.removeUserOnLogOutEventListenerProvider.getRestClient().close();
+            } catch (IOException e) {
+                // Do nothing
+            }
+        }
     }
 
 }

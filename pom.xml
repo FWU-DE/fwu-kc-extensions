@@ -24,10 +24,11 @@
     <module>school-mapper</module>
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
+    <module>license-connect-authenticator</module>
   </modules>
 
   <properties>
-    <revision>4.11.2</revision>
+    <revision>4.12.0</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
