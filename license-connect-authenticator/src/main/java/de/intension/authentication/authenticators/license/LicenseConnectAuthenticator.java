@@ -1,6 +1,7 @@
 package de.intension.authentication.authenticators.license;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,7 +58,12 @@ public class LicenseConnectAuthenticator
         LicenseRequestedRequest licenseRequest = createLicenseRequest(user, context);
         JsonNode userLicenses = fetchUserLicense(licenseRequest);
         if (userLicenses != null && userLicenses.path("hasLicences").asBoolean()) {
-            user.setSingleAttribute(LICENSE_ATTRIBUTE, userLicenses.toString());
+            int partSize = 255;
+            String userLicense = userLicenses.toString();
+            for (int i = 0; i < userLicense.length(); i += partSize) {
+                String partValue = userLicense.substring(i, Math.min(userLicense.length(), i + partSize));
+                user.setAttribute(LICENSE_ATTRIBUTE + (i / partSize + 1), List.of(partValue));
+            }
             return true;
         }
         return false;

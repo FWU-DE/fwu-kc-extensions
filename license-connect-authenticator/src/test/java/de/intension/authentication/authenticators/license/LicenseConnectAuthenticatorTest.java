@@ -48,7 +48,7 @@ import de.intension.authentication.authenticators.rest.model.LicenseRequestedReq
 import de.intension.authentication.helpers.KeycloakPage;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LicenseAuthenticatorTest
+public class LicenseConnectAuthenticatorTest
 {
 
     private static final Network             network           = Network.newNetwork();
@@ -103,10 +103,15 @@ public class LicenseAuthenticatorTest
             List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
             assertFalse(idpUsers.isEmpty());
             UserRepresentation idpUser = idpUsers.get(0);
-            List<String> attributes = idpUser.getAttributes().get(LicenseConnectAuthenticator.LICENSE_ATTRIBUTE);
+            List<String> attributes = idpUser.getAttributes().get(LicenseConnectAuthenticator.LICENSE_ATTRIBUTE + "1");
             assertFalse(attributes.isEmpty());
             String licenseAttribute = attributes.get(0);
-            assertEquals("{\"hasLicences\":true,\"licences\":[{\"license_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"license_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015\"}]}",
+            assertEquals("{\"hasLicences\":true,\"licences\":[{\"license_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"license_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-423",
+                         licenseAttribute);
+            attributes = idpUser.getAttributes().get(LicenseConnectAuthenticator.LICENSE_ATTRIBUTE + "2");
+            assertFalse(attributes.isEmpty());
+            licenseAttribute = attributes.get(0);
+            assertEquals("7-a451-4333736ex015\"}]}",
                          licenseAttribute);
             mockServerClient.verify(requestLicense.getId(), VerificationTimes.once());
             kcPage.logout();
@@ -129,7 +134,7 @@ public class LicenseAuthenticatorTest
                      response()
                          .withStatusCode(OK_200.code())
                          .withReasonPhrase(OK_200.reasonPhrase())
-                         .withBody("{\n    \"hasLicences\": true,\n    \"licences\": [\n      {\n        \"license_code\": \"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"\n      },\n      {\n        \"license_code\": \"COR-3rw46a45-345c-4237-a451-4333736ex015\"\n      }\n    ]\n  }")
+                         .withBody("{\n    \"hasLicences\": true,\n    \"licences\": [\n      {\n        \"license_code\": \"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"\n      },\n      {\n        \"license_code\": \"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"\n      }\n    ]\n  }")
                          .withHeaders(
                                       header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType())))[0];
     }
