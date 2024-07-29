@@ -22,6 +22,17 @@
     }
   },
   {
+    "id": "allowed_idp-token-debug",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/service-provider/idp-token-debug/idp-assignments"
+    },
+    "httpResponse": {
+      "body": "[\"keycloak-oidc\"]"
+    }
+  },
+  {
     "id": "allow_account_console",
     "priority": 0,
     "httpRequest": {
@@ -80,6 +91,20 @@
     },
     "httpResponse": {
       "body": "{\"allowAll\": false,\"vidisSchoolIdentifiers\": [\"DE-SN-Schullogin.0815\",\"DE-SN-Schullogin.1111\"]}"
+    }
+  },
+  {
+    "id": "allowAll_idp-token-debug",
+    "priority": 0,
+    "httpRequest": {
+      "method": "GET",
+      "path": "/school-assignments",
+      "queryStringParameters": {
+        "serviceProvider": "idp-token-debug"
+      }
+    },
+    "httpResponse": {
+      "body": "{\"allowAll\": true,\"vidisSchoolIdentifiers\": []}"
     }
   },
   {

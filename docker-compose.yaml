@@ -47,6 +47,7 @@ services:
       - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
       - "./target:/opt/keycloak/providers/"
+      - "./test/lib/keycloak-custom-attribute-idp-linking-2.1.0.jar:/opt/keycloak/providers/keycloak-custom-attribute-idp-linking-2.1.0.jar"
     networks:
       - fwunet
     depends_on:

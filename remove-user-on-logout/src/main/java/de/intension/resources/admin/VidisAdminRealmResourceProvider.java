@@ -27,8 +27,9 @@ public class VidisAdminRealmResourceProvider
     implements AdminRealmResourceProvider
 {
 
-    private static final Logger      LOG                                       = Logger.getLogger(VidisAdminRealmResourceProvider.class);
-    private static final int         TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 5;
+    private static final Logger      LOG                                               = Logger.getLogger(VidisAdminRealmResourceProvider.class);
+    private static final int         DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 30;
+    public static final String       DELETION_TOLERANCE_CONFIG                         = "deletiontolerance";
 
     private final KeycloakSession    session;
     private AdminPermissionEvaluator auth;
@@ -82,7 +83,8 @@ public class VidisAdminRealmResourceProvider
         RealmModel realmModel = session.getContext().getRealm();
         UserSessionProvider sessionProvider = session.sessions();
         int numberOfDeletedUsers = 0;
-        Long lastCreationDate = new Date().toInstant().getEpochSecond() - TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS;
+        Long lastCreationDate = new Date().toInstant().getEpochSecond()
+                - config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS);
         do {
             List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate, idpOnly);
             LOG.debugf("Found %s users in realm %s", idpUsers.size(), realmModel.getName());
@@ -108,8 +110,7 @@ public class VidisAdminRealmResourceProvider
                 : " ";
         Query userQuery = em.createNativeQuery("select ue.* "
                 + "from user_entity ue "
-                + "where (ue.created_timestamp > :lastTimeStamp "
-                + "or ue.created_timestamp is null) "
+                + "where ue.created_timestamp > :lastTimeStamp "
                 + "and ue.realm_id = :realmId "
                 + idpOnlyClause
                 + "order by ue.created_timestamp asc "
