@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -63,11 +64,15 @@ class VidisAdminRealmResourceProviderIT
     public static final String               ADMIN_PASSWORD    = keycloak.getAdminPassword();
 
     @Test
-    void shouldDeleteAllUsers_whenAllConfigured()
+    void shouldDeleteUsersWithCreatedTimestam_whenAllConfigured()
         throws IOException
     {
         keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "ALL");
         keycloak.start();
+        UserRepresentation user = new UserRepresentation();
+        user.setEmail("test@intension.de");
+        user.setUsername("test");
+        keycloak.getKeycloakAdminClient().realm("fwu").users().create(user);
 
         Integer userCountBeforeCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
         String authServerUrl = keycloak.getAuthServerUrl();
@@ -76,11 +81,11 @@ class VidisAdminRealmResourceProviderIT
         Integer deletedUsers = deleteUsers(accessToken, authServerUrl);
         Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
 
-        assertThat(deletedUsers).as("Should have deleted All Users").isPositive();
-        assertThat(userCountBeforeCleanup).isGreaterThan(userCountAfterCleanup);
-        assertThat(userCountAfterCleanup)
+        assertThat(deletedUsers).as("Deleted users").isPositive();
+        assertThat(userCountBeforeCleanup).as("Users before cleanup").isGreaterThan(userCountAfterCleanup);
+        assertThat(userCountAfterCleanup).as("Users after cleanup")
             .isEqualTo(userCountBeforeCleanup - deletedUsers)
-            .isZero();
+            .isPositive();
     }
 
     @Test
