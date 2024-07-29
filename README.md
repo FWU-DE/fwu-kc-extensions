@@ -81,7 +81,7 @@ For more details please check [here](./user-info-provider/README.md).
 ### Account Linking Authenticator
 
 Authenticators required to enable the linking of accounts with only one authentication process
-For more details please check [here](./account-linking/README.md).
+For more details please check [here](./account-linking-authenticator/README.md).
 
 ## Contributing
 
