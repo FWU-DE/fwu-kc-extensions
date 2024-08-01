@@ -10,8 +10,6 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<amqp-client.version>5.18.0</amqp-client.version>
-		<maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 		<assertj.version>3.21.0</assertj.version>
 	</properties>
 
@@ -45,11 +43,12 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>${amqp-client.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

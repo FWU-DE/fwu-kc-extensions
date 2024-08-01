@@ -64,7 +64,7 @@ class VidisAdminRealmResourceProviderIT
     public static final String               ADMIN_PASSWORD    = keycloak.getAdminPassword();
 
     @Test
-    void shouldDeleteUsersWithCreatedTimestam_whenAllConfigured()
+    void shouldDeleteUsersWithCreatedTimestamp_whenAllConfigured()
         throws IOException
     {
         keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "ALL");

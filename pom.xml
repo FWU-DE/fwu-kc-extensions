@@ -24,6 +24,7 @@
     <module>school-mapper</module>
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
+    <module>3rd-party-libs</module>
   </modules>
 
   <properties>
@@ -35,6 +36,7 @@
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <mockito.version>4.9.0</mockito.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
   </properties>
 
   <dependencies>
@@ -217,6 +219,11 @@
         <artifactId>user-info-api</artifactId>
         <version>${project.version}</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>5.18.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

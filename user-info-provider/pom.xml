@@ -15,18 +15,22 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi-private</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-saml-core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>de.intension</groupId>
@@ -35,62 +39,16 @@
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <phase>none</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.3.0</version>
-        <configuration>
-          <appendAssemblyId>false</appendAssemblyId>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-            <manifestEntries>
-              <Dependencies>org.keycloak.keycloak-core, org.keycloak.keycloak-server-spi,
-                org.keycloak.keycloak-server-spi-private,
-                org.keycloak.keycloak-services, org.keycloak.keycloak-saml-core, com.fasterxml.jackson.datatype.jsr310
-              </Dependencies>
-            </manifestEntries>
-          </archive>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- bind to the packaging phase -->
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>

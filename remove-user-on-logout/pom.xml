@@ -39,14 +39,17 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-legacy</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-jpa</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mock-server</groupId>
