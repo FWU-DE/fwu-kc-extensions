@@ -28,6 +28,7 @@ services:
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_HMAC_MANAGEMENT_REALM: management
       KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU: "IDP"
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU: "ALL"
+      KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE: 5
       KC_FEATURES: admin-api
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
@@ -47,6 +48,7 @@ services:
       - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
       - "./target:/opt/keycloak/providers/"
+      - "./test/lib/keycloak-custom-attribute-idp-linking-2.1.0.jar:/opt/keycloak/providers/keycloak-custom-attribute-idp-linking-2.1.0.jar"
     networks:
       - fwunet
     depends_on:

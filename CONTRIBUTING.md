@@ -51,6 +51,8 @@ The project is a multi-module Maven project. When creating a new module, make su
 
 1. Make sure the folder has the same name as the module name in the `pom.xml`.
 2. `README.md` explaining the extension.
+3. If you are using 3rd Party Libraries which are not provided by Keycloak, please take a look at the "3rd-party-libs" module.
+   a. If you dependency is not there already you can add it there as dependency. Define the version in the parent pom and define it with scope provided in your module. this way you don't have to define the build ocnfiguration in your modules pom.
 
 ## Automatic release process
 
