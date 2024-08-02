@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented here.
 
-## Version [4.11.4]
+## Version [4.11.5]
 
-- Bugfix: Only delete users with a creation date
+- Bugfix: Add JsonPath dependency to 3rd Party Libs
 
 ## Version [4.11.4]
 

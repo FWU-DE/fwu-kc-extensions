@@ -28,6 +28,10 @@
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
