@@ -6,6 +6,11 @@ All notable changes to this project will be documented here.
 
 - Bugfix: Only delete users with a creation date
 
+## Version [4.11.4]
+
+- Bugfix: Don't delete users without created Date
+- Improvement: Add possiblity to configure the Toleration period for newly Created Users to not be deleted.
+
 ## Version [4.11.3]
 
 - Bugfix: Simple HMAC mapper can map to configurable claim
