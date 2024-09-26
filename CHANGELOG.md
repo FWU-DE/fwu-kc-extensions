@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.12.0]
+
+- Feature: Add new authenticator to fetch the license for user from license connect
+
 ## Version [4.11.5]
 
 - Bugfix: Add JsonPath dependency to 3rd Party Libs

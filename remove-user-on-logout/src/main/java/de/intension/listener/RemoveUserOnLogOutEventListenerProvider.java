@@ -1,5 +1,10 @@
 package de.intension.listener;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -9,12 +14,16 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.models.FederatedIdentityModel;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
 
 import de.intension.resources.admin.DeletableUserType;
+import de.intension.rest.LicenseConnectRestClient;
+import de.intension.rest.model.RemoveLicenseRequest;
 import jakarta.persistence.EntityManager;
 
 /**
@@ -24,12 +33,16 @@ public class RemoveUserOnLogOutEventListenerProvider
     implements EventListenerProvider
 {
 
-    private static final Logger            LOG = Logger.getLogger(RemoveUserOnLogOutEventListenerProvider.class);
+    private static final Logger            LOG             = Logger.getLogger(RemoveUserOnLogOutEventListenerProvider.class);
+
+    public static final String             LICENSE_URL     = "license-url";
+    public static final String             LICENSE_API_KEY = "license-api-key";
 
     private final KeycloakSession          keycloakSession;
 
-    private final EventListenerTransaction tx  = new EventListenerTransaction(null, this::removeUser);
+    private final EventListenerTransaction tx              = new EventListenerTransaction(null, this::removeUser);
     private final Config.Scope             config;
+    private LicenseConnectRestClient       restClient;
 
     protected RemoveUserOnLogOutEventListenerProvider(KeycloakSession session, Config.Scope config)
     {
@@ -37,6 +50,7 @@ public class RemoveUserOnLogOutEventListenerProvider
         this.config = config;
         session.getTransactionManager().enlistAfterCompletion(tx);
         LOG.debugf("[%s] instantiated.", this.getClass());
+        this.restClient = new LicenseConnectRestClient(config.get(LICENSE_URL), config.get(LICENSE_API_KEY));
     }
 
     @Override
@@ -51,7 +65,8 @@ public class RemoveUserOnLogOutEventListenerProvider
 
     /**
      * Remove user from keycloak on logout.
-     * Starts a jpa transaction before removing the user since eventlistener tarnsaction does not hava a
+     * Starts a jpa transaction before removing the user since eventlistener tarnsaction does not
+     * hava a
      * running jpa-transaction
      */
     private void removeUser(Event event)
@@ -64,6 +79,7 @@ public class RemoveUserOnLogOutEventListenerProvider
 
         UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
         if (userToDelete != null) {
+            this.releaseLicenses(userToDelete, event);
             userProvider.removeUser(realm, userToDelete);
             LOG.infof("User %s removed.", userToDelete.getUsername());
         }
@@ -71,10 +87,11 @@ public class RemoveUserOnLogOutEventListenerProvider
         transaction.commit();
     }
 
-    private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId) {
+    private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId)
+    {
         RealmModel realm = keycloakSession.getContext().getRealm();
         DeletableUserType deletableUserType = DeletableUserType
-                .valueOf(config.get(realm.getName().toLowerCase(), DeletableUserType.NONE.name()));
+            .valueOf(config.get(realm.getName().toLowerCase(), DeletableUserType.NONE.name()));
         if (deletableUserType == DeletableUserType.NONE || "master".equals(realm.getName())) {
             LOG.infof("Userdeletion for realm %s is disabled.", realm.getName());
             return null;
@@ -83,10 +100,44 @@ public class RemoveUserOnLogOutEventListenerProvider
         if (user == null) {
             return null;
         }
-        if(deletableUserType == DeletableUserType.ALL) {
+        if (deletableUserType == DeletableUserType.ALL) {
             return user;
         }
         return keycloakSession.users().getFederatedIdentitiesStream(realm, user).findAny().isPresent() ? user : null;
+    }
+
+    private void releaseLicenses(UserModel user, Event event)
+    {
+        RemoveLicenseRequest licenseRequest = createLicenseReleaseRequest(user, event);
+        boolean licenseReleased = false;
+        try {
+            licenseReleased = this.restClient.releaseLicense(licenseRequest);
+        } catch (Exception e) {
+            LOG.warn(e.getLocalizedMessage());
+        }
+        if (licenseReleased) {
+            LOG.infof("User license has been released for the user %s", user.getUsername());
+        }
+        else {
+            LOG.warnf("User license not released for the user %s", user.getUsername());
+        }
+    }
+
+    private RemoveLicenseRequest createLicenseReleaseRequest(UserModel user, Event event)
+    {
+        RemoveLicenseRequest licenseRequestedRequest = null;
+        RealmModel realm = this.keycloakSession.realms().getRealm(event.getRealmId());
+
+        Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
+        Stream<FederatedIdentityModel> federatedIdentityModelList = keycloakSession.users().getFederatedIdentitiesStream(realm, user)
+            .filter(identity -> idps.contains(identity.getIdentityProvider()));
+
+        Optional<FederatedIdentityModel> idp = federatedIdentityModelList.findFirst();
+        if (idp.isPresent()) {
+            String userId = idp.get().getUserId();
+            licenseRequestedRequest = new RemoveLicenseRequest(userId);
+        }
+        return licenseRequestedRequest;
     }
 
     @Override
@@ -99,5 +150,10 @@ public class RemoveUserOnLogOutEventListenerProvider
     public void close()
     {
         // nothing to close.
+    }
+
+    public LicenseConnectRestClient getRestClient()
+    {
+        return this.restClient;
     }
 }

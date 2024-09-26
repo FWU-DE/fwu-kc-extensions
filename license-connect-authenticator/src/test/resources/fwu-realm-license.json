@@ -1611,7 +1611,6 @@
 	"accountTheme": "keycloak.v2",
 	"eventsEnabled": false,
 	"eventsListeners": [
-		"remove-user-on-logout",
 		"jboss-logging"
 	],
 	"enabledEventTypes": [],
@@ -1631,6 +1630,7 @@
 			"authenticateByDefault": false,
 			"linkOnly": false,
 			"firstBrokerLoginFlowAlias": "first broker login",
+			"postBrokerLoginFlowAlias": "License Connect",
 			"config": {
 				"loginHint": "true",
 				"clientId": "identity-broker",
@@ -1663,7 +1663,7 @@
 			"config": {
 				"syncMode": "INHERIT",
 				"attribute.value": "de-DE",
-				"attribute": "person.lokalisierung"
+				"attribute": "bundesland"
 			}
 		}
 	],
@@ -2514,6 +2514,24 @@
 					"priority": 20,
 					"autheticatorFlow": true,
 					"flowAlias": "vidis first broker login First broker login - Conditional OTP",
+					"userSetupAllowed": false
+				}
+			]
+		},
+		{
+			"id": "ab29878c-597e-4980-be6e-a8c16b80b4f8",
+			"alias": "License Connect",
+			"description": "",
+			"providerId": "basic-flow",
+			"topLevel": true,
+			"builtIn": false,
+			"authenticationExecutions": [
+				{
+					"authenticator": "license-connect-authenticator",
+					"authenticatorFlow": false,
+					"requirement": "REQUIRED",
+					"priority": 0,
+					"autheticatorFlow": false,
 					"userSetupAllowed": false
 				}
 			]

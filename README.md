@@ -83,6 +83,11 @@ For more details please check [here](./user-info-provider/README.md).
 Authenticators required to enable the linking of accounts with only one authentication process
 For more details please check [here](./account-linking-authenticator/README.md).
 
+### License Connect Authenticator
+
+Authenticator required to fetch the license associated with the user from license connect
+For more details please check [here](./license-connect-authenticator/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
