@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.intension.authentication.authenticators.rest.model.LicenseRequestedRequest;
+import de.intension.authentication.authenticators.rest.model.LicenseRequest;
 
 public class LicenseConnectRestClient
     implements Closeable
@@ -39,7 +39,7 @@ public class LicenseConnectRestClient
         httpClient = HttpClientBuilder.create().setDefaultRequestConfig(getRequestConfig()).build();
     }
 
-    public JsonNode getLicenses(LicenseRequestedRequest licenseRequest)
+    public JsonNode getLicenses(LicenseRequest licenseRequest)
         throws IOException
     {
         JsonNode userLicenses = null;
@@ -50,20 +50,20 @@ public class LicenseConnectRestClient
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenseRequest));
         httpPost.setEntity(entity);
 
-        CloseableHttpResponse response = httpClient.execute(httpPost);
-
-        final int status = response.getStatusLine().getStatusCode();
-        if (status == 200) {
-            try {
-                userLicenses = objectMapper.readTree(EntityUtils.toString(response.getEntity()));
-            } catch (JsonProcessingException e) {
-                LOG.error("Error while parsing user licenses ", e);
+        try (CloseableHttpResponse response = httpClient.execute(httpPost);) {
+            final int status = response.getStatusLine().getStatusCode();
+            if (status == 200) {
+                try {
+                    userLicenses = objectMapper.readTree(EntityUtils.toString(response.getEntity()));
+                } catch (JsonProcessingException e) {
+                    LOG.error("Error while parsing user licenses ", e);
+                }
+            }
+            else {
+                LOG.warnf("There was an error while fetching the license for the user. Status: %d. Reason: %s", status,
+                          response.getStatusLine().getReasonPhrase());
             }
         }
-        else {
-            LOG.warnf("There was an error while fetching the license for the user. Status: %d. Reason: %s", status, response.getStatusLine().getReasonPhrase());
-        }
-        response.close();
         return userLicenses;
     }
 

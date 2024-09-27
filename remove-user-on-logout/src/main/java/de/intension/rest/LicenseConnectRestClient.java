@@ -46,15 +46,15 @@ public class LicenseConnectRestClient
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenseRequest));
         httpPost.setEntity(entity);
 
-        CloseableHttpResponse response = httpClient.execute(httpPost);
-
-        final int status = response.getStatusLine().getStatusCode();
-        if (status == 200) {
-            return true;
-        }
-        else {
-            LOG.warnf("There was an error while releasing the license for the user. Status: %d. Reason: %s", status,
-                      response.getStatusLine().getReasonPhrase());
+        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+            final int status = response.getStatusLine().getStatusCode();
+            if (status == 200) {
+                return true;
+            }
+            else {
+                LOG.warnf("There was an error while releasing the license for the user. Status: %d. Reason: %s", status,
+                          response.getStatusLine().getReasonPhrase());
+            }
         }
         return false;
     }

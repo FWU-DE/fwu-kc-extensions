@@ -2,14 +2,11 @@
 
 ## Configuration
 
-### SPI environment variables
+### Rest endpoint in UI
 
-The following environment variables must be set within the deployment pipeline.
+The following environment variables must be set within UI in the authenticator config
 
-| Property                                                           | Description                        | Example                                    |
-|--------------------------------------------------------------------|------------------------------------|--------------------------------------------|
-| KC_SPI_AUTHENTICATOR_LICENSE_CONNECT_AUTHENTICATOR_LICENSE_URL     | URI for the license connect        | http://mockserver:1080/v1/licences/request |
-| KC_SPI_AUTHENTICATOR_LICENSE_CONNECT_AUTHENTICATOR_LICENSE_API_KEY | API key used to conenct to the API | sample-api-key                             |
+rest-endpoint and api-key
 
 ### Fetching the user license
 

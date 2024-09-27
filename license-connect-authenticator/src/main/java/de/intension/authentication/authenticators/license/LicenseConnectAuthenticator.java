@@ -2,6 +2,7 @@ package de.intension.authentication.authenticators.license;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,29 +22,34 @@ import org.keycloak.services.ErrorPage;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import de.intension.authentication.authenticators.rest.LicenseConnectRestClient;
-import de.intension.authentication.authenticators.rest.model.LicenseRequestedRequest;
+import de.intension.authentication.authenticators.rest.model.LicenseRequest;
 import jakarta.ws.rs.core.Response;
 
 public class LicenseConnectAuthenticator
     implements Authenticator
 {
 
-    private static final Logger            logger                          = Logger.getLogger(LicenseConnectAuthenticator.class);
-    public static final String             LICENSE_ATTRIBUTE               = "licences";
-    private static final String            SCHOOL_IDENTIFICATION_ATTRIBUTE = "prefixedSchools";
-    private static final String            BUNDESLAND_ATTRIBUTE            = "bundesland";
-    private static final String            HAS_LICENSES_ATTRIBUTE          = "hasLicences";
+    private static final Logger      logger                          = Logger.getLogger(LicenseConnectAuthenticator.class);
+    public static final String       LICENSE_ATTRIBUTE               = "licences";
+    private static final String      SCHOOL_IDENTIFICATION_ATTRIBUTE = "prefixedSchools";
+    private static final String      BUNDESLAND_ATTRIBUTE            = "bundesland";
+    private static final String      HAS_LICENSES_ATTRIBUTE          = "hasLicences";
+    private static final int         PART_SIZE                       = 255;
 
-    private final LicenseConnectRestClient restClient;
+    private LicenseConnectRestClient restClient;
 
-    public LicenseConnectAuthenticator(LicenseConnectRestClient restClient)
+    public LicenseConnectAuthenticator()
     {
-        this.restClient = restClient;
     }
 
     @Override
     public void authenticate(AuthenticationFlowContext context)
     {
+        this.restClient = createRestClient(context.getAuthenticatorConfig().getConfig());
+        if (this.restClient == null) {
+            logger.error("Please configure the authenticator");
+            context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+        }
         if (this.addUserLicense(context)) {
             context.success();
         }
@@ -56,23 +62,32 @@ public class LicenseConnectAuthenticator
     private boolean addUserLicense(AuthenticationFlowContext context)
     {
         UserModel user = context.getUser();
-        LicenseRequestedRequest licenseRequest = createLicenseRequest(user, context);
+        LicenseRequest licenseRequest = createLicenseRequest(user, context);
         JsonNode userLicenses = fetchUserLicense(licenseRequest);
         if (userLicenses != null && userLicenses.path(HAS_LICENSES_ATTRIBUTE).asBoolean()) {
-            int partSize = 255;
             String userLicense = userLicenses.path(LICENSE_ATTRIBUTE).toString();
-            for (int i = 0; i < userLicense.length(); i += partSize) {
-                String partValue = userLicense.substring(i, Math.min(userLicense.length(), i + partSize));
-                user.setAttribute(LICENSE_ATTRIBUTE + (i / partSize + 1), List.of(partValue));
+            for (int i = 0; i < userLicense.length(); i += PART_SIZE) {
+                String partValue = userLicense.substring(i, Math.min(userLicense.length(), i + PART_SIZE));
+                user.setAttribute(LICENSE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
             }
             return true;
         }
         return false;
     }
 
-    private LicenseRequestedRequest createLicenseRequest(UserModel user, AuthenticationFlowContext context)
+    private LicenseConnectRestClient createRestClient(Map<String, String> config)
     {
-        LicenseRequestedRequest licenseRequestedRequest = null;
+        if (config.get(LicenseConnectAuthenticatorFactory.LICENSE_URL) == null || config.get(LicenseConnectAuthenticatorFactory.LICENSE_API_KEY) == null) {
+            return null;
+        }
+        LicenseConnectRestClient restClient = new LicenseConnectRestClient(config.get(LicenseConnectAuthenticatorFactory.LICENSE_URL),
+                config.get(LicenseConnectAuthenticatorFactory.LICENSE_API_KEY));
+        return restClient;
+    }
+
+    private LicenseRequest createLicenseRequest(UserModel user, AuthenticationFlowContext context)
+    {
+        LicenseRequest licenseRequestedRequest = null;
         String schulKennung = user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE);
         String bundesLand = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
         String clientId = context.getAuthenticationSession().getClient().getClientId();
@@ -80,13 +95,13 @@ public class LicenseConnectAuthenticator
         Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
         if (idp.isPresent()) {
             String userId = idp.get().getUserId();
-            licenseRequestedRequest = new LicenseRequestedRequest(userId, clientId, schulKennung, bundesLand);
+            licenseRequestedRequest = new LicenseRequest(userId, clientId, schulKennung, bundesLand);
         }
 
         return licenseRequestedRequest;
     }
 
-    private JsonNode fetchUserLicense(LicenseRequestedRequest licenseRequest)
+    private JsonNode fetchUserLicense(LicenseRequest licenseRequest)
     {
         JsonNode userLicense = null;
         try {

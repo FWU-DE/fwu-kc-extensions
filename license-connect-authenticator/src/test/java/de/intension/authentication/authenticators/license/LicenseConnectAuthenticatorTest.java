@@ -44,7 +44,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.authentication.authenticators.rest.model.LicenseRequestedRequest;
+import de.intension.authentication.authenticators.rest.model.LicenseRequest;
 import de.intension.authentication.helpers.KeycloakPage;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -116,7 +116,7 @@ public class LicenseConnectAuthenticatorTest
     private Expectation requestLicenseExpectation(MockServerClient clientAndServer)
         throws JsonProcessingException
     {
-        LicenseRequestedRequest licenseRequestedRequest = new LicenseRequestedRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f", "account-console",
+        LicenseRequest licenseRequestedRequest = new LicenseRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f", "account-console",
                 "DE-SN-Schullogin.0815", "de-DE");
         return clientAndServer
             .when(

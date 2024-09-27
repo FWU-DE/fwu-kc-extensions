@@ -1,6 +1,6 @@
 package de.intension.authentication.authenticators.rest.model;
 
-public class LicenseRequestedRequest
+public class LicenseRequest
 {
 
     private String userId;
@@ -8,7 +8,7 @@ public class LicenseRequestedRequest
     private String schulkennung;
     private String bundesland;
 
-    public LicenseRequestedRequest(String userId, String clientId, String schulkennung, String bundesland)
+    public LicenseRequest(String userId, String clientId, String schulkennung, String bundesland)
     {
         this.userId = userId;
         this.clientId = clientId;
