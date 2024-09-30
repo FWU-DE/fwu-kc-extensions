@@ -1,5 +1,6 @@
 package de.intension.rest;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.jboss.logging.Logger;
@@ -82,6 +83,13 @@ public class DefaultRestClientProviderFactory
     public void close()
     {
         initHolder.set(Boolean.FALSE);
+        if (this.restClient != null) {
+            try {
+                this.restClient.close();
+            } catch (IOException e) {
+                LOG.warn("There was error while closing the rest client");
+            }
+        }
     }
 
     @Override

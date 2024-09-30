@@ -48,14 +48,6 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     @Override
     public void close()
     {
-        if (this.removeUserOnLogOutEventListenerProvider != null) {
-            try {
-                this.removeUserOnLogOutEventListenerProvider.getRestClient().close();
-            } catch (IOException e) {
-                // Do nothing
-                LOG.warn("There was error while closing the rest client");
-            }
-        }
     }
 
 }
