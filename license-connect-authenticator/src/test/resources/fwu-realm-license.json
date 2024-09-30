@@ -1611,7 +1611,6 @@
 	"accountTheme": "keycloak.v2",
 	"eventsEnabled": false,
 	"eventsListeners": [
-		"remove-user-on-logout",
 		"jboss-logging"
 	],
 	"enabledEventTypes": [],
@@ -1631,6 +1630,7 @@
 			"authenticateByDefault": false,
 			"linkOnly": false,
 			"firstBrokerLoginFlowAlias": "first broker login",
+			"postBrokerLoginFlowAlias": "License Connect",
 			"config": {
 				"loginHint": "true",
 				"clientId": "identity-broker",
@@ -1663,7 +1663,7 @@
 			"config": {
 				"syncMode": "INHERIT",
 				"attribute.value": "de-DE",
-				"attribute": "person.lokalisierung"
+				"attribute": "bundesland"
 			}
 		}
 	],
@@ -2517,6 +2517,25 @@
 					"userSetupAllowed": false
 				}
 			]
+		},
+		{
+			"id": "ab29878c-597e-4980-be6e-a8c16b80b4f8",
+			"alias": "License Connect",
+			"description": "",
+			"providerId": "basic-flow",
+			"topLevel": true,
+			"builtIn": false,
+			"authenticationExecutions": [
+				{
+				    "authenticatorConfig": "License Connect",
+					"authenticator": "license-connect-authenticator",
+					"authenticatorFlow": false,
+					"requirement": "REQUIRED",
+					"priority": 0,
+					"autheticatorFlow": false,
+					"userSetupAllowed": false
+				}
+			]
 		}
 	],
 	"authenticatorConfig": [
@@ -2533,6 +2552,14 @@
 			"config": {
 				"update.profile.on.first.login": "missing"
 			}
+		},
+		{
+			  "id": "443d2a41-f72a-41fe-af08-a5888ec1c193",
+			  "alias": "License Connect",
+			  "config": {
+			    "license-api-key": "sample-api-key",
+			    "license-url": "http://mockserver:1080/v1/licences/request"
+			  }
 		}
 	],
 	"requiredActions": [

@@ -25,10 +25,11 @@
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
     <module>3rd-party-libs</module>
+    <module>license-connect-authenticator</module>
   </modules>
 
   <properties>
-    <revision>4.11.5</revision>
+    <revision>4.12.0</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -211,7 +212,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.24</version>
+        <version>1.18.30</version>
         <scope>provided</scope>
       </dependency>
       <dependency>

@@ -1,6 +1,11 @@
 package de.intension.resources.admin;
 
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockserver.model.Header.header;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.HttpStatusCode.OK_200;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,23 +14,41 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.matchers.Times;
+import org.mockserver.mock.Expectation;
+import org.mockserver.model.MediaType;
+import org.mockserver.verify.VerificationTimes;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.rest.model.RemoveLicenseRequest;
 import de.intension.testhelper.KeycloakPage;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 class VidisAdminRealmResourceProviderIT
 {
@@ -37,6 +60,8 @@ class VidisAdminRealmResourceProviderIT
     private static final String              IMPORT_PATH       = "/opt/keycloak/data/import/";
 
     private static final OkHttpClient        client            = new OkHttpClient();
+
+    private final ObjectMapper               objectMapper      = new ObjectMapper();
 
     @Container
     private static final KeycloakContainer   keycloak          = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
@@ -57,6 +82,11 @@ class VidisAdminRealmResourceProviderIT
         .withExposedPorts(4444, 5900)
         .withSharedMemorySize(2000000000L);
 
+    private static final MockServerContainer mockServer        = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.13.2"))
+        .withNetwork(network)
+        .withNetworkAliases("mockserver")
+        .withExposedPorts(1080, 1090);
+
     private RemoteWebDriver                  driver;
     private FluentWait<WebDriver>            wait;
 
@@ -70,6 +100,7 @@ class VidisAdminRealmResourceProviderIT
         keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "ALL");
         keycloak.start();
         UserRepresentation user = new UserRepresentation();
+        user.setId("sampleUserId");
         user.setEmail("test@intension.de");
         user.setUsername("test");
         keycloak.getKeycloakAdminClient().realm("fwu").users().create(user);
@@ -86,30 +117,38 @@ class VidisAdminRealmResourceProviderIT
         assertThat(userCountAfterCleanup).as("Users after cleanup")
             .isEqualTo(userCountBeforeCleanup - deletedUsers)
             .isPositive();
+
     }
 
     @Test
     void shouldDeleteIdpUsers_whenIdpConfigured()
         throws IOException
     {
-        keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "IDP");
-        keycloak.start();
+        try (
+                MockServerClient mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort())) {
+            Expectation releaseLicense = releaseLicenseExpectation(mockServerClient);
+            keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "IDP");
+            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_API_KEY", "sample-api-key");
+            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_BASE_URL", "http://mockserver:1080/v1/licences/release");
+            keycloak.start();
 
-        KeycloakPage.start(driver, wait).openAccountConsole().idpLogin("idpuser", "test");
-        RealmResource realm = keycloak.getKeycloakAdminClient().realms().realm("fwu");
-        String userId = realm.users().search("idpuser").get(0).getId();
-        realm.users().get(userId).getUserSessions().forEach(session -> realm.deleteSession(session.getId(), false));
+            KeycloakPage.start(driver, wait).openAccountConsole().idpLogin("idpuser", "test");
+            RealmResource realm = keycloak.getKeycloakAdminClient().realms().realm("fwu");
+            String userId = realm.users().search("idpuser").get(0).getId();
+            realm.users().get(userId).getUserSessions().forEach(session -> realm.deleteSession(session.getId(), false));
 
-        Integer userCountBeforeCleanup = realm.users().count();
-        String authServerUrl = keycloak.getAuthServerUrl();
-        String accessToken = getAccessToken(authServerUrl + "/realms/master/protocol/openid-connect/token", ADMIN_USERNAME, ADMIN_PASSWORD);
+            Integer userCountBeforeCleanup = realm.users().count();
+            String authServerUrl = keycloak.getAuthServerUrl();
+            String accessToken = getAccessToken(authServerUrl + "/realms/master/protocol/openid-connect/token", ADMIN_USERNAME, ADMIN_PASSWORD);
 
-        Integer deletedUsers = deleteUsers(accessToken, authServerUrl);
-        Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
+            Integer deletedUsers = deleteUsers(accessToken, authServerUrl);
+            Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
 
-        assertThat(deletedUsers).as("Should have deleted IDP Users").isPositive();
-        assertThat(userCountBeforeCleanup).as("Usercount should be different after deletion").isGreaterThan(userCountAfterCleanup);
-        assertThat(userCountAfterCleanup).as("Usercount after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
+            assertThat(deletedUsers).as("Should have deleted IDP Users").isPositive();
+            assertThat(userCountBeforeCleanup).as("Usercount should be different after deletion").isGreaterThan(userCountAfterCleanup);
+            assertThat(userCountAfterCleanup).as("Usercount after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
+            mockServerClient.verify(releaseLicense.getId(), VerificationTimes.once());
+        }
     }
 
     private String getAccessToken(String tokenUrl, String username, String password)
@@ -154,10 +193,30 @@ class VidisAdminRealmResourceProviderIT
         }
     }
 
+    private Expectation releaseLicenseExpectation(MockServerClient clientAndServer)
+        throws JsonProcessingException
+    {
+        RemoveLicenseRequest licenseRequestedRequest = new RemoveLicenseRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f");
+        return clientAndServer
+            .when(
+                  request().withPath("/v1/licences/release")
+                      .withMethod("POST")
+                      .withHeader("X-API-Key", "sample-api-key")
+                      .withBody(objectMapper.writeValueAsString(licenseRequestedRequest)),
+                  Times.exactly(1))
+            .respond(
+                     response()
+                         .withStatusCode(OK_200.code())
+                         .withReasonPhrase(OK_200.reasonPhrase())
+                         .withHeaders(
+                                      header(CONTENT_TYPE.toString(), MediaType.JSON_UTF_8.getType())))[0];
+    }
+
     @BeforeAll
     static void startContainers()
     {
         firefoxStandalone.start();
+        mockServer.start();
     }
 
     @BeforeEach

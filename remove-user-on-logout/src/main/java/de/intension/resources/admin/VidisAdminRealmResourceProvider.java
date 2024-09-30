@@ -2,13 +2,20 @@ package de.intension.resources.admin;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.models.FederatedIdentityModel;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionProvider;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -17,9 +24,16 @@ import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator;
 
+import de.intension.rest.LicenseConnectRestClient;
+import de.intension.rest.model.RemoveLicenseRequest;
+import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -94,7 +108,10 @@ public class VidisAdminRealmResourceProvider
             for (UserEntity ue : idpUsers) {
                 lastCreationDate = ue.getCreatedTimestamp() != null ? ue.getCreatedTimestamp() : lastCreationDate;
                 UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
-                if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true) && session.users().removeUser(realmModel, ua)) {
+                if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
+                    LicenseConnectRestClient restClient = session.getProvider(RestClientProvider.class).restClient();
+                    this.removeUserLicense(restClient, ua, realmModel);
+                    session.users().removeUser(realmModel, ua);
                     numberOfDeletedUsers++;
                 }
 
@@ -119,5 +136,40 @@ public class VidisAdminRealmResourceProvider
         userQuery.setParameter("chunkSize", chunkSize);
         userQuery.setParameter("realmId", session.getContext().getRealm().getId());
         return userQuery.getResultList();
+    }
+
+    private void removeUserLicense(LicenseConnectRestClient restClient, UserAdapter ua, RealmModel realm)
+    {
+        RemoveLicenseRequest licenseRequest = createLicenseReleaseRequest(ua, realm);
+        boolean licenseReleased = false;
+        try {
+            if (restClient != null) {
+                licenseReleased = restClient.releaseLicense(licenseRequest);
+            }
+        } catch (Exception e) {
+            LOG.warn(e.getLocalizedMessage());
+        }
+        if (licenseReleased) {
+            LOG.infof("User license has been released for the user %s", ua.getUsername());
+        }
+        else {
+            LOG.warnf("User license not released for the user %s", ua.getUsername());
+        }
+    }
+
+    private RemoveLicenseRequest createLicenseReleaseRequest(UserModel user, RealmModel realm)
+    {
+        RemoveLicenseRequest licenseRequestedRequest = null;
+
+        Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
+        Stream<FederatedIdentityModel> federatedIdentityModelList = this.session.users().getFederatedIdentitiesStream(realm, user)
+            .filter(identity -> idps.contains(identity.getIdentityProvider()));
+
+        Optional<FederatedIdentityModel> idp = federatedIdentityModelList.findFirst();
+        if (idp.isPresent()) {
+            String userId = idp.get().getUserId();
+            licenseRequestedRequest = new RemoveLicenseRequest(userId);
+        }
+        return licenseRequestedRequest;
     }
 }

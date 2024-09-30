@@ -3,6 +3,7 @@
     "realm": "idp",
     "users": [
         {
+          "id": "9c7e5634-5021-4c3e-9bea-53f54c299a0f",
           "username": "idpuser",
           "enabled": true,
           "email": "idpuser@test.de",
