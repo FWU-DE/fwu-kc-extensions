@@ -63,8 +63,8 @@ public class ReleaseLicenseOnLogOutEventIT
         .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
         .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
         .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "IDP")
-        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_URL", "http://mockserver:1080/v1/licences/release")
-        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_API_KEY", "sample-api-key");
+        .withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_API_KEY", "sample-api-key")
+        .withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_BASE_URL", "http://mockserver:1080/v1/licences/release");
 
     private static final GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
         .withNetwork(network)

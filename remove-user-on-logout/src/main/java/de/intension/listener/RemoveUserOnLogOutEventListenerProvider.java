@@ -24,6 +24,7 @@ import org.keycloak.models.UserProvider;
 import de.intension.resources.admin.DeletableUserType;
 import de.intension.rest.LicenseConnectRestClient;
 import de.intension.rest.model.RemoveLicenseRequest;
+import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
 
 /**
@@ -50,7 +51,6 @@ public class RemoveUserOnLogOutEventListenerProvider
         this.config = config;
         session.getTransactionManager().enlistAfterCompletion(tx);
         LOG.debugf("[%s] instantiated.", this.getClass());
-        this.restClient = new LicenseConnectRestClient(config.get(LICENSE_URL), config.get(LICENSE_API_KEY));
     }
 
     @Override
@@ -108,10 +108,13 @@ public class RemoveUserOnLogOutEventListenerProvider
 
     private void releaseLicenses(UserModel user, Event event)
     {
+        this.restClient = this.keycloakSession.getProvider(RestClientProvider.class).restClient();
         RemoveLicenseRequest licenseRequest = createLicenseReleaseRequest(user, event);
         boolean licenseReleased = false;
         try {
-            licenseReleased = this.restClient.releaseLicense(licenseRequest);
+            if (this.restClient != null) {
+                licenseReleased = this.restClient.releaseLicense(licenseRequest);
+            }
         } catch (Exception e) {
             LOG.warn(e.getLocalizedMessage());
         }

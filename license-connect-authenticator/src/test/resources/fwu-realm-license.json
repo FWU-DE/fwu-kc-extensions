@@ -2527,6 +2527,7 @@
 			"builtIn": false,
 			"authenticationExecutions": [
 				{
+				    "authenticatorConfig": "License Connect",
 					"authenticator": "license-connect-authenticator",
 					"authenticatorFlow": false,
 					"requirement": "REQUIRED",
@@ -2551,6 +2552,14 @@
 			"config": {
 				"update.profile.on.first.login": "missing"
 			}
+		},
+		{
+			  "id": "443d2a41-f72a-41fe-af08-a5888ec1c193",
+			  "alias": "License Connect",
+			  "config": {
+			    "license-api-key": "sample-api-key",
+			    "license-url": "http://mockserver:1080/v1/licences/request"
+			  }
 		}
 	],
 	"requiredActions": [
