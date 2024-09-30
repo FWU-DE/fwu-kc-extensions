@@ -2,6 +2,7 @@ package de.intension.listener;
 
 import java.io.IOException;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -15,6 +16,7 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
     implements EventListenerProviderFactory
 {
 
+    private static final Logger LOG = Logger.getLogger(RemoveUserOnLogOutEventListenerProviderFactory.class);
     private RemoveUserOnLogOutEventListenerProvider removeUserOnLogOutEventListenerProvider;
     private Scope                                   config;
 
@@ -51,6 +53,7 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
                 this.removeUserOnLogOutEventListenerProvider.getRestClient().close();
             } catch (IOException e) {
                 // Do nothing
+                LOG.warn("There was error while closing the rest client");
             }
         }
     }
