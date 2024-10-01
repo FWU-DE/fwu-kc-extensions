@@ -8,6 +8,23 @@ The following environment variables must be set within UI in the authenticator c
 
 rest-endpoint and api-key
 
+In the authentication flow of your choice select the option to add authenticator
+
+<img src="../docs/license-connect-authenticator/add_authenticator.png" width="70%"/>
+
+In the list of authenticator search for License Connect Authenticator and select it
+
+<img src="../docs/license-connect-authenticator/license-connect-authenticator.png" width="70%"/>
+
+After selecting it make it to be required and then click on the settings symbol near the authenticator
+
+<img src="../docs/license-connect-authenticator/add_configuration.png" width="70%"/>
+
+Once the dialog box is opened configure the URL to fetch the license and the sample key which is needed for
+authentication
+
+<img src="../docs/license-connect-authenticator/authenticator_configuration.png" width="70%"/>
+
 ### Fetching the user license
 
 The license associated with user is managed by a microservice, which provides endpoints to gather those information.
