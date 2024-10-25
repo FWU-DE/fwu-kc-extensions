@@ -88,6 +88,11 @@ For more details please check [here](./account-linking-authenticator/README.md).
 Authenticator required to fetch the license associated with the user from license connect
 For more details please check [here](./license-connect-authenticator/README.md).
 
+### ACR values Authenticator
+
+Authenticator required to append the acr_values to the request which is sent to the IDP
+For more details please check [here](./acr-values-authenticator/README.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).
