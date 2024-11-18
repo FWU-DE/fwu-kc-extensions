@@ -32,6 +32,15 @@ Add it as a required step in the authentication flow.
 
 <img src="../docs/acr-values-authenticator/required_step.png" width="70%"/>
 
+After adding it bind this flow as the browser flow by selecting the Action dropdown on the
+top right corner of the screen and then selecting 'Bind Flow'.
+
+<img src="../docs/acr-values-authenticator/browser_flow.png" width="70%"/>
+
+Select browser flow from the dropdown list and save the authentication flow
+
+<img src="../docs/acr-values-authenticator/save_browser_flow.png" width="70%"/>
+
 ## Behaviour
 
 If the user tries to login to a specific client and
