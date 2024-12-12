@@ -14,7 +14,7 @@ import java.util.List;
 public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
     @Override
     public String getDisplayType() {
-        return "Quak";
+        return "Acr deny";
     }
 
     @Override
@@ -39,7 +39,7 @@ public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getHelpText() {
-        return "Was";
+        return "Configure in post login flow. Denies access when user does not have attribute 'acr' set with value configured in clients ACR to LoA mapping for key 'acr'.";
     }
 
     @Override
