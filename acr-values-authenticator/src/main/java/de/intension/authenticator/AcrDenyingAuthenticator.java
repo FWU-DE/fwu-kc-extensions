@@ -48,6 +48,7 @@ public class AcrDenyingAuthenticator implements Authenticator {
                 }
             }
         } catch (Exception e) {
+            logger.error("Internal server error", e);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR);
         }
         context.success();
