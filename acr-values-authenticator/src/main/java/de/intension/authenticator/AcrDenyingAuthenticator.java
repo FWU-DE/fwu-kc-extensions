@@ -45,11 +45,13 @@ public class AcrDenyingAuthenticator implements Authenticator {
                             client.getClientId(),
                             context.getUser().getId());
                     context.failure(AuthenticationFlowError.ACCESS_DENIED);
+                    return;
                 }
             }
         } catch (Exception e) {
             logger.error("Internal server error", e);
             context.failure(AuthenticationFlowError.INTERNAL_ERROR);
+            return;
         }
         context.success();
     }

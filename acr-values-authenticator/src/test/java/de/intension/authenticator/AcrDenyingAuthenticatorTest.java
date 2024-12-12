@@ -10,8 +10,9 @@ import org.mockito.Mockito;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AcrDenyingAuthenticatorTest {
@@ -41,6 +42,59 @@ class AcrDenyingAuthenticatorTest {
     }
 
     /**
+     * GIVEN: client configured with LoA mapping for "acr"
+     * WHEN: {@link AcrDenyingAuthenticator} is called for user with correct "acr" attribute
+     * THEN: context succeeds
+     */
+    @Test
+    void should_allow_for_user_with_acr_attribute() {
+        var authenticator = authenticator("1");
+        var context = mockContext("0", "1");
+
+        authenticator.authenticate(context);
+
+        assertSuccess();
+    }
+
+    /**
+     * GIVEN: client configured with LoA mapping for "acr"
+     * WHEN: {@link AcrDenyingAuthenticator} is called for user without "acr" attribute
+     * THEN: context succeeds
+     */
+    @Test
+    void should_deny_for_user_with_missing_attribute() {
+        var authenticator = authenticator("1");
+        var context = mockContext();
+
+        authenticator.authenticate(context);
+
+        assertFailure();
+    }
+
+    /**
+     * GIVEN: client configured with LoA mapping for "acr"
+     * WHEN: {@link AcrDenyingAuthenticator} is called for user with incorrect "acr" attribute
+     * THEN: context succeeds
+     */
+    @Test
+    void should_deny_for_user_with_invalid_attribute() {
+        var authenticator = authenticator("1");
+        var context = mockContext("2");
+
+        authenticator.authenticate(context);
+
+        assertFailure();
+    }
+
+    /**
+     * Assertion for when access is denied.
+     */
+    private void assertFailure() {
+        assertFalse(success);
+        assertThat(failure, equalTo(AuthenticationFlowError.ACCESS_DENIED));
+    }
+
+    /**
      * Assertion for when everything went successful.
      */
     private void assertSuccess() {
@@ -53,6 +107,7 @@ class AcrDenyingAuthenticatorTest {
      */
     private AuthenticationFlowContext mockContext(String... acrValues) {
         var user = mock(UserModel.class);
+        when(user.getId()).thenReturn("foobar");
         when(user.getAttributeStream("acr")).thenReturn(Stream.of(acrValues));
         var context = mock(AuthenticationFlowContext.class);
         when(context.getUser()).thenReturn(user);
@@ -64,6 +119,10 @@ class AcrDenyingAuthenticatorTest {
             failure = x.getArgument(0);
             return null;
         }).when(context).failure(Mockito.any());
+        // needed for logging when access is denied
+        var realm = mock(RealmModel.class);
+        when(realm.getName()).thenReturn("test");
+        when(context.getRealm()).thenReturn(realm);
         return context;
     }
 
@@ -72,6 +131,7 @@ class AcrDenyingAuthenticatorTest {
      */
     private AcrDenyingAuthenticator authenticator(String acr) {
         var client = mock(ClientModel.class);
+        when(client.getClientId()).thenReturn("example");
         when(client.getAttribute(Constants.ACR_LOA_MAP)).thenReturn(getClientLoaMap(acr));
         KeycloakContext context = mock(KeycloakContext.class);
         when(context.getClient()).thenReturn(client);
