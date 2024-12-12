@@ -38,12 +38,12 @@ public class AcrDenyingAuthenticator implements Authenticator {
             Map<String, String> loaMap = getAcrLoaMap(client);
             if (loaMap.containsKey(ACR)) {
                 var acrValue = loaMap.get(ACR);
-                var acrParam = session.getContext().getHttpRequest().getUri().getPathParameters().get(ACR);
-                if (!acrParam.contains(acrValue)) {
-                    logger.warnf("Denied request due to ACR in IdP redirect URL not matching client configuration. Realm %s, client %s, user %s.",
+                var hasAcrAttribute = context.getUser().getAttributeStream(ACR).anyMatch(acrValue::equals);
+                if (!hasAcrAttribute) {
+                    logger.warnf("Denied request due to ACR in user attribute not matching client configuration. Realm %s, client %s, user %s.",
                             context.getRealm().getName(),
                             client.getClientId(),
-                            context.getUser() != null ? context.getUser().getId() : "unknown");
+                            context.getUser().getId());
                     context.failure(AuthenticationFlowError.ACCESS_DENIED);
                 }
             }
@@ -66,12 +66,12 @@ public class AcrDenyingAuthenticator implements Authenticator {
 
     @Override
     public boolean requiresUser() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return false;
+        return true;
     }
 
     @Override
