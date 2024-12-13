@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.15.0]
+
+- Feature: Fetched licences are now persisted together with the hmacId
+- Feature: The persisted licences are also deleted once the user logs out
+- The modules remove-user-on-logout and licence-connect-authenticator are combined into a single 
+  module user-licence-lifecycle-manager
+
 ## Version [4.14.2]
 
 - Bugfix: new logic for ACR deny authenticator

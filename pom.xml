@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>remove-user-on-logout</module>
     <module>hmac-mapper</module>
     <module>whitelist-authenticator</module>
     <module>multi-value-user-attribute-mapper</module>
@@ -25,12 +24,12 @@
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
     <module>3rd-party-libs</module>
-    <module>licence-connect-authenticator</module>
     <module>acr-values-authenticator</module>
+    <module>user-licence-lifecycle-manager</module>
   </modules>
 
   <properties>
-    <revision>4.14.2</revision>
+    <revision>4.15.0</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -226,6 +225,18 @@
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
         <version>5.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>1.20.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.4</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -28,6 +28,9 @@ public class HmacPairwiseSubMapperHelper {
     private HmacPairwiseSubMapperHelper() {
     }
 
+    public static String generateIdentifier(ProtocolMapperModel mappingModel, UserModel user) {
+        return generateIdentifier(mappingModel, getLocalIdentifierValue(user, mappingModel));
+    }
 
     public static String generateIdentifier(ProtocolMapperModel mappingModel, String localSub) {
         String saltStr = PairwiseSubMapperHelper.getSalt(mappingModel);
