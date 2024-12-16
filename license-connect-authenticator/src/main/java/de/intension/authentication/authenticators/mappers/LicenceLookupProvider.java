@@ -3,12 +3,12 @@ package de.intension.authentication.authenticators.mappers;
 import de.intension.authentication.authenticators.mappers.jpa.entity.MappingEntity;
 import org.keycloak.provider.Provider;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 public interface LicenceLookupProvider extends Provider {
-    Stream<String> getLicenceByPseudonym(String pseudonym);
+    List<String> getLicenceByPseudonym(String pseudonym);
 
     MappingEntity createMapping(MappingEntity mappingEntity);
 
-    //todo: add function that removed the old entries (once the session is over)
+    //todo: add function that removed the old entries (once the session is over) -> see github project
 }

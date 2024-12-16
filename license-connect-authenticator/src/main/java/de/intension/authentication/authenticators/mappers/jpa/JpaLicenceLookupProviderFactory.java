@@ -11,7 +11,7 @@ public class JpaLicenceLookupProviderFactory implements LicenceLookupProviderFac
 
     @Override
     public LicenceLookupProvider create(KeycloakSession keycloakSession) {
-        return new JpaLicenceLookupProvider();
+        return new JpaLicenceLookupProvider(keycloakSession);
     }
 
     @Override
