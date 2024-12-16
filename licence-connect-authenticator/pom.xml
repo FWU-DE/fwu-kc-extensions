@@ -37,6 +37,11 @@
             <artifactId>keycloak-model-jpa</artifactId>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hmac-mapper</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>
             <scope>test</scope>
