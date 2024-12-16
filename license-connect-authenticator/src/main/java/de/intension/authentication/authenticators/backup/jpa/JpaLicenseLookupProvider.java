@@ -1,7 +1,7 @@
-package de.intension.authentication.authenticators.persistence.jpa;
+package de.intension.authentication.authenticators.backup.jpa;
 
-import de.intension.authentication.authenticators.persistence.LicenseLookupProvider;
-import de.intension.authentication.authenticators.persistence.jpa.entity.LicenseEntity;
+import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
+import de.intension.authentication.authenticators.backup.jpa.entity.LicenseEntity;
 import jakarta.persistence.EntityManager;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;

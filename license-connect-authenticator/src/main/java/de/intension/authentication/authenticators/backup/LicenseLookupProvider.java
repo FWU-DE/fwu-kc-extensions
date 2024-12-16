@@ -1,6 +1,6 @@
-package de.intension.authentication.authenticators.persistence;
+package de.intension.authentication.authenticators.backup;
 
-import de.intension.authentication.authenticators.persistence.jpa.entity.LicenseEntity;
+import de.intension.authentication.authenticators.backup.jpa.entity.LicenseEntity;
 import org.keycloak.provider.Provider;
 
 import java.util.List;

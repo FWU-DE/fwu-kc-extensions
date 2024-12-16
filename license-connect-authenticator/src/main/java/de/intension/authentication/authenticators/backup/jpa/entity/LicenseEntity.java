@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.persistence.jpa.entity;
+package de.intension.authentication.authenticators.backup.jpa.entity;
 
 import jakarta.persistence.*;
 

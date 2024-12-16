@@ -1,7 +1,7 @@
-package de.intension.authentication.authenticators.persistence.jpa;
+package de.intension.authentication.authenticators.backup.jpa;
 
-import de.intension.authentication.authenticators.persistence.LicenseLookupProvider;
-import de.intension.authentication.authenticators.persistence.LicenseLookupProviderFactory;
+import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
+import de.intension.authentication.authenticators.backup.LicenseLookupProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;

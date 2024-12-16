@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.persistence;
+package de.intension.authentication.authenticators.backup;
 
 import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;

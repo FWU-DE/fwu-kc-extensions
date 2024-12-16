@@ -1,7 +1,7 @@
 package de.intension.authentication.authenticators.licence;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.intension.authentication.authenticators.persistence.LicenseLookupProvider;
+import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
 import de.intension.authentication.authenticators.rest.LicenseConnectRestClient;
 import de.intension.authentication.authenticators.rest.model.LicenseRequest;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
