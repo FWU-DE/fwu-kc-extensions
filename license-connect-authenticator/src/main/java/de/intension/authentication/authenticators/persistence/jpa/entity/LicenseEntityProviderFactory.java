@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.mappers.jpa.entity;
+package de.intension.authentication.authenticators.persistence.jpa.entity;
 
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
@@ -6,12 +6,12 @@ import org.keycloak.connections.jpa.entityprovider.JpaEntityProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class MappingEntityProviderFactory implements JpaEntityProviderFactory {
+public class LicenseEntityProviderFactory implements JpaEntityProviderFactory {
     protected static final String ID = "pseudonym-licence-mapping-entity-provider";
 
     @Override
     public JpaEntityProvider create(KeycloakSession keycloakSession) {
-        return new MappingEntityProvider();
+        return new LicenseEntityProvider();
     }
 
     @Override

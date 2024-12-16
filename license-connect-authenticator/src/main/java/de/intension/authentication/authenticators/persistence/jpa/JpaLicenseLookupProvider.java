@@ -1,17 +1,17 @@
-package de.intension.authentication.authenticators.mappers.jpa;
+package de.intension.authentication.authenticators.persistence.jpa;
 
-import de.intension.authentication.authenticators.mappers.LicenceLookupProvider;
-import de.intension.authentication.authenticators.mappers.jpa.entity.LicenseEntity;
+import de.intension.authentication.authenticators.persistence.LicenseLookupProvider;
+import de.intension.authentication.authenticators.persistence.jpa.entity.LicenseEntity;
 import jakarta.persistence.EntityManager;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 
 import java.util.List;
 
-public class JpaLicenceLookupProvider implements LicenceLookupProvider {
+public class JpaLicenseLookupProvider implements LicenseLookupProvider {
     private final KeycloakSession session;
 
-    public JpaLicenceLookupProvider(KeycloakSession session) {
+    public JpaLicenseLookupProvider(KeycloakSession session) {
         this.session = session;
     }
 

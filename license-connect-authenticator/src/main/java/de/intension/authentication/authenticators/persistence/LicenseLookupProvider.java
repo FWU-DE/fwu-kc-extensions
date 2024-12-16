@@ -1,11 +1,11 @@
-package de.intension.authentication.authenticators.mappers;
+package de.intension.authentication.authenticators.persistence;
 
-import de.intension.authentication.authenticators.mappers.jpa.entity.LicenseEntity;
+import de.intension.authentication.authenticators.persistence.jpa.entity.LicenseEntity;
 import org.keycloak.provider.Provider;
 
 import java.util.List;
 
-public interface LicenceLookupProvider extends Provider {
+public interface LicenseLookupProvider extends Provider {
     List<String> getLicenceByPseudonym(String pseudonym);
 
     LicenseEntity createMapping(LicenseEntity licenseEntity);
