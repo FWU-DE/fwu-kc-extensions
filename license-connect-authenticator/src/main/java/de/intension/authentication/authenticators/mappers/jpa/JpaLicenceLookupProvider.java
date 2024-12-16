@@ -1,7 +1,7 @@
 package de.intension.authentication.authenticators.mappers.jpa;
 
 import de.intension.authentication.authenticators.mappers.LicenceLookupProvider;
-import de.intension.authentication.authenticators.mappers.jpa.entity.MappingEntity;
+import de.intension.authentication.authenticators.mappers.jpa.entity.LicenseEntity;
 import jakarta.persistence.EntityManager;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
@@ -23,7 +23,7 @@ public class JpaLicenceLookupProvider implements LicenceLookupProvider {
     @Override
     public List<String> getLicenceByPseudonym(String pseudonym) {
         List<String> licences = getEntityManager()
-                .createNamedQuery(MappingEntity.GET_LICENCE_BY_PSEUDONYM)
+                .createNamedQuery(LicenseEntity.GET_LICENCE_BY_HMAC_ID)
                 .setParameter("pseudonym", pseudonym)
                 .getResultList();
         if (licences.isEmpty()){
@@ -33,9 +33,9 @@ public class JpaLicenceLookupProvider implements LicenceLookupProvider {
     }
 
     @Override
-    public MappingEntity createMapping(MappingEntity mappingEntity) {
-        getEntityManager().persist(mappingEntity);
-        return mappingEntity;
+    public LicenseEntity createMapping(LicenseEntity licenseEntity) {
+        getEntityManager().persist(licenseEntity);
+        return licenseEntity;
     }
 
     private EntityManager getEntityManager() {

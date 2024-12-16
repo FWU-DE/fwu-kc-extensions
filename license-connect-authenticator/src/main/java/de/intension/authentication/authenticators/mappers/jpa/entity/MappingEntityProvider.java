@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MappingEntityProvider implements JpaEntityProvider {
-    private static Class<?>[] entities = {MappingEntity.class};
+    private static Class<?>[] entities = {LicenseEntity.class};
 
     @Override
     public List<Class<?>> getEntities() {
