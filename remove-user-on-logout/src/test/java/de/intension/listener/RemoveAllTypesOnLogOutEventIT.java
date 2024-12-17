@@ -46,8 +46,8 @@ class RemoveAllTypesOnLogOutEventIT
         .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
         .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
         .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "ALL")
-        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_URL", "http://mockserver:1080/v1/licences/release")
-        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_API_KEY", "sample-api-key")
+        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_URL", "http://mockserver:1080/v1/licences/release")
+        .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_API_KEY", "sample-api-key")
         .withAccessToHost(true);
 
     private static final GenericContainer<?> firefoxStandalone = new GenericContainer<>(DockerImageName.parse("selenium/standalone-firefox:4.3.0-20220706"))
@@ -76,7 +76,7 @@ class RemoveAllTypesOnLogOutEventIT
         int usersCountBeforeLogout = usersResource.count();
         kcPage.logout();
         String logs = keycloak.getLogs();
-        assertTrue(logs.contains("User license not released for the user"));
+        assertTrue(logs.contains("User licence not released for the user"));
         int usersCountAfterLogout = usersResource.count();
         assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
     }

@@ -2,7 +2,7 @@
 
 This extension is to make sure the user is removed from keycloak on the user logout and session expiration.
 
-Moreover, with the recent development before removing the user the license associated with the user is released.
+Moreover, with the recent development before removing the user the licence associated with the user is released.
 
 ## Configurations
 
@@ -16,10 +16,10 @@ You can also configure if only IDP-Users(IDP) are deleted or all users (ALL) by 
 ```shell
 KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_<REALM>: [IDP|ALL|NONE]
 ```
-The rest API URL to release the license associated with the user can be configured using the following environments.
+The rest API URL to release the licence associated with the user can be configured using the following environments.
 ```shell
-KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_URL: http://mockserver:1080/v1/licences/release
-KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENSE_API_KEY: sample-api-key
+KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_URL: http://mockserver:1080/v1/licences/release
+KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_API_KEY: sample-api-key
 ```
 ### Custom authentication flow
 
