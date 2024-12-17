@@ -21,9 +21,9 @@ Pull requests are the best way to propose changes to the codebase (we use Github
 5. Make sure your code lints.
 6. Issue that pull request!
 
-## Any contributions you make will be under the Apache License
+## Any contributions you make will be under the Apache Licence
 
-In short, when you submit code changes, your submissions are understood to be under the same [Apache License](https://choosealicense.com/licenses/apache-2.0/) version 2.0 that covers the project. Feel free to contact the maintainers if that's a concern.
+In short, when you submit code changes, your submissions are understood to be under the same [Apache Licence](https://choosealicence.com/licences/apache-2.0/) version 2.0 that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using GitHub issues
 

@@ -25,7 +25,7 @@
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
     <module>3rd-party-libs</module>
-    <module>license-connect-authenticator</module>
+    <module>licence-connect-authenticator</module>
     <module>acr-values-authenticator</module>
   </modules>
 
