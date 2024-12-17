@@ -25,6 +25,16 @@ authentication
 
 <img src="../docs/license-connect-authenticator/authenticator_configuration.png" width="70%"/>
 
+Endpoint:
+```text
+http://mockserver:1080/v1/licences/request
+```
+
+Api key: 
+```text
+sample-api-key
+```
+
 ### Fetching the user license
 
 The license associated with user is managed by a microservice, which provides endpoints to gather those information.

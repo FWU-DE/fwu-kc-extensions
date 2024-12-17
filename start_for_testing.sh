@@ -7,4 +7,4 @@ if [[ "$?" -ne 0 ]] ; then
 fi
 
 # start docker
-docker compose up --build --detach
+docker compose down; docker compose up --build --detach
