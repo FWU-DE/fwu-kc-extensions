@@ -30,7 +30,7 @@
   </modules>
 
   <properties>
-    <revision>4.13.0</revision>
+    <revision>4.14.0</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
