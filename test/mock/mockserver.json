@@ -119,7 +119,7 @@
     }
   },
   {
-    "id": "license-request",
+    "id": "licence-request",
     "priority": 0,
     "httpRequest": {
       "method": "POST",
@@ -139,7 +139,7 @@
     }
   },
   {
-    "id": "license-release",
+    "id": "licence-release",
     "priority": 0,
     "httpRequest": {
       "method": "POST",

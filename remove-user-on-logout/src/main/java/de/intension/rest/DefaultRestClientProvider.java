@@ -6,9 +6,9 @@ public class DefaultRestClientProvider
     implements RestClientProvider
 {
 
-    private final LicenseConnectRestClient restClient;
+    private final LicenceConnectRestClient restClient;
 
-    public DefaultRestClientProvider(LicenseConnectRestClient restClient)
+    public DefaultRestClientProvider(LicenceConnectRestClient restClient)
     {
         this.restClient = restClient;
     }
@@ -21,7 +21,7 @@ public class DefaultRestClientProvider
     }
 
     @Override
-    public LicenseConnectRestClient restClient()
+    public LicenceConnectRestClient restClient()
     {
         return this.restClient;
     }

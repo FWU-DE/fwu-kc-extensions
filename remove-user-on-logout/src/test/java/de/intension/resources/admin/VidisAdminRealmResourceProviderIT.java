@@ -42,7 +42,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.rest.model.RemoveLicenseRequest;
+import de.intension.rest.model.RemoveLicenceRequest;
 import de.intension.testhelper.KeycloakPage;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -126,10 +126,10 @@ class VidisAdminRealmResourceProviderIT
     {
         try (
                 MockServerClient mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort())) {
-            Expectation releaseLicense = releaseLicenseExpectation(mockServerClient);
+            Expectation releaseLicence = releaseLicenceExpectation(mockServerClient);
             keycloak.withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "IDP");
-            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_API_KEY", "sample-api-key");
-            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENSE_CONNECT_BASE_URL", "http://mockserver:1080/v1/licences/release");
+            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key");
+            keycloak.withEnv("KC_SPI_REMOVE_USER_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080/v1/licences/release");
             keycloak.start();
 
             KeycloakPage.start(driver, wait).openAccountConsole().idpLogin("idpuser", "test");
@@ -147,7 +147,7 @@ class VidisAdminRealmResourceProviderIT
             assertThat(deletedUsers).as("Should have deleted IDP Users").isPositive();
             assertThat(userCountBeforeCleanup).as("Usercount should be different after deletion").isGreaterThan(userCountAfterCleanup);
             assertThat(userCountAfterCleanup).as("Usercount after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
-            mockServerClient.verify(releaseLicense.getId(), VerificationTimes.once());
+            mockServerClient.verify(releaseLicence.getId(), VerificationTimes.once());
         }
     }
 
@@ -193,16 +193,16 @@ class VidisAdminRealmResourceProviderIT
         }
     }
 
-    private Expectation releaseLicenseExpectation(MockServerClient clientAndServer)
+    private Expectation releaseLicenceExpectation(MockServerClient clientAndServer)
         throws JsonProcessingException
     {
-        RemoveLicenseRequest licenseRequestedRequest = new RemoveLicenseRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f");
+        RemoveLicenceRequest licenceRequestedRequest = new RemoveLicenceRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f");
         return clientAndServer
             .when(
                   request().withPath("/v1/licences/release")
                       .withMethod("POST")
                       .withHeader("X-API-Key", "sample-api-key")
-                      .withBody(objectMapper.writeValueAsString(licenseRequestedRequest)),
+                      .withBody(objectMapper.writeValueAsString(licenceRequestedRequest)),
                   Times.exactly(1))
             .respond(
                      response()
