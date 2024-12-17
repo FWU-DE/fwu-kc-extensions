@@ -83,10 +83,10 @@ For more details please check [here](./user-info-provider/README.md).
 Authenticators required to enable the linking of accounts with only one authentication process
 For more details please check [here](./account-linking-authenticator/README.md).
 
-### Licence Connect Authenticator
+### License Connect Authenticator
 
-Authenticator required to fetch the licence associated with the user from licence connect
-For more details please check [here](./licence-connect-authenticator/README.md).
+Authenticator required to fetch the license associated with the user from license connect
+For more details please check [here](./license-connect-authenticator/README.md).
 
 ### ACR values Authenticator
 

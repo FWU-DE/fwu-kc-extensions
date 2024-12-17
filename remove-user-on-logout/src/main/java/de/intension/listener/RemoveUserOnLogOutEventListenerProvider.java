@@ -22,8 +22,8 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.UserProvider;
 
 import de.intension.resources.admin.DeletableUserType;
-import de.intension.rest.LicenceConnectRestClient;
-import de.intension.rest.model.RemoveLicenceRequest;
+import de.intension.rest.LicenseConnectRestClient;
+import de.intension.rest.model.RemoveLicenseRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
 
@@ -36,14 +36,14 @@ public class RemoveUserOnLogOutEventListenerProvider
 
     private static final Logger            LOG             = Logger.getLogger(RemoveUserOnLogOutEventListenerProvider.class);
 
-    public static final String             LICENCE_URL     = "licence-url";
-    public static final String             LICENCE_API_KEY = "licence-api-key";
+    public static final String             LICENSE_URL     = "license-url";
+    public static final String             LICENSE_API_KEY = "license-api-key";
 
     private final KeycloakSession          keycloakSession;
 
     private final EventListenerTransaction tx              = new EventListenerTransaction(null, this::removeUser);
     private final Config.Scope             config;
-    private LicenceConnectRestClient       restClient;
+    private LicenseConnectRestClient       restClient;
 
     protected RemoveUserOnLogOutEventListenerProvider(KeycloakSession session, Config.Scope config)
     {
@@ -79,7 +79,7 @@ public class RemoveUserOnLogOutEventListenerProvider
 
         UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
         if (userToDelete != null) {
-            this.releaseLicences(userToDelete, event);
+            this.releaseLicenses(userToDelete, event);
             userProvider.removeUser(realm, userToDelete);
             LOG.infof("User %s removed.", userToDelete.getUsername());
         }
@@ -106,29 +106,29 @@ public class RemoveUserOnLogOutEventListenerProvider
         return keycloakSession.users().getFederatedIdentitiesStream(realm, user).findAny().isPresent() ? user : null;
     }
 
-    private void releaseLicences(UserModel user, Event event)
+    private void releaseLicenses(UserModel user, Event event)
     {
         this.restClient = this.keycloakSession.getProvider(RestClientProvider.class).restClient();
-        RemoveLicenceRequest licenceRequest = createLicenceReleaseRequest(user, event);
-        boolean licenceReleased = false;
+        RemoveLicenseRequest licenseRequest = createLicenseReleaseRequest(user, event);
+        boolean licenseReleased = false;
         try {
             if (this.restClient != null) {
-                licenceReleased = this.restClient.releaseLicence(licenceRequest);
+                licenseReleased = this.restClient.releaseLicense(licenseRequest);
             }
         } catch (Exception e) {
             LOG.warn(e.getLocalizedMessage());
         }
-        if (licenceReleased) {
-            LOG.infof("User licence has been released for the user %s", user.getUsername());
+        if (licenseReleased) {
+            LOG.infof("User license has been released for the user %s", user.getUsername());
         }
         else {
-            LOG.warnf("User licence not released for the user %s", user.getUsername());
+            LOG.warnf("User license not released for the user %s", user.getUsername());
         }
     }
 
-    private RemoveLicenceRequest createLicenceReleaseRequest(UserModel user, Event event)
+    private RemoveLicenseRequest createLicenseReleaseRequest(UserModel user, Event event)
     {
-        RemoveLicenceRequest licenceRequestedRequest = null;
+        RemoveLicenseRequest licenseRequestedRequest = null;
         RealmModel realm = this.keycloakSession.realms().getRealm(event.getRealmId());
 
         Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
@@ -138,9 +138,9 @@ public class RemoveUserOnLogOutEventListenerProvider
         Optional<FederatedIdentityModel> idp = federatedIdentityModelList.findFirst();
         if (idp.isPresent()) {
             String userId = idp.get().getUserId();
-            licenceRequestedRequest = new RemoveLicenceRequest(userId);
+            licenseRequestedRequest = new RemoveLicenseRequest(userId);
         }
-        return licenceRequestedRequest;
+        return licenseRequestedRequest;
     }
 
     @Override
@@ -155,7 +155,7 @@ public class RemoveUserOnLogOutEventListenerProvider
         // nothing to close.
     }
 
-    public LicenceConnectRestClient getRestClient()
+    public LicenseConnectRestClient getRestClient()
     {
         return this.restClient;
     }

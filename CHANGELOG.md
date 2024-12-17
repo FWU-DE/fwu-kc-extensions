@@ -8,7 +8,7 @@ All notable changes to this project will be documented here.
 
 ## Version [4.12.0]
 
-- Feature: Add new authenticator to fetch the licence for user from licence connect
+- Feature: Add new authenticator to fetch the license for user from license connect
 
 ## Version [4.11.5]
 
