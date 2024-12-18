@@ -69,4 +69,5 @@ The mentioned REST-Endpoint will be called during each login.
 If the user tries to login to a specific client and
 
 * the user has licence associated and returned as response in the REST-API then the login is  _permitted_ and attribute named `licence` is added to the user.
+  Additionally, the licence is persisted together with the `hmacID`, by the clients [HMAC Mapper](../hmac-mapper/README.md "hmac-mapper")
 * the user does not have licence associated and REST-API returns 404,500 or non successful response then the login is not _permitted_.
