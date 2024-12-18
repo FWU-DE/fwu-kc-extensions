@@ -3,6 +3,7 @@
 This extension is to make sure the user is removed from keycloak on the user logout and session expiration.
 
 Moreover, with the recent development before removing the user the licence associated with the user is released.
+Also the licence that is stored in the database together with the hmacId is deleted.
 
 ## Configurations
 

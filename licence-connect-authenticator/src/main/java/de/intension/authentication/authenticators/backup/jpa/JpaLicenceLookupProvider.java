@@ -22,7 +22,7 @@ public class JpaLicenceLookupProvider implements LicenceLookupProvider {
 
     @Override
     public List<String> getLicenceByHmacId(String hmacId) {
-        //todo: change to only string!? -> check in user attributes
+        //todo: change to only string and take first element!? -> check in user attributes
         List<String> licences = getEntityManager()
                 .createNamedQuery(LicenceEntity.GET_LICENCE_BY_HMAC_ID)
                 .setParameter("hmacId", hmacId)
@@ -37,6 +37,14 @@ public class JpaLicenceLookupProvider implements LicenceLookupProvider {
     public LicenceEntity createLicence(LicenceEntity licenceEntity) {
         getEntityManager().persist(licenceEntity);
         return licenceEntity;
+    }
+
+    @Override
+    public void deleteLicence(String hmacId) {
+        getEntityManager()
+                .createNamedQuery(LicenceEntity.REMOVE_LICENCE_BY_HMAC_ID)
+                .setParameter("hmacId", hmacId)
+                .executeUpdate();
     }
 
     private EntityManager getEntityManager() {
