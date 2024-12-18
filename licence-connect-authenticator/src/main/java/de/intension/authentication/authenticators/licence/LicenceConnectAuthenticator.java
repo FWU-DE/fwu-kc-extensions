@@ -2,8 +2,8 @@ package de.intension.authentication.authenticators.licence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
-import de.intension.authentication.authenticators.rest.LicenseConnectRestClient;
-import de.intension.authentication.authenticators.rest.model.LicenseRequest;
+import de.intension.authentication.authenticators.rest.LicenceConnectRestClient;
+import de.intension.authentication.authenticators.rest.model.LicenceRequest;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import jakarta.ws.rs.core.Response;
@@ -48,25 +48,25 @@ public class LicenceConnectAuthenticator
             logger.error("Please configure the authenticator");
             context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
         }
-        if (this.addUserLicense(context)) {
+        if (this.addUserLicence(context)) {
             context.success();
         }
         else {
-            logger.infof("There were no licenses found associated with the user %s", context.getUser().getUsername());
+            logger.infof("There were no licences found associated with the user %s", context.getUser().getUsername());
             context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
         }
     }
 
-    private boolean addUserLicense(AuthenticationFlowContext context)
+    private boolean addUserLicence(AuthenticationFlowContext context)
     {
         UserModel user = context.getUser();
-        LicenseRequest licenseRequest = createLicenseRequest(user, context);
-        JsonNode userLicenses = fetchUserLicense(licenseRequest);
-        if (userLicenses != null && userLicenses.path(HAS_LICENSES_ATTRIBUTE).asBoolean()) {
-            String userLicense = userLicenses.path(LICENSE_ATTRIBUTE).toString();
-            for (int i = 0; i < userLicense.length(); i += PART_SIZE) {
-                String partValue = userLicense.substring(i, Math.min(userLicense.length(), i + PART_SIZE));
-                user.setAttribute(LICENSE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
+        LicenceRequest licenceRequest = createLicenceRequest(user, context);
+        JsonNode userLicences = fetchUserLicence(licenceRequest);
+        if (userLicences != null && userLicences.path(HAS_LICENCES_ATTRIBUTE).asBoolean()) {
+            String userLicence = userLicences.path(LICENCE_ATTRIBUTE).toString();
+            for (int i = 0; i < userLicence.length(); i += PART_SIZE) {
+                String partValue = userLicence.substring(i, Math.min(userLicence.length(), i + PART_SIZE));
+                user.setAttribute(LICENCE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
             }
             var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMapperByName(OIDCLoginProtocol.LOGIN_PROTOCOL, HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
             if (hmacMapper != null) {
@@ -80,19 +80,19 @@ public class LicenceConnectAuthenticator
         return false;
     }
 
-    private LicenseConnectRestClient createRestClient(Map<String, String> config)
+    private LicenceConnectRestClient createRestClient(Map<String, String> config)
     {
-        if (config.get(LicenseConnectAuthenticatorFactory.LICENSE_URL) == null || config.get(LicenseConnectAuthenticatorFactory.LICENSE_API_KEY) == null) {
+        if (config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL) == null || config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY) == null) {
             return null;
         }
-        LicenseConnectRestClient restClient = new LicenseConnectRestClient(config.get(LicenseConnectAuthenticatorFactory.LICENSE_URL),
-                config.get(LicenseConnectAuthenticatorFactory.LICENSE_API_KEY));
+        LicenceConnectRestClient restClient = new LicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL),
+                config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY));
         return restClient;
     }
 
-    private LicenseRequest createLicenseRequest(UserModel user, AuthenticationFlowContext context)
+    private LicenceRequest createLicenceRequest(UserModel user, AuthenticationFlowContext context)
     {
-        LicenseRequest licenseRequestedRequest = null;
+        LicenceRequest licenceRequestedRequest = null;
         String schulKennung = user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE);
         String bundesLand = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
         String clientId = context.getAuthenticationSession().getClient().getClientId();
@@ -100,21 +100,21 @@ public class LicenceConnectAuthenticator
         Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
         if (idp.isPresent()) {
             String userId = idp.get().getUserId();
-            licenseRequestedRequest = new LicenseRequest(userId, clientId, schulKennung, bundesLand);
+            licenceRequestedRequest = new LicenceRequest(userId, clientId, schulKennung, bundesLand);
         }
 
-        return licenseRequestedRequest;
+        return licenceRequestedRequest;
     }
 
-    private JsonNode fetchUserLicense(LicenseRequest licenseRequest)
+    private JsonNode fetchUserLicence(LicenceRequest licenceRequest)
     {
-        JsonNode userLicense = null;
+        JsonNode userLicence = null;
         try {
-            userLicense = this.restClient.getLicenses(licenseRequest);
+            userLicence = this.restClient.getLicences(licenceRequest);
         } catch (IOException e) {
-            logger.errorf(e, "Error while fetching the user license from license connect");
+            logger.errorf(e, "Error while fetching the user licence from licence connect");
         }
-        return userLicense;
+        return userLicence;
     }
 
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context)
@@ -129,7 +129,7 @@ public class LicenceConnectAuthenticator
     protected Response createErrorPage(AuthenticationFlowContext context)
     {
         return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                               Response.Status.FORBIDDEN, "There is no license associated with user");
+                               Response.Status.FORBIDDEN, "There is no licence associated with user");
     }
 
     @Override
@@ -162,7 +162,7 @@ public class LicenceConnectAuthenticator
         // Nothing to implement
     }
 
-    public LicenseConnectRestClient getRestClient()
+    public LicenceConnectRestClient getRestClient()
     {
         return this.restClient;
     }
