@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## Version [4.13.0]
+## Version [4.14.0]
 
 - Improvement: Rename "license" to "licence" where possible for unification
 
