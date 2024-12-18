@@ -6,12 +6,12 @@ import org.keycloak.connections.jpa.entityprovider.JpaEntityProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class LicenseEntityProviderFactory implements JpaEntityProviderFactory {
+public class LicenceEntityProviderFactory implements JpaEntityProviderFactory {
     protected static final String ID = "pseudonym-licence-mapping-entity-provider";
 
     @Override
     public JpaEntityProvider create(KeycloakSession keycloakSession) {
-        return new LicenseEntityProvider();
+        return new LicenceEntityProvider();
     }
 
     @Override

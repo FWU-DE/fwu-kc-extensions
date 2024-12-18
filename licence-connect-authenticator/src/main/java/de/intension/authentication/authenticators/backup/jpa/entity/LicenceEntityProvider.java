@@ -5,8 +5,8 @@ import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 import java.util.Arrays;
 import java.util.List;
 
-public class LicenseEntityProvider implements JpaEntityProvider {
-    private static Class<?>[] entities = {LicenseEntity.class};
+public class LicenceEntityProvider implements JpaEntityProvider {
+    private static Class<?>[] entities = {LicenceEntity.class};
 
     @Override
     public List<Class<?>> getEntities() {
@@ -15,12 +15,12 @@ public class LicenseEntityProvider implements JpaEntityProvider {
 
     @Override
     public String getChangelogLocation() {
-        return "META-INF/license-changelog.xml";
+        return "META-INF/licence-changelog.xml";
     }
 
     @Override
     public String getFactoryId() {
-        return LicenseEntityProviderFactory.ID;
+        return LicenceEntityProviderFactory.ID;
     }
 
     @Override

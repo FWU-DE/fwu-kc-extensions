@@ -1,17 +1,17 @@
 package de.intension.authentication.authenticators.backup.jpa;
 
-import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
-import de.intension.authentication.authenticators.backup.LicenseLookupProviderFactory;
+import de.intension.authentication.authenticators.backup.LicenceLookupProvider;
+import de.intension.authentication.authenticators.backup.LicenceLookupProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class JpaLicenseLookupProviderFactory implements LicenseLookupProviderFactory {
+public class JpaLicenceLookupProviderFactory implements LicenceLookupProviderFactory {
     public static final String PROVIDER_ID = "jpa-licenceLookup";
 
     @Override
-    public LicenseLookupProvider create(KeycloakSession keycloakSession) {
-        return new JpaLicenseLookupProvider(keycloakSession);
+    public LicenceLookupProvider create(KeycloakSession keycloakSession) {
+        return new JpaLicenceLookupProvider(keycloakSession);
     }
 
     @Override

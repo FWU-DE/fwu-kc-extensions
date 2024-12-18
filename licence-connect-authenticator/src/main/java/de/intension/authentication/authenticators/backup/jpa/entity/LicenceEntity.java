@@ -3,12 +3,12 @@ package de.intension.authentication.authenticators.backup.jpa.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "LICENSE")
+@Table(name = "LICENCE")
 @NamedQueries({
-    @NamedQuery(name = LicenseEntity.GET_LICENCE_BY_HMAC_ID,
-                query = "SELECT w.content FROM MappingEntity w WHERE w.hmacId = :hmacId")
+    @NamedQuery(name = LicenceEntity.GET_LICENCE_BY_HMAC_ID,
+                query = "SELECT w.content FROM LicenceEntity w WHERE w.hmacId = :hmacId")
 })
-public class LicenseEntity {
+public class LicenceEntity {
     public static final String GET_LICENCE_BY_HMAC_ID = "getLicenceByHmacId";
 
     @Id
@@ -22,12 +22,12 @@ public class LicenseEntity {
     @Column(name = "CONTENT", nullable = false)
     private String content;
 
-    public LicenseEntity(String hmacId, String licence) {
+    public LicenceEntity(String hmacId, String licence) {
         this.hmacId = hmacId;
         this.content = licence;
     }
 
-    public LicenseEntity() {
+    public LicenceEntity() {
     }
 
     public void setId(Integer id) {

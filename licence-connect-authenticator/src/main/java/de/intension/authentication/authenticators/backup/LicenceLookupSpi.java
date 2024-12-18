@@ -4,7 +4,7 @@ import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.Spi;
 
-public class LicenseLookupSpi implements Spi {
+public class LicenceLookupSpi implements Spi {
     private static final String LICENCE_LOOKUP = "licenceLookup";
 
     @Override
@@ -19,11 +19,11 @@ public class LicenseLookupSpi implements Spi {
 
     @Override
     public Class<? extends Provider> getProviderClass() {
-        return LicenseLookupProvider.class;
+        return LicenceLookupProvider.class;
     }
 
     @Override
     public Class<? extends ProviderFactory> getProviderFactoryClass() {
-        return LicenseLookupProviderFactory.class;
+        return LicenceLookupProviderFactory.class;
     }
 }

@@ -1,7 +1,7 @@
 package de.intension.authentication.authenticators.licence;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.intension.authentication.authenticators.backup.LicenseLookupProvider;
+import de.intension.authentication.authenticators.backup.LicenceLookupProvider;
 import de.intension.authentication.authenticators.rest.LicenceConnectRestClient;
 import de.intension.authentication.authenticators.rest.model.LicenceRequest;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
@@ -72,7 +72,7 @@ public class LicenceConnectAuthenticator
             if (hmacMapper != null) {
                 String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, user);
                 // todo: store licence with hmacId via dinger
-               var provider = context.getSession().getProvider(LicenseLookupProvider.class);
+               var provider = context.getSession().getProvider(LicenceLookupProvider.class);
 
             }
             return true;
