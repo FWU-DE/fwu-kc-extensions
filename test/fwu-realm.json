@@ -2738,7 +2738,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticator": "license-connect-authenticator",
+          "authenticator": "licence-connect-authenticator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 1,

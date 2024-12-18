@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.14.0]
+
+- Improvement: Rename "license" to "licence" where possible for unification
+
 ## Version [4.13.0]
 
 - Feature: Add new authenticator for sending acr_values to the IDP request

@@ -23,13 +23,13 @@ public class DefaultRestClientProviderFactory
 
     private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property()
-        .name(ConfigConstant.LICENSE_CONNECT_BASE_URL.asString())
+        .name(ConfigConstant.LICENCE_CONNECT_BASE_URL.asString())
         .type(ProviderConfigProperty.STRING_TYPE)
         .label("Base URL")
-        .helpText("Base URL of the license connect API")
+        .helpText("Base URL of the licence connect API")
         .add()
         .property()
-        .name(ConfigConstant.LICENSE_CONNECT_API_KEY.asString())
+        .name(ConfigConstant.LICENCE_CONNECT_API_KEY.asString())
         .type(ProviderConfigProperty.STRING_TYPE)
         .label("API key")
         .helpText("Key used for authentication to connect with API")
@@ -37,9 +37,9 @@ public class DefaultRestClientProviderFactory
         .build();
 
     private final ThreadLocal<Boolean>                initHolder        = new ThreadLocal<>();
-    private LicenseConnectRestClient                  restClient;
-    public String                                     licenseConnectBaseUrl;
-    public String                                     licenseConnectAPIKey;
+    private LicenceConnectRestClient                  restClient;
+    public String                                     licenceConnectBaseUrl;
+    public String                                     licenceConnectAPIKey;
 
     @Override
     public RestClientProvider create(KeycloakSession session)
@@ -47,7 +47,7 @@ public class DefaultRestClientProviderFactory
         if (initHolder.get() == null) {
             synchronized(this) {
                 if (restClient == null) {
-                    restClient = new LicenseConnectRestClient(this.licenseConnectBaseUrl, this.licenseConnectAPIKey);
+                    restClient = new LicenceConnectRestClient(this.licenceConnectBaseUrl, this.licenceConnectAPIKey);
                 }
                 initHolder.set(Boolean.TRUE);
             }
@@ -58,10 +58,10 @@ public class DefaultRestClientProviderFactory
     @Override
     public void init(Scope config)
     {
-        this.licenseConnectBaseUrl = config.get(ConfigConstant.LICENSE_CONNECT_BASE_URL.asString());
-        this.licenseConnectAPIKey = config.get(ConfigConstant.LICENSE_CONNECT_API_KEY.asString());
-        if (this.licenseConnectBaseUrl == null || this.licenseConnectAPIKey == null) {
-            LOG.warn("License connect URL and the API key should be added in order to access license connect API");
+        this.licenceConnectBaseUrl = config.get(ConfigConstant.LICENCE_CONNECT_BASE_URL.asString());
+        this.licenceConnectAPIKey = config.get(ConfigConstant.LICENCE_CONNECT_API_KEY.asString());
+        if (this.licenceConnectBaseUrl == null || this.licenceConnectAPIKey == null) {
+            LOG.warn("Licence connect URL and the API key should be added in order to access licence connect API");
         }
 
     }
