@@ -988,7 +988,8 @@
     "adminTheme": "keycloak",
     "eventsEnabled": false,
     "eventsListeners": [
-      "jboss-logging"
+      "jboss-logging",
+      "remove-user-on-logout"
     ],
     "enabledEventTypes": [],
     "adminEventsEnabled": false,

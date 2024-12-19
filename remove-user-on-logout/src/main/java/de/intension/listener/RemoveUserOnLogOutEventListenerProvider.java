@@ -5,6 +5,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.intension.authentication.authenticators.backup.LicenceLookupProvider;
+import de.intension.authentication.authenticators.backup.jpa.entity.LicenceEntity;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -14,18 +18,14 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.FederatedIdentityModel;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserProvider;
+import org.keycloak.models.*;
 
 import de.intension.resources.admin.DeletableUserType;
 import de.intension.rest.LicenceConnectRestClient;
 import de.intension.rest.model.RemoveLicenceRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 
 /**
  * Event listener to remove user on logout for the users from identity providers.
@@ -81,6 +81,7 @@ public class RemoveUserOnLogOutEventListenerProvider
         if (userToDelete != null) {
             this.releaseLicences(userToDelete, event);
             userProvider.removeUser(realm, userToDelete);
+            deleteBackupLicence(userToDelete, event);
             LOG.infof("User %s removed.", userToDelete.getUsername());
         }
 
@@ -141,6 +142,15 @@ public class RemoveUserOnLogOutEventListenerProvider
             licenceRequestedRequest = new RemoveLicenceRequest(userId);
         }
         return licenceRequestedRequest;
+    }
+
+    private void deleteBackupLicence(UserModel user, Event event){
+         var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
+                .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+        if (hmacMapper.isPresent()) {
+           String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
+            keycloakSession.getProvider(LicenceLookupProvider.class).deleteLicence(hmacId);
+        }
     }
 
     @Override

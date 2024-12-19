@@ -618,6 +618,21 @@
           "protocolMapper": "oidc-audience-resolve-mapper",
           "consentRequired": false,
           "config": {}
+        },
+        {
+          "name": "HMAC user ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-mapper",
+          "consentRequired": false,
+          "config": {
+            "sectorIdentifierUri": "https://sector.identifier.de",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "pairwiseSubHashAlgorithm": "HmacSHA512",
+            "pairwiseSubAlgorithmSalt": "9a375233-064b-4bda-9b94-b16d275eb58b",
+            "pairwiseLocalSubIdentifier": "username"
+          }
         }
       ],
       "defaultClientScopes": [
@@ -2738,6 +2753,7 @@
           "userSetupAllowed": false
         },
         {
+          "authenticatorConfig": "mockserver",
           "authenticator": "licence-connect-authenticator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
@@ -3472,6 +3488,14 @@
         "idpHintParamName": "vidis_idp_hint",
         "authWhiteListClientGrantType": "password",
         "authWhiteListClientId": "iam-service"
+      }
+    },
+    {
+      "id": "a8f647a4-a0dc-4927-b551-bf7317a35398",
+      "alias": "mockserver",
+      "config": {
+        "licence-url": "http://mockServer:1080/v1/licences/request",
+        "licence-api-key": "sample-api-key"
       }
     },
     {
