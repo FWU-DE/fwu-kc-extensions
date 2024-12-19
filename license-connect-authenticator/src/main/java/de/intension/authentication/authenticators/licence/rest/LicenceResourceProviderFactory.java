@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license.rest;
+package de.intension.authentication.authenticators.licence.rest;
 
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
@@ -32,6 +32,6 @@ public class LicenceResourceProviderFactory implements RealmResourceProviderFact
 
     @Override
     public String getId() {
-        return "licence-resource";
+        return "licences-resource";
     }
 }

@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license;
+package de.intension.authentication.authenticators.licence;
 
 import java.io.IOException;
 import java.util.List;

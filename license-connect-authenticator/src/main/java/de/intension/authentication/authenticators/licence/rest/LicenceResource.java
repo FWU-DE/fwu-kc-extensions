@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license.rest;
+package de.intension.authentication.authenticators.licence.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +33,9 @@ public class LicenceResource {
         }
         var licenceBuilder = new StringBuilder();
         var filteredLicenceAttributes = user.getAttributes().entrySet().stream().filter(it -> it.getKey().contains("licences")).toList();
+        if(filteredLicenceAttributes.isEmpty()) {
+            throw new NotFoundException("The user has no licences.");
+        }
         for (int part = 1; part <= filteredLicenceAttributes.size(); part++) {
             licenceBuilder.append(getLicenceText(filteredLicenceAttributes, part));
         }

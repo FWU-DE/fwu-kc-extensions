@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license.rest;
+package de.intension.authentication.authenticators.licence.rest;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;

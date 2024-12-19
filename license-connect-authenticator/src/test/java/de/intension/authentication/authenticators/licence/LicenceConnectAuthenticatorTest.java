@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license;
+package de.intension.authentication.authenticators.licence;
 
 import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +48,7 @@ import de.intension.authentication.authenticators.rest.model.LicenseRequest;
 import de.intension.authentication.helpers.KeycloakPage;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LicenseConnectAuthenticatorTest
+public class LicenceConnectAuthenticatorTest
 {
 
     private static final Network             network           = Network.newNetwork();

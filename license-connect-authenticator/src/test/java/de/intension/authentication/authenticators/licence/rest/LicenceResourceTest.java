@@ -1,4 +1,4 @@
-package de.intension.authentication.authenticators.license.rest;
+package de.intension.authentication.authenticators.licence.rest;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.junit.jupiter.api.Test;
