@@ -13,7 +13,6 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.*;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ErrorPage;
 
 import java.io.IOException;
@@ -64,9 +63,10 @@ public class LicenceConnectAuthenticator
                 String partValue = userLicence.substring(i, Math.min(userLicence.length(), i + PART_SIZE));
                 user.setAttribute(LICENCE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
             }
-            var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMapperByName(OIDCLoginProtocol.LOGIN_PROTOCOL, HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
-            if (hmacMapper != null) {
-                String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, user);
+            var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMappersStream()
+                    .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+            if (hmacMapper.isPresent()) {
+                String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
                 LicenceEntity licence = new LicenceEntity(hmacId, userLicence);
                 context.getSession().getProvider(LicenceLookupProvider.class).createLicence(licence);
 

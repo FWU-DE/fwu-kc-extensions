@@ -618,6 +618,21 @@
           "protocolMapper": "oidc-audience-resolve-mapper",
           "consentRequired": false,
           "config": {}
+        },
+        {
+          "name": "HMAC user ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hmac-pairwise-subject-mapper",
+          "consentRequired": false,
+          "config": {
+            "sectorIdentifierUri": "https://sector.identifier.de",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "pairwiseSubHashAlgorithm": "HmacSHA512",
+            "pairwiseSubAlgorithmSalt": "9a375233-064b-4bda-9b94-b16d275eb58b",
+            "pairwiseLocalSubIdentifier": "username"
+          }
         }
       ],
       "defaultClientScopes": [
