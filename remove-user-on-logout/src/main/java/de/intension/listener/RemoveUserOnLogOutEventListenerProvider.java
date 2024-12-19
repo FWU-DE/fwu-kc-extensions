@@ -145,11 +145,10 @@ public class RemoveUserOnLogOutEventListenerProvider
     }
 
     private void deleteBackupLicence(UserModel user, Event event){
-        RealmModel realm = keycloakSession.realms().getRealm(event.getRealmId());
-        ClientModel client = keycloakSession.clients().getClientById(realm, event.getClientId());
-        var hmacMapper = client.getProtocolMapperByName(OIDCLoginProtocol.LOGIN_PROTOCOL, HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID);
-        if (hmacMapper != null) {
-            String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper, user);
+         var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
+                .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+        if (hmacMapper.isPresent()) {
+           String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
             keycloakSession.getProvider(LicenceLookupProvider.class).deleteLicence(hmacId);
         }
     }

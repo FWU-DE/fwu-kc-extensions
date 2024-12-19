@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "LICENCE")
 @NamedQueries({
-    @NamedQuery(name = LicenceEntity.GET_LICENCE_BY_HMAC_ID,
+        @NamedQuery(name = LicenceEntity.GET_LICENCE_BY_HMAC_ID,
                 query = "SELECT w.content FROM LicenceEntity w WHERE w.hmacId = :hmacId"),
         @NamedQuery(
                 name = LicenceEntity.REMOVE_LICENCE_BY_HMAC_ID,
-                query = "DELETE FROM LicenseEntity w WHERE w.hmacId = :hmacId")
+                query = "DELETE FROM LicenceEntity w WHERE w.hmacId = :hmacId")
 })
 public class LicenceEntity {
     public static final String GET_LICENCE_BY_HMAC_ID = "getLicenceByHmacId";

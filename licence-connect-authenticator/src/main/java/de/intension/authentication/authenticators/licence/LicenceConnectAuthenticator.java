@@ -69,7 +69,6 @@ public class LicenceConnectAuthenticator
                 String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
                 LicenceEntity licence = new LicenceEntity(hmacId, userLicence);
                 context.getSession().getProvider(LicenceLookupProvider.class).createLicence(licence);
-
             }
             return true;
         }
