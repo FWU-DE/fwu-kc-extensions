@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.14.1]
+
+- Bugfix: get version to build from correct step
+
 ## Version [4.14.0]
 
 - Improvement: Rename "license" to "licence" where possible for unification
