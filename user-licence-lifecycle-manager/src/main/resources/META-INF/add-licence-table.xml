@@ -10,6 +10,9 @@
             <column name="CONTENT" type="CLOB">
                 <constraints nullable="false" />
             </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
     </changeSet>

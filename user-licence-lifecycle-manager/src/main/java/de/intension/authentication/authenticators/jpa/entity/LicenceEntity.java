@@ -2,6 +2,8 @@ package de.intension.authentication.authenticators.jpa.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "LICENCE")
 @NamedQueries({
@@ -22,9 +24,13 @@ public class LicenceEntity {
     @Column(name = "CONTENT", nullable = false)
     private String content;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     public LicenceEntity(String hmacId, String licence) {
         this.hmacId = hmacId;
         this.content = licence;
+        this.createdAt = LocalDateTime.now();
     }
 
     public LicenceEntity() {
@@ -44,5 +50,9 @@ public class LicenceEntity {
 
     public String getContent() {
         return content;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
