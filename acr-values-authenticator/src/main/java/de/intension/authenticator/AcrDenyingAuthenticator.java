@@ -7,20 +7,17 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.models.ClientModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 
 import java.util.Map;
 
+import static de.intension.authenticator.AcrDenyingAuthenticatorFactory.CONF_LOA_KEY;
 import static org.keycloak.models.Constants.ACR_LOA_MAP;
 
 /**
  * Authenticator for post login flow which denies if user attribute does not have attribute matching the LoA settings of current client.
  */
 public class AcrDenyingAuthenticator implements Authenticator {
-    private static final String ACR = "acr";
     private static final Logger logger = Logger.getLogger(AcrDenyingAuthenticator.class);
 
     private final KeycloakSession session;
@@ -35,10 +32,11 @@ public class AcrDenyingAuthenticator implements Authenticator {
     public void authenticate(AuthenticationFlowContext context) {
         try {
             var client = session.getContext().getClient();
+            var loaKey = getLoaMapKey(context);
             Map<String, String> loaMap = getAcrLoaMap(client);
-            if (loaMap.containsKey(ACR)) {
-                var acrValue = loaMap.get(ACR);
-                var hasAcrAttribute = context.getUser().getAttributeStream(ACR).anyMatch(acrValue::equals);
+            if (loaMap.containsKey(loaKey)) {
+                var acrValue = loaMap.get(loaKey);
+                var hasAcrAttribute = context.getUser().getAttributeStream(loaKey).anyMatch(acrValue::equals);
                 if (!hasAcrAttribute) {
                     logger.warnf("Denied request due to ACR in user attribute not matching client configuration. Realm %s, client %s, user %s.",
                             context.getRealm().getName(),
@@ -56,10 +54,24 @@ public class AcrDenyingAuthenticator implements Authenticator {
         context.success();
     }
 
+    private String getLoaMapKey(AuthenticationFlowContext context) {
+        final String defaultKey = "mfa";
+        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
+        if (authenticatorConfig == null) {
+            return defaultKey;
+        }
+        return authenticatorConfig.getConfig().getOrDefault(CONF_LOA_KEY, defaultKey);
+    }
+
     private Map<String, String> getAcrLoaMap(ClientModel client) throws JsonProcessingException {
         TypeReference<Map<String, String>> typeRef = new TypeReference<>() {
         };
-        return mapper.readValue(client.getAttribute(ACR_LOA_MAP), typeRef);
+        String acrLoaMap = client.getAttribute(ACR_LOA_MAP);
+        if (acrLoaMap == null) {
+            logger.warnf("Client '%s' does not have attribute '%s' set.", client.getClientId(), ACR_LOA_MAP);
+            return Map.of();
+        }
+        return mapper.readValue(acrLoaMap, typeRef);
     }
 
     @Override
