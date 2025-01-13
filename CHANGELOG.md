@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.14.2]
+
+- Bugfix: new logic for ACR deny authenticator
+
 ## Version [4.14.1]
 
 - Bugfix: get version to build from correct step
