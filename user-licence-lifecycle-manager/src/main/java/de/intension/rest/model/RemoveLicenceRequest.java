@@ -1,22 +1,18 @@
 package de.intension.rest.model;
 
-public class RemoveLicenceRequest
-{
+public class RemoveLicenceRequest {
 
     private String studentId;
 
-    public RemoveLicenceRequest(String studentId)
-    {
+    public RemoveLicenceRequest(String studentId) {
         this.studentId = studentId;
     }
 
-    public String getStudentId()
-    {
+    public String getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(String studentId)
-    {
+    public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
 }

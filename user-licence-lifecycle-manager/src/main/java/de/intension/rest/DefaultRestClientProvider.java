@@ -3,26 +3,22 @@ package de.intension.rest;
 import de.intension.spi.RestClientProvider;
 
 public class DefaultRestClientProvider
-    implements RestClientProvider
-{
+        implements RestClientProvider {
 
     private final LicenceConnectRestClient restClient;
 
-    public DefaultRestClientProvider(LicenceConnectRestClient restClient)
-    {
+    public DefaultRestClientProvider(LicenceConnectRestClient restClient) {
         this.restClient = restClient;
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public LicenceConnectRestClient restClient()
-    {
+    public LicenceConnectRestClient restClient() {
         return this.restClient;
     }
 

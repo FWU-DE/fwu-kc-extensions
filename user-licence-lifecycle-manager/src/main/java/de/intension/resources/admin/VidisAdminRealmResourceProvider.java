@@ -28,32 +28,28 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class VidisAdminRealmResourceProvider
-    implements AdminRealmResourceProvider
-{
+        implements AdminRealmResourceProvider {
 
-    private static final Logger      LOG                                               = Logger.getLogger(VidisAdminRealmResourceProvider.class);
-    private static final int         DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 30;
-    public static final String       DELETION_TOLERANCE_CONFIG                         = "deletiontolerance";
+    private static final Logger LOG = Logger.getLogger(VidisAdminRealmResourceProvider.class);
+    private static final int DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 30;
+    public static final String DELETION_TOLERANCE_CONFIG = "deletiontolerance";
 
-    private final KeycloakSession    session;
+    private final KeycloakSession session;
     private AdminPermissionEvaluator auth;
-    private Config.Scope             config;
+    private Config.Scope config;
 
-    public VidisAdminRealmResourceProvider(KeycloakSession session, Config.Scope config)
-    {
+    public VidisAdminRealmResourceProvider(KeycloakSession session, Config.Scope config) {
         this.session = session;
         this.config = config;
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         //nothing to do
     }
 
     @Override
-    public Object getResource(KeycloakSession session, RealmModel realm, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent)
-    {
+    public Object getResource(KeycloakSession session, RealmModel realm, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent) {
         this.auth = auth;
         return this;
     }
@@ -61,12 +57,11 @@ public class VidisAdminRealmResourceProvider
     @DELETE
     @Path("users/inactive")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteUsers(@QueryParam("max") @DefaultValue("1000") Integer max)
-    {
+    public Response deleteUsers(@QueryParam("max") @DefaultValue("1000") Integer max) {
         UserPermissionEvaluator userPermissionEvaluator = auth.users();
         userPermissionEvaluator.requireQuery();
         DeletableUserType deletableUserType = DeletableUserType
-            .valueOf(config.get(session.getContext().getRealm().getName().toLowerCase(), DeletableUserType.NONE.name()));
+                .valueOf(config.get(session.getContext().getRealm().getName().toLowerCase(), DeletableUserType.NONE.name()));
 
         String realm = session.getContext().getRealm().getName();
         if (realm.equals("master") || deletableUserType == DeletableUserType.NONE) {
@@ -81,8 +76,7 @@ public class VidisAdminRealmResourceProvider
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(new UserDeletionResponse(amountOfDeletedUsers)).build();
     }
 
-    private int deleteUsersWithoutSession(int maxNoOfUserToDelete, boolean idpOnly)
-    {
+    private int deleteUsersWithoutSession(int maxNoOfUserToDelete, boolean idpOnly) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         RealmModel realmModel = session.getContext().getRealm();
         UserSessionProvider sessionProvider = session.sessions();
@@ -110,8 +104,7 @@ public class VidisAdminRealmResourceProvider
         return numberOfDeletedUsers;
     }
 
-    private List<UserEntity> getListOfUsers(int chunkSize, long lastCreationDate, boolean idpOnly)
-    {
+    private List<UserEntity> getListOfUsers(int chunkSize, long lastCreationDate, boolean idpOnly) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
                 : " ";
@@ -128,8 +121,7 @@ public class VidisAdminRealmResourceProvider
         return userQuery.getResultList();
     }
 
-    private void removeUserLicence(LicenceConnectRestClient restClient, UserAdapter ua, RealmModel realm)
-    {
+    private void removeUserLicence(LicenceConnectRestClient restClient, UserAdapter ua, RealmModel realm) {
         RemoveLicenceRequest licenceRequest = createLicenceReleaseRequest(ua, realm);
         boolean licenceReleased = false;
         try {
@@ -141,19 +133,17 @@ public class VidisAdminRealmResourceProvider
         }
         if (licenceReleased) {
             LOG.infof("User licence has been released for the user %s", ua.getUsername());
-        }
-        else {
+        } else {
             LOG.warnf("User licence not released for the user %s", ua.getUsername());
         }
     }
 
-    private RemoveLicenceRequest createLicenceReleaseRequest(UserModel user, RealmModel realm)
-    {
+    private RemoveLicenceRequest createLicenceReleaseRequest(UserModel user, RealmModel realm) {
         RemoveLicenceRequest licenceRequestedRequest = null;
 
         Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
         Stream<FederatedIdentityModel> federatedIdentityModelList = this.session.users().getFederatedIdentitiesStream(realm, user)
-            .filter(identity -> idps.contains(identity.getIdentityProvider()));
+                .filter(identity -> idps.contains(identity.getIdentityProvider()));
 
         Optional<FederatedIdentityModel> idp = federatedIdentityModelList.findFirst();
         if (idp.isPresent()) {

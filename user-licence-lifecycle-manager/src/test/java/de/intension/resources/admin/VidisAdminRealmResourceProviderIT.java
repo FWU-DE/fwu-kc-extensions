@@ -1,24 +1,13 @@
 package de.intension.resources.admin;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockserver.model.Header.header;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.HttpStatusCode.OK_200;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.SQLException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.rest.model.LicenceRequest;
+import de.intension.rest.model.RemoveLicenceRequest;
+import de.intension.testhelper.KeycloakPage;
 import jakarta.ws.rs.core.HttpHeaders;
+import okhttp3.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +20,6 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.matchers.Times;
 import org.mockserver.mock.Expectation;
 import org.mockserver.model.MediaType;
-import org.mockserver.verify.VerificationTimes;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -40,17 +28,22 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.rest.model.RemoveLicenceRequest;
-import de.intension.testhelper.KeycloakPage;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockserver.model.Header.header;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.HttpStatusCode.OK_200;
 
 class VidisAdminRealmResourceProviderIT {
 

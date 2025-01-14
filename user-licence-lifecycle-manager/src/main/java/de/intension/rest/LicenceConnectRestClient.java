@@ -21,26 +21,23 @@ import java.io.IOException;
 import static org.jboss.logging.Logger.getLogger;
 
 public class LicenceConnectRestClient
-    implements Closeable
-{
+        implements Closeable {
 
-    private static final Logger LOG          = getLogger(LicenceConnectRestClient.class);
-    private final ObjectMapper  objectMapper = new ObjectMapper();
-    private final String        licenceRestUri;
-    private final String        licenceAPIKey;
+    private static final Logger LOG = getLogger(LicenceConnectRestClient.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String licenceRestUri;
+    private final String licenceAPIKey;
 
     private CloseableHttpClient httpClient;
 
-    public LicenceConnectRestClient(String licenceRestUri, String licenceAPIKey)
-    {
+    public LicenceConnectRestClient(String licenceRestUri, String licenceAPIKey) {
         this.licenceRestUri = licenceRestUri;
         this.licenceAPIKey = licenceAPIKey;
         httpClient = HttpClientBuilder.create().setDefaultRequestConfig(getRequestConfig()).build();
     }
 
     public boolean releaseLicence(RemoveLicenceRequest licenceRequest)
-        throws IOException
-    {
+            throws IOException {
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
         httpPost.setHeader("X-API-Key", this.licenceAPIKey);
@@ -52,18 +49,16 @@ public class LicenceConnectRestClient
             final int status = response.getStatusLine().getStatusCode();
             if (status == 200) {
                 return true;
-            }
-            else {
+            } else {
                 LOG.warnf("There was an error while releasing the licence for the user. Status: %d. Reason: %s", status,
-                          response.getStatusLine().getReasonPhrase());
+                        response.getStatusLine().getReasonPhrase());
             }
         }
         return false;
     }
 
     public JsonNode getLicences(LicenceRequest licenceRequest)
-            throws IOException
-    {
+            throws IOException {
         JsonNode userLicences = null;
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
@@ -80,8 +75,7 @@ public class LicenceConnectRestClient
                 } catch (JsonProcessingException e) {
                     LOG.error("Error while parsing user licences ", e);
                 }
-            }
-            else {
+            } else {
                 LOG.warnf("There was an error while fetching the licence for the user. Status: %d. Reason: %s", status,
                         response.getStatusLine().getReasonPhrase());
             }
@@ -92,19 +86,17 @@ public class LicenceConnectRestClient
     /**
      * Get request configuration for timeout handling.
      */
-    private static RequestConfig getRequestConfig()
-    {
+    private static RequestConfig getRequestConfig() {
         int timeoutInSeconds = 10;
         return RequestConfig.custom()
-            .setConnectTimeout(timeoutInSeconds * 1000)
-            .setConnectionRequestTimeout(timeoutInSeconds * 1000)
-            .setSocketTimeout(timeoutInSeconds * 1000).build();
+                .setConnectTimeout(timeoutInSeconds * 1000)
+                .setConnectionRequestTimeout(timeoutInSeconds * 1000)
+                .setSocketTimeout(timeoutInSeconds * 1000).build();
     }
 
     @Override
     public void close()
-        throws IOException
-    {
+            throws IOException {
         this.httpClient.close();
     }
 }

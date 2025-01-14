@@ -1,14 +1,12 @@
 package de.intension.config;
 
-public interface EnumType
-{
+public interface EnumType {
 
     String name();
 
     int ordinal();
 
-    default String asString()
-    {
+    default String asString() {
         return name();
     }
 }

@@ -1,6 +1,5 @@
 package de.intension.authentication.authenticators.jpa;
 
-import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;

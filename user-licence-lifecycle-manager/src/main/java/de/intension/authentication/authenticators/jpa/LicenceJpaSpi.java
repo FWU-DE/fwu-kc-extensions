@@ -1,7 +1,5 @@
 package de.intension.authentication.authenticators.jpa;
 
-import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
-import de.intension.authentication.authenticators.jpa.LicenceJpaProviderFactory;
 import org.keycloak.provider.Spi;
 
 /**

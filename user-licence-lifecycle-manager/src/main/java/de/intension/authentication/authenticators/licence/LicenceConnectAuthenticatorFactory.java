@@ -1,6 +1,5 @@
 package de.intension.authentication.authenticators.licence;
 
-import de.intension.authentication.authenticators.licence.LicenceConnectAuthenticator;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -14,12 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LicenceConnectAuthenticatorFactory
-    implements AuthenticatorFactory
-{
+        implements AuthenticatorFactory {
 
-    public static final String                        PROVIDER_ID      = "licence-connect-authenticator";
-    public static final String                        LICENCE_URL      = "licence-url";
-    public static final String                        LICENCE_API_KEY  = "licence-api-key";
+    public static final String PROVIDER_ID = "licence-connect-authenticator";
+    public static final String LICENCE_URL = "licence-url";
+    public static final String LICENCE_API_KEY = "licence-api-key";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
@@ -30,7 +28,7 @@ public class LicenceConnectAuthenticatorFactory
         property.setLabel("Rest endpoint to fetch the licence for the user");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property
-            .setHelpText("Expected value of rest endpoint to fetch user licence. Authenticator will only success if the user has licence associated with it");
+                .setHelpText("Expected value of rest endpoint to fetch user licence. Authenticator will only success if the user has licence associated with it");
         configProperties.add(property);
 
         property = new ProviderConfigProperty();
@@ -44,20 +42,17 @@ public class LicenceConnectAuthenticatorFactory
     private LicenceConnectAuthenticator licenceConnectAuthenticator;
 
     @Override
-    public String getDisplayType()
-    {
+    public String getDisplayType() {
         return "Licence Connect Authenticator";
     }
 
     @Override
-    public String getReferenceCategory()
-    {
+    public String getReferenceCategory() {
         return "Licence Connect";
     }
 
     @Override
-    public boolean isConfigurable()
-    {
+    public boolean isConfigurable() {
         return true;
     }
 
@@ -66,50 +61,42 @@ public class LicenceConnectAuthenticatorFactory
     };
 
     @Override
-    public AuthenticationExecutionModel.Requirement[] getRequirementChoices()
-    {
+    public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
     }
 
     @Override
-    public boolean isUserSetupAllowed()
-    {
+    public boolean isUserSetupAllowed() {
         return false;
     }
 
     @Override
-    public String getHelpText()
-    {
+    public String getHelpText() {
         return "Fetch the licences associated with user";
     }
 
     @Override
-    public List<ProviderConfigProperty> getConfigProperties()
-    {
+    public List<ProviderConfigProperty> getConfigProperties() {
         return configProperties;
     }
 
     @Override
-    public Authenticator create(KeycloakSession session)
-    {
+    public Authenticator create(KeycloakSession session) {
         licenceConnectAuthenticator = new LicenceConnectAuthenticator();
         return licenceConnectAuthenticator;
     }
 
     @Override
-    public void init(Config.Scope config)
-    {
+    public void init(Config.Scope config) {
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory factory)
-    {
+    public void postInit(KeycloakSessionFactory factory) {
         // Nothing to implement
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         if (this.licenceConnectAuthenticator != null) {
             try {
                 this.licenceConnectAuthenticator.getRestClient().close();
@@ -120,8 +107,7 @@ public class LicenceConnectAuthenticatorFactory
     }
 
     @Override
-    public String getId()
-    {
+    public String getId() {
         return PROVIDER_ID;
     }
 }

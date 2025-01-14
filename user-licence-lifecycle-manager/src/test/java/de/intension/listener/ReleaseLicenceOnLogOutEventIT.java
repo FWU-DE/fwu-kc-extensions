@@ -20,7 +20,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.testcontainers.containers.*;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
@@ -103,7 +105,7 @@ public class ReleaseLicenceOnLogOutEventIT {
         java.sql.Statement statement = connection.createStatement();
         ResultSet resultSetBefore = statement.executeQuery("SELECT w.content FROM Licence w");
         boolean isElement = resultSetBefore.next();
-        assert(isElement);
+        assert (isElement);
 
         kcPage.logout();
 
@@ -111,7 +113,7 @@ public class ReleaseLicenceOnLogOutEventIT {
         assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
         ResultSet resultSetAfter = statement.executeQuery("SELECT w.content FROM Licence w");
         boolean isEmpty = !resultSetAfter.next();
-        assert(isEmpty);
+        assert (isEmpty);
         mockServerClient.verify(releaseLicence.getId(), VerificationTimes.once());
     }
 

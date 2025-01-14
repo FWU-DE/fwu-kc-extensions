@@ -14,38 +14,32 @@ public class VidisAdminRealmResourceProviderFactory implements AdminRealmResourc
     private Config.Scope config;
 
     @Override
-    public AdminRealmResourceProvider create(KeycloakSession session)
-    {
+    public AdminRealmResourceProvider create(KeycloakSession session) {
         return new VidisAdminRealmResourceProvider(session, config);
     }
 
     @Override
-    public void init(Config.Scope config)
-    {
+    public void init(Config.Scope config) {
         this.config = config;
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory factory)
-    {
+    public void postInit(KeycloakSessionFactory factory) {
         //nothing to do
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         //nothing to do
     }
 
     @Override
-    public String getId()
-    {
+    public String getId() {
         return PROVIDER_ID;
     }
 
     @Override
-    public boolean isSupported()
-    {
+    public boolean isSupported() {
         return Profile.isFeatureEnabled(Profile.Feature.ADMIN2);
     }
 

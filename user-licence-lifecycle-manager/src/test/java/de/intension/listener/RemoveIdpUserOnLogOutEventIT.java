@@ -1,22 +1,10 @@
 package de.intension.listener;
 
-import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockserver.model.Header.header;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.HttpStatusCode.OK_200;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.rest.model.LicenceRequest;
+import de.intension.testhelper.KeycloakPage;
 import org.junit.jupiter.api.*;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -31,8 +19,20 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
-import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.testhelper.KeycloakPage;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockserver.model.Header.header;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.HttpStatusCode.OK_200;
 
 class RemoveIdpUserOnLogOutEventIT {
 

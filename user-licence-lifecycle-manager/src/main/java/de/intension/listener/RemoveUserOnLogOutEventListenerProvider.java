@@ -68,7 +68,7 @@ public class RemoveUserOnLogOutEventListenerProvider
         JpaKeycloakTransaction transaction = new JpaKeycloakTransaction(entityManager);
         transaction.begin();
         RealmModel realm = keycloakSession.getContext().getRealm();
-        UserProvider userProvider = keycloakSession.getProvider(UserProvider.class, "jpa" );
+        UserProvider userProvider = keycloakSession.getProvider(UserProvider.class, "jpa");
 
         UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
         if (userToDelete != null) {

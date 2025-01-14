@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.rest.model.LicenceRequest;
 import de.intension.testhelper.KeycloakPage;
-import jakarta.ws.rs.core.HttpHeaders;
 import org.junit.jupiter.api.*;
 import org.junit.runner.Description;
 import org.keycloak.admin.client.resource.UsersResource;
