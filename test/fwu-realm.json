@@ -2179,6 +2179,17 @@
       }
     },
     {
+      "id": "2fd0ac5a-9635-4187-a404-c1e7867ba73c",
+      "name": "ACR",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "claim": "acr_values",
+        "user.attribute": "acr_values"
+      }
+    },
+    {
       "id": "471a4409-6de2-4f2c-a002-58277c73d0e0",
       "name": "uuid",
       "identityProviderAlias": "keycloak-oidc2",
