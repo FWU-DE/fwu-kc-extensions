@@ -80,4 +80,3 @@ The test setup is as follows:
 - The user federation has a mapper to write claim `acr_values` to user attribute with same name
 
 <img src="../docs/acr-values-authenticator/acr-loa-idp-flow.png" width="70%"/>
-
