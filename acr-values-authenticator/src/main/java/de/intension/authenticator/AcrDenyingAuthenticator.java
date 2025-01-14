@@ -1,6 +1,7 @@
 package de.intension.authenticator;
 
 import org.jboss.logging.Logger;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -30,7 +31,7 @@ public class AcrDenyingAuthenticator implements Authenticator {
             // get ACR to LOA mapping from client or realm
             Map<String, Integer> acrLoaMap = AcrUtils.getAcrLoaMap(client);
             if (!acrLoaMap.isEmpty()) {
-                var hasAcrAttribute = context.getUser().getAttributeStream("acr_values").anyMatch(acrLoaMap::containsKey);
+                var hasAcrAttribute = context.getUser().getAttributeStream(OAuth2Constants.ACR_VALUES).anyMatch(acrLoaMap::containsKey);
                 if (!hasAcrAttribute) {
                     logger.warnf("Denied request due to acr_values in user attribute not matching client configuration. Realm %s, client %s, user %s.",
                             context.getRealm().getName(),

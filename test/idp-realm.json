@@ -346,7 +346,7 @@
         },
         {
           "id": "c94bba59-5dd0-494b-8405-095cd0aa580f",
-          "name": "LOA",
+          "name": "ACR",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-hardcoded-claim-mapper",
           "consentRequired": false,
