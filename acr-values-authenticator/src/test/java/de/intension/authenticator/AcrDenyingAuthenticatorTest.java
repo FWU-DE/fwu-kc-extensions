@@ -47,7 +47,7 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_allow_for_user_with_acr_attribute() {
-        var authenticator = authenticator("1");
+        var authenticator = authenticator(1);
         var context = mockContext("0", "1");
 
         authenticator.authenticate(context);
@@ -62,7 +62,7 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_deny_for_user_with_missing_attribute() {
-        var authenticator = authenticator("1");
+        var authenticator = authenticator(1);
         var context = mockContext();
 
         authenticator.authenticate(context);
@@ -77,7 +77,7 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_deny_for_user_with_invalid_attribute() {
-        var authenticator = authenticator("1");
+        var authenticator = authenticator(1);
         var context = mockContext("2");
 
         authenticator.authenticate(context);
@@ -128,10 +128,10 @@ class AcrDenyingAuthenticatorTest {
     /**
      * Instantiate authenticator with mocked {@link KeycloakSession} returning client configured with passed value for LoA mapping key "acr".
      */
-    private AcrDenyingAuthenticator authenticator(String acr) {
+    private AcrDenyingAuthenticator authenticator(Integer loa) {
         var client = mock(ClientModel.class);
         when(client.getClientId()).thenReturn("example");
-        when(client.getAttribute(Constants.ACR_LOA_MAP)).thenReturn(getClientLoaMap(acr));
+        when(client.getAttribute(Constants.ACR_LOA_MAP)).thenReturn(getClientLoaMap(loa));
         KeycloakContext context = mock(KeycloakContext.class);
         when(context.getClient()).thenReturn(client);
         KeycloakSession session = mock(KeycloakSession.class);
@@ -142,16 +142,16 @@ class AcrDenyingAuthenticatorTest {
     /**
      * Construct map for {@link Constants#ACR_LOA_MAP} with conditional passed value.
      * <hr>
-     * Returns map in the format {"key1": "value1","key2": "value2"}, where:
+     * Returns map in the format {"key1": value1,"key2": value2}, where:
      * <ul>
-     *     <li><code>"foo": "bar"</code> is always first element</li>
-     *     <li><code>"acr": "${value}"</code> is set when parameter "acr" is not null</li>
+     *     <li><code>"foo": 1337</code> is always first element</li>
+     *     <li><code>"acr": ${value}</code> is set when parameter "loa" is not null</li>
      * </ul>
      */
-    private static String getClientLoaMap(String acr) {
-        StringBuilder loaMapBuilder = new StringBuilder("{\"foo\":\"bar\"");
-        if (acr != null) {
-            loaMapBuilder.append(",\"acr\":\"").append(acr).append("\"");
+    private static String getClientLoaMap(Integer loa) {
+        StringBuilder loaMapBuilder = new StringBuilder("{\"foo\":1337");
+        if (loa != null) {
+            loaMapBuilder.append(",\"acr\":").append(loa);
         }
         return loaMapBuilder.append("}").toString();
     }
