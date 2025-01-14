@@ -1,6 +1,5 @@
 package de.intension.authenticator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -39,7 +38,7 @@ public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getHelpText() {
-        return "Configure in post login flow. Denies access when user does not have attribute 'acr' set with value configured in clients ACR to LoA mapping for key 'acr'.";
+        return "Configure in post login flow. Denies access when user does not have attribute set with value configured in clients ACR to LoA mapping for same key.";
     }
 
     @Override
@@ -49,7 +48,7 @@ public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new AcrDenyingAuthenticator(session, new ObjectMapper());
+        return new AcrDenyingAuthenticator(session);
     }
 
     @Override

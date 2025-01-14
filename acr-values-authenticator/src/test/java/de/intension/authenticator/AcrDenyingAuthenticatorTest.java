@@ -1,8 +1,8 @@
 package de.intension.authenticator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.models.*;
@@ -27,7 +27,7 @@ class AcrDenyingAuthenticatorTest {
     }
 
     /**
-     * GIVEN: client configured without LoA mapping for "acr"
+     * GIVEN: client configured without LoA mappings
      * WHEN: {@link AcrDenyingAuthenticator} is called for user without "acr" attribute
      * THEN: context succeeds
      */
@@ -48,8 +48,8 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_allow_for_user_with_acr_attribute() {
-        var authenticator = authenticator("1");
-        var context = mockContext("0", "1");
+        var authenticator = authenticator("acr");
+        var context = mockContext("smth", "acr");
 
         authenticator.authenticate(context);
 
@@ -63,7 +63,7 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_deny_for_user_with_missing_attribute() {
-        var authenticator = authenticator("1");
+        var authenticator = authenticator("acr");
         var context = mockContext();
 
         authenticator.authenticate(context);
@@ -78,8 +78,8 @@ class AcrDenyingAuthenticatorTest {
      */
     @Test
     void should_deny_for_user_with_invalid_attribute() {
-        var authenticator = authenticator("1");
-        var context = mockContext("2");
+        var authenticator = authenticator("acr");
+        var context = mockContext("bar");
 
         authenticator.authenticate(context);
 
@@ -108,7 +108,7 @@ class AcrDenyingAuthenticatorTest {
     private AuthenticationFlowContext mockContext(String... acrValues) {
         var user = mock(UserModel.class);
         when(user.getId()).thenReturn("foobar");
-        when(user.getAttributeStream("acr")).thenReturn(Stream.of(acrValues));
+        when(user.getAttributeStream(OAuth2Constants.ACR_VALUES)).thenReturn(Stream.of(acrValues));
         var context = mock(AuthenticationFlowContext.class);
         when(context.getUser()).thenReturn(user);
         doAnswer(x -> {
@@ -130,31 +130,33 @@ class AcrDenyingAuthenticatorTest {
      * Instantiate authenticator with mocked {@link KeycloakSession} returning client configured with passed value for LoA mapping key "acr".
      */
     private AcrDenyingAuthenticator authenticator(String acr) {
+        var realm = mock(RealmModel.class);
+        when(realm.getAttribute(Constants.ACR_LOA_MAP)).thenReturn(null);
         var client = mock(ClientModel.class);
         when(client.getClientId()).thenReturn("example");
         when(client.getAttribute(Constants.ACR_LOA_MAP)).thenReturn(getClientLoaMap(acr));
+        when(client.getRealm()).thenReturn(realm);
         KeycloakContext context = mock(KeycloakContext.class);
         when(context.getClient()).thenReturn(client);
         KeycloakSession session = mock(KeycloakSession.class);
         when(session.getContext()).thenReturn(context);
-        ObjectMapper mapper = new ObjectMapper();
-        return new AcrDenyingAuthenticator(session, mapper);
+        return new AcrDenyingAuthenticator(session);
     }
 
     /**
      * Construct map for {@link Constants#ACR_LOA_MAP} with conditional passed value.
      * <hr>
-     * Returns map in the format {"key1": "value1","key2": "value2"}, where:
+     * If parameter "acr" is not null it returns map in the format {"key1": value1,"key2": value2}, where:
      * <ul>
-     *     <li><code>"foo": "bar"</code> is always first element</li>
-     *     <li><code>"acr": "${value}"</code> is set when parameter "acr" is not null</li>
+     *     <li><code>"foo": 1337</code></li>
+     *     <li><code>"${acr}": 420</code></li>
      * </ul>
+     * If parameter "acr" is null it returns an empty map.
      */
     private static String getClientLoaMap(String acr) {
-        StringBuilder loaMapBuilder = new StringBuilder("{\"foo\":\"bar\"");
         if (acr != null) {
-            loaMapBuilder.append(",\"acr\":\"").append(acr).append("\"");
+            return "{\"foo\":1337" + ",\"" + acr + "\":420}";
         }
-        return loaMapBuilder.append("}").toString();
+        return "{}";
     }
 }
