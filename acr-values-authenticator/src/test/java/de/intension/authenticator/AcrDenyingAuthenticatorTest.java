@@ -1,6 +1,5 @@
 package de.intension.authenticator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -137,8 +136,7 @@ class AcrDenyingAuthenticatorTest {
         when(context.getClient()).thenReturn(client);
         KeycloakSession session = mock(KeycloakSession.class);
         when(session.getContext()).thenReturn(context);
-        ObjectMapper mapper = new ObjectMapper();
-        return new AcrDenyingAuthenticator(session, mapper);
+        return new AcrDenyingAuthenticator(session);
     }
 
     /**

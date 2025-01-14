@@ -1,6 +1,5 @@
 package de.intension.authenticator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -49,7 +48,7 @@ public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new AcrDenyingAuthenticator(session, new ObjectMapper());
+        return new AcrDenyingAuthenticator(session);
     }
 
     @Override

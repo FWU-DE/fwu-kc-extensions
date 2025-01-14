@@ -1,6 +1,5 @@
 package de.intension.authenticator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -19,11 +18,9 @@ public class AcrDenyingAuthenticator implements Authenticator {
     private static final Logger logger = Logger.getLogger(AcrDenyingAuthenticator.class);
 
     private final KeycloakSession session;
-    private final ObjectMapper mapper;
 
-    public AcrDenyingAuthenticator(KeycloakSession session, ObjectMapper mapper) {
+    public AcrDenyingAuthenticator(KeycloakSession session) {
         this.session = session;
-        this.mapper = mapper;
     }
 
     @Override
