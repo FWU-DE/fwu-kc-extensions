@@ -1,5 +1,10 @@
 package de.intension.rest.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LicenceRequest {
 
     private String userId;
@@ -12,37 +17,5 @@ public class LicenceRequest {
         this.clientId = clientId;
         this.schulkennung = schulkennung;
         this.bundesland = bundesland;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getSchulkennung() {
-        return schulkennung;
-    }
-
-    public void setSchulkennung(String schulkennung) {
-        this.schulkennung = schulkennung;
-    }
-
-    public String getBundesland() {
-        return bundesland;
-    }
-
-    public void setBundesland(String bundesland) {
-        this.bundesland = bundesland;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }

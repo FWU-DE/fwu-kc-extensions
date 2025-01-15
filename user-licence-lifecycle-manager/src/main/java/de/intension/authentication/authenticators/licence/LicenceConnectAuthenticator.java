@@ -8,6 +8,7 @@ import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.rest.LicenceConnectRestClient;
 import de.intension.rest.model.LicenceRequest;
 import jakarta.ws.rs.core.Response;
+import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -33,6 +34,7 @@ public class LicenceConnectAuthenticator
     private static final String HAS_LICENCES_ATTRIBUTE = "hasLicences";
     private static final int PART_SIZE = 255;
 
+    @Getter
     private LicenceConnectRestClient restClient;
 
     public LicenceConnectAuthenticator() {
@@ -144,9 +146,5 @@ public class LicenceConnectAuthenticator
     @Override
     public void close() {
         // Nothing to implement
-    }
-
-    public LicenceConnectRestClient getRestClient() {
-        return this.restClient;
     }
 }

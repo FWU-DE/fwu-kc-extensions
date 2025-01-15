@@ -8,6 +8,7 @@ import de.intension.rest.LicenceConnectRestClient;
 import de.intension.rest.model.RemoveLicenceRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
+import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -39,6 +40,7 @@ public class RemoveUserOnLogOutEventListenerProvider
 
     private final EventListenerTransaction tx = new EventListenerTransaction(null, this::removeUser);
     private final Config.Scope config;
+    @Getter
     private LicenceConnectRestClient restClient;
 
     protected RemoveUserOnLogOutEventListenerProvider(KeycloakSession session, Config.Scope config) {
@@ -153,7 +155,4 @@ public class RemoveUserOnLogOutEventListenerProvider
         // nothing to close.
     }
 
-    public LicenceConnectRestClient getRestClient() {
-        return this.restClient;
-    }
 }
