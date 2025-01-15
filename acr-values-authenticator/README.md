@@ -73,6 +73,8 @@ Make sure it is set as a required step!
 
 When configured correctly, this extension makes sure requests cannot be fiddled with during the authentication flow.
 
+### Local testing
+
 The test setup is as follows:
 - The Realm `idp` acts as an identity provider for Realm `fwu`
 - The user federation "IDP Login" in Realm `fwu` uses client `idp-broker` from realm `idp`
@@ -80,3 +82,9 @@ The test setup is as follows:
 - The user federation has a mapper to write claim `acr_values` to user attribute with same name
 
 <img src="../docs/acr-values-authenticator/acr-loa-idp-flow.png" width="70%"/>
+
+#### Negative case
+
+To verify the denial of login works, you can either:
+- Change the URL's value during login for parameter `acr_values`
+- Update the claim value property for the hardcoded claim mapper "ACR" in the `idp` realm client `idp-broker`
