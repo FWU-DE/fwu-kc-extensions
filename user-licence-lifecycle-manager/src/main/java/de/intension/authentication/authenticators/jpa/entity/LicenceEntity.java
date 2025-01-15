@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class LicenceEntity {
     public static final String GET_LICENCE_BY_HMAC_ID = "getLicenceByHmacId";
     public static final String REMOVE_LICENCE_BY_HMAC_ID = "removeLicenceByHmacId";
+    public static final String HMAC_ID = "hmacId";
 
     @Id
     @Column(name = "HMAC_ID", nullable = false)

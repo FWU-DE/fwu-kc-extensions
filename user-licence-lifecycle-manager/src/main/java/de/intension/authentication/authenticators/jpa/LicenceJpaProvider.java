@@ -21,19 +21,18 @@ public class LicenceJpaProvider implements Provider {
     public String getLicenceByHmacId(String hmacId) {
         return getEntityManager()
                 .createNamedQuery(LicenceEntity.GET_LICENCE_BY_HMAC_ID, String.class)
-                .setParameter("hmacId", hmacId)
+                .setParameter(LicenceEntity.HMAC_ID, hmacId)
                 .getResultStream().findFirst().orElse(null);
     }
 
-    public LicenceEntity persistLicence(LicenceEntity licenceEntity) {
+    public void persistLicence(LicenceEntity licenceEntity) {
         getEntityManager().persist(licenceEntity);
-        return licenceEntity;
     }
 
     public void deleteLicence(String hmacId) {
         getEntityManager()
                 .createNamedQuery(LicenceEntity.REMOVE_LICENCE_BY_HMAC_ID)
-                .setParameter("hmacId", hmacId)
+                .setParameter(LicenceEntity.HMAC_ID, hmacId)
                 .executeUpdate();
     }
 
