@@ -573,9 +573,9 @@
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "client_credentials.use_refresh_token": "false",
-        "tls.client.certificate.bound.access.tokens": "false",
-        "require.pushed.authorization.requests": "false",
         "acr.loa.map": "{\"mfa\":\"1\"}",
+        "require.pushed.authorization.requests": "false",
+        "tls.client.certificate.bound.access.tokens": "false",
         "display.on.consent.screen": "false",
         "pkce.code.challenge.method": "S256",
         "token.response.type.bearer.lower-case": "false",
@@ -754,8 +754,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "clients": "formand##desight##applicy##progrant",
             "access.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
             "pseudonymListClaimName": "otherPseudonyms",
             "userinfo.token.claim": "true"
           }
@@ -901,8 +901,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "clients": "formand##desight##applicy##progrant",
             "access.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
             "pseudonymListClaimName": "otherPseudonyms",
             "userinfo.token.claim": "true"
           }
@@ -994,8 +994,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "clients": "formand##desight##applicy##progrant",
             "access.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
             "pseudonymListClaimName": "otherPseudonyms",
             "userinfo.token.claim": "true"
           }
@@ -1151,8 +1151,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "clients": "formand##desight##applicy##progrant",
             "access.token.claim": "true",
+            "clients": "formand##desight##applicy##progrant",
             "pseudonymListClaimName": "otherPseudonyms",
             "userinfo.token.claim": "true"
           }
@@ -1998,6 +1998,7 @@
   "browserSecurityHeaders": {
     "contentSecurityPolicyReportOnly": "",
     "xContentTypeOptions": "nosniff",
+    "referrerPolicy": "no-referrer",
     "xRobotsTag": "none",
     "xFrameOptions": "SAMEORIGIN",
     "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
@@ -2095,15 +2096,15 @@
       "config": {
         "validateSignature": "false",
         "postBindingLogout": "true",
-        "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
         "postBindingResponse": "true",
         "singleLogoutServiceUrl": "http://localhost:18443/auth/realms/saml/protocol/saml",
+        "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
         "entityId": "saml-identity-broker",
         "backchannelSupported": "false",
         "signSpMetadata": "false",
+        "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
         "signatureAlgorithm": "RSA_SHA256",
         "wantAssertionsEncrypted": "false",
-        "xmlSigKeyInfoKeyNameTransformer": "KEY_ID",
         "idpEntityId": "http://localhost:18443/auth/realms/saml",
         "loginHint": "false",
         "allowCreate": "true",
@@ -2611,9 +2612,17 @@
       "builtIn": false,
       "authenticationExecutions": [
         {
-          "authenticatorFlow": true,
+          "authenticator": "acr-value-param-authenticator",
+          "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "priority": 33,
           "autheticatorFlow": true,
           "flowAlias": "Default",
           "userSetupAllowed": false
@@ -2623,7 +2632,7 @@
           "authenticator": "school-whitelist-authenticator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 33,
+          "priority": 34,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }
