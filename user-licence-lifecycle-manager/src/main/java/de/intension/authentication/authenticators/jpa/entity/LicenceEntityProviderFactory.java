@@ -7,7 +7,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
 public class LicenceEntityProviderFactory implements JpaEntityProviderFactory {
-    protected static final String ID = "de/intension/authentication/authenticators/licence";
+    protected static final String ID = "licence-entity";
 
     @Override
     public JpaEntityProvider create(KeycloakSession keycloakSession) {
