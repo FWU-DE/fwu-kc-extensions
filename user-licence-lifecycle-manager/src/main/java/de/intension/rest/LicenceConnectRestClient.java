@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.intension.rest.model.LicenceRequest;
 import de.intension.rest.model.RemoveLicenceRequest;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -18,6 +19,7 @@ import org.jboss.logging.Logger;
 import java.io.Closeable;
 import java.io.IOException;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.jboss.logging.Logger.getLogger;
 
 public class LicenceConnectRestClient
@@ -41,7 +43,7 @@ public class LicenceConnectRestClient
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
         httpPost.setHeader("X-API-Key", this.licenceAPIKey);
-        httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
+        httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
         httpPost.setEntity(entity);
 
@@ -63,13 +65,13 @@ public class LicenceConnectRestClient
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
         httpPost.setHeader("X-API-Key", this.licenceAPIKey);
-        httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
+        httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
         httpPost.setEntity(entity);
 
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             final int status = response.getStatusLine().getStatusCode();
-            if (status == 200) {
+            if (status == HttpStatus.SC_OK) {
                 try {
                     userLicences = objectMapper.readTree(EntityUtils.toString(response.getEntity()));
                 } catch (JsonProcessingException e) {
