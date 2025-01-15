@@ -579,7 +579,7 @@
         "display.on.consent.screen": "false",
         "pkce.code.challenge.method": "S256",
         "token.response.type.bearer.lower-case": "false",
-        "default.acr.values": "1"
+        "default.acr.values": "mfa"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
