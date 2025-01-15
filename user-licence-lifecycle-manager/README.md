@@ -2,10 +2,10 @@
 
 This extension handles the lifecycle of users and licences. It consists of two main features:
 
-- Licence Connect Authenticator, which fetches the licence when a user logs in via idp. The licence is then persisted
+- Licence Connect Authenticator, which fetches the licence from [Licence Connect](https://licenceconnect.schule/)  
+  when a user logs in via idp. The licence is then persisted
   together with the 'hmacId'
-- Remove User On Logout, which deletes the logged-in user once they log out and sends a release request to
-  licence-connect.
+- Remove User On Logout, which deletes the Keycloak user once it logs out and sends a release request to Licence Connect.
   Furthermore, the licence is deleted from the database
 
 ## Licence Connect Authenticator
@@ -14,9 +14,7 @@ This extension handles the lifecycle of users and licences. It consists of two m
 
 #### Rest endpoint in UI
 
-The following environment variables must be set within UI in the authenticator config
-
-rest-endpoint and api-key
+The following variables must be set within the Admin UI for the authenticator config.
 
 In the authentication flow of your choice select the option to add authenticator
 
@@ -37,7 +35,8 @@ authentication
 
 #### Fetching the user licence
 
-The licence associated with user is managed by a microservice, which provides endpoints to gather those information.
+The licence associated with user is managed by a [Licence Connect](https://licenceconnect.schule/), 
+which provides endpoints to gather those information.
 
 **Endpoint:** <hostname>/v1/licences/request
 
@@ -162,7 +161,7 @@ mvn package -DskipTests
 2. Start the containers for the mockserver and the firefox standalone with
 
 ```
-docker compose -f user-licence-lifecycle-manager/src/test/resources/docker-compose.yaml up --detach --build
+docker compose -f user-licence-lifecycle-manager/src/test/resources/docker-compose.yaml up --detach
 ```
 
 3. Run the tests with
