@@ -38,7 +38,7 @@ public class AcrDenyingAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public String getHelpText() {
-        return "Configure in post login flow. Denies access when user does not have attribute set with value configured in clients ACR to LoA mapping for same key.";
+        return "Configure in post login flow. Denies access when user does not have attribute 'acr_values' set with value configured in clients ACR to LoA mapping.";
     }
 
     @Override

@@ -1,2 +1,3 @@
 de.intension.authenticator.AcrValuesAuthenticatorFactory
 de.intension.authenticator.AcrDenyingAuthenticatorFactory
+de.intension.authenticator.AcrConditionalAuthenticatorFactory
