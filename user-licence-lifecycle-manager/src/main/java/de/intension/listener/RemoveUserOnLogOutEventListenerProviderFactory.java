@@ -14,13 +14,11 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
         implements EventListenerProviderFactory {
 
     private static final Logger LOG = Logger.getLogger(RemoveUserOnLogOutEventListenerProviderFactory.class);
-    private RemoveUserOnLogOutEventListenerProvider removeUserOnLogOutEventListenerProvider;
     private Scope config;
 
     @Override
     public EventListenerProvider create(KeycloakSession session) {
-        removeUserOnLogOutEventListenerProvider = new RemoveUserOnLogOutEventListenerProvider(session, config);
-        return removeUserOnLogOutEventListenerProvider;
+        return new RemoveUserOnLogOutEventListenerProvider(session, config);
     }
 
     @Override

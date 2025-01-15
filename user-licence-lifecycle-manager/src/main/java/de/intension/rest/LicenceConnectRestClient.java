@@ -67,7 +67,7 @@ public class LicenceConnectRestClient
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
         httpPost.setEntity(entity);
 
-        try (CloseableHttpResponse response = httpClient.execute(httpPost);) {
+        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             final int status = response.getStatusLine().getStatusCode();
             if (status == 200) {
                 try {

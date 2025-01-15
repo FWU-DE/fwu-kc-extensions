@@ -80,9 +80,8 @@ public class LicenceConnectAuthenticator
         if (config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL) == null || config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY) == null) {
             return null;
         }
-        LicenceConnectRestClient restClient = new LicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL),
+        return new LicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL),
                 config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY));
-        return restClient;
     }
 
     private LicenceRequest createLicenceRequest(UserModel user, AuthenticationFlowContext context) {
@@ -113,9 +112,8 @@ public class LicenceConnectAuthenticator
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context) {
         RealmModel realm = context.getRealm();
         Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
-        Stream<FederatedIdentityModel> federatedIdentityModelList = context.getSession().users().getFederatedIdentitiesStream(realm, user)
+        return context.getSession().users().getFederatedIdentitiesStream(realm, user)
                 .filter(identity -> idps.contains(identity.getIdentityProvider()));
-        return federatedIdentityModelList;
     }
 
     protected Response createErrorPage(AuthenticationFlowContext context) {

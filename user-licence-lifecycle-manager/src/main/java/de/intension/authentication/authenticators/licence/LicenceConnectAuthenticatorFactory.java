@@ -19,7 +19,7 @@ public class LicenceConnectAuthenticatorFactory
     public static final String LICENCE_URL = "licence-url";
     public static final String LICENCE_API_KEY = "licence-api-key";
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
         ProviderConfigProperty property;
