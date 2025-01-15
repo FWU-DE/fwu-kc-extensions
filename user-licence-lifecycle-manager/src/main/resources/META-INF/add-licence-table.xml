@@ -11,7 +11,7 @@
             <column name="CONTENT" type="CLOB">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMP">
+            <column name="CREATED_AT" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
