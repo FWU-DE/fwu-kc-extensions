@@ -184,7 +184,7 @@ public class LicenceConnectAuthenticatorTest {
         return new Network() {
             @Override
             public String getId() {
-                return "resources_fwu_test";
+                return "test_fwu_test";
             }
 
             @Override
