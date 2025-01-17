@@ -42,6 +42,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>5.8.2</version>
@@ -208,7 +213,6 @@
         <artifactId>guava</artifactId>
         <version>31.1-jre</version>
       </dependency>
-      <!-- Lombok -->
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
