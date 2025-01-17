@@ -161,7 +161,7 @@ mvn package -DskipTests
 2. Start the containers for the mockserver and the firefox standalone with
 
 ```
-docker compose -f user-licence-lifecycle-manager/src/test/resources/docker-compose.yaml up --detach
+docker compose -f test/docker-compose.yaml up --detach
 ```
 
 3. Run the tests with
@@ -173,5 +173,5 @@ mvn verify
 4. Stop the docker containers
 
 ```
-docker compose -f user-licence-lifecycle-manager/src/test/resources/docker-compose.yaml down
+docker compose -f test/docker-compose.yaml down
 ```

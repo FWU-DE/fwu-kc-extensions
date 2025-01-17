@@ -16,6 +16,6 @@ jobs:
         with:
           java-version: 17
       - name: Start test containers
-        run: docker compose -f user-licence-lifecycle-manager/src/test/resources/docker-compose.yaml up --detach
+        run: docker compose -f test/docker-compose.yaml up --detach
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
