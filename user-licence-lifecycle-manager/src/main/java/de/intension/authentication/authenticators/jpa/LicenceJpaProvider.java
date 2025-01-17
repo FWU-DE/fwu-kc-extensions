@@ -2,16 +2,14 @@ package de.intension.authentication.authenticators.jpa;
 
 import de.intension.authentication.authenticators.jpa.entity.LicenceEntity;
 import jakarta.persistence.EntityManager;
+import lombok.AllArgsConstructor;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.Provider;
 
+@AllArgsConstructor
 public class LicenceJpaProvider implements Provider {
     private final KeycloakSession session;
-
-    public LicenceJpaProvider(KeycloakSession session) {
-        this.session = session;
-    }
 
     @Override
     public void close() {

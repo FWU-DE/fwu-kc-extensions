@@ -1,9 +1,7 @@
 package de.intension.authentication.authenticators.jpa.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +16,7 @@ import java.time.LocalDateTime;
 })
 @Getter
 @Setter
+@NoArgsConstructor
 public class LicenceEntity {
     public static final String GET_LICENCE_BY_HMAC_ID = "getLicenceByHmacId";
     public static final String REMOVE_LICENCE_BY_HMAC_ID = "removeLicenceByHmacId";
@@ -38,8 +37,5 @@ public class LicenceEntity {
         this.hmacId = hmacId;
         this.content = licence;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public LicenceEntity() {
     }
 }
