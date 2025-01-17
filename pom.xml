@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>remove-user-on-logout</module>
     <module>hmac-mapper</module>
     <module>whitelist-authenticator</module>
     <module>multi-value-user-attribute-mapper</module>
@@ -25,12 +24,12 @@
     <module>login-event-publisher</module>
     <module>account-linking-authenticator</module>
     <module>3rd-party-libs</module>
-    <module>licence-connect-authenticator</module>
     <module>acr-values-authenticator</module>
+    <module>user-licence-lifecycle-manager</module>
   </modules>
 
   <properties>
-    <revision>4.14.2</revision>
+    <revision>4.15.0</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -42,6 +41,12 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -82,6 +87,12 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
       <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.24.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -209,13 +220,6 @@
         <artifactId>guava</artifactId>
         <version>31.1-jre</version>
       </dependency>
-      <!-- Lombok -->
-      <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.30</version>
-        <scope>provided</scope>
-      </dependency>
       <dependency>
         <groupId>de.intension</groupId>
         <artifactId>user-info-api</artifactId>
@@ -226,6 +230,18 @@
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
         <version>5.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>1.20.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.4</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
