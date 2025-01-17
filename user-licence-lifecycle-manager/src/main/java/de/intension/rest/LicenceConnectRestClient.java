@@ -49,7 +49,7 @@ public class LicenceConnectRestClient
 
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             final int status = response.getStatusLine().getStatusCode();
-            if (status == 200) {
+            if (status == HttpStatus.SC_OK) {
                 return true;
             } else {
                 LOG.warnf("There was an error while releasing the licence for the user. Status: %d. Reason: %s", status,
