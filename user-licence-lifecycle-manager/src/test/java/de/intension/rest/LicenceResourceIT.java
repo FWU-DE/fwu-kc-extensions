@@ -15,6 +15,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.testcontainers.containers.*;
@@ -81,7 +82,7 @@ public class LicenceResourceIT {
 
     @Container
     private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
-            .withCapabilities(new ChromeOptions())
+            .withCapabilities(new FirefoxOptions())
             .withNetwork(network);
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -107,7 +108,7 @@ public class LicenceResourceIT {
 
     @BeforeEach
     void setup() {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), new ChromeOptions());
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), new FirefoxOptions());
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
