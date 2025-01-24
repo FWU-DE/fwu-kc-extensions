@@ -83,35 +83,30 @@ public class LicenceConnectAuthenticatorTest {
      */
     @Order(10)
     @Test
-    void should_add_licence_to_user()
-            throws JsonProcessingException {
-        try {
-            Expectation requestLicence = requestLicenceExpectation();
-            UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-            KeycloakPage kcPage = KeycloakPage
-                    .start(driver, wait)
-                    .openAccountConsole()
-                    .idpLogin("idpuser", "test");
-            List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
-            assertFalse(idpUsers.isEmpty());
-            UserRepresentation idpUser = idpUsers.get(0);
-            List<String> attributes = idpUser.getAttributes().get(LicenceConnectAuthenticator.LICENCE_ATTRIBUTE + "1");
-            assertFalse(attributes.isEmpty());
-            String licenceAttribute = attributes.get(0);
-            assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
-                    licenceAttribute);
-            mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
-            Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
-            resultSet.next();
-            String persistedLicence = resultSet.getString(1);
-            assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
-                    persistedLicence);
-            kcPage.logout();
-        } catch (SQLException e) {
-            Assertions.fail(e.getMessage());
-        }
+    void should_add_licence_to_user() throws Exception {
+        Expectation requestLicence = requestLicenceExpectation();
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+        KeycloakPage kcPage = KeycloakPage
+                .start(driver, wait)
+                .openAccountConsole()
+                .idpLogin("idpuser", "test");
+        List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
+        assertFalse(idpUsers.isEmpty());
+        UserRepresentation idpUser = idpUsers.get(0);
+        List<String> attributes = idpUser.getAttributes().get(LicenceConnectAuthenticator.LICENCE_ATTRIBUTE + "1");
+        assertFalse(attributes.isEmpty());
+        String licenceAttribute = attributes.get(0);
+        assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
+                licenceAttribute);
+        mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
+        Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
+        resultSet.next();
+        String persistedLicence = resultSet.getString(1);
+        assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
+                persistedLicence);
+        kcPage.logout();
     }
 
     /**
@@ -121,7 +116,7 @@ public class LicenceConnectAuthenticatorTest {
      */
     @Order(20)
     @Test
-    void should_not_add_licence_to_user() {
+    void should_not_add_licence_to_user() throws Exception {
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage.start(driver, wait)
                 .openAccountConsole()
@@ -131,14 +126,11 @@ public class LicenceConnectAuthenticatorTest {
         UserRepresentation idpUser = idpUsers.get(0);
         List<String> attributes = idpUser.getAttributes().get(LicenceConnectAuthenticator.LICENCE_ATTRIBUTE);
         assertNull(attributes);
-        try {
-            Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
-            assertFalse(resultSet.next());
-        } catch (SQLException e) {
-            Assertions.fail(e.getMessage());
-        }
+
+        Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
+        assertFalse(resultSet.next());
     }
 
     @BeforeAll
@@ -165,14 +157,11 @@ public class LicenceConnectAuthenticatorTest {
     }
 
     @AfterEach
-    void cleanUp() {
-        try {
-            Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("DELETE FROM Licence");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    void cleanUp() throws SQLException {
+        Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("DELETE FROM Licence");
+
         driver.quit();
         mockServerClient.reset();
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
