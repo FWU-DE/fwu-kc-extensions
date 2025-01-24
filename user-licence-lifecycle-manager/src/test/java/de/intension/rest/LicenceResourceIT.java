@@ -83,7 +83,8 @@ public class LicenceResourceIT {
     @Container
     private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions())
-            .withNetwork(network);
+            .withNetwork(network)
+            .withSharedMemorySize(2L * 1000L * 1000L * 1000L);
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static MockServerClient mockServerClient;
@@ -107,7 +108,7 @@ public class LicenceResourceIT {
     }
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         driver = new RemoteWebDriver(selenium.getSeleniumAddress(), new FirefoxOptions());
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
