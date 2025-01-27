@@ -80,12 +80,6 @@ public class LicenceResourceIT {
             .withEnv("KC_DB_PASSWORD", "test123")
             .dependsOn(postgres, mockServer);
 
-    @Container
-    private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
-            .withCapabilities(new FirefoxOptions())
-            .withNetwork(network)
-            .withSharedMemorySize(2L * 1000L * 1000L * 1000L);
-
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static MockServerClient mockServerClient;
     private static RemoteWebDriver driver;
@@ -109,7 +103,7 @@ public class LicenceResourceIT {
 
     @BeforeEach
     void setup() throws Exception {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), new FirefoxOptions());
+        driver = new RemoteWebDriver(URI.create("http://localhost:4444/wd/hub").toURL(), new FirefoxOptions());
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
