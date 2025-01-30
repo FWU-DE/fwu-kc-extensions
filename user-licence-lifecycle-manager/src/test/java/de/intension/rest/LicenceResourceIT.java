@@ -1,7 +1,6 @@
 package de.intension.rest;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.authentication.authenticators.licence.LicenceConnectAuthenticator;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,8 +8,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -32,7 +29,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 public class LicenceResourceIT {

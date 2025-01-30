@@ -1,14 +1,11 @@
 package de.intension.resources.admin;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.testhelper.KeycloakPage;
-import de.intension.testhelper.LicenceMockHelper;
 import okhttp3.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
 import org.mockserver.client.MockServerClient;
@@ -27,7 +24,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
