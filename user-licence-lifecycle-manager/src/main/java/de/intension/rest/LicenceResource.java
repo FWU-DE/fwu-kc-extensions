@@ -3,15 +3,13 @@ package de.intension.rest;
 import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.keycloak.models.KeycloakSession;
 
+@RequiredArgsConstructor
 public class LicenceResource {
 
     private final KeycloakSession session;
-
-    public LicenceResource(KeycloakSession session) {
-        this.session = session;
-    }
 
     @Path("/{hmac-id}")
     @GET
