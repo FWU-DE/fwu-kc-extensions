@@ -22,10 +22,6 @@ This OIDC mapper can be used to pseudonymize one of the attributes of user like 
 2. Field `sectorIdentifier` has to be still a valid URI but must not link to a JSON-File
 3. If `sectorIdentifier` links to a JSON-File, it's content will be completely ignored
 
-### Remove user on logout
-
-It holds the customization to remove the user on logout or inactive users. For more details please check [here](./remove-user-on-logout/README.md).
-
 ### Whitelist Authenticator
 
 This Authenticator checks valid combinations of Client ID and `KC_IDP_HINT` information.
@@ -83,15 +79,17 @@ For more details please check [here](./user-info-provider/README.md).
 Authenticators required to enable the linking of accounts with only one authentication process
 For more details please check [here](./account-linking-authenticator/README.md).
 
-### Licence Connect Authenticator
-
-Authenticator required to fetch the licence associated with the user from licence connect
-For more details please check [here](./licence-connect-authenticator/README.md).
-
 ### ACR values Authenticator
 
 Authenticator required to append the acr_values to the request which is sent to the IDP
 For more details please check [here](./acr-values-authenticator/README.md).
+
+### User Licence Lifecycle Manager
+
+Authenticator required to fetch the licence associated with the user from licence connect. 
+Additionally, it holds the customization to remove inactive users and remove the user together with the fetched licence 
+on logout.
+For more details please check [here](./user-licence-lifecycle-manager/README.md).
 
 ## Contributing
 
