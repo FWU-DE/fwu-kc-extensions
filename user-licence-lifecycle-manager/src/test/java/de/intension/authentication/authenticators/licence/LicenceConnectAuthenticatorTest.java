@@ -74,6 +74,8 @@ public class LicenceConnectAuthenticatorTest {
             .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
             .withNetwork(network);
 
+    private static final String EXPECTED_LICENCES = "[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]";
+
     private static MockServerClient mockServerClient;
 
     private RemoteWebDriver driver;
@@ -100,29 +102,29 @@ public class LicenceConnectAuthenticatorTest {
     @Order(10)
     @Test
     void should_add_licence_to_user() throws Exception {
+        // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage kcPage = KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
+
+        // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
         UserRepresentation idpUser = idpUsers.get(0);
         List<String> attributes = idpUser.getAttributes().get(LicenceConnectAuthenticator.LICENCE_ATTRIBUTE + "1");
         assertFalse(attributes.isEmpty());
         String licenceAttribute = attributes.get(0);
-        assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
-                licenceAttribute);
+        assertEquals(EXPECTED_LICENCES, licenceAttribute);
         mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
         resultSet.next();
         String persistedLicence = resultSet.getString(1);
-        assertEquals("[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]",
-                persistedLicence);
-        kcPage.logout();
+        assertEquals(EXPECTED_LICENCES, persistedLicence);
     }
 
     /**
@@ -133,16 +135,18 @@ public class LicenceConnectAuthenticatorTest {
     @Order(20)
     @Test
     void should_not_add_licence_to_user() throws Exception {
+        // given & when
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage.start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
+
+        // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
         UserRepresentation idpUser = idpUsers.get(0);
         List<String> attributes = idpUser.getAttributes().get(LicenceConnectAuthenticator.LICENCE_ATTRIBUTE);
         assertNull(attributes);
-
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT w.content FROM Licence w");
