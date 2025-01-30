@@ -5,16 +5,12 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.rest.model.LicenceRequest;
 import de.intension.testhelper.KeycloakPage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockserver.client.MockServerClient;
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -25,17 +21,15 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -80,6 +74,12 @@ public class LicenceResourceIT {
             .withEnv("KC_DB_PASSWORD", "test123")
             .dependsOn(postgres, mockServer);
 
+    @Container
+    private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
+            .withCapabilities(new FirefoxOptions())
+            .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
+            .withNetwork(network);
+
     private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static MockServerClient mockServerClient;
     private static RemoteWebDriver driver;
@@ -102,8 +102,8 @@ public class LicenceResourceIT {
     }
 
     @BeforeEach
-    void setup() throws Exception {
-        driver = new RemoteWebDriver(URI.create("http://localhost:4444/wd/hub").toURL(), new FirefoxOptions());
+    void setup() {
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), new FirefoxOptions());
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
@@ -140,5 +140,10 @@ public class LicenceResourceIT {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences-resource/1234567890")).GET().build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         assertEquals(404, response.statusCode());
+    }
+
+    @AfterEach
+    void tearDown() {
+        driver.quit();
     }
 }
