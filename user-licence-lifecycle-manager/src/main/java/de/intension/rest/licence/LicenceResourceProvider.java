@@ -1,16 +1,17 @@
-package de.intension.rest;
+package de.intension.rest.licence;
 
 import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resource.RealmResourceProvider;
 
 /**
- * Custom rest endpoints exposed via <code>${authUrl}/realms/${realm}/licences-resource/</code>.
+ * Custom rest endpoints exposed via <code>${authUrl}/realms/${realm}/licences/</code>.
  */
 @RequiredArgsConstructor
-public class LicenceResource {
+public class LicenceResourceProvider implements RealmResourceProvider {
 
     private final KeycloakSession session;
 
@@ -18,7 +19,7 @@ public class LicenceResource {
      * Get licences via their ID, which is the user's ID hashed with HMAC.
      *
      * <pre>
-     *     GET ${authUrl}/realms/${realm}/licences-resource/${hmacId}
+     *     GET ${authUrl}/realms/${realm}/licences/${hmacId}
      * </pre>
      */
     @Path("/{hmac-id}")
@@ -30,5 +31,15 @@ public class LicenceResource {
             throw new NotFoundException("No licence with hmac-id " + hmacID + " found.");
         }
         return licence;
+    }
+
+    @Override
+    public Object getResource() {
+        return this;
+    }
+
+    @Override
+    public void close() {
+
     }
 }

@@ -1,4 +1,4 @@
-package de.intension.rest;
+package de.intension.rest.licence;
 
 import lombok.RequiredArgsConstructor;
 import org.keycloak.Config;
@@ -8,21 +8,14 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 /**
- * Provider and provider factory for {@link LicenceResource}.
+ * Provider factory for {@link LicenceResourceProvider}.
  */
 @RequiredArgsConstructor
-public class LicenceResourceProviderFactory implements RealmResourceProvider, RealmResourceProviderFactory {
-
-    private final KeycloakSession session;
+public class LicenceResourceProviderFactory implements RealmResourceProviderFactory {
 
     @Override
     public RealmResourceProvider create(KeycloakSession keycloakSession) {
-        return this;
-    }
-
-    @Override
-    public Object getResource() {
-        return new LicenceResource(session);
+        return new LicenceResourceProvider(keycloakSession);
     }
 
     @Override
@@ -41,6 +34,6 @@ public class LicenceResourceProviderFactory implements RealmResourceProvider, Re
 
     @Override
     public String getId() {
-        return "licences-resource";
+        return "licences";
     }
 }

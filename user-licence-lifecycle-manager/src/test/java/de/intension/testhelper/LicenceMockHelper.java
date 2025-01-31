@@ -2,8 +2,8 @@ package de.intension.testhelper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.model.LicenceRequest;
-import de.intension.rest.model.RemoveLicenceRequest;
+import de.intension.rest.licence.model.LicenceRequest;
+import de.intension.rest.licence.model.RemoveLicenceRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.matchers.Times;

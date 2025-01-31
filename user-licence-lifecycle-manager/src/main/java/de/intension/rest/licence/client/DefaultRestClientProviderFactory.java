@@ -1,4 +1,4 @@
-package de.intension.rest;
+package de.intension.rest.licence.client;
 
 import de.intension.config.ConfigConstant;
 import de.intension.spi.RestClientProvider;

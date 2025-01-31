@@ -104,7 +104,7 @@ public class LicenceResourceIT {
         var databaseEntry = getDatabaseEntry();
         var hmacID = databaseEntry.getLeft();
         var expectedLicence = databaseEntry.getRight();
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences-resource/" + hmacID)).GET().build();
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/" + hmacID)).GET().build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         var body = response.body();
@@ -124,7 +124,7 @@ public class LicenceResourceIT {
 
     @Test
     void should_return_404_when_hmac_id_does_not_exist() throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences-resource/invalid-hmac-id")).GET().build();
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/invalid-hmac-id")).GET().build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         assertEquals(404, response.statusCode());
     }
