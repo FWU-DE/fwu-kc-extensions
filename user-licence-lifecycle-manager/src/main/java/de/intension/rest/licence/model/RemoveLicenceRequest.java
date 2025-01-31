@@ -1,4 +1,4 @@
-package de.intension.rest.model;
+package de.intension.rest.licence.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

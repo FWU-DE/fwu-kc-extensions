@@ -158,20 +158,8 @@ KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE: [TIME IN SE
 mvn package -DskipTests
 ```
 
-2. Start the containers for the mockserver and the firefox standalone with
-
-```
-docker compose -f test/docker-compose.yaml up --detach
-```
-
-3. Run the tests with
+2. Run the tests with
 
 ```
 mvn verify
-```
-
-4. Stop the docker containers
-
-```
-docker compose -f test/docker-compose.yaml down
 ```

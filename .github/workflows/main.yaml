@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - name: Start test containers
-        run: docker compose -f test/docker-compose.yaml up --detach
       - name: Build with Maven
         run: mvn --batch-mode package
 
@@ -97,4 +95,3 @@ jobs:
           VERSION: ${{ needs.publish.outputs.published_version }}
           KEYCLOAK_VERSION: ${{ needs.publish.outputs.keycloak_version }}
         run: curl -X POST --fail -F token=${GITLAB_TRIGGER_TOKEN} -F ref=main -F "variables[keycloak_version]=${KEYCLOAK_VERSION}" -F "variables[extensions_version]=${VERSION}" "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/trigger/pipeline"
-

@@ -1,7 +1,7 @@
 package de.intension.resources.admin;
 
-import de.intension.rest.LicenceConnectRestClient;
-import de.intension.rest.model.RemoveLicenceRequest;
+import de.intension.rest.licence.client.LicenceConnectRestClient;
+import de.intension.rest.licence.model.RemoveLicenceRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;

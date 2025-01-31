@@ -1,10 +1,10 @@
-package de.intension.rest;
+package de.intension.rest.licence.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.model.LicenceRequest;
-import de.intension.rest.model.RemoveLicenceRequest;
+import de.intension.rest.licence.model.LicenceRequest;
+import de.intension.rest.licence.model.RemoveLicenceRequest;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;

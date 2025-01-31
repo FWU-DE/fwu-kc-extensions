@@ -109,5 +109,10 @@
             <version>4.12.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>selenium</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
