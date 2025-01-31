@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.16.1]
+
+- Technical: New image build project in GitLab
+
 ## Version [4.16.0]
 
 - Feature: Custom Rest endpoint to fetch licences by HMAC ID
