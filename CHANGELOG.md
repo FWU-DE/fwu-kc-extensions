@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.16.2]
+
+- Technical: Updated variables `GITLAB_TOKEN` and `GITLAB_TRIGGER_TOKEN`
+
 ## Version [4.16.1]
 
 - Technical: New image build project in GitLab
