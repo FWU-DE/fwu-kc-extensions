@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.16.0]
+
+- Feature: Custom Rest endpoint to fetch licences by HMAC ID
+- Technical: Refactored tests using testcontainers again
+
 ## Version [4.15.0]
 
 - Feature: Fetched licences are now persisted together with the hmacId
