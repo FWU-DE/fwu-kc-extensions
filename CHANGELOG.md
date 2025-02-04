@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.16.3]
+
+- Bugfix: Added Content-Type header to Licence Connect requests
+- Bugfix: Adapted expected Licence Connect reponse format
+
 ## Version [4.16.2]
 
 - Technical: Updated variables `GITLAB_TOKEN` and `GITLAB_TRIGGER_TOKEN`
