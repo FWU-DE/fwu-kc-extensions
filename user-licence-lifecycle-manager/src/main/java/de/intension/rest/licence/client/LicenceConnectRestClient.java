@@ -43,6 +43,7 @@ public class LicenceConnectRestClient
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
         httpPost.setHeader("X-API-Key", this.licenceAPIKey);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
         httpPost.setEntity(entity);
@@ -52,8 +53,8 @@ public class LicenceConnectRestClient
             if (status == HttpStatus.SC_OK) {
                 return true;
             } else {
-                LOG.warnf("There was an error while releasing the licence for the user. Status: %d. Reason: %s", status,
-                        response.getStatusLine().getReasonPhrase());
+                LOG.warnf("There was an error while releasing the licence for the user. Status: %d. Reason: %s. Error: %s.", status,
+                        response.getStatusLine().getReasonPhrase(), EntityUtils.toString(response.getEntity()));
             }
         }
         return false;
@@ -65,6 +66,7 @@ public class LicenceConnectRestClient
         HttpPost httpPost = new HttpPost(licenceRestUri);
 
         httpPost.setHeader("X-API-Key", this.licenceAPIKey);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
         StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
         httpPost.setEntity(entity);
@@ -78,8 +80,8 @@ public class LicenceConnectRestClient
                     LOG.error("Error while parsing user licences ", e);
                 }
             } else {
-                LOG.warnf("There was an error while fetching the licence for the user. Status: %d. Reason: %s", status,
-                        response.getStatusLine().getReasonPhrase());
+                LOG.warnf("There was an error while fetching the licence for the user. Status: %d. Reason: %s. Error: %s.", status,
+                        response.getStatusLine().getReasonPhrase(), EntityUtils.toString(response.getEntity()));
             }
         }
         return userLicences;
