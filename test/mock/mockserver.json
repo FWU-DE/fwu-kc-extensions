@@ -125,7 +125,8 @@
       "method": "POST",
       "path": "/v1/licences/request",
       "headers": {
-        "X-API-Key": "sample-api-key"
+        "X-API-Key": "sample-api-key",
+        "Content-Type": "application/json"
       },
       "body": {
         "userId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f",
@@ -144,7 +145,8 @@
       "method": "POST",
       "path": "/v1/licences/release",
       "headers": {
-        "X-API-Key": "sample-api-key"
+        "X-API-Key": "sample-api-key",
+        "Content-Type": "application/json"
       },
       "body": {
         "studentId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f"
