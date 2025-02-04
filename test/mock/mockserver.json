@@ -125,7 +125,8 @@
       "method": "POST",
       "path": "/v1/licences/request",
       "headers": {
-        "X-API-Key": "sample-api-key"
+        "X-API-Key": "sample-api-key",
+        "Content-Type": "application/json"
       },
       "body": {
         "userId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f",
@@ -134,7 +135,7 @@
       }
     },
     "httpResponse": {
-      "body": "{\"hasLicences\":true,\"licences\":[{\"license_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\",\"license_type\":\"single\",\"license_special_type\":\"none\",\"license_status\":{\"assignment_date\":12345,\"provisioned_date\":45678,\"status_activation\":\"ACTIVATED\",\"status_validity\":\"VALID\",\"validity_start\":12345,\"validity_end\":45678}},{\"license_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\",\"license_type\":\"volumnes\",\"license_special_type\":\"none\",\"license_status\":{\"assignment_date\":45678,\"provisioned_date\":12345,\"status_activation\":\"ACTIVATED\",\"status_validity\":\"VALID\",\"validity_start\":45678,\"validity_end\":12345}}]}"
+      "body": "{\"licences\":[\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\",\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"]}"
     }
   },
   {
@@ -144,7 +145,8 @@
       "method": "POST",
       "path": "/v1/licences/release",
       "headers": {
-        "X-API-Key": "sample-api-key"
+        "X-API-Key": "sample-api-key",
+        "Content-Type": "application/json"
       },
       "body": {
         "studentId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f"
