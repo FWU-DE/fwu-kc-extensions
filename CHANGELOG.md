@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.16.4]
+
+- Bugfix: Check for "licenses" in response if "licences" not set
+
 ## Version [4.16.3]
 
 - Bugfix: Added Content-Type header to Licence Connect requests
