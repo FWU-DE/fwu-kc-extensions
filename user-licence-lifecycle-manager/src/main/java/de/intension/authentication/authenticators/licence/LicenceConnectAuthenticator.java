@@ -59,6 +59,10 @@ public class LicenceConnectAuthenticator
         JsonNode userLicences = fetchUserLicence(licenceRequest);
         if (userLicences != null) {
             String userLicence = userLicences.path(LICENCE_ATTRIBUTE).toString();
+            if (userLicence == null || userLicence.isBlank()) {
+                // fallback to American licences
+                userLicence = userLicences.path("licenses").toString();
+            }
             for (int i = 0; i < userLicence.length(); i += PART_SIZE) {
                 String partValue = userLicence.substring(i, Math.min(userLicence.length(), i + PART_SIZE));
                 user.setAttribute(LICENCE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
