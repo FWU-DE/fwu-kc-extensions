@@ -9,6 +9,7 @@ import de.intension.rest.licence.client.LicenceConnectRestClient;
 import de.intension.rest.licence.model.LicenceRequest;
 import jakarta.ws.rs.core.Response;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -24,6 +25,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Getter
+@NoArgsConstructor
 public class LicenceConnectAuthenticator
         implements Authenticator {
 
@@ -31,14 +34,9 @@ public class LicenceConnectAuthenticator
     public static final String LICENCE_ATTRIBUTE = "licences";
     private static final String SCHOOL_IDENTIFICATION_ATTRIBUTE = "prefixedSchools";
     private static final String BUNDESLAND_ATTRIBUTE = "bundesland";
-    private static final String HAS_LICENCES_ATTRIBUTE = "hasLicences";
     private static final int PART_SIZE = 255;
 
-    @Getter
     private LicenceConnectRestClient restClient;
-
-    public LicenceConnectAuthenticator() {
-    }
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -59,7 +57,7 @@ public class LicenceConnectAuthenticator
         UserModel user = context.getUser();
         LicenceRequest licenceRequest = createLicenceRequest(user, context);
         JsonNode userLicences = fetchUserLicence(licenceRequest);
-        if (userLicences != null && userLicences.path(HAS_LICENCES_ATTRIBUTE).asBoolean()) {
+        if (userLicences != null) {
             String userLicence = userLicences.path(LICENCE_ATTRIBUTE).toString();
             for (int i = 0; i < userLicence.length(); i += PART_SIZE) {
                 String partValue = userLicence.substring(i, Math.min(userLicence.length(), i + PART_SIZE));

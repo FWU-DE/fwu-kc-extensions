@@ -35,7 +35,7 @@ public class LicenceMockHelper {
                         response()
                                 .withStatusCode(OK_200.code())
                                 .withReasonPhrase(OK_200.reasonPhrase())
-                                .withBody("{\n    \"hasLicences\": true,\n    \"licences\": [\n      {\n        \"licence_code\": \"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"\n      },\n      {\n        \"licence_code\": \"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"\n      }\n    ]\n  }")
+                                .withBody("{\"licences\": [\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\",\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"]}")
                                 .withHeaders(
                                         header(CONTENT_TYPE, MediaType.JSON_UTF_8.getType())))[0];
     }

@@ -33,7 +33,7 @@ public class LicenceConnectAuthenticatorTest {
 
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final String REALM = "fwu";
-    private static final String EXPECTED_LICENCES = "[{\"licence_code\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licence_code\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]";
+    private static final String EXPECTED_LICENCES = "[\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\",\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"]";
 
     private static final Network network = Network.newNetwork();
     private static final Capabilities capabilities = new FirefoxOptions();
