@@ -33,9 +33,17 @@ public class LicenceEntity {
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "UPDATED_AT")
+    private LocalDateTime updatedAt;
+
     public LicenceEntity(String hmacId, String licence) {
         this.hmacId = hmacId;
         this.content = licence;
         this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    private void beforeUpdate() {
+        setUpdatedAt(LocalDateTime.now());
     }
 }

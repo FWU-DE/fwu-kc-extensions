@@ -24,7 +24,7 @@ public class LicenceJpaProvider implements Provider {
     }
 
     public void persistLicence(LicenceEntity licenceEntity) {
-        getEntityManager().persist(licenceEntity);
+        getEntityManager().merge(licenceEntity);
     }
 
     public void deleteLicence(String hmacId) {

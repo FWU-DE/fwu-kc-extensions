@@ -127,6 +127,44 @@ public class LicenceConnectAuthenticatorTest {
     }
 
     /**
+     * GIVEN: a user is federated by idp and already has an outdated licence in the database
+     * WHEN: the same user logs in
+     * THEN: licence is fetched for the user and updated in the database
+     */
+    @Order(10)
+    @Test
+    void should_update_licence() throws Exception {
+        // given
+        Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP)");
+
+        Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+        KeycloakPage kcPage = KeycloakPage
+                .start(driver, wait)
+                .openAccountConsole()
+                // when
+                .idpLogin("idpuser", "test");
+
+        // then
+        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*), MAX(UPDATED_AT), MAX(CONTENT) FROM LICENCE");
+        resultSet.next();
+
+        // Assert that there is exactly one entry in the table
+        int rowCount = resultSet.getInt(1);
+        assertEquals(1, rowCount, "Expected exactly one entry in the LICENCE table");
+
+        // Assert that UPDATED_AT is not NULL
+        Timestamp updatedAt = resultSet.getTimestamp(2);
+        assertNotNull(updatedAt, "UPDATED_AT should not be NULL");
+
+        // Assert the content is as expected
+        String persistedLicence = resultSet.getString(3);
+        assertEquals(EXPECTED_LICENCES, persistedLicence, "Licence content does not match");
+    }
+
+    /**
      * GIVEN: a user is federated by idp login
      * WHEN: the same user logs in
      * THEN: licence is fetched for the user and error occurs and user attribute is not added
