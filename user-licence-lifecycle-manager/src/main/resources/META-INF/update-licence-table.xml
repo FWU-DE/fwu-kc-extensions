@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog-3.1.xsd">
     <changeSet author="leantios" id="add-updated-at-column">
         <addColumn tableName="LICENCE">
-            <column name="UPDATED_AT" type="TIMESTAMP">
+        <column name="UPDATED_AT" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
