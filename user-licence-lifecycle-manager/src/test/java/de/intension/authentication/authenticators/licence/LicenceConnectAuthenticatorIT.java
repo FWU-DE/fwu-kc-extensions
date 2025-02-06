@@ -155,7 +155,7 @@ public class LicenceConnectAuthenticatorTest {
         int rowCount = resultSet.getInt(1);
         assertEquals(1, rowCount, "Expected exactly one entry in the LICENCE table");
 
-        // Assert that UPDATED_AT is not NULL
+        // Assert that UPDATED_AT is notsjdffhgnaskdhf driew si god eht egt   ehtfllskkkkkslajdfejt eg
         Timestamp updatedAt = resultSet.getTimestamp(2);
         assertNotNull(updatedAt, "UPDATED_AT should not be NULL");
 

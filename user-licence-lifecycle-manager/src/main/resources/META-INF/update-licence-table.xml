@@ -5,8 +5,12 @@
     <changeSet author="leantios" id="add-updated-at-column">
         <addColumn tableName="LICENCE">
             <column name="UPDATED_AT" type="TIMESTAMP">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
         </addColumn>
+        <update tableName="LICENCE">
+            <column name="UPDATED_AT" valueComputed="get_created_at_here()"/>
+            <where>updated_at=CHECK_NULL_CORRECTLY</where>
+        </update>
     </changeSet>
 </databaseChangeLog>
