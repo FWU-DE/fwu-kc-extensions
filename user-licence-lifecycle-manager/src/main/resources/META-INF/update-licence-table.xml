@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog-3.1.xsd">
+    <changeSet author="leantios" id="add-updated-at-column">
+        <addColumn tableName="LICENCE">
+        <column name="UPDATED_AT" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+        </column>
+        </addColumn>
+        <update tableName="LICENCE">
+            <column name="UPDATED_AT" valueComputed="CREATED_AT"/>
+        </update>
+    </changeSet>
+</databaseChangeLog>
