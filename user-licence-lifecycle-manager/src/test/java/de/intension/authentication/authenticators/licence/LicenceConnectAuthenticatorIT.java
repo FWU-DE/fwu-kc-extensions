@@ -100,7 +100,6 @@ public class LicenceConnectAuthenticatorIT {
      * THEN: licence is fetched for the user and added as user attribute
      */
     @Test
-    @Order(10)
     void should_add_licence_to_user() throws Exception {
         // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
@@ -132,7 +131,6 @@ public class LicenceConnectAuthenticatorIT {
      * WHEN: the same user logs in
      * THEN: licence is fetched for the user and updated in the database
      */
-    @Order(15)
     @Test
     void should_update_licence() throws Exception {
         // given
@@ -178,7 +176,6 @@ public class LicenceConnectAuthenticatorIT {
      * WHEN: the same user logs in
      * THEN: licence is fetched for the user and error occurs and user attribute is not added
      */
-    @Order(20)
     @Test
     void should_not_add_licence_to_user() throws Exception {
         // given & when
