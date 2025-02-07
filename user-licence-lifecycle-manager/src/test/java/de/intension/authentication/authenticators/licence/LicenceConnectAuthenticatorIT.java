@@ -161,8 +161,8 @@ public class LicenceConnectAuthenticatorIT {
         resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT, CONTENT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
         // Assert that UPDATED_AT is not the same as CREATED_AT
-        updatedAt = resultSet.getTimestamp(1);
-        createdAt = resultSet.getTimestamp(2);
+        createdAt = resultSet.getTimestamp(1);
+        updatedAt = resultSet.getTimestamp(2);
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
         assertThat(updatedAt.toLocalDateTime()).isAfter(createdAt.toLocalDateTime());
 
