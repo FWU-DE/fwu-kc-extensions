@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -163,7 +164,7 @@ public class LicenceConnectAuthenticatorIT {
         updatedAt = resultSet.getTimestamp(1);
         createdAt = resultSet.getTimestamp(2);
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        assertTrue(updatedAt.after(createdAt), "UPDATED_AT should be later than CREATED_AT");
+        assertThat(updatedAt.toLocalDateTime()).isAfter(createdAt.toLocalDateTime());
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
