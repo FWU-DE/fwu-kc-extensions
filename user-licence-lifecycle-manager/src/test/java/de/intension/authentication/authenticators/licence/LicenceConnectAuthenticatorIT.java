@@ -25,11 +25,12 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Testcontainers
-public class LicenceConnectAuthenticatorTest {
+public class LicenceConnectAuthenticatorIT {
 
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final String REALM = "fwu";
@@ -98,7 +99,6 @@ public class LicenceConnectAuthenticatorTest {
      * WHEN: the same user logs in
      * THEN: licence is fetched for the user and added as user attribute
      */
-    @Order(10)
     @Test
     void should_add_licence_to_user() throws Exception {
         // given
@@ -127,11 +127,55 @@ public class LicenceConnectAuthenticatorTest {
     }
 
     /**
+     * GIVEN: a user is federated by idp and already has an outdated licence in the database
+     * WHEN: the same user logs in
+     * THEN: licence is fetched for the user and updated in the database
+     */
+    @Test
+    void should_update_licence() throws Exception {
+        // given
+        Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+        ResultSet resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
+        resultSet.next();
+        Timestamp updatedAt = resultSet.getTimestamp(1);
+        Timestamp createdAt = resultSet.getTimestamp(2);
+        assertEquals(updatedAt, createdAt, "UPDATED_AT should be the same as CREATED_AT");
+
+        LicenceMockHelper.requestLicenceExpectation(mockServerClient);
+        KeycloakPage kcPage = KeycloakPage
+                .start(driver, wait)
+                .openAccountConsole()
+                // when
+                .idpLogin("idpuser", "test");
+
+        // then
+        resultSet = statement.executeQuery("SELECT COUNT(*) FROM LICENCE");
+        resultSet.next();
+
+        // Assert that there is exactly one entry in the table
+        int rowCount = resultSet.getInt(1);
+        assertEquals(1, rowCount, "Expected exactly one entry in the LICENCE table");
+
+        resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT, CONTENT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
+        resultSet.next();
+        // Assert that UPDATED_AT is not the same as CREATED_AT
+        createdAt = resultSet.getTimestamp(1);
+        updatedAt = resultSet.getTimestamp(2);
+        assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
+        assertThat(updatedAt.toLocalDateTime()).isAfter(createdAt.toLocalDateTime());
+
+        // Assert the content is as expected
+        String persistedLicence = resultSet.getString(3);
+        assertEquals(EXPECTED_LICENCES, persistedLicence, "Licence content does not match");
+    }
+
+    /**
      * GIVEN: a user is federated by idp login
      * WHEN: the same user logs in
      * THEN: licence is fetched for the user and error occurs and user attribute is not added
      */
-    @Order(20)
     @Test
     void should_not_add_licence_to_user() throws Exception {
         // given & when

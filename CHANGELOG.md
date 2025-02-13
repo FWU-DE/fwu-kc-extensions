@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.17.0]
+
+- Feature: `Licence` table now contains a `updated_at` column and licences are replaced if they already exist and 
+  fetched again from Licence Connect
+
 ## Version [4.16.4]
 
 - Bugfix: Check for "licenses" in response if "licences" not set
