@@ -5,7 +5,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.managers.AppAuthManager;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
 /**
  * Custom rest endpoints exposed via <code>${authUrl}/realms/${realm}/licences/</code>.
@@ -26,11 +29,19 @@ public class LicenceResourceProvider implements RealmResourceProvider {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getLicence(@PathParam("hmac-id") String hmacID) {
+        checkAuth();
         var licence = session.getProvider(LicenceJpaProvider.class).getLicenceByHmacId(hmacID);
         if (licence == null) {
             throw new NotFoundException("No licence with hmac-id " + hmacID + " found.");
         }
         return licence;
+    }
+
+    private void checkAuth() {
+        var auth = new AppAuthManager.BearerTokenAuthenticator(session).authenticate();
+        if (auth == null) {
+            throw new NotAuthorizedException("Bearer");
+        }
     }
 
     @Override

@@ -3,11 +3,13 @@ package de.intension.rest;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
+import jakarta.ws.rs.core.Form;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.OAuth2Constants;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -17,6 +19,7 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.testcontainers.containers.*;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
@@ -30,6 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.keycloak.OAuth2Constants.*;
 
 @Testcontainers
 public class LicenceResourceIT {
@@ -39,6 +43,7 @@ public class LicenceResourceIT {
     private static final Network network = Network.newNetwork();
     private static final Capabilities capabilities = new FirefoxOptions();
     private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Container
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
@@ -104,7 +109,8 @@ public class LicenceResourceIT {
         var databaseEntry = getDatabaseEntry();
         var hmacID = databaseEntry.getLeft();
         var expectedLicence = databaseEntry.getRight();
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/" + hmacID)).GET().build();
+        var accessToken = getAccessToken();
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/" + hmacID)).GET().header("Authorization", "Bearer " + accessToken).build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         var body = response.body();
@@ -124,9 +130,28 @@ public class LicenceResourceIT {
 
     @Test
     void should_return_404_when_hmac_id_does_not_exist() throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/invalid-hmac-id")).GET().build();
+        var accessToken = getAccessToken();
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/invalid-hmac-id")).GET().header("Authorization", "Bearer " + accessToken).build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
         assertEquals(404, response.statusCode());
+    }
+
+    private String getAccessToken() throws Exception {
+        var parameters = GRANT_TYPE + "=" + PASSWORD + "&" + USERNAME + "=misty&" + PASSWORD + "=test&" + CLIENT_ID + "=admin-cli";
+        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/protocol/openid-connect/token"))
+                .POST(HttpRequest.BodyPublishers.ofString(parameters))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        var json = objectMapper.readTree(response.body());
+        return json.get("access_token").asText();
+    }
+
+    @Test
+    void should_return_401_when_no_access_token_is_provided()  throws Exception {
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + keycloak.getHttpPort() + "/auth/realms/fwu/licences/ignored")).GET().build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(401, response.statusCode());
     }
 
     @AfterEach
