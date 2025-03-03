@@ -1,12 +1,6 @@
 package de.intension.id.oidc;
 
-import static de.intension.id.PrefixAttributeConstants.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.PatternSyntaxException;
-
+import de.intension.id.PrefixAttributeService;
 import org.jboss.logging.Logger;
 import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
@@ -15,21 +9,25 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 
-import de.intension.id.PrefixAttributeService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.PatternSyntaxException;
+
+import static de.intension.id.PrefixAttributeConstants.*;
 
 /**
  * Identity provider mapper to map OIDC token claims to user attributes.
  */
-public class PrefixAttributeOidcMapper extends AbstractClaimMapper
-{
+public class PrefixAttributeOidcMapper extends AbstractClaimMapper {
 
-    public static final String                          PROVIDER_ID          = "prefixed-attribute-idp-mapper";
-    protected static final String[]                        COMPATIBLE_PROVIDERS = {
+    public static final String PROVIDER_ID = "prefixed-attribute-idp-mapper";
+    protected static final String[] COMPATIBLE_PROVIDERS = {
             KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
             OIDCIdentityProviderFactory.PROVIDER_ID
     };
-    public static final String                          ATTRIBUTE            = "attribute";
-    protected static final List<ProviderConfigProperty> configProperties     = new ArrayList<>();
+    public static final String ATTRIBUTE = "attribute";
+    protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     private static final Logger LOG = Logger.getLogger(PrefixAttributeOidcMapper.class);
 
     static {
@@ -37,7 +35,7 @@ public class PrefixAttributeOidcMapper extends AbstractClaimMapper
         property.setName(CLAIM);
         property.setLabel("Claim");
         property
-            .setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
+                .setHelpText("Name of claim to search for in token. You can reference nested claims using a '.', i.e. 'address.locality'. To use dot (.) literally, escape it with backslash (\\.)");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         configProperties.add(property);
 
@@ -139,18 +137,20 @@ public class PrefixAttributeOidcMapper extends AbstractClaimMapper
         try {
             PrefixAttributeService prefixer = new PrefixAttributeService(prefix, toLowerCase, attributeValueRegEx);
             if (claimValue instanceof List) {
-                var prefixedValues = prefixer.prefix((List<String>) claimValue);
+                List<Object> claimList = (List<Object>) claimValue;
+                List<String> claims = claimList.stream().map(String::valueOf).toList();
+                var prefixedValues = prefixer.prefix(claims);
                 if (!prefixedValues.isEmpty()) {
                     user.setAttribute(userAttribute, prefixedValues);
                 }
             } else {
-                String stringValue = (String) claimValue;
+                String stringValue = String.valueOf(claimValue);
                 if (stringValue.isBlank()) {
                     return;
                 }
                 user.setSingleAttribute(userAttribute, prefixer.prefix(stringValue));
             }
-        } catch( PatternSyntaxException e){
+        } catch (PatternSyntaxException e) {
             LOG.errorf("Invalid regular expression '%s' configured", attributeValueRegEx);
         }
     }
