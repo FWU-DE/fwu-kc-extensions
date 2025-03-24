@@ -1,11 +1,11 @@
 package de.intension.events;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import de.intension.events.publishers.EventPublisher;
+import de.intension.events.publishers.dto.DetailedLoginEvent;
+import de.intension.events.testhelper.KeycloakSessionMock;
+import de.intension.events.testhelper.RealmModelMock;
+import de.intension.events.testhelper.TestEventHelper;
+import de.intension.events.testhelper.UserModelMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.Config.Scope;
@@ -13,12 +13,12 @@ import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
 
-import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.dto.DetailedLoginEvent;
-import de.intension.events.testhelper.KeycloakSessionMock;
-import de.intension.events.testhelper.RealmModelMock;
-import de.intension.events.testhelper.TestEventHelper;
-import de.intension.events.testhelper.UserModelMock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginEventListenerProviderTest
 {
@@ -42,13 +42,13 @@ class LoginEventListenerProviderTest
         Event event = TestEventHelper.create();
         provider.onEvent(event);
         kcSession.getTransactionManager().commit();
-        assertThat(publisher.events).hasSize(1)
-            .first().usingRecursiveComparison().ignoringFields("timeStamp", "idpName", "schoolIds", "type").isEqualTo(event);
+        assertThat(publisher.events).hasSize(1);
         DetailedLoginEvent actual = publisher.events.get(0);
-        assertThat(actual.getType()).isEqualTo("LOGIN");
-        assertThat(actual.getTimeStamp()).isEqualTo(TestEventHelper.TIMESTAMP);
-        assertThat(actual.getIdpName()).isEqualTo(TestEventHelper.IDP_NAME);
+        assertThat(actual.getEventType()).isEqualTo("vidis_login");
+        assertThat(actual.getTimestamp()).isEqualTo(Instant.ofEpochMilli(TestEventHelper.TIMESTAMP.toEpochMilli()));
+        assertThat(actual.getFederalState()).isEqualTo(TestEventHelper.IDP_NAME);
         assertThat(actual.getSchoolIds()).hasSize(2).containsExactlyInAnyOrder("DE_BY-1234", "DE_BY-4321");
+        assertThat(actual.getProduct()).isEqualTo(TestEventHelper.CLIENT_ID);
     }
 
     @Test

@@ -1,30 +1,26 @@
 package de.intension.events.publishers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.keycloak.common.util.Time.currentTimeMillis;
-import static org.keycloak.events.EventType.LOGIN;
-import static org.mockito.Mockito.*;
-
-import java.time.Instant;
-import java.util.Date;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AMQP.Exchange.DeclareOk;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-
 import de.intension.events.publishers.dto.DetailedLoginEvent;
 import de.intension.events.publishers.rabbitmq.RabbitMqConnectionManager;
 import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
 import de.intension.events.testhelper.MockScope;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import java.time.Instant;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.keycloak.common.util.Time.currentTimeMillis;
+import static org.mockito.Mockito.*;
 
 class RabbitMqEventPublisherTest
 {
@@ -67,10 +63,9 @@ class RabbitMqEventPublisherTest
         DetailedLoginEvent event = DetailedLoginEvent.builder().timestamp(Instant.now()).build();
 		publisher.publish(event);
 
-		verify(channel).basicPublish(exchangeArg.capture(), routingKeyArg.capture(), propsArg.capture(),
-				bodyArg.capture());
+		verify(channel).basicPublish(exchangeArg.capture(), routingKeyArg.capture(), propsArg.capture(), bodyArg.capture());
 		assertThat(exchangeArg.getValue()).isEqualTo("login-details");
-		assertThat(routingKeyArg.getValue()).isEqualTo("KC.EVENT.LOGIN");
+		assertThat(routingKeyArg.getValue()).isEqualTo(null);
 		assertThat(propsArg.getValue()).isEqualTo(RabbitMqConnectionManager.PERSISTENT_JSON);
 	}
 }
