@@ -1,9 +1,8 @@
-package de.intension.events.publishers.dto;
+package de.intension.events.v2.publishers.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.List;

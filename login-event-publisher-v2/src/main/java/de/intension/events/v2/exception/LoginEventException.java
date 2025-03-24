@@ -1,4 +1,4 @@
-package de.intension.events.exception;
+package de.intension.events.v2.exception;
 
 /**
  * 

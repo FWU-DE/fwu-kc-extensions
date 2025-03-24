@@ -1,4 +1,4 @@
-package de.intension.events.testhelper;
+package de.intension.events.v2.testhelper;
 
 import java.util.Map;
 

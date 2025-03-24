@@ -1,4 +1,4 @@
-package de.intension.events;
+package de.intension.events.v2;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
@@ -7,8 +7,8 @@ import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
+import de.intension.events.v2.publishers.EventPublisher;
+import de.intension.events.v2.publishers.rabbitmq.RabbitMqEventPublisher;
 
 /**
  * Factory for the user login event listener

@@ -1,11 +1,11 @@
-package de.intension.events;
+package de.intension.events.v2;
 
-import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.dto.DetailedLoginEvent;
-import de.intension.events.testhelper.KeycloakSessionMock;
-import de.intension.events.testhelper.RealmModelMock;
-import de.intension.events.testhelper.TestEventHelper;
-import de.intension.events.testhelper.UserModelMock;
+import de.intension.events.v2.publishers.EventPublisher;
+import de.intension.events.v2.publishers.dto.DetailedLoginEvent;
+import de.intension.events.v2.testhelper.KeycloakSessionMock;
+import de.intension.events.v2.testhelper.RealmModelMock;
+import de.intension.events.v2.testhelper.TestEventHelper;
+import de.intension.events.v2.testhelper.UserModelMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.Config.Scope;

@@ -1,8 +1,8 @@
-package de.intension.events.publishers;
+package de.intension.events.v2.publishers;
 
 import org.keycloak.Config.Scope;
 
-import de.intension.events.publishers.dto.DetailedLoginEvent;
+import de.intension.events.v2.publishers.dto.DetailedLoginEvent;
 
 public interface EventPublisher {
 

@@ -1,4 +1,4 @@
-package de.intension.events;
+package de.intension.events.v2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

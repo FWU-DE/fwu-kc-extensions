@@ -1,4 +1,4 @@
-package de.intension.events;
+package de.intension.events.v2;
 
 import java.time.Instant;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 
-import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.dto.DetailedLoginEvent;
+import de.intension.events.v2.publishers.EventPublisher;
+import de.intension.events.v2.publishers.dto.DetailedLoginEvent;
 
 /**
  * Provider for the user login event in Keycloak

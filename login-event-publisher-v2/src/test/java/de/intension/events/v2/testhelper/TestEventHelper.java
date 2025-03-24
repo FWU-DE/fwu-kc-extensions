@@ -1,4 +1,4 @@
-package de.intension.events.testhelper;
+package de.intension.events.v2.testhelper;
 
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;

@@ -1,4 +1,4 @@
-package de.intension.events.publishers.rabbitmq;
+package de.intension.events.v2.publishers.rabbitmq;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.BuiltinExchangeType;
@@ -19,6 +19,7 @@ public enum RabbitMqConnectionManager {
             null, null, null, null, null, null, null, null, null);
     private static final Logger logger = Logger.getLogger(RabbitMqConnectionManager.class);
     private String exchangeName;
+    private String routingKey;
     private ConnectionFactory connectionFactory;
     private Connection connection;
     private Channel channel;
@@ -27,6 +28,7 @@ public enum RabbitMqConnectionManager {
     // variables
     public void init(Scope config, ConnectionFactory connectionFactory) {
         this.exchangeName = config.get("rmq-exchange", "login-details");
+        this.routingKey = config.get("rmq-routing-key", "KC.EVENT.LOGIN");
         this.connectionFactory = connectionFactory;
         this.connectionFactory.setUsername(config.get("rmq-username", "guest"));
         this.connectionFactory.setPassword(config.get("rmq-password", "guest"));
@@ -37,7 +39,7 @@ public enum RabbitMqConnectionManager {
         logger.info("init of Rabbitmq successful");
     }
 
-    public void basicPublish(String routingKey, byte[] bytes) throws IOException {
+    public void basicPublish(byte[] bytes) throws IOException {
         Channel ch = getChannel();
         if (ch != null && ch.isOpen()) {
             ch.basicPublish(exchangeName, routingKey, PERSISTENT_JSON, bytes);
@@ -101,5 +103,4 @@ public enum RabbitMqConnectionManager {
         }
         return null;
     }
-
 }
