@@ -60,12 +60,12 @@ class RabbitMqEventPublisherTest
 	void publish_login_event() throws Exception {
 		RabbitMqEventPublisher publisher = new RabbitMqEventPublisher();
 
-        DetailedLoginEvent event = DetailedLoginEvent.builder().timestamp(Instant.now()).build();
+		DetailedLoginEvent event = DetailedLoginEvent.builder().timestamp(Instant.ofEpochMilli(now)).build();
 		publisher.publish(event);
 
 		verify(channel).basicPublish(exchangeArg.capture(), routingKeyArg.capture(), propsArg.capture(), bodyArg.capture());
 		assertThat(exchangeArg.getValue()).isEqualTo("login-details");
-		assertThat(routingKeyArg.getValue()).isEqualTo(null);
+		assertThat(routingKeyArg.getValue()).isEqualTo("KC.EVENT.VIDIS_LOGIN");
 		assertThat(propsArg.getValue()).isEqualTo(RabbitMqConnectionManager.PERSISTENT_JSON);
 	}
 }
