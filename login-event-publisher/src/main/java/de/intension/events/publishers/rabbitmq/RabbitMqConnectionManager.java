@@ -40,16 +40,10 @@ public enum RabbitMqConnectionManager {
     }
 
     /**
-     * Publish to exchange with routing key from configuration.
-     */
-    public void basicPublish(byte[] bytes) throws IOException {
-        basicPublish(routingKey, bytes);
-    }
-
-    /**
      * Publish to exchange with routing key override.
      */
-    public void basicPublish(String routingKey, byte[] bytes) throws IOException {
+    public void basicPublish(String routingKeyOverride, byte[] bytes) throws IOException {
+        String routingKey = routingKeyOverride != null ? routingKeyOverride : this.routingKey;
         Channel ch = getChannel();
         if (ch != null && ch.isOpen()) {
             ch.basicPublish(exchangeName, routingKey, PERSISTENT_JSON, bytes);
