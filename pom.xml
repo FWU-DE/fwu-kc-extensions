@@ -22,7 +22,6 @@
     <module>acronym-mapper</module>
     <module>school-mapper</module>
     <module>login-event-publisher</module>
-    <module>login-event-publisher-v2</module>
     <module>account-linking-authenticator</module>
     <module>3rd-party-libs</module>
     <module>acr-values-authenticator</module>

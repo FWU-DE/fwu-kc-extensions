@@ -1,4 +1,4 @@
-package de.intension.events.v2.publishers.dto;
+package de.intension.events.publishers.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import java.util.List;
 
 @Builder
 @Getter
-public class DetailedLoginEvent {
+public class BMILoginEvent
+        implements LoginEvent {
 
     @JsonProperty("event_type")
     private final String eventType = "vidis_login";
