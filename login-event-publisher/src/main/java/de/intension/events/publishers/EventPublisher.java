@@ -6,9 +6,9 @@ import de.intension.events.publishers.dto.LoginEvent;
 
 public interface EventPublisher {
 
-	public void initConnection(Scope config);
+	void initConnection(Scope config);
 
-    public void publish(LoginEvent event);
+    void publish(LoginEvent event);
 
-	public void close();
+	void close();
 }
