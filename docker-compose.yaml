@@ -120,6 +120,8 @@ services:
     networks:
       - fwunet
 
+  # Admin UI: http://localhost:15672/
+  # Login: guest/guest
   rabbitmq:
     image: rabbitmq:3-management
     container_name: test-rabbitmq
