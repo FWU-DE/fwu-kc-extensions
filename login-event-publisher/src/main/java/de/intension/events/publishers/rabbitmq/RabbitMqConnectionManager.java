@@ -7,6 +7,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
+import org.keycloak.services.validation.Validation;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -101,10 +102,18 @@ public enum RabbitMqConnectionManager {
         try {
             return connectionFactory.newConnection();
         } catch (IOException | TimeoutException exception) {
+            String message = getMessageFromStackTrace(exception);
             logger.errorf("Unable to open new connection: %s with hostname: %s, username: %s and portnumber: %d",
-                    exception.getMessage(), this.connectionFactory.getHost(), this.connectionFactory.getUsername(),
+                    message, this.connectionFactory.getHost(), this.connectionFactory.getUsername(),
                     this.connectionFactory.getPort(), exception);
         }
         return null;
+    }
+
+    private String getMessageFromStackTrace(Throwable exception) {
+        if (exception == null) {
+            return "";
+        }
+        return Validation.isBlank(exception.getMessage()) ? getMessageFromStackTrace(exception.getCause()) : exception.getMessage();
     }
 }
