@@ -1,10 +1,10 @@
 package de.intension.events.testhelper;
 
-import java.util.Date;
-import java.util.Map;
-
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
+
+import java.util.Date;
+import java.util.Map;
 
 public class TestEventHelper
 {

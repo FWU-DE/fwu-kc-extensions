@@ -2026,7 +2026,8 @@
   "eventsListeners": [
     "remove-user-on-logout",
     "jboss-logging",
-    "login-event-publisher"
+    "login-event-publisher",
+    "login-event-publisher-bmi"
   ],
   "enabledEventTypes": [],
   "adminEventsEnabled": false,

@@ -1,5 +1,9 @@
 version: '3.7'
 services:
+  # Admin UI: http://localhost:18080/auth/admin/master/console/
+  # Login: admin/keycloak
+  # Account console: http://localhost:18080/auth/realms/fwu/account/
+  # Login: misty/test
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:22.0.5
@@ -24,6 +28,12 @@ services:
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_USERNAME: guest
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_RMQ_PASSWORD: guest
       KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_SCHOOLIDS_ATTRIBUTE: prefixedSchools
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_RMQ_HOST: test-rabbitmq
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_RMQ_PORT: 5672
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_RMQ_EXCHANGE: login-details
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_RMQ_USERNAME: guest
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_RMQ_PASSWORD: guest
+      KC_SPI_EVENTS_LISTENER_LOGIN_EVENT_PUBLISHER_BMI_SCHOOLIDS_ATTRIBUTE: prefixedSchools
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_HMAC_VERIFIER_REALM: fwu
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_HMAC_MANAGEMENT_REALM: management
       KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU: "IDP"
@@ -110,6 +120,8 @@ services:
     networks:
       - fwunet
 
+  # Admin UI: http://localhost:15672/
+  # Login: guest/guest
   rabbitmq:
     image: rabbitmq:3-management
     container_name: test-rabbitmq

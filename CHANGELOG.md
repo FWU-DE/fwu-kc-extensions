@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.18.0]
+
+- Feature: New BMI login event publisher
+- Improvement: More configuration possibilities for all login event publishers
+
 ## Version [4.17.1]
 
 - Bugfix: Add authentication check to LicenceResource
