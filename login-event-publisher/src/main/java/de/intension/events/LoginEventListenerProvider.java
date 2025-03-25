@@ -1,7 +1,9 @@
 package de.intension.events;
 
-import java.util.List;
-
+import de.intension.events.publishers.EventPublisher;
+import de.intension.events.publishers.dto.DetailedLoginEvent;
+import de.intension.events.publishers.dto.DetailedLoginEventBuilder;
+import de.intension.events.publishers.dto.LoginEvent;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -10,13 +12,11 @@ import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.models.KeycloakSession;
 
-import de.intension.events.publishers.EventPublisher;
-import de.intension.events.publishers.dto.DetailedLoginEvent;
-import de.intension.events.publishers.dto.DetailedLoginEventBuilder;
+import java.util.List;
 
 /**
  * Provider for the user login event in Keycloak
- * 
+ *
  * @author kdeshpande
  */
 public class LoginEventListenerProvider
@@ -65,23 +65,26 @@ public class LoginEventListenerProvider
         // Nothing to do in the admin events
     }
 
-    private void publishEvent(Event event)
+    public void publishEvent(Event event)
     {
         DetailedLoginEvent detailedLoginEvent = DetailedLoginEventBuilder.fromKeycloakEvent(event)
             .withSchoolIds(retrieveSchoolIds())
             .build();
-        this.publisher.publish(detailedLoginEvent);
+        internalPublishEvent(detailedLoginEvent);
     }
 
-    private List<String> retrieveSchoolIds()
+    protected void internalPublishEvent(LoginEvent event) {
+        this.publisher.publish(event);
+    }
+
+    protected List<String> retrieveSchoolIds()
     {
         return keycloakSession.getContext().getAuthenticationSession().getAuthenticatedUser()
             .getAttributeStream(schoolIdsAttributeName).toList();
     }
 
-    private void publishAdminEvent(AdminEvent event, boolean includeRepresentation)
+    public void publishAdminEvent(AdminEvent event, boolean includeRepresentation)
     {
         // Nothing to do in the admin events
     }
-
 }
