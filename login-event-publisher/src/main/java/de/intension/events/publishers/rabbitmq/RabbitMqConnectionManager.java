@@ -9,6 +9,8 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
 
 public enum RabbitMqConnectionManager {
@@ -24,8 +26,9 @@ public enum RabbitMqConnectionManager {
     private Connection connection;
     private Channel channel;
 
-    // Initiates and configures the connection factory using the environment
-    // variables
+    /**
+     * Initiates and configures the connection factory using the environment variables
+     */
     public void init(Scope config, ConnectionFactory connectionFactory) {
         this.exchangeName = config.get("rmq-exchange", "login-details");
         this.routingKey = config.get("rmq-routing-key", "KC.EVENT.LOGIN");
@@ -36,6 +39,13 @@ public enum RabbitMqConnectionManager {
         this.connectionFactory.setHost(config.get("rmq-host", "localhost"));
         this.connectionFactory.setPort(Integer.parseInt(config.get("rmq-port", "5672")));
         this.connectionFactory.setAutomaticRecoveryEnabled(true);
+        if (Boolean.parseBoolean(config.get("rmq-ssl-enabled", "false"))) {
+            try {
+                this.connectionFactory.useSslProtocol();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                logger.errorf(e, "Cannot set SSL protocol");
+            }
+        }
         logger.info("init of Rabbitmq successful");
     }
 
