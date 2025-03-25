@@ -5,7 +5,7 @@ import de.intension.events.publishers.dto.BMILoginEvent;
 import org.keycloak.events.Event;
 import org.keycloak.models.KeycloakSession;
 
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * Provider for the user login event in Keycloak to be sent to BMI message queue.
@@ -21,7 +21,7 @@ public class BMILoginEventListenerProvider
     public void publishEvent(Event event) {
         BMILoginEvent loginEvent = BMILoginEvent.builder()
                 .federalState(event.getDetails().get("identity_provider"))
-                .timestamp(Instant.ofEpochMilli(event.getTime()))
+                .timestamp(new Date(event.getTime()))
                 .product(event.getClientId())
                 .schoolIds(retrieveSchoolIds())
                 .build();

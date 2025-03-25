@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -16,7 +16,7 @@ public class BMILoginEvent
     private final String eventType = "vidis_login";
     @JsonProperty("federal_state")
     private String federalState;
-    private Instant timestamp;
+    private Date timestamp;
     private String product;
     @JsonProperty("school_ids")
     private List<String> schoolIds;
