@@ -12,7 +12,7 @@ import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
 
 /**
  * Factory for the user login event listener
- * 
+ *
  * @author kdeshpande
  */
 public class LoginEventListenerProviderFactory
@@ -22,8 +22,8 @@ public class LoginEventListenerProviderFactory
     public static final String  PROVIDER_ID         = "login-event-publisher";
     public static final String  SCHOOLIDS_ATTRIBUTE = "schoolids-attribute";
     private static final Logger logger              = Logger.getLogger(LoginEventListenerProviderFactory.class);
-    private EventPublisher            publisher;
-    private String              schoolIdsAttributeName;
+    protected EventPublisher    publisher;
+    protected String            schoolIdsAttributeName;
 
     @Override
     public EventListenerProvider create(KeycloakSession session)
