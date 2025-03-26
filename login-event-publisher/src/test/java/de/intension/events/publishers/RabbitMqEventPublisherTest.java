@@ -53,7 +53,7 @@ class RabbitMqEventPublisherTest
 		propsArg = ArgumentCaptor.forClass(BasicProperties.class);
 		bodyArg = ArgumentCaptor.forClass(byte[].class);
 		publisher = new RabbitMqEventPublisher();
-		publisher.initConnection(MockScope.create().put("rmq-exchange", "login-details"));
+		publisher.initConnection(MockScope.create().put("rmq-exchange", "login-details"), factory);
 	}
 
 	@BeforeEach

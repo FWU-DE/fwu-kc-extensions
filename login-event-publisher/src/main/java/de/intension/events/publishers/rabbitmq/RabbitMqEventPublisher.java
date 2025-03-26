@@ -31,8 +31,12 @@ public class RabbitMqEventPublisher implements EventPublisher {
 
     @Override
     public void initConnection(Scope config) {
+        initConnection(config, new ConnectionFactory());
+    }
+
+    public void initConnection(Scope config, ConnectionFactory factory) {
         connectionManager = new RabbitMqConnectionManager();
-        connectionManager.init(config, new ConnectionFactory());
+        connectionManager.init(config, factory);
     }
 
     @Override
