@@ -35,6 +35,8 @@ class RabbitMqEventPublisherTest
 	private static ArgumentCaptor<BasicProperties> propsArg;
 	private static ArgumentCaptor<byte[]> bodyArg;
 	private final long now = currentTimeMillis();
+	
+	private static RabbitMqEventPublisher publisher;
 
 	@BeforeAll
 	static void initConnectionManager() throws Exception {
@@ -50,7 +52,8 @@ class RabbitMqEventPublisherTest
 		routingKeyArg = ArgumentCaptor.forClass(String.class);
 		propsArg = ArgumentCaptor.forClass(BasicProperties.class);
 		bodyArg = ArgumentCaptor.forClass(byte[].class);
-		RabbitMqConnectionManager.INSTANCE.init(MockScope.create().put("rmq-exchange", "login-details"), factory);
+		publisher = new RabbitMqEventPublisher();
+		publisher.initConnection(MockScope.create().put("rmq-exchange", "login-details"));
 	}
 
 	@BeforeEach
@@ -61,7 +64,6 @@ class RabbitMqEventPublisherTest
 
 	@Test
 	void publish_login_event() throws Exception {
-		RabbitMqEventPublisher publisher = new RabbitMqEventPublisher();
 
         DetailedLoginEvent event = new DetailedLoginEvent();
         event.setType(LOGIN.toString());
