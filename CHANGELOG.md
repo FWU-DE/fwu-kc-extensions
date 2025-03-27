@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.18.1]
+
+- Bugfix: Allow multiple instances of RabbitMQ connection manager
+
 ## Version [4.18.0]
 
 - Feature: New BMI login event publisher
