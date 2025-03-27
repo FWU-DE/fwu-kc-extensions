@@ -13,9 +13,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
 
-public enum RabbitMqConnectionManager {
-
-    INSTANCE;
+public class RabbitMqConnectionManager {
 
     public static final BasicProperties PERSISTENT_JSON = new BasicProperties("application/json", null, null, 2, 0,
             null, null, null, null, null, null, null, null, null);

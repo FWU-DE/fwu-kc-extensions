@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 
 public class RabbitMqEventPublisher implements EventPublisher {
 
+    private RabbitMqConnectionManager connectionManager;
+    
     private static final Logger logger = Logger.getLogger(RabbitMqEventPublisher.class);
     public static final String ROUTING_KEY_PREFIX = "KC.EVENT.";
 
@@ -24,12 +26,17 @@ public class RabbitMqEventPublisher implements EventPublisher {
 
     @Override
     public void close() {
-        RabbitMqConnectionManager.INSTANCE.closeConnection();
+        connectionManager.closeConnection();
     }
 
     @Override
     public void initConnection(Scope config) {
-        RabbitMqConnectionManager.INSTANCE.init(config, new ConnectionFactory());
+        initConnection(config, new ConnectionFactory());
+    }
+
+    public void initConnection(Scope config, ConnectionFactory factory) {
+        connectionManager = new RabbitMqConnectionManager();
+        connectionManager.init(config, factory);
     }
 
     @Override
@@ -38,7 +45,7 @@ public class RabbitMqEventPublisher implements EventPublisher {
 
         try {
             String messageString = writeAsJson(event);
-            RabbitMqConnectionManager.INSTANCE.basicPublish(routingKey, messageString.getBytes(StandardCharsets.UTF_8));
+            connectionManager.basicPublish(routingKey, messageString.getBytes(StandardCharsets.UTF_8));
         } catch (IOException ex) {
             throw new LoginEventException("Error while publishing the message to the queue", ex);
         }
