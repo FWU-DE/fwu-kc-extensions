@@ -2,7 +2,7 @@ package de.intension.testhelper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.licence.model.LicenceRequest;
+import de.intension.rest.licence.model.LegacyLicenceRequest;
 import de.intension.rest.licence.model.RemoveLicenceRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.mockserver.client.MockServerClient;
@@ -22,7 +22,7 @@ public class LicenceMockHelper {
 
     public static Expectation requestLicenceExpectation(MockServerClient mockServerClient)
             throws JsonProcessingException {
-        LicenceRequest licenceRequestedRequest = new LicenceRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f", "account-console",
+        LegacyLicenceRequest licenceRequestedRequest = new LegacyLicenceRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f", "account-console",
                 "DE-SN-Schullogin.0815", "de-DE");
         return mockServerClient
                 .when(

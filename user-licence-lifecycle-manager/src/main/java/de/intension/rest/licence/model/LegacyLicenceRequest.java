@@ -7,11 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class LicenceRequest {
+public class LegacyLicenceRequest {
 
-    private String bundesland;
-    private String standortnummer;
-    private String schulnummer;
     private String userId;
-    private String clientName;
+    private String clientId;
+    private String schulkennung;
+    private String bundesland;
 }

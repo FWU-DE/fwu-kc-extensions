@@ -13,9 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper.createHashAlgorithmConfig;
 import static de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper.createLocalSubIdentifierConfig;

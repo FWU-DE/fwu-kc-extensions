@@ -35,7 +35,7 @@ public class DefaultRestClientProviderFactory
             .build();
 
     private final ThreadLocal<Boolean> initHolder = new ThreadLocal<>();
-    private LicenceConnectRestClient restClient;
+    private LegacyLicenceConnectRestClient restClient;
     public String licenceConnectBaseUrl;
     public String licenceConnectAPIKey;
 
@@ -44,7 +44,7 @@ public class DefaultRestClientProviderFactory
         if (initHolder.get() == null) {
             synchronized (this) {
                 if (restClient == null) {
-                    restClient = new LicenceConnectRestClient(this.licenceConnectBaseUrl, this.licenceConnectAPIKey);
+                    restClient = new LegacyLicenceConnectRestClient(this.licenceConnectBaseUrl, this.licenceConnectAPIKey);
                 }
                 initHolder.set(Boolean.TRUE);
             }

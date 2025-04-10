@@ -4,7 +4,7 @@ import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.resources.admin.DeletableUserType;
-import de.intension.rest.licence.client.LicenceConnectRestClient;
+import de.intension.rest.licence.client.LegacyLicenceConnectRestClient;
 import de.intension.rest.licence.model.RemoveLicenceRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
@@ -41,7 +41,7 @@ public class RemoveUserOnLogOutEventListenerProvider
     private final EventListenerTransaction tx = new EventListenerTransaction(null, this::removeUser);
     private final Config.Scope config;
     @Getter
-    private LicenceConnectRestClient restClient;
+    private LegacyLicenceConnectRestClient restClient;
 
     protected RemoveUserOnLogOutEventListenerProvider(KeycloakSession session, Config.Scope config) {
         this.keycloakSession = session;

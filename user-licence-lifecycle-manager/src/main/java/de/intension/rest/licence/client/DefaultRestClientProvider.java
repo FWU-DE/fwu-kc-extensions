@@ -5,9 +5,9 @@ import de.intension.spi.RestClientProvider;
 public class DefaultRestClientProvider
         implements RestClientProvider {
 
-    private final LicenceConnectRestClient restClient;
+    private final LegacyLicenceConnectRestClient restClient;
 
-    public DefaultRestClientProvider(LicenceConnectRestClient restClient) {
+    public DefaultRestClientProvider(LegacyLicenceConnectRestClient restClient) {
         this.restClient = restClient;
     }
 
@@ -18,7 +18,7 @@ public class DefaultRestClientProvider
     }
 
     @Override
-    public LicenceConnectRestClient restClient() {
+    public LegacyLicenceConnectRestClient restClient() {
         return this.restClient;
     }
 

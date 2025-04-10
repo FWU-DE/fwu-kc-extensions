@@ -1,6 +1,6 @@
 package de.intension.resources.admin;
 
-import de.intension.rest.licence.client.LicenceConnectRestClient;
+import de.intension.rest.licence.client.LegacyLicenceConnectRestClient;
 import de.intension.rest.licence.model.RemoveLicenceRequest;
 import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
@@ -93,7 +93,7 @@ public class VidisAdminRealmResourceProvider
                 lastCreationDate = ue.getCreatedTimestamp() != null ? ue.getCreatedTimestamp() : lastCreationDate;
                 UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
                 if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
-                    LicenceConnectRestClient restClient = session.getProvider(RestClientProvider.class).restClient();
+                    LegacyLicenceConnectRestClient restClient = session.getProvider(RestClientProvider.class).restClient();
                     this.removeUserLicence(restClient, ua, realmModel);
                     session.users().removeUser(realmModel, ua);
                     numberOfDeletedUsers++;
@@ -121,7 +121,7 @@ public class VidisAdminRealmResourceProvider
         return userQuery.getResultList();
     }
 
-    private void removeUserLicence(LicenceConnectRestClient restClient, UserAdapter ua, RealmModel realm) {
+    private void removeUserLicence(LegacyLicenceConnectRestClient restClient, UserAdapter ua, RealmModel realm) {
         RemoveLicenceRequest licenceRequest = createLicenceReleaseRequest(ua, realm);
         boolean licenceReleased = false;
         try {

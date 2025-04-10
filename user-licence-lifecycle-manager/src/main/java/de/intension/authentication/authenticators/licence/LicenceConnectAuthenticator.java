@@ -5,7 +5,9 @@ import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import de.intension.authentication.authenticators.jpa.entity.LicenceEntity;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
+import de.intension.rest.licence.client.LegacyLicenceConnectRestClient;
 import de.intension.rest.licence.client.LicenceConnectRestClient;
+import de.intension.rest.licence.model.LegacyLicenceRequest;
 import de.intension.rest.licence.model.LicenceRequest;
 import jakarta.ws.rs.core.Response;
 import lombok.Getter;
@@ -36,26 +38,68 @@ public class LicenceConnectAuthenticator
     private static final String BUNDESLAND_ATTRIBUTE = "bundesland";
     private static final int PART_SIZE = 255;
 
+    private LegacyLicenceConnectRestClient legacyRestClient;
     private LicenceConnectRestClient restClient;
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        this.restClient = createRestClient(context.getAuthenticatorConfig().getConfig());
-        if (this.restClient == null) {
-            logger.error("Please configure the authenticator");
-            context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
-        }
-        if (this.addUserLicence(context)) {
-            context.success();
+        var realm = context.getRealm().getName();
+        if (realm.equals("some_realm")) {
+            restClient = createRestClient(context.getAuthenticatorConfig().getConfig());
+            if (legacyRestClient == null) {
+                logger.error("Legacy authenticator is not configured correctly");
+                context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+                return;
+            }
+            if (addUserLicenceLegacy(context)) {
+                context.success();
+            } else {
+                logger.infof("There were no licences found associated with the user %s", context.getUser().getUsername());
+                context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+            }
         } else {
-            logger.infof("There were no licences found associated with the user %s", context.getUser().getUsername());
-            context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+            legacyRestClient = createLegacyRestClient(context.getAuthenticatorConfig().getConfig());
+            if (legacyRestClient == null) {
+                logger.error("Legacy authenticator is not configured correctly");
+                context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+                return;
+            }
+            if (addUserLicenceLegacy(context)) {
+                context.success();
+            } else {
+                logger.infof("There were no licences found associated with the user %s", context.getUser().getUsername());
+                context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
+            }
         }
     }
 
-    private boolean addUserLicence(AuthenticationFlowContext context) {
+    private boolean addUserLicence(AuthenticationFlowContext context) throws Exception {
         UserModel user = context.getUser();
-        LicenceRequest licenceRequest = createLicenceRequest(user, context);
+        var licenceRequest = createLicenceRequest(user, context);
+        var userLicences = restClient.getLicences(licenceRequest);
+        var licenceAttributes = user.getAttributes();
+        for (var i = 0; i < licenceAttributes.size(); i++) {
+            var licence = userLicences.get(i);
+            for (var j = 0; j < licence.length(); j += PART_SIZE) {
+                var index = (j / PART_SIZE);
+                var part = licence.substring(j, Math.min(licence.length(), j + PART_SIZE));
+                user.setAttribute(LICENCE_ATTRIBUTE + "_" + i + "_" + index, List.of(part));
+            }
+            var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMappersStream()
+                    .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+            if (hmacMapper.isPresent()) {
+                String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
+                LicenceEntity licenceEntity = new LicenceEntity(hmacId, licence);
+                context.getSession().getProvider(LicenceJpaProvider.class).persistLicence(licenceEntity);
+                logger.infof("User licence has been persisted in the database for user %s", user.getUsername());
+            }
+        }
+        return true;
+    }
+
+    private boolean addUserLicenceLegacy(AuthenticationFlowContext context) {
+        UserModel user = context.getUser();
+        LegacyLicenceRequest licenceRequest = createLegacyLicenceRequest(user, context);
         JsonNode userLicences = fetchUserLicence(licenceRequest);
         if (userLicences != null) {
             String userLicence = userLicences.path("licences").toString();
@@ -84,8 +128,14 @@ public class LicenceConnectAuthenticator
         if (config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL) == null || config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY) == null) {
             return null;
         }
-        return new LicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL),
-                config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY));
+        return new LicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL), config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY));
+    }
+
+    private LegacyLicenceConnectRestClient createLegacyRestClient(Map<String, String> config) {
+        if (config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL) == null || config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY) == null) {
+            return null;
+        }
+        return new LegacyLicenceConnectRestClient(config.get(LicenceConnectAuthenticatorFactory.LICENCE_URL), config.get(LicenceConnectAuthenticatorFactory.LICENCE_API_KEY));
     }
 
     private LicenceRequest createLicenceRequest(UserModel user, AuthenticationFlowContext context) {
@@ -96,17 +146,34 @@ public class LicenceConnectAuthenticator
 
         Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
         if (idp.isPresent()) {
+            var bundesland = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
+
             String userId = idp.get().getUserId();
-            licenceRequestedRequest = new LicenceRequest(userId, clientId, schulKennung, bundesLand);
+            licenceRequestedRequest = new LicenceRequest(bundesland);
         }
 
         return licenceRequestedRequest;
     }
 
-    private JsonNode fetchUserLicence(LicenceRequest licenceRequest) {
+    private LegacyLicenceRequest createLegacyLicenceRequest(UserModel user, AuthenticationFlowContext context) {
+        LegacyLicenceRequest licenceRequestedRequest = null;
+        String schulKennung = user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE);
+        String bundesLand = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
+        String clientId = context.getAuthenticationSession().getClient().getClientId();
+
+        Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
+        if (idp.isPresent()) {
+            String userId = idp.get().getUserId();
+            licenceRequestedRequest = new LegacyLicenceRequest(userId, clientId, schulKennung, bundesLand);
+        }
+
+        return licenceRequestedRequest;
+    }
+
+    private JsonNode fetchUserLicence(LegacyLicenceRequest licenceRequest) {
         JsonNode userLicence = null;
         try {
-            userLicence = this.restClient.getLicences(licenceRequest);
+            userLicence = this.legacyRestClient.getLicences(licenceRequest);
         } catch (IOException e) {
             logger.errorf(e, "Error while fetching the user licence from licence connect");
         }
