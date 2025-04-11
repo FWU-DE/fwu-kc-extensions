@@ -20,10 +20,7 @@ import org.keycloak.models.*;
 import org.keycloak.services.ErrorPage;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,18 +137,14 @@ public class LicenceConnectAuthenticator
 
     private LicenceRequest createLicenceRequest(UserModel user, AuthenticationFlowContext context) {
         LicenceRequest licenceRequestedRequest = null;
-        String schulKennung = user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE);
-        String bundesLand = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
+        String schulkennung = user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE);
+        String bundesland = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
         String clientId = context.getAuthenticationSession().getClient().getClientId();
-
         Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
         if (idp.isPresent()) {
-            var bundesland = user.getFirstAttribute(BUNDESLAND_ATTRIBUTE);
-
             String userId = idp.get().getUserId();
-            licenceRequestedRequest = new LicenceRequest(bundesland);
+            licenceRequestedRequest = new LicenceRequest(bundesland, bundesland, schulkennung, userId, clientId);
         }
-
         return licenceRequestedRequest;
     }
 
