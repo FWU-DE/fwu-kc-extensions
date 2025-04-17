@@ -5,21 +5,22 @@ import de.intension.spi.RestClientProvider;
 public class DefaultRestClientProvider
         implements RestClientProvider {
 
-    private final LegacyLicenceConnectRestClient restClient;
+    private final LicenceConnectRestClient    licenceConnectRestClient;
 
-    public DefaultRestClientProvider(LegacyLicenceConnectRestClient restClient) {
-        this.restClient = restClient;
+    public DefaultRestClientProvider(LicenceConnectRestClient licenceConnectRestClient) {
+        this.licenceConnectRestClient = licenceConnectRestClient;
     }
 
     @Override
-    public void close() {
-        // TODO Auto-generated method stub
-
+    public void close()
+    {
+        // Nothing to do
     }
 
     @Override
-    public LegacyLicenceConnectRestClient restClient() {
-        return this.restClient;
+    public LicenceConnectRestClient getLicenseConnectRestClient()
+    {
+        return this.licenceConnectRestClient;
     }
 
 }

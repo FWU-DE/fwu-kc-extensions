@@ -1,8 +1,5 @@
 package de.intension.resources.admin;
 
-import de.intension.rest.licence.client.LegacyLicenceConnectRestClient;
-import de.intension.rest.licence.model.RemoveLicenceRequest;
-import de.intension.spi.RestClientProvider;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.ws.rs.*;
@@ -22,10 +19,6 @@ import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class VidisAdminRealmResourceProvider
         implements AdminRealmResourceProvider {
@@ -93,8 +86,6 @@ public class VidisAdminRealmResourceProvider
                 lastCreationDate = ue.getCreatedTimestamp() != null ? ue.getCreatedTimestamp() : lastCreationDate;
                 UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
                 if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
-                    LegacyLicenceConnectRestClient restClient = session.getProvider(RestClientProvider.class).restClient();
-                    this.removeUserLicence(restClient, ua, realmModel);
                     session.users().removeUser(realmModel, ua);
                     numberOfDeletedUsers++;
                 }
@@ -119,37 +110,5 @@ public class VidisAdminRealmResourceProvider
         userQuery.setParameter("chunkSize", chunkSize);
         userQuery.setParameter("realmId", session.getContext().getRealm().getId());
         return userQuery.getResultList();
-    }
-
-    private void removeUserLicence(LegacyLicenceConnectRestClient restClient, UserAdapter ua, RealmModel realm) {
-        RemoveLicenceRequest licenceRequest = createLicenceReleaseRequest(ua, realm);
-        boolean licenceReleased = false;
-        try {
-            if (restClient != null) {
-                licenceReleased = restClient.releaseLicence(licenceRequest);
-            }
-        } catch (Exception e) {
-            LOG.warn(e.getLocalizedMessage());
-        }
-        if (licenceReleased) {
-            LOG.infof("User licence has been released for the user %s", ua.getUsername());
-        } else {
-            LOG.warnf("User licence not released for the user %s", ua.getUsername());
-        }
-    }
-
-    private RemoveLicenceRequest createLicenceReleaseRequest(UserModel user, RealmModel realm) {
-        RemoveLicenceRequest licenceRequestedRequest = null;
-
-        Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
-        Stream<FederatedIdentityModel> federatedIdentityModelList = this.session.users().getFederatedIdentitiesStream(realm, user)
-                .filter(identity -> idps.contains(identity.getIdentityProvider()));
-
-        Optional<FederatedIdentityModel> idp = federatedIdentityModelList.findFirst();
-        if (idp.isPresent()) {
-            String userId = idp.get().getUserId();
-            licenceRequestedRequest = new RemoveLicenceRequest(userId);
-        }
-        return licenceRequestedRequest;
     }
 }

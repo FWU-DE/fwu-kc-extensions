@@ -10,9 +10,12 @@ This extension handles the lifecycle of users and licences. It consists of two m
 
 ## Licence Connect Authenticator
 
+To fetch the user license two endpoints are available. One is bilo and the other one is generic license connect
+endpoint. This can be configured per client to fetch the data accordingly.
+
 ### Configuration
 
-#### Rest endpoint in UI
+#### Client configuration in UI
 
 The following variables must be set within the Admin UI for the authenticator config.
 
@@ -38,18 +41,20 @@ authentication
 The licence associated with user is managed by a [Licence Connect](https://licenceconnect.schule/), 
 which provides endpoints to gather those information.
 
+There are two endpoint to fetch user license
+
+1. Generic license endpoint
 **Endpoint:** <hostname>/v1/licences/request
 
-Request body
+Request params
 
-```json
-{
-  "userId": "02e71a9d-d68d-3050-9a0d-5b963c06aec0",
-  "clientId": "Angebot12345",
-  "schulkennung": "DE-MV-SN-51201",
-  "bundesland": "DE-MV"
-}
-```
+| Name             | Type   | Example                              | Required |
+|------------------|--------|--------------------------------------|----------|
+| `userId`         | string | 02e71a9d-d68d-3050-9a0d-5b963c06aec0 | No       |
+| `clientName`     | string | Angebot12345                         | Yes      |
+| `schulnummer`    | string | DE-MV-SN-51201                       | No       |
+| `bundesland`     | string | DE-MV                                | Yes      |
+| `standortnummer` | string | 45112                                | No       |
 
 Response body
 
@@ -59,6 +64,120 @@ Response body
     "VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j",
     "COR-3rw46a45-345c-4237-a451-4333736ex015"
   ]
+}
+```
+
+2. Bilo license endpoint
+   **Endpoint:** <hostname>/v1/ucs/request
+
+Request params
+
+| Name           | Type   | Example                              | Required |
+|----------------|--------|--------------------------------------|----------|
+| `userId`       | string | 02e71a9d-d68d-3050-9a0d-5b963c06aec0 | Yes      |
+| `clientId`     | string | Angebot12345                         | Yes      |
+| `schulkennung` | string | DE-MV-SN-51201                       | No       |
+| `bundesland`   | string | DE-MV                                | Yes      |
+
+Response body
+
+```json
+{
+  "id": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "licenses": [
+    "string"
+  ],
+  "context": {
+    "additionalProp1": {
+      "licenses": [
+        "string"
+      ],
+      "classes": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "workgroups": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "school_authority": "string",
+      "school_identifier": "string",
+      "school_name": "string",
+      "roles": [
+        "string"
+      ]
+    },
+    "additionalProp2": {
+      "licenses": [
+        "string"
+      ],
+      "classes": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "workgroups": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "school_authority": "string",
+      "school_identifier": "string",
+      "school_name": "string",
+      "roles": [
+        "string"
+      ]
+    },
+    "additionalProp3": {
+      "licenses": [
+        "string"
+      ],
+      "classes": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "workgroups": [
+        {
+          "name": "string",
+          "id": "string",
+          "licenses": [
+            "string"
+          ]
+        }
+      ],
+      "school_authority": "string",
+      "school_identifier": "string",
+      "school_name": "string",
+      "roles": [
+        "string"
+      ]
+    }
+  }
 }
 ```
 
@@ -83,8 +202,7 @@ If the user tries to login to a specific client and
 
 In this part, we make sure the user is removed from keycloak on the user logout and session expiration.
 
-Moreover, before removing the user the licence associated with the user is released in
-Licence Connect and deleted from the Keycloak database.
+Moreover, before removing the user the licence associated with the user is deleted from the Keycloak database.
 
 ### Configurations
 
@@ -104,8 +222,8 @@ KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_<REALM>: [IDP|ALL|NONE]
 The rest API URL to release the licence associated with the user can be configured using the following environments.
 
 ```shell
-KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_URL: http://mockserver:1080/v1/licences/release
-KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_API_KEY: sample-api-key
+KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL: http://mockserver:1080
+KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY: sample-api-key
 ```
 
 #### Custom authentication flow

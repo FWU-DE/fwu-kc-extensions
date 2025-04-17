@@ -7,7 +7,7 @@ import org.keycloak.provider.Spi;
 public class RestClientSpi
         implements Spi {
 
-    private static final String SPI_NAME = "removeUserRestClient";
+    private static final String SPI_NAME = "restClient";
 
     @Override
     public boolean isInternal() {

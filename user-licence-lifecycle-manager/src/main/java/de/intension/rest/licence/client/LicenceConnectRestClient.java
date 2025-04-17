@@ -1,91 +1,87 @@
 package de.intension.rest.licence.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.licence.model.LegacyLicenceRequest;
-import de.intension.rest.licence.model.LicenceRequest;
-import de.intension.rest.licence.model.RemoveLicenceRequest;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
+import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.models.KeycloakSession;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.Array;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.Map;
 
+import static de.intension.rest.licence.model.LicenseConstants.*;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.jboss.logging.Logger.getLogger;
 
-public class LicenceConnectRestClient
-        implements Closeable {
+public class LicenceConnectRestClient {
 
-    private static final Logger LOG = getLogger(LicenceConnectRestClient.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger LOG                = getLogger(LicenceConnectRestClient.class);
+    private final List<String>  biloRequiredParams      = List.of(USER_ID, CLIENT_ID, BUNDESLAND_ATTRIBUTE);
+    private final List<String>  genericLcRequiredParams = List.of(CLIENT_NAME, BUNDESLAND_ATTRIBUTE);
+    private static final String UCS_REQUEST_PATH        = "v1/ucs/request";
+    private static final String LC_REQUEST_PATH = "v1/licences/request";
     private final String licenceRestUri;
     private final String licenceAPIKey;
+    private final KeycloakSession session;
 
-    private final CloseableHttpClient httpClient;
 
-    public LicenceConnectRestClient(String licenceRestUri, String licenceAPIKey) {
+    public LicenceConnectRestClient(KeycloakSession session, String licenceRestUri, String licenceAPIKey) {
         this.licenceRestUri = licenceRestUri;
         this.licenceAPIKey = licenceAPIKey;
-        httpClient = HttpClientBuilder.create().build();
+        this.session = session;
     }
 
-    public List<String> getLicences(LicenceRequest licenceRequest) throws Exception {
-        if (licenceRequest.getBundesland() == null) throw new IllegalArgumentException("Bundesland must not be null");
-        if (licenceRequest.getClientName() == null) throw new IllegalArgumentException("Client name must not be null");
-        var url = constructLicenseUri(licenceRequest);
-        var httpGet = new HttpGet(url);
-        httpGet.addHeader("X-API-KEY", this.licenceAPIKey);
-        try (var response = httpClient.execute(httpGet)) {
-            var status = response.getStatusLine().getStatusCode();
-            if (status == HttpStatus.SC_OK) {
-                var jsonResponse = objectMapper.readTree(response.getEntity().getContent());
-                return StreamSupport.stream(jsonResponse.spliterator(), false).map(jsonNode -> {
-                    if (!jsonNode.has("licenceCode")) {
-                        throw new IllegalArgumentException("Licences not found in response");
-                    }
-                    return jsonNode.get("licenceCode").asText();
-                }).toList();
+    public String getUcsLicences(Map<String,String> queryParams)
+            throws IOException
+    {
+        List<String> missing = biloRequiredParams.stream()
+                .filter(param -> queryParams.get(param) == null)
+                .toList();
+
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
+        }
+
+        String url = String.format("%s/%s", licenceRestUri, UCS_REQUEST_PATH);
+        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        addConfig(simpleHttp, queryParams);
+
+        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+            if (response.getStatus() == 200) {
+                LOG.debugf("Received success response for the user for the license type UCS");
+                return response.asString();
             }
+            throw new WebApplicationException(response.getStatus());
         }
-        throw new Exception("There was an error while fetching the licence.");
     }
 
-    private URI constructLicenseUri(LicenceRequest licenceRequest) throws URISyntaxException {
-        var urlBuilder = new URIBuilder(licenceRestUri);
-        urlBuilder.addParameter("bundesland", licenceRequest.getBundesland());
-        urlBuilder.addParameter("clientName", licenceRequest.getClientName());
-        if (licenceRequest.getStandortnummer() != null) {
-            urlBuilder.addParameter("standortnummer", licenceRequest.getStandortnummer());
+    public String getLicences(Map<String,String> queryParams)
+            throws IOException
+    {
+        List<String> missing = genericLcRequiredParams.stream()
+                .filter(param -> queryParams.get(param) == null)
+                .toList();
+
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
         }
-        if (licenceRequest.getSchulnummer() != null) {
-            urlBuilder.addParameter("schulnummer", licenceRequest.getSchulnummer());
+
+        String url = String.format("%s/%s", licenceRestUri, LC_REQUEST_PATH);
+        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        addConfig(simpleHttp, queryParams);
+
+        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+            if (response.getStatus() == 200) {
+                LOG.debugf("Received success response for the user for the license type LC");
+                return response.asString();
+            }
+            throw new WebApplicationException(response.getStatus());
         }
-        if (licenceRequest.getUserId() != null) {
-            urlBuilder.addParameter("userId", licenceRequest.getUserId());
-        }
-        return urlBuilder.build();
     }
 
-    @Override
-    public void close()
-            throws IOException {
-        this.httpClient.close();
+    private void addConfig(SimpleHttp simpleHttp, Map<String,String> queryParams) {
+        simpleHttp.header("X-API-KEY", this.licenceAPIKey).header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).header(HttpHeaders.ACCEPT, APPLICATION_JSON);
+        queryParams.forEach(simpleHttp::param);
     }
 }
