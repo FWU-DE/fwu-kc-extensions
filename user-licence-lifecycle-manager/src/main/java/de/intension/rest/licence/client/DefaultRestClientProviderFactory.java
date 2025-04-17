@@ -7,35 +7,16 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
-import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ProviderConfigurationBuilder;
-
-import java.io.IOException;
-import java.util.List;
+import org.keycloak.utils.StringUtil;
 
 public class DefaultRestClientProviderFactory
         implements RestClientProviderFactory {
 
     private static final String PROVIDER_ID = "default";
     private static final Logger LOG = Logger.getLogger(DefaultRestClientProviderFactory.class);
+    private final ThreadLocal<Boolean>        initHolder = new ThreadLocal<>();
+    private       LicenceConnectRestClient    licenceConnectRestClient;
 
-    private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
-            .property()
-            .name(ConfigConstant.LICENCE_CONNECT_BASE_URL.asString())
-            .type(ProviderConfigProperty.STRING_TYPE)
-            .label("Base URL")
-            .helpText("Base URL of the licence connect API")
-            .add()
-            .property()
-            .name(ConfigConstant.LICENCE_CONNECT_API_KEY.asString())
-            .type(ProviderConfigProperty.STRING_TYPE)
-            .label("API key")
-            .helpText("Key used for authentication to connect with API")
-            .add()
-            .build();
-
-    private final ThreadLocal<Boolean> initHolder = new ThreadLocal<>();
-    private LicenceConnectRestClient restClient;
     public String licenceConnectBaseUrl;
     public String licenceConnectAPIKey;
 
@@ -43,46 +24,37 @@ public class DefaultRestClientProviderFactory
     public RestClientProvider create(KeycloakSession session) {
         if (initHolder.get() == null) {
             synchronized (this) {
-                if (restClient == null) {
-                    restClient = new LicenceConnectRestClient(this.licenceConnectBaseUrl, this.licenceConnectAPIKey);
+                if (licenceConnectRestClient == null) {
+                    licenceConnectRestClient = new LicenceConnectRestClient(session, this.licenceConnectBaseUrl, this.licenceConnectAPIKey);
                 }
                 initHolder.set(Boolean.TRUE);
             }
         }
-        return new DefaultRestClientProvider(restClient);
+        return new DefaultRestClientProvider(licenceConnectRestClient);
     }
 
     @Override
     public void init(Scope config) {
+
         this.licenceConnectBaseUrl = config.get(ConfigConstant.LICENCE_CONNECT_BASE_URL.asString());
         this.licenceConnectAPIKey = config.get(ConfigConstant.LICENCE_CONNECT_API_KEY.asString());
-        if (this.licenceConnectBaseUrl == null || this.licenceConnectAPIKey == null) {
+
+        if (StringUtil.isBlank(licenceConnectBaseUrl) || StringUtil.isBlank(licenceConnectAPIKey)) {
             LOG.warn("Licence connect URL and the API key should be added in order to access licence connect API");
         }
 
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory factory) {
-        // TODO Auto-generated method stub
-
+    public void postInit(KeycloakSessionFactory factory)
+    {
+        // Nothing to do
     }
 
     @Override
-    public List<ProviderConfigProperty> getConfigMetadata() {
-        return CONFIG_PROPERTIES;
-    }
-
-    @Override
-    public void close() {
-        initHolder.set(Boolean.FALSE);
-        if (this.restClient != null) {
-            try {
-                this.restClient.close();
-            } catch (IOException e) {
-                LOG.warn("There was error while closing the rest client");
-            }
-        }
+    public void close()
+    {
+        // Nothing to do
     }
 
     @Override

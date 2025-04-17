@@ -122,38 +122,42 @@
     "id": "licence-request",
     "priority": 0,
     "httpRequest": {
-      "method": "POST",
+      "method": "GET",
       "path": "/v1/licences/request",
       "headers": {
         "X-API-Key": "sample-api-key",
         "Content-Type": "application/json"
       },
-      "body": {
+      "queryStringParameters": {
         "userId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f",
-        "clientId": "account-console",
-        "schulkennung": "DE-SN-Schullogin.0815"
+        "clientName": "account-console",
+        "schulnummer": "DE-SN-Schullogin.0815",
+        "bundesland": "de-DE"
       }
     },
     "httpResponse": {
-      "body": "{\"licences\":[\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\",\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"]}"
+      "body": "[{\"licenceCode\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licenceCode\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]"
     }
   },
   {
-    "id": "licence-release",
+    "id": "licence-request-ucs",
     "priority": 0,
     "httpRequest": {
-      "method": "POST",
-      "path": "/v1/licences/release",
+      "method": "GET",
+      "path": "/v1/ucs/request",
       "headers": {
         "X-API-Key": "sample-api-key",
         "Content-Type": "application/json"
       },
-      "body": {
-        "studentId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f"
+      "queryStringParameters": {
+        "userId": "9c7e5634-5021-4c3e-9bea-53f54c299a0f",
+        "clientId": "account-console",
+        "schulkennung": "DE-SN-Schullogin.0815",
+        "bundesland": "de-DE"
       }
     },
     "httpResponse": {
-      "body": ""
+      "body": "{\"id\":\"sample-user-id\",\"first_name\":\"Max\",\"last_name\":\"Muster\",\"licenses\":[\"ucs-license-1\",\"ucs-license-2\"],\"context\":{\"additionalProp1\":{\"licenses\":[\"ucs-license-prop-1\",\"ucs-license-prop-2\"],\"classes\":[{\"name\":\"class-1\",\"id\":\"sample-id1\",\"licenses\":[\"ucs-class-license-1\",\"ucs-classlicense-2\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp2\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp3\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]}}}"
     }
   }
 ]

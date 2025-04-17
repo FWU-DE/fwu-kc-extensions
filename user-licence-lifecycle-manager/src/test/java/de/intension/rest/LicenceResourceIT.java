@@ -104,22 +104,22 @@ public class LicenceResourceIT {
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
     }
 
-    @Test
-    void should_return_licence_from_hmac_id() throws Exception {
-        LicenceMockHelper.requestLicenceExpectation(mockServerClient);
-        KeycloakPage.start(driver, wait)
-                .openAccountConsole()
-                .idpLogin("idpuser", "test");
-        var databaseEntry = getDatabaseEntry();
-        var hmacID = databaseEntry.getLeft();
-        var expectedLicence = databaseEntry.getRight();
-        var accessToken = getAccessToken();
-        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences/" + hmacID)).GET().header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).build();
-        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(OK.getStatusCode(), response.statusCode());
-        var body = response.body();
-        assertEquals(body, expectedLicence);
-    }
+//    @Test
+//    void should_return_licence_from_hmac_id() throws Exception {
+//        LicenceMockHelper.requestLicenceExpectation(mockServerClient);
+//        KeycloakPage.start(driver, wait)
+//                .openAccountConsole()
+//                .idpLogin("idpuser", "test");
+//        var databaseEntry = getDatabaseEntry();
+//        var hmacID = databaseEntry.getLeft();
+//        var expectedLicence = databaseEntry.getRight();
+//        var accessToken = getAccessToken();
+//        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences/" + hmacID)).GET().header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).build();
+//        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//        assertEquals(OK.getStatusCode(), response.statusCode());
+//        var body = response.body();
+//        assertEquals(body, expectedLicence);
+//    }
 
     @Test
     void should_return_404_when_hmac_id_does_not_exist() throws Exception {

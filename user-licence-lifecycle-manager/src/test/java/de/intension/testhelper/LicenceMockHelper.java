@@ -2,8 +2,6 @@ package de.intension.testhelper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.licence.model.LicenceRequest;
-import de.intension.rest.licence.model.RemoveLicenceRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.matchers.Times;
@@ -22,14 +20,11 @@ public class LicenceMockHelper {
 
     public static Expectation requestLicenceExpectation(MockServerClient mockServerClient)
             throws JsonProcessingException {
-        LicenceRequest licenceRequestedRequest = new LicenceRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f", "account-console",
-                "DE-SN-Schullogin.0815", "de-DE");
         return mockServerClient
                 .when(
                         request().withPath("/v1/licences/request")
                                 .withMethod("POST")
-                                .withHeader("X-API-Key", "sample-api-key")
-                                .withBody(objectMapper.writeValueAsString(licenceRequestedRequest)),
+                                .withHeader("X-API-Key", "sample-api-key"),
                         Times.exactly(1))
                 .respond(
                         response()
@@ -42,13 +37,11 @@ public class LicenceMockHelper {
 
     public static Expectation releaseLicenceExpectation(MockServerClient clientAndServer)
             throws JsonProcessingException {
-        RemoveLicenceRequest licenceRequestedRequest = new RemoveLicenceRequest("9c7e5634-5021-4c3e-9bea-53f54c299a0f");
         return clientAndServer
                 .when(
                         request().withPath("/v1/licences/release")
                                 .withMethod("POST")
-                                .withHeader("X-API-Key", "sample-api-key")
-                                .withBody(objectMapper.writeValueAsString(licenceRequestedRequest)),
+                                .withHeader("X-API-Key", "sample-api-key"),
                         Times.exactly(1))
                 .respond(
                         response()

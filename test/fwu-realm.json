@@ -2802,7 +2802,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticatorConfig": "mockserver",
+          "authenticatorConfig": "License connect",
           "authenticator": "licence-connect-authenticator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
@@ -3541,10 +3541,10 @@
     },
     {
       "id": "a8f647a4-a0dc-4927-b551-bf7317a35398",
-      "alias": "mockserver",
+      "alias": "License connect",
       "config": {
-        "licence-url": "http://mockServer:1080/v1/licences/request",
-        "licence-api-key": "sample-api-key"
+        "license-controller-clients": "client3",
+        "bilo-license-clients": "client1,client2,account-console"
       }
     },
     {

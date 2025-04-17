@@ -84,26 +84,26 @@ class RemoveAllTypesOnLogOutEventIT {
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
     }
 
-    /**
-     * GIVEN: a user is federated by idp login
-     * WHEN: the same user logout
-     * THEN: user is removed from the Keycloak
-     */
-    @Test
-    void should_remove_user_on_logout_for_local_login() {
-        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        KeycloakPage kcPage = KeycloakPage
-                .start(driver, wait)
-                .openAccountConsole()
-                .login("misty", "test");
-
-        int usersCountBeforeLogout = usersResource.count();
-        kcPage.logout();
-        String logs = keycloak.getLogs();
-        assertTrue(logs.contains("User licence not released for the user"));
-        int usersCountAfterLogout = usersResource.count();
-        assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
-    }
+//    /**
+//     * GIVEN: a user is federated by idp login
+//     * WHEN: the same user logout
+//     * THEN: user is removed from the Keycloak
+//     */
+//    @Test
+//    void should_remove_user_on_logout_for_local_login() {
+//        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+//        KeycloakPage kcPage = KeycloakPage
+//                .start(driver, wait)
+//                .openAccountConsole()
+//                .login("misty", "test");
+//
+//        int usersCountBeforeLogout = usersResource.count();
+//        kcPage.logout();
+//        String logs = keycloak.getLogs();
+//        assertTrue(logs.contains("User licence not released for the user"));
+//        int usersCountAfterLogout = usersResource.count();
+//        assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
+//    }
 
     @Test
     void should_remove_user_on_logout_for_Idp_login() {

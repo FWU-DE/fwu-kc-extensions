@@ -6,6 +6,5 @@ import org.keycloak.provider.Provider;
 public interface RestClientProvider
         extends Provider {
 
-    LicenceConnectRestClient restClient();
-
+    LicenceConnectRestClient getLicenseConnectRestClient();
 }

@@ -1,106 +1,87 @@
 package de.intension.rest.licence.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.intension.rest.licence.model.LicenceRequest;
-import de.intension.rest.licence.model.RemoveLicenceRequest;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
+import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.models.KeycloakSession;
 
-import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import static de.intension.rest.licence.model.LicenseConstants.*;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.jboss.logging.Logger.getLogger;
 
-public class LicenceConnectRestClient
-        implements Closeable {
+public class LicenceConnectRestClient {
 
-    private static final Logger LOG = getLogger(LicenceConnectRestClient.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger LOG                = getLogger(LicenceConnectRestClient.class);
+    private final List<String>  biloRequiredParams      = List.of(USER_ID, CLIENT_ID, BUNDESLAND_ATTRIBUTE);
+    private final List<String>  genericLcRequiredParams = List.of(CLIENT_NAME, BUNDESLAND_ATTRIBUTE);
+    private static final String UCS_REQUEST_PATH        = "v1/ucs/request";
+    private static final String LC_REQUEST_PATH = "v1/licences/request";
     private final String licenceRestUri;
     private final String licenceAPIKey;
+    private final KeycloakSession session;
 
-    private CloseableHttpClient httpClient;
 
-    public LicenceConnectRestClient(String licenceRestUri, String licenceAPIKey) {
+    public LicenceConnectRestClient(KeycloakSession session, String licenceRestUri, String licenceAPIKey) {
         this.licenceRestUri = licenceRestUri;
         this.licenceAPIKey = licenceAPIKey;
-        httpClient = HttpClientBuilder.create().setDefaultRequestConfig(getRequestConfig()).build();
+        this.session = session;
     }
 
-    public boolean releaseLicence(RemoveLicenceRequest licenceRequest)
-            throws IOException {
-        HttpPost httpPost = new HttpPost(licenceRestUri);
+    public String getUcsLicences(Map<String,String> queryParams)
+            throws IOException
+    {
+        List<String> missing = biloRequiredParams.stream()
+                .filter(param -> queryParams.get(param) == null)
+                .toList();
 
-        httpPost.setHeader("X-API-Key", this.licenceAPIKey);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
-        httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
-        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
-        httpPost.setEntity(entity);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            final int status = response.getStatusLine().getStatusCode();
-            if (status == HttpStatus.SC_OK) {
-                return true;
-            } else {
-                LOG.warnf("There was an error while releasing the licence for the user. Status: %d. Reason: %s. Error: %s.", status,
-                        response.getStatusLine().getReasonPhrase(), EntityUtils.toString(response.getEntity()));
-            }
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
         }
-        return false;
-    }
 
-    public JsonNode getLicences(LicenceRequest licenceRequest)
-            throws IOException {
-        JsonNode userLicences = null;
-        HttpPost httpPost = new HttpPost(licenceRestUri);
+        String url = String.format("%s/%s", licenceRestUri, UCS_REQUEST_PATH);
+        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        addConfig(simpleHttp, queryParams);
 
-        httpPost.setHeader("X-API-Key", this.licenceAPIKey);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
-        httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
-        StringEntity entity = new StringEntity(objectMapper.writeValueAsString(licenceRequest));
-        httpPost.setEntity(entity);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            final int status = response.getStatusLine().getStatusCode();
-            if (status == HttpStatus.SC_OK) {
-                try {
-                    userLicences = objectMapper.readTree(EntityUtils.toString(response.getEntity()));
-                } catch (JsonProcessingException e) {
-                    LOG.error("Error while parsing user licences ", e);
-                }
-            } else {
-                LOG.warnf("There was an error while fetching the licence for the user. Status: %d. Reason: %s. Error: %s.", status,
-                        response.getStatusLine().getReasonPhrase(), EntityUtils.toString(response.getEntity()));
+        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+            if (response.getStatus() == 200) {
+                LOG.debugf("Received success response for the user for the license type UCS");
+                return response.asString();
             }
+            throw new WebApplicationException(response.getStatus());
         }
-        return userLicences;
     }
 
-    /**
-     * Get request configuration for timeout handling.
-     */
-    private static RequestConfig getRequestConfig() {
-        int timeoutInSeconds = 10;
-        return RequestConfig.custom()
-                .setConnectTimeout(timeoutInSeconds * 1000)
-                .setConnectionRequestTimeout(timeoutInSeconds * 1000)
-                .setSocketTimeout(timeoutInSeconds * 1000).build();
+    public String getLicences(Map<String,String> queryParams)
+            throws IOException
+    {
+        List<String> missing = genericLcRequiredParams.stream()
+                .filter(param -> queryParams.get(param) == null)
+                .toList();
+
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
+        }
+
+        String url = String.format("%s/%s", licenceRestUri, LC_REQUEST_PATH);
+        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        addConfig(simpleHttp, queryParams);
+
+        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+            if (response.getStatus() == 200) {
+                LOG.debugf("Received success response for the user for the license type LC");
+                return response.asString();
+            }
+            throw new WebApplicationException(response.getStatus());
+        }
     }
 
-    @Override
-    public void close()
-            throws IOException {
-        this.httpClient.close();
+    private void addConfig(SimpleHttp simpleHttp, Map<String,String> queryParams) {
+        simpleHttp.header("X-API-KEY", this.licenceAPIKey).header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).header(HttpHeaders.ACCEPT, APPLICATION_JSON);
+        queryParams.forEach(simpleHttp::param);
     }
 }
