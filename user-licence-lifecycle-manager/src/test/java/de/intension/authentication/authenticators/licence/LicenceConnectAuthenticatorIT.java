@@ -1,33 +1,9 @@
 package de.intension.authentication.authenticators.licence;
 
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
-import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.testhelper.KeycloakPage;
+import de.intension.testhelper.LicenceMockHelper;
+import org.junit.jupiter.api.*;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -39,18 +15,23 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.MockServerContainer;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.*;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.testhelper.KeycloakPage;
-import de.intension.testhelper.LicenceMockHelper;
+import java.io.File;
+import java.sql.*;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
+
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
+import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Please use the test order in the file to avoid changing configurations again and again
@@ -58,70 +39,67 @@ import de.intension.testhelper.LicenceMockHelper;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Testcontainers
-public class LicenceConnectAuthenticatorIT
-{
+public class LicenceConnectAuthenticatorIT {
 
-    private static final String                       IMPORT_PATH                      = "/opt/keycloak/data/import/";
-    private static final String                       REALM                            = "fwu";
-    private static final String                       EXPECTED_LICENCES                = "[{\"licenceCode\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licenceCode\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]";
-    private static final String                       EXPECTED_LICENCES_BILO           = "{\"id\":\"sample-user-id\",\"first_name\":\"Max\",\"last_name\":\"Muster\",\"licenses\":[\"ucs-license-1\",\"ucs-license-2\"],\"context\":{\"additionalProp1\":{\"licenses\":[\"ucs-license-prop-1\",\"ucs-license-prop-2\"],\"classes\":[{\"name\":\"class-1\",\"id\":\"sample-id1\",\"licenses\":[\"uc";
-    private static final String                       PERSISTED_EXPECTED_LICENCES_BILO = "{\"id\":\"sample-user-id\",\"first_name\":\"Max\",\"last_name\":\"Muster\",\"licenses\":[\"ucs-license-1\",\"ucs-license-2\"],\"context\":{\"additionalProp1\":{\"licenses\":[\"ucs-license-prop-1\",\"ucs-license-prop-2\"],\"classes\":[{\"name\":\"class-1\",\"id\":\"sample-id1\",\"licenses\":[\"ucs-class-license-1\",\"ucs-classlicense-2\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp2\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp3\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]}}}";
+    private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
+    private static final String REALM = "fwu";
+    private static final String EXPECTED_LICENCES = "[{\"licenceCode\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licenceCode\":\"COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015-COR-3rw46a45-345c-4237-a451-4333736ex015\"}]";
+    private static final String EXPECTED_LICENCES_BILO = "{\"id\":\"sample-user-id\",\"first_name\":\"Max\",\"last_name\":\"Muster\",\"licenses\":[\"ucs-license-1\",\"ucs-license-2\"],\"context\":{\"additionalProp1\":{\"licenses\":[\"ucs-license-prop-1\",\"ucs-license-prop-2\"],\"classes\":[{\"name\":\"class-1\",\"id\":\"sample-id1\",\"licenses\":[\"uc";
+    private static final String PERSISTED_EXPECTED_LICENCES_BILO = "{\"id\":\"sample-user-id\",\"first_name\":\"Max\",\"last_name\":\"Muster\",\"licenses\":[\"ucs-license-1\",\"ucs-license-2\"],\"context\":{\"additionalProp1\":{\"licenses\":[\"ucs-license-prop-1\",\"ucs-license-prop-2\"],\"classes\":[{\"name\":\"class-1\",\"id\":\"sample-id1\",\"licenses\":[\"ucs-class-license-1\",\"ucs-classlicense-2\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp2\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]},\"additionalProp3\":{\"licenses\":[\"string\"],\"classes\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"workgroups\":[{\"name\":\"string\",\"id\":\"string\",\"licenses\":[\"string\"]}],\"school_authority\":\"string\",\"school_identifier\":\"string\",\"school_name\":\"string\",\"roles\":[\"string\"]}}}";
 
-    private static final Network                      network                          = Network.newNetwork();
-    private static final Capabilities                 capabilities                     = new FirefoxOptions();
-
-    @Container
-    private static final PostgreSQLContainer<?>       postgres                         = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
-        .withNetwork(network)
-        .withNetworkAliases("postgres")
-        .withDatabaseName("keycloak")
-        .withUsername("keycloak")
-        .withPassword("test123");
+    private static final Network network = Network.newNetwork();
+    private static final Capabilities capabilities = new FirefoxOptions();
 
     @Container
-    private static final MockServerContainer          mockServer                       = new MockServerContainer(
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
+            .withNetwork(network)
+            .withNetworkAliases("postgres")
+            .withDatabaseName("keycloak")
+            .withUsername("keycloak")
+            .withPassword("test123");
+
+    @Container
+    private static final MockServerContainer mockServer = new MockServerContainer(
             DockerImageName.parse("mockserver/mockserver:5.13.2"))
-                .withNetwork(network)
-                .withNetworkAliases("mockserver");
+            .withNetwork(network)
+            .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer            keycloak                         = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
-        .withProviderClassesFrom("target/classes")
-        .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
-        .withContextPath("/auth")
-        .withNetwork(network)
-        .withNetworkAliases("test")
-        .withClasspathResourceMapping("fwu-realm.json", IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
-        .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
-        .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
-        .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080")
-        .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key")
-        .withEnv("KC_DB", "postgres")
-        .withEnv("KC_DB_URL_HOST", "postgres")
-        .withEnv("KC_DB_USERNAME", "keycloak")
-        .withEnv("KC_DB_PASSWORD", "test123")
-        .dependsOn(postgres, mockServer);
+    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+            .withProviderClassesFrom("target/classes")
+            .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
+            .withContextPath("/auth")
+            .withNetwork(network)
+            .withNetworkAliases("test")
+            .withClasspathResourceMapping("fwu-realm.json", IMPORT_PATH + "fwu-realm.json", BindMode.READ_ONLY)
+            .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
+            .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key")
+            .withEnv("KC_DB", "postgres")
+            .withEnv("KC_DB_URL_HOST", "postgres")
+            .withEnv("KC_DB_USERNAME", "keycloak")
+            .withEnv("KC_DB_PASSWORD", "test123")
+            .dependsOn(postgres, mockServer);
 
     @Container
-    private static final BrowserWebDriverContainer<?> selenium                         = new BrowserWebDriverContainer<>()
-        .withCapabilities(capabilities)
-        .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
-        .withNetwork(network);
+    private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
+            .withCapabilities(capabilities)
+            .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
+            .withNetwork(network);
 
-    private static MockServerClient                   mockServerClient;
+    private static MockServerClient mockServerClient;
 
-    private RemoteWebDriver                           driver;
-    private FluentWait<WebDriver>                     wait;
+    private RemoteWebDriver driver;
+    private FluentWait<WebDriver> wait;
 
     @BeforeAll
-    static void setupAll()
-    {
+    static void setupAll() {
         mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort());
     }
 
     @BeforeEach
-    void setup()
-    {
+    void setup() {
         driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
@@ -136,15 +114,14 @@ public class LicenceConnectAuthenticatorIT
     @Order(10)
     @Test
     void should_add_licence_to_user()
-        throws Exception
-    {
+            throws Exception {
         // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage kcPage = KeycloakPage
-            .start(driver, wait)
-            .openAccountConsole()
-            .idpLogin("idpuser", "test");
+                .start(driver, wait)
+                .openAccountConsole()
+                .idpLogin("idpuser", "test");
 
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
@@ -171,22 +148,21 @@ public class LicenceConnectAuthenticatorIT
     @Order(40)
     @Test
     void should_add_licence_to_user_from_bilo()
-        throws Exception
-    {
+            throws Exception {
         // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectationBilo(mockServerClient);
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         AuthenticatorConfigRepresentation authConfig = keycloak.getKeycloakAdminClient().realms().realm(REALM).flows()
-            .getAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193");
+                .getAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193");
         Map<String, String> config = authConfig.getConfig();
         config.put(GENERIC_LICENSE_CLIENTS, "client1");
         config.put(BILO_LICENSE_CLIENTS, "account-console");
         authConfig.setConfig(config);
         keycloak.getKeycloakAdminClient().realms().realm(REALM).flows().updateAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193", authConfig);
         KeycloakPage kcPage = KeycloakPage
-            .start(driver, wait)
-            .openAccountConsole()
-            .idpLogin("idpuser", "test");
+                .start(driver, wait)
+                .openAccountConsole()
+                .idpLogin("idpuser", "test");
 
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
@@ -213,13 +189,12 @@ public class LicenceConnectAuthenticatorIT
     @Order(20)
     @Test
     void should_update_licence()
-        throws Exception
-    {
+            throws Exception {
         // given
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         statement
-            .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+                .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
         ResultSet resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
         Timestamp updatedAt = resultSet.getTimestamp(1);
@@ -228,10 +203,10 @@ public class LicenceConnectAuthenticatorIT
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         KeycloakPage kcPage = KeycloakPage
-            .start(driver, wait)
-            .openAccountConsole()
-            // when
-            .idpLogin("idpuser", "test");
+                .start(driver, wait)
+                .openAccountConsole()
+                // when
+                .idpLogin("idpuser", "test");
 
         // then
         resultSet = statement.executeQuery("SELECT COUNT(*) FROM LICENCE");
@@ -262,13 +237,12 @@ public class LicenceConnectAuthenticatorIT
     @Order(30)
     @Test
     void should_not_add_licence_to_user()
-        throws Exception
-    {
+            throws Exception {
         // given & when
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
         KeycloakPage.start(driver, wait)
-            .openAccountConsole()
-            .idpLogin("idpuser", "test");
+                .openAccountConsole()
+                .idpLogin("idpuser", "test");
 
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
@@ -284,8 +258,7 @@ public class LicenceConnectAuthenticatorIT
 
     @AfterEach
     void cleanUp()
-        throws SQLException
-    {
+            throws SQLException {
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         statement.executeUpdate("DELETE FROM Licence");
@@ -295,8 +268,7 @@ public class LicenceConnectAuthenticatorIT
     }
 
     @AfterEach
-    void tearDown()
-    {
+    void tearDown() {
         driver.quit();
     }
 }

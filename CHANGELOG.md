@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.19.0]
+
+- Feature: Fetch licenses for user from different endpoint based on the configuration in client
+
 ## Version [4.18.1]
 
 - Bugfix: Allow multiple instances of RabbitMQ connection manager
