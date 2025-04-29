@@ -28,7 +28,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 class RemoveAllTypesOnLogOutEventIT {
@@ -55,8 +54,8 @@ class RemoveAllTypesOnLogOutEventIT {
             .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
             .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
             .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "ALL")
-            .withEnv("KC_SPI_AUTHENTICATOR_LICENCE_CONNECT_AUTHENTICATOR_LICENCE_URL", "http://mockserver:1080/v1/licences/request")
-            .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_API_KEY", "sample-api-key")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key")
             .dependsOn(mockServer);
 
     @Container
@@ -76,7 +75,8 @@ class RemoveAllTypesOnLogOutEventIT {
     }
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup()
+            throws Exception {
         driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
@@ -84,26 +84,24 @@ class RemoveAllTypesOnLogOutEventIT {
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
     }
 
-//    /**
-//     * GIVEN: a user is federated by idp login
-//     * WHEN: the same user logout
-//     * THEN: user is removed from the Keycloak
-//     */
-//    @Test
-//    void should_remove_user_on_logout_for_local_login() {
-//        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-//        KeycloakPage kcPage = KeycloakPage
-//                .start(driver, wait)
-//                .openAccountConsole()
-//                .login("misty", "test");
-//
-//        int usersCountBeforeLogout = usersResource.count();
-//        kcPage.logout();
-//        String logs = keycloak.getLogs();
-//        assertTrue(logs.contains("User licence not released for the user"));
-//        int usersCountAfterLogout = usersResource.count();
-//        assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
-//    }
+    /**
+     * GIVEN: a user is federated by idp login
+     * WHEN: the same user logout
+     * THEN: user is removed from the Keycloak
+     */
+    @Test
+    void should_remove_user_on_logout_for_local_login() {
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+        KeycloakPage kcPage = KeycloakPage
+                .start(driver, wait)
+                .openAccountConsole()
+                .login("misty", "test");
+
+        int usersCountBeforeLogout = usersResource.count();
+        kcPage.logout();
+        int usersCountAfterLogout = usersResource.count();
+        assertEquals(usersCountBeforeLogout - 1, usersCountAfterLogout);
+    }
 
     @Test
     void should_remove_user_on_logout_for_Idp_login() {

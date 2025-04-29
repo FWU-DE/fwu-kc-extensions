@@ -90,9 +90,9 @@ class VidisAdminRealmResourceProviderIdpIT {
     }
 
     @Test
-    void shouldDeleteIdpUsers_whenIdpConfigured() throws IOException, SQLException {
+    void shouldDeleteIdpUsers_whenIdpConfigured()
+            throws IOException, SQLException {
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
-        LicenceMockHelper.releaseLicenceExpectation(mockServerClient);
 
         KeycloakPage.start(driver, wait).openAccountConsole().idpLogin("idpuser", "test");
 
@@ -102,7 +102,8 @@ class VidisAdminRealmResourceProviderIdpIT {
 
         Integer userCountBeforeCleanup = realm.users().count();
         String authServerUrl = keycloak.getAuthServerUrl();
-        String accessToken = getAccessToken(authServerUrl + "/realms/master/protocol/openid-connect/token", keycloak.getAdminUsername(), keycloak.getAdminPassword());
+        String accessToken = getAccessToken(authServerUrl + "/realms/master/protocol/openid-connect/token", keycloak.getAdminUsername(),
+                keycloak.getAdminPassword());
 
         Integer deletedUsers = deleteUsers(accessToken, authServerUrl);
         Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
@@ -112,8 +113,10 @@ class VidisAdminRealmResourceProviderIdpIT {
         assertThat(userCountAfterCleanup).as("Usercount after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
     }
 
-    private String getAccessToken(String tokenUrl, String username, String password) throws IOException {
-        RequestBody formBody = new FormBody.Builder().add("grant_type", "password").add("client_id", "admin-cli").add("username", username).add("password", password).build();
+    private String getAccessToken(String tokenUrl, String username, String password)
+            throws IOException {
+        RequestBody formBody = new FormBody.Builder().add("grant_type", "password").add("client_id", "admin-cli").add("username", username)
+                .add("password", password).build();
 
         Request request = new Request.Builder().url(tokenUrl).post(formBody).build();
 
@@ -126,8 +129,10 @@ class VidisAdminRealmResourceProviderIdpIT {
         }
     }
 
-    private Integer deleteUsers(String accessToken, String authServerUrl) throws IOException {
-        Request request = new Request.Builder().url(authServerUrl + "/admin/realms/fwu/vidis-custom/users/inactive?max=1000").delete().addHeader("Authorization", "Bearer " + accessToken).build();
+    private Integer deleteUsers(String accessToken, String authServerUrl)
+            throws IOException {
+        Request request = new Request.Builder().url(authServerUrl + "/admin/realms/fwu/vidis-custom/users/inactive?max=1000").delete()
+                .addHeader("Authorization", "Bearer " + accessToken).build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {

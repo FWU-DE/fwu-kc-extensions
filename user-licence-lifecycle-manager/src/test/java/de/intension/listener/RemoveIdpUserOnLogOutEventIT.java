@@ -54,9 +54,8 @@ class RemoveIdpUserOnLogOutEventIT {
             .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
             .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
             .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_FWU", "IDP")
-            .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_URL", "http://mockserver:1080/v1/licences/release")
-            .withEnv("KC_SPI_AUTHENTICATOR_LICENCE_CONNECT_AUTHENTICATOR_LICENCE_URL", "http://mockserver:1080/v1/licences/request")
-            .withEnv("KC_SPI_EVENTS_LISTENER_REMOVE_USER_ON_LOGOUT_LICENCE_API_KEY", "sample-api-key")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key")
             .dependsOn(mockServer);
 
     @Container
@@ -76,7 +75,8 @@ class RemoveIdpUserOnLogOutEventIT {
     }
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup()
+            throws Exception {
         driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));

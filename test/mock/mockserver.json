@@ -140,7 +140,7 @@
     }
   },
   {
-    "id": "licence-request-ucs",
+    "id": "licence-request-bilo",
     "priority": 0,
     "httpRequest": {
       "method": "GET",
