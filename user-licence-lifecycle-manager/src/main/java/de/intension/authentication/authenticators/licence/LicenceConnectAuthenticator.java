@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.*;
 import org.keycloak.services.ErrorPage;
@@ -24,8 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.rest.licence.model.LicenseConstants.*;
 
 @Getter
@@ -33,20 +32,19 @@ import static de.intension.rest.licence.model.LicenseConstants.*;
 public class LicenceConnectAuthenticator
         implements Authenticator {
 
-    private static final Logger       logger       = Logger.getLogger(LicenceConnectAuthenticator.class);
-    private final        ObjectMapper objectMapper = new ObjectMapper();
-    private static final int          PART_SIZE    = 255;
+    private static final Logger logger = Logger.getLogger(LicenceConnectAuthenticator.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final int PART_SIZE = 255;
     private static final String CLIENT_DELIMITER = ",";
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         if (context.getAuthenticatorConfig() == null) {
             logger.errorf("Please configure the license connect authenticator with the clients");
-            context.failure(AuthenticationFlowError.INTERNAL_ERROR, createErrorPage(context));
         } else {
             this.addLicenses(context);
-            context.success();
         }
+        context.success();
     }
 
     private void addLicenses(AuthenticationFlowContext context) {
@@ -55,13 +53,13 @@ public class LicenceConnectAuthenticator
         if (licenseType.isPresent()) {
             LicenceConnectRestClient restClient = context.getSession().getProvider(RestClientProvider.class).getLicenseConnectRestClient();
             UserModel user = context.getUser();
-            Map<String,String> queryParams = new HashMap<>();
+            Map<String, String> queryParams = new HashMap<>();
             populateCommonQueryParams(queryParams, context, user);
             this.fetchUserLicenses(licenseType.get(), queryParams, user, client, context, restClient);
         }
     }
 
-    private void fetchUserLicenses(String licenseType, Map<String,String> queryParams, UserModel user, String client, AuthenticationFlowContext context, LicenceConnectRestClient restClient) {
+    private void fetchUserLicenses(String licenseType, Map<String, String> queryParams, UserModel user, String client, AuthenticationFlowContext context, LicenceConnectRestClient restClient) {
         String userLicences = null;
         try {
             if (BILO_LICENSE_CLIENTS.equals(licenseType)) {
@@ -71,9 +69,10 @@ public class LicenceConnectAuthenticator
                 populateLicenseConnectQueryParams(queryParams, user, client);
                 userLicences = restClient.getLicences(queryParams);
             }
+        } catch (IllegalArgumentException ex) {
+            logger.errorf("User missing parameters %s", ex.getMessage());
         } catch (WebApplicationException | IOException ex) {
             logger.errorf("Error while fetching the user license for the user with username %s. Response from server %s", user.getUsername(), ex.getMessage());
-            context.failure(AuthenticationFlowError.ACCESS_DENIED, createErrorPage(context));
         }
         if (!StringUtil.isBlank(userLicences)) {
             logger.infof("User license found for the user %s from the license type %s", user.getUsername(), licenseType);
@@ -96,7 +95,7 @@ public class LicenceConnectAuthenticator
                 .findFirst();
     }
 
-    private void populateCommonQueryParams(Map<String,String> queryParams, AuthenticationFlowContext context, UserModel user) {
+    private void populateCommonQueryParams(Map<String, String> queryParams, AuthenticationFlowContext context, UserModel user) {
         queryParams.put(BUNDESLAND_ATTRIBUTE, user.getFirstAttribute(BUNDESLAND_ATTRIBUTE));
         Optional<FederatedIdentityModel> idp = fetchFederatedIdentityModels(user, context).findFirst();
         if (idp.isPresent()) {
@@ -105,12 +104,12 @@ public class LicenceConnectAuthenticator
         }
     }
 
-    private void populateUcsQueryParams(Map<String,String> queryParams, UserModel user, String clientId) {
+    private void populateUcsQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
         queryParams.put(SCHULKENNUNG, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
         queryParams.put(CLIENT_ID, clientId);
     }
 
-    private void populateLicenseConnectQueryParams(Map<String,String> queryParams, UserModel user, String clientId) {
+    private void populateLicenseConnectQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
         // TODO: Add the params for the standortnummer
         queryParams.put(SCHULNUMMER, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
         queryParams.put(CLIENT_NAME, clientId);
@@ -136,7 +135,7 @@ public class LicenceConnectAuthenticator
 
     protected Response createErrorPage(AuthenticationFlowContext context) {
         return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                               Response.Status.FORBIDDEN, "There is no licence associated with user");
+                Response.Status.FORBIDDEN, "There is no licence associated with user");
     }
 
     @Override
