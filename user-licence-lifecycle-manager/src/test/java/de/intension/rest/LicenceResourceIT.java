@@ -1,18 +1,13 @@
 package de.intension.rest;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.intension.testhelper.KeycloakPage;
-import de.intension.testhelper.LicenceMockHelper;
-import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.OAuth2Constants;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -35,7 +30,8 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static jakarta.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.keycloak.OAuth2Constants.*;
 
@@ -122,15 +118,16 @@ public class LicenceResourceIT {
 //    }
 
     @Test
-    void should_return_404_when_hmac_id_does_not_exist() throws Exception {
+    void should_return_200_with_empty_json_object_when_hmac_id_does_not_exist() throws Exception {
         var accessToken = getAccessToken();
         var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences/invalid-hmac-id")).GET().header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken).build();
-        var response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        assertEquals(NOT_FOUND.getStatusCode(), response.statusCode());
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(OK.getStatusCode(), response.statusCode());
+        assertEquals("{}", response.body());
     }
 
     @Test
-    void should_return_401_when_no_access_token_is_provided()  throws Exception {
+    void should_return_401_when_no_access_token_is_provided() throws Exception {
         var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences/ignored")).GET().build();
         var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());

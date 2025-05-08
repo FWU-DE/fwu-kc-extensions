@@ -30,11 +30,8 @@ public class LicenceResourceProvider implements RealmResourceProvider {
     @Produces(MediaType.APPLICATION_JSON)
     public String getLicence(@PathParam("hmac-id") String hmacID) {
         checkAuth();
-        var licence = session.getProvider(LicenceJpaProvider.class).getLicenceByHmacId(hmacID);
-        if (licence == null) {
-            throw new NotFoundException("No licence with hmac-id " + hmacID + " found.");
-        }
-        return licence;
+        var license = session.getProvider(LicenceJpaProvider.class).getLicenceByHmacId(hmacID);
+        return (license != null) ? license : "{}";
     }
 
     private void checkAuth() {
