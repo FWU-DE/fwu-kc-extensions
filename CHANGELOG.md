@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## Version [4.19.1]
+## Version [4.19.2]
 
 - Enhancement: Not denying access to user even in case of no license for the user
 - Enhancement: Returning empty object for the user if license is not found

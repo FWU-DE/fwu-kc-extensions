@@ -29,7 +29,7 @@
   </modules>
 
   <properties>
-    <revision>4.19.1</revision>
+    <revision>4.19.2</revision>
     <keycloak.version>22.0.5</keycloak.version>
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
