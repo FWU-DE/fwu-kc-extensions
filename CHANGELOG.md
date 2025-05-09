@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.19.1]
+
+- Enhancement: Not denying access to user even in case of no license for the user
+- Enhancement: Returning empty object for the user if license is not found
+
 ## Version [4.19.0]
 
 - Feature: Fetch licenses for user from different endpoint based on the configuration in client
