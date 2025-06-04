@@ -1,2 +1,2 @@
-de.intension.authenticator.AcrValuesAuthenticatorFactory
+de.intension.authenticator.IdpValuesForwarderAuthenticatorFactory
 de.intension.authenticator.AcrDenyingAuthenticatorFactory

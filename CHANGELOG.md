@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.19.3]
+
+- Enhancement: Modify the behavior of acr values authenticator to be able to configure and pass any parameter to IDP
+
 ## Version [4.19.2]
 
 - Enhancement: Not denying access to user even in case of no license for the user
