@@ -118,12 +118,15 @@ public class LicenceConnectAuthenticator
     private void persistUserLicense(AuthenticationFlowContext context, UserModel user, String userLicence) {
         var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMappersStream()
                 .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+        LicenceEntity licence;
         if (hmacMapper.isPresent()) {
             String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
-            LicenceEntity licence = new LicenceEntity(hmacId, userLicence);
-            context.getSession().getProvider(LicenceJpaProvider.class).persistLicence(licence);
-            logger.infof("User licence has been persisted in the database for user %s", user.getUsername());
+            licence = new LicenceEntity(hmacId, userLicence);
+        } else {
+            licence = new LicenceEntity(user.getId(), userLicence);
         }
+        context.getSession().getProvider(LicenceJpaProvider.class).persistLicence(licence);
+        logger.infof("User licence has been persisted in the database for user %s", user.getUsername());
     }
 
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context) {
