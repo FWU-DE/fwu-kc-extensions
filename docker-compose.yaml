@@ -41,13 +41,13 @@ services:
       KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY: sample-api-key
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU: "ALL"
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE: 5
-      KC_FEATURES: admin-api
-      DEBUG: "true"
-      DEBUG_PORT: "*:8787"
-      KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_SCHOOLS_ENABLED: true
+      KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_SCHOOLS_REALMS: fwu
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_SCHOOLS_VALID_DOMAINS: nrw.schule.de
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_SCHOOLS_PRINCIPAL_ROLE: Schulleiter
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_SCHOOLS_TEACHER_ROLE: Lehrkraft
+      KC_FEATURES: admin-api
+      DEBUG: "true"
+      DEBUG_PORT: "*:8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
     volumes:
       - /etc/localtime:/etc/localtime:ro

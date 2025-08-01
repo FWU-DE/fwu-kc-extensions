@@ -1,5 +1,6 @@
 package de.intension.school.resources;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -13,22 +14,28 @@ public class SchoolResourceProviderFactory
 
     public static final String PROVIDER_ID = "schools";
 
-    private boolean enabled;
+    private static final Logger logger = Logger.getLogger(SchoolResourceProviderFactory.class);
+
+    private List<String> enabledRealms;
     private List<String> validDomains;
     private String principalRole;
     private String teacherRole;
 
     @Override
     public AdminRealmResourceProvider create(KeycloakSession session) {
-        if (enabled) {
+        String realmName = session.getContext().getRealm().getName();
+        if (enabledRealms.contains(realmName)) {
+            logger.infof("School endpoints for realm %s are enabled with %s as principal role and %s as teacher role. Valid domains are %s.",
+                    realmName, principalRole, teacherRole, validDomains);
             return new SchoolResource(session, validDomains, principalRole, teacherRole);
         }
+        logger.infof("School endpoints are disabled for realm %s. To enable, add realm to 'realms' configuration.", realmName);
         return null;
     }
 
     @Override
     public void init(Config.Scope config) {
-        enabled = Boolean.parseBoolean(config.get("enabled"));
+        enabledRealms = List.of(config.getArray("realms"));
         validDomains = List.of(config.getArray("validDomains"));
         principalRole = config.get("principalRole");
         teacherRole = config.get("teacherRole");
