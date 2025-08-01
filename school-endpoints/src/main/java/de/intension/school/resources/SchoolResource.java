@@ -1,36 +1,49 @@
 package de.intension.school.resources;
 
 import de.intension.school.dto.SchoolPrincipal;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.models.*;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
 import java.util.List;
 
-public class SchoolResource {
+public class SchoolResource
+        implements AdminRealmResourceProvider {
 
     private final KeycloakSession session;
-    private final RealmModel realm;
-    private final AdminPermissionEvaluator auth;
+    private RealmModel realm;
+    private AdminPermissionEvaluator auth;
     private final List<String> validDomains;
     private final String principalRole;
     private final String teacherRole;
 
-    public SchoolResource(KeycloakSession session, RealmModel realm, AdminPermissionEvaluator auth, List<String> validDomains, String principalRole, String teacherRole) {
+    public SchoolResource(KeycloakSession session, List<String> validDomains, String principalRole, String teacherRole) {
         this.session = session;
-        this.realm = realm;
-        this.auth = auth;
         this.validDomains = validDomains;
         this.principalRole = principalRole;
         this.teacherRole = teacherRole;
     }
 
+    @Override
+    public Object getResource(KeycloakSession session, RealmModel realm, AdminPermissionEvaluator auth, AdminEventBuilder adminEvent) {
+        this.realm = realm;
+        this.auth = auth;
+        return this;
+    }
+
+    @Override
+    public void close() {
+        // nothing to close
+    }
+
     @POST
     @Path("/principal")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createSchoolPrincipal(SchoolPrincipal principal) {
         RoleModel role = session.roles().getRealmRole(realm, principalRole);
         if (role == null) {

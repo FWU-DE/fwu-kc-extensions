@@ -21,7 +21,7 @@ public class SchoolResourceProviderFactory
     @Override
     public AdminRealmResourceProvider create(KeycloakSession session) {
         if (enabled) {
-            return new SchoolResourceProvider(validDomains, principalRole, teacherRole);
+            return new SchoolResource(session, validDomains, principalRole, teacherRole);
         }
         return null;
     }
