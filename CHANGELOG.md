@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.19.4]
+
+- Enhancement: Add the ACR values authenticator for backwards compatibility
+
 ## Version [4.19.3]
 
 - Enhancement: Modify the behavior of acr values authenticator to be able to configure and pass any parameter to IDP
