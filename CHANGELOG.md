@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.20.0]
+
+- Feature: Add the Non-standard IDP values authenticator which forwards the configured params to the IDP request
+
 ## Version [4.19.4]
 
 - Enhancement: Add the ACR values authenticator for backwards compatibility
