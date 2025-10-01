@@ -9,12 +9,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import static de.intension.authenticator.NonStandardIdpValuesForwarderAuthFactory.ORIGIN_CLIENT_PARAM_NAME;
+import static de.intension.authenticator.ClientIdIdpValuesForwarderAuthFactory.ORIGIN_CLIENT_PARAM_NAME;
 import static org.keycloak.protocol.oidc.endpoints.AuthorizationEndpoint.LOGIN_SESSION_NOTE_ADDITIONAL_REQ_PARAMS_PREFIX;
 
-public class NonStandardIdpValuesForwarderAuth implements Authenticator {
+public class ClientIdIdpValuesForwarderAuth implements Authenticator {
 
-    private static final Logger logger = Logger.getLogger(NonStandardIdpValuesForwarderAuth.class);
+    private static final Logger logger = Logger.getLogger(ClientIdIdpValuesForwarderAuth.class);
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -49,7 +49,7 @@ public class NonStandardIdpValuesForwarderAuth implements Authenticator {
 
     @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return false;
+        return true;
     }
 
     @Override

@@ -7,10 +7,11 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderConfigurationBuilder;
 
 import java.util.List;
 
-public class NonStandardIdpValuesForwarderAuthFactory implements AuthenticatorFactory {
+public class ClientIdIdpValuesForwarderAuthFactory implements AuthenticatorFactory {
 
     public static final String PROVIDER_ID = "non-standard-idp-value-forwarder";
     public static final String ORIGIN_CLIENT_PARAM_NAME = "originClientId";
@@ -48,15 +49,20 @@ public class NonStandardIdpValuesForwarderAuthFactory implements AuthenticatorFa
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of(
-                new ProviderConfigProperty(ORIGIN_CLIENT_PARAM_NAME, "Origin client ID",
-                        "Param name which needs to be forwarded with request to the IDP for origin client ID",
-                        ProviderConfigProperty.STRING_TYPE, ORIGIN_CLIENT_PARAM_NAME_DEFAULT));
+        return ProviderConfigurationBuilder.create()
+                .property()
+                .name(ORIGIN_CLIENT_PARAM_NAME)
+                .label("Origin client ID")
+                .helpText("Param name which needs to be forwarded with request to the IDP for origin client ID")
+                .type(ProviderConfigProperty.STRING_TYPE)
+                .defaultValue(ORIGIN_CLIENT_PARAM_NAME_DEFAULT)
+                .add()
+                .build();
     }
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new NonStandardIdpValuesForwarderAuth();
+        return new ClientIdIdpValuesForwarderAuth();
     }
 
     @Override

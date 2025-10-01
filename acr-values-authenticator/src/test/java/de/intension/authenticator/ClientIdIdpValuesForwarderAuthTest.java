@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class NonStandardIdpValuesForwarderAuthTest {
+public class ClientIdIdpValuesForwarderAuthTest {
 
     private static final Network network = Network.newNetwork();
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";

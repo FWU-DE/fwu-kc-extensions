@@ -6,6 +6,7 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.utils.AcrUtils;
+import org.keycloak.utils.StringUtil;
 
 import java.util.*;
 
@@ -38,7 +39,7 @@ public class IdpValuesForwarderAuthenticator
         context.getAuthenticationSession().setClientNote(noteKey, paramValue);
         logger.infof("Set ACR value '%s' to client note key '%s' for client '%s'", paramValue, noteKey, client.getClientId());
 
-        if (Boolean.parseBoolean(config.get(ACR_FORWARDING))) {
+        if (Boolean.parseBoolean(config.get(ACR_FORWARDING)) && StringUtil.isNotBlank(paramValue)) {
             context.getAuthenticationSession().setClientNote(OAuth2Constants.ACR_VALUES, paramValue);
             logger.debugf("Forwarding ACR value '%s' under '%s' for client '%s'", paramValue, OAuth2Constants.ACR_VALUES, client.getClientId());
         }
