@@ -107,3 +107,63 @@ The test setup is as follows:
 To verify the denial of login works, you can either:
 - Change the URL's value during login for parameter `acr_values`
 - Update the claim value property for the hardcoded claim mapper "ACR" in the `idp` realm client `idp-broker`
+
+## Non-standard IDP values forwarder authenticator
+
+This authenticator adds the parameter which is configured in the settings to the request which is redirected to the IDP.
+This is done via Client Note. This is different from the standard ones, as it takes into consideration the non-standard
+params and the custom values which are set in them.
+
+### Configuration
+
+In the authentication flow of your choice select the option to add authenticator
+
+<img src="../docs/acr-values-authenticator/add_step.png" width="70%"/>
+
+In the list of authenticator search for 'Non-standard IDP values params appender' authenticator and select it
+
+<img src="../docs/acr-values-authenticator/non_std_idp_params.png" width="70%"/>
+
+Add it as a required step in the authentication flow.
+
+<img src="../docs/acr-values-authenticator/non_std_idp_params_required_step.png" width="70%"/>
+
+After adding it as required step please configure it as per the need. Param name should be the name which needs to be
+forwarded example `origin_client_id`. Client ID value would be added from the authentication context.
+
+<img src="../docs/acr-values-authenticator/non_std_idp_params_config.png" width="70%"/>
+
+After adding it bind this flow as the browser flow by selecting the Action dropdown on the
+top right corner of the screen and then selecting 'Bind Flow'.
+
+<img src="../docs/acr-values-authenticator/browser_flow.png" width="70%"/>
+
+Select browser flow from the dropdown list and save the authentication flow
+
+<img src="../docs/acr-values-authenticator/save_browser_flow.png" width="70%"/>
+
+After completion of browser flow, some modifications are to be done in the IDP as well. In the admin console select
+identity providers from the left window.
+
+<img src="../docs/acr-values-authenticator/identity_providers.png" width="70%"/>
+
+Now select the IDP of your choice and select the `Advanced` from the list of options (scroll down a little)
+
+<img src="../docs/acr-values-authenticator/advanced_idp_settings.png" width="70%"/>
+
+In the section of Forwarded query params add the name of the param which you have configured in the authenticator in
+step example `audience,origin_client_id` and save the settings. If there are more than one params please separate them
+using comma.
+
+<img src="../docs/acr-values-authenticator/non_std_idp_params_idp_config.png" width="70%"/>
+
+### Behaviour
+
+If the user tries to login to a specific client and
+
+* the authenticator has the value of the key set then that particular params is passed in the request to the IDP
+
+Please note that this will never set the `context.failure()` because this is something which is optional and not requested
+by every client.
+
+Also, if there comes the need to add more non-standard parameters we can use this authenticator for it.

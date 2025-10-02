@@ -1640,7 +1640,7 @@
         "syncMode": "IMPORT",
         "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true",
-        "forwardParameters": "audience"
+        "forwardParameters": "audience,origin_client_id"
       }
     },
     {
@@ -2095,6 +2095,15 @@
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 20,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "nonStandardIDPValues",
+          "authenticator": "non-standard-idp-value-forwarder",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 33,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -2613,6 +2622,13 @@
       "config": {
         "acrForwarding": "true",
         "paramName": "audience"
+      }
+    },
+    {
+      "id": "d63fc78b-c1d5-47f8-a41e-b8fb894b0255",
+      "alias": "nonStandardIDPValues",
+      "config": {
+        "originClientId": "origin_client_id"
       }
     },
     {
