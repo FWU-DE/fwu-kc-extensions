@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## Version [4.20.0]
+## Version [4.20.1]
 
 - Feature: Add the Non-standard IDP values authenticator which forwards the configured params to the IDP request
 
