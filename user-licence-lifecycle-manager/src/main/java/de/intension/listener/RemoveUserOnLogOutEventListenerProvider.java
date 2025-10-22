@@ -14,7 +14,10 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
-import org.keycloak.models.*;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserManager;
+import org.keycloak.models.UserModel;
 
 /**
  * Event listener to remove user on logout for the users from identity providers.
@@ -27,7 +30,7 @@ public class RemoveUserOnLogOutEventListenerProvider
     private final KeycloakSession keycloakSession;
 
     private final EventListenerTransaction tx = new EventListenerTransaction(null, this::removeUser);
-    private final Config.Scope                config;
+    private final Config.Scope config;
 
     protected RemoveUserOnLogOutEventListenerProvider(KeycloakSession session, Config.Scope config) {
         this.keycloakSession = session;
@@ -56,12 +59,12 @@ public class RemoveUserOnLogOutEventListenerProvider
         JpaKeycloakTransaction transaction = new JpaKeycloakTransaction(entityManager);
         transaction.begin();
         RealmModel realm = keycloakSession.getContext().getRealm();
-        UserProvider userProvider = keycloakSession.getProvider(UserProvider.class, "jpa");
+        UserManager userManager = new UserManager(keycloakSession);
 
         UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
         if (userToDelete != null) {
-            userProvider.removeUser(realm, userToDelete);
             deleteLicence(userToDelete);
+            userManager.removeUser(realm, userToDelete);
             LOG.infof("User %s removed.", userToDelete.getUsername());
         }
 

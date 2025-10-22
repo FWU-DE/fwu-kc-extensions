@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.20.2]
+
+- Bugfix: Move licence deletion to be before user deletion
+
 ## Version [4.20.1]
 
 - Feature: Add the Non-standard IDP values authenticator which forwards the configured params to the IDP request
