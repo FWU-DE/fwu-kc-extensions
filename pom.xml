@@ -12,6 +12,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>base</module>
     <module>hmac-mapper</module>
     <module>whitelist-authenticator</module>
     <module>multi-value-user-attribute-mapper</module>
