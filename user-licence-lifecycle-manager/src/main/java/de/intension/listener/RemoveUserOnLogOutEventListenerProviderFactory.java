@@ -1,6 +1,5 @@
 package de.intension.listener;
 
-import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -13,7 +12,6 @@ import org.keycloak.models.KeycloakSessionFactory;
 public class RemoveUserOnLogOutEventListenerProviderFactory
         implements EventListenerProviderFactory {
 
-    private static final Logger LOG = Logger.getLogger(RemoveUserOnLogOutEventListenerProviderFactory.class);
     private Scope config;
 
     @Override
@@ -33,11 +31,10 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-        // nothing to do
+        factory.register(new RemoveLicenceOnLogOutEventListener(factory.create()));
     }
 
     @Override
     public void close() {
     }
-
 }

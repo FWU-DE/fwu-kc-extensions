@@ -1,14 +1,8 @@
 package de.intension.listener;
 
-import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.resources.admin.DeletableUserType;
-import jakarta.persistence.EntityManager;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.connections.jpa.JpaKeycloakTransaction;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
@@ -55,20 +49,14 @@ public class RemoveUserOnLogOutEventListenerProvider
      * running jpa-transaction
      */
     private void removeUser(Event event) {
-        EntityManager entityManager = keycloakSession.getProvider(JpaConnectionProvider.class).getEntityManager();
-        JpaKeycloakTransaction transaction = new JpaKeycloakTransaction(entityManager);
-        transaction.begin();
         RealmModel realm = keycloakSession.getContext().getRealm();
         UserManager userManager = new UserManager(keycloakSession);
 
         UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
         if (userToDelete != null) {
-            deleteLicence(userToDelete);
             userManager.removeUser(realm, userToDelete);
             LOG.infof("User %s removed.", userToDelete.getUsername());
         }
-
-        transaction.commit();
     }
 
     private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId) {
@@ -89,17 +77,6 @@ public class RemoveUserOnLogOutEventListenerProvider
         return keycloakSession.users().getFederatedIdentitiesStream(realm, user).findAny().isPresent() ? user : null;
     }
 
-
-    private void deleteLicence(UserModel user) {
-        var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
-                .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
-        if (hmacMapper.isPresent()) {
-            String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
-            keycloakSession.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
-            LOG.infof("User licence has been removed from the database for user %s", user.getUsername());
-        }
-    }
-
     @Override
     public void onEvent(AdminEvent event, boolean includeRepresentation) {
         // no action on admin events.
@@ -109,5 +86,4 @@ public class RemoveUserOnLogOutEventListenerProvider
     public void close() {
         // nothing to close.
     }
-
 }
