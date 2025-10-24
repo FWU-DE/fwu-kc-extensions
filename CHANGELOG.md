@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.20.3]
+
+- Bugfix: Fix user and licence deletion on logout
+
 ## Version [4.20.2]
 
 - Bugfix: Move licence deletion to be before user deletion
