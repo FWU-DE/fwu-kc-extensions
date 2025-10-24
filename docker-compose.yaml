@@ -10,6 +10,7 @@ services:
     ports:
       - 18080:8080
       - 8787:8787
+    restart: always
     environment:
       KC_HTTP_RELATIVE_PATH: "/auth"
       KEYCLOAK_ADMIN: admin

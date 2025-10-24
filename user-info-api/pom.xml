@@ -13,6 +13,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>de.intension</groupId>
+      <artifactId>fwu-base</artifactId>
+      <version>${revision}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
       <scope>provided</scope>
