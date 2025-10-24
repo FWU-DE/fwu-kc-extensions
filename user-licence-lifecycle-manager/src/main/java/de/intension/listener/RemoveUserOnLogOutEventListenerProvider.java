@@ -1,5 +1,8 @@
 package de.intension.listener;
 
+import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.resources.admin.DeletableUserType;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -63,8 +66,20 @@ public class RemoveUserOnLogOutEventListenerProvider
 
             UserModel userToDelete = findUserForDeletion(session, event.getUserId());
             if (userToDelete != null) {
-                userManager.removeUser(realm, userToDelete);
-                LOG.infof("User %s removed.", userToDelete.getUsername());
+                String hmacId = null;
+                String username = userToDelete.getUsername();
+                var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
+                        .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+                if (hmacMapper.isPresent()) {
+                    hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), userToDelete);
+                }
+                if (userManager.removeUser(realm, userToDelete)) {
+                    LOG.infof("User %s removed.", userToDelete.getUsername());
+                    if (hmacId != null) {
+                        keycloakSession.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
+                        LOG.infof("User licence has been removed from the database for user %s", username);
+                    }
+                }
             }
         });
     }
