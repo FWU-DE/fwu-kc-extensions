@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [4.20.4]
+
+- Bugfix: Generate HMAC ID for licence deletion before user is deleted
+
 ## Version [4.20.3]
 
 - Bugfix: Fix user and licence deletion on logout
