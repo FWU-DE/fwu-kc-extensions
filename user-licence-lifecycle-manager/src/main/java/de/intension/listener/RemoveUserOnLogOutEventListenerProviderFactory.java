@@ -31,7 +31,7 @@ public class RemoveUserOnLogOutEventListenerProviderFactory
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
-        factory.register(new RemoveLicenceOnLogOutEventListener(factory.create()));
+        factory.register(new RemoveLicenceOnLogOutEventListener());
     }
 
     @Override

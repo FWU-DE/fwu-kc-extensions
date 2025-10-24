@@ -1,11 +1,8 @@
 package de.intension.listener;
 
 import de.intension.resources.admin.DeletableUserType;
-import jakarta.persistence.EntityManager;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.connections.jpa.JpaKeycloakTransaction;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerTransaction;
@@ -15,6 +12,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserManager;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 
 /**
  * Event listener to remove user on logout for the users from identity providers.
@@ -48,23 +46,27 @@ public class RemoveUserOnLogOutEventListenerProvider
     /**
      * Remove user from keycloak on logout.
      * Starts a jpa transaction before removing the user since eventlistener tarnsaction does not
-     * hava a
-     * running jpa-transaction
+     * hava a running jpa-transaction
      */
     private void removeUser(Event event) {
-        EntityManager entityManager = keycloakSession.getProvider(JpaConnectionProvider.class).getEntityManager();
-        JpaKeycloakTransaction transaction = new JpaKeycloakTransaction(entityManager);
-        transaction.begin();
-        RealmModel realm = keycloakSession.getContext().getRealm();
-        UserManager userManager = new UserManager(keycloakSession);
+        KeycloakModelUtils.runJobInTransaction(keycloakSession.getKeycloakSessionFactory(), session -> {
+            RealmModel realm = session.getContext().getRealm();
+            if (realm == null) {
+                realm = session.realms().getRealm(event.getRealmId());
+                session.getContext().setRealm(realm);
+            }
+            if (session.getContext().getClient() == null) {
+                // needed for RemoveLicenceOnLogOutEventListener
+                session.getContext().setClient(keycloakSession.getContext().getClient());
+            }
+            UserManager userManager = new UserManager(session);
 
-        UserModel userToDelete = findUserForDeletion(keycloakSession, event.getUserId());
-        if (userToDelete != null) {
-            userManager.removeUser(realm, userToDelete);
-            LOG.infof("User %s removed.", userToDelete.getUsername());
-        }
-
-        transaction.commit();
+            UserModel userToDelete = findUserForDeletion(session, event.getUserId());
+            if (userToDelete != null) {
+                userManager.removeUser(realm, userToDelete);
+                LOG.infof("User %s removed.", userToDelete.getUsername());
+            }
+        });
     }
 
     private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId) {

@@ -5,11 +5,8 @@ import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.UserModel.UserRemovedEvent;
-import org.keycloak.models.UserProvider;
 import org.keycloak.provider.ProviderEvent;
 import org.keycloak.provider.ProviderEventListener;
 
@@ -23,26 +20,24 @@ public class RemoveLicenceOnLogOutEventListener implements ProviderEventListener
 
     private static final Logger LOG = Logger.getLogger(RemoveLicenceOnLogOutEventListener.class);
 
-    private final KeycloakSession keycloakSession;
-
-    public RemoveLicenceOnLogOutEventListener(KeycloakSession keycloakSession) {
-        this.keycloakSession = keycloakSession;
-    }
-
     @Override
     public void onEvent(ProviderEvent event) {
         if (event instanceof UserRemovedEvent userRemovedEvent) {
-            UserModel user = userRemovedEvent.getUser();
-            deleteLicence(user);
+            deleteLicence(userRemovedEvent.getKeycloakSession(), userRemovedEvent.getUser());
         }
     }
 
-    private void deleteLicence(UserModel user) {
-        var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
+    private void deleteLicence(KeycloakSession session, UserModel user) {
+        ClientModel client = session.getContext().getClient();
+        if (client == null) {
+            LOG.error("No client set in context. Cannot remove user licence.");
+            return;
+        }
+        var hmacMapper = client.getProtocolMappersStream()
                 .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
         if (hmacMapper.isPresent()) {
             String hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), user);
-            keycloakSession.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
+            session.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
             LOG.infof("User licence has been removed from the database for user %s", user.getUsername());
         }
     }
