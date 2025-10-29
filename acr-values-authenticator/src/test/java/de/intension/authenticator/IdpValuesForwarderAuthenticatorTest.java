@@ -32,7 +32,7 @@ public class IdpValuesForwarderAuthenticatorTest {
     private static final Capabilities capabilities = new FirefoxOptions();
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
             .withProviderClassesFrom("target/classes")
             .withContextPath("/auth")
             .withNetwork(network)
