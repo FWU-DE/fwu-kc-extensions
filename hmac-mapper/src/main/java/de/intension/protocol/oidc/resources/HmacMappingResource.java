@@ -1,5 +1,10 @@
 package de.intension.protocol.oidc.resources;
 
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
+import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -8,20 +13,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
-import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 
 public class HmacMappingResource
     implements AdminRealmResourceProvider
@@ -29,8 +21,8 @@ public class HmacMappingResource
 
     private final KeycloakSession session;
 
-    private String                verifierRealm;
-    private String                managementRealm;
+    private final String                verifierRealm;
+    private final String                managementRealm;
 
     private static final String   ATTRIBUTE_NAME = "hmac-clientId";
 

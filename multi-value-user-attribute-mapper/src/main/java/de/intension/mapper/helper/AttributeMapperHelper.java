@@ -1,10 +1,5 @@
 package de.intension.mapper.helper;
 
-import static org.keycloak.broker.saml.mappers.UserAttributeMapper.USER_ATTRIBUTE;
-
-import java.util.*;
-import java.util.regex.PatternSyntaxException;
-
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.models.Constants;
@@ -13,6 +8,11 @@ import org.keycloak.models.UserModel;
 import org.keycloak.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.regex.PatternSyntaxException;
+
+import static org.keycloak.broker.saml.mappers.UserAttributeMapper.USER_ATTRIBUTE;
 
 public class AttributeMapperHelper
 {
@@ -66,7 +66,7 @@ public class AttributeMapperHelper
     private static Set<String> mapValues(IdentityProviderMapperModel mapperModel, List<String> attributeValues)
     {
         Set<String> mappedValues = new HashSet<>();
-        Map<String, String> configMap = mapperModel.getConfigMap(VALUE_MAPPINGS);
+        Map<String, List<String>> configMap = mapperModel.getConfigMap(VALUE_MAPPINGS);
         if (!configMap.isEmpty()) {
             for (String attributeValue : attributeValues) {
                 translateAndAddValue(mapperModel, configMap, attributeValue, mappedValues);
@@ -78,17 +78,18 @@ public class AttributeMapperHelper
     /**
      * Translate single incoming value and add it to the Set of translated values.
      */
-    private static void translateAndAddValue(IdentityProviderMapperModel mapperModel, Map<String, String> configMap, String attributeValue,
+    private static void translateAndAddValue(IdentityProviderMapperModel mapperModel, Map<String, List<String>> configMap, String attributeValue,
                                              Set<String> mappedValues)
     {
-        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : configMap.entrySet()) {
             String key = entry.getKey();
             if (key != null) {
                 try {
                     if (key.equalsIgnoreCase(attributeValue)
                             || RegExHelper.isRegularExpression(key) && RegExHelper.matches(RegExHelper.getRegularExpressionFromString(key), attributeValue)
                             || RegExHelper.isWildcardExpression(key) && RegExHelper.matches(RegExHelper.wildcardToJavaRegex(key), attributeValue)) {
-                        mappedValues.add(entry.getValue());
+                        // TODO: Add all or only first value?
+                        mappedValues.add(entry.getValue().getFirst());
                         break;
                     }
                 } catch (PatternSyntaxException e) {
@@ -101,15 +102,10 @@ public class AttributeMapperHelper
     /**
      * Get user attribute from brokered identity context.
      */
+    @SuppressWarnings("unchecked")
     private static List<String> getUserAttribute(BrokeredIdentityContext context, String attributeName)
     {
         List<String> userAttribute = (List<String>)context.getContextData().get(Constants.USER_ATTRIBUTES_PREFIX + attributeName);
-        if (userAttribute == null) {
-            return new ArrayList<>();
-        }
-        else {
-            return userAttribute;
-        }
+        return Objects.requireNonNullElseGet(userAttribute, ArrayList::new);
     }
-
 }
