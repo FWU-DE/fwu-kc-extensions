@@ -6,15 +6,15 @@ services:
   # Login: misty/test
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:22.0.5
+    image: quay.io/keycloak/keycloak:26.4.2
     ports:
       - 18080:8080
       - 8787:8787
     restart: always
     environment:
       KC_HTTP_RELATIVE_PATH: "/auth"
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: keycloak
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: keycloak
       KC_DB_URL_HOST: postgres
       KC_DB: postgres
       KC_DB_USER: keycloak
