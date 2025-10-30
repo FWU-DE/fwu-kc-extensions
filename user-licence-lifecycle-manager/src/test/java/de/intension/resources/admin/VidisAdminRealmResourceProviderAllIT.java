@@ -1,13 +1,12 @@
 package de.intension.resources.admin;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import okhttp3.*;
+import de.intension.testhelper.HttpClientHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.util.JsonSerialization;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -23,11 +22,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +36,7 @@ class VidisAdminRealmResourceProviderAllIT {
 
     private static final Network network = Network.newNetwork();
     private static final Capabilities capabilities = new FirefoxOptions();
-    private static final OkHttpClient client = new OkHttpClient();
+    private static final HttpClient client = HttpClient.newHttpClient();
 
     @Container
     private static final MockServerContainer mockServer = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:5.13.2"))
@@ -84,7 +82,7 @@ class VidisAdminRealmResourceProviderAllIT {
     }
 
     @Test
-    void shouldDeleteUsersWithCreatedTimestamp_whenAllConfigured() throws IOException {
+    void shouldDeleteUsersWithCreatedTimestamp_whenAllConfigured() throws Exception {
         UserRepresentation user = new UserRepresentation();
         user.setId("sampleUserId");
         user.setEmail("test@intension.de");
@@ -93,41 +91,15 @@ class VidisAdminRealmResourceProviderAllIT {
 
         Integer userCountBeforeCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
         String authServerUrl = keycloak.getAuthServerUrl();
-        String accessToken = getAccessToken(authServerUrl + "/realms/master/protocol/openid-connect/token", keycloak.getAdminUsername(), keycloak.getAdminPassword());
+        String accessToken = HttpClientHelper.getAccessToken(client, authServerUrl + "/realms/master/protocol/openid-connect/token", keycloak.getAdminUsername(), keycloak.getAdminPassword());
 
-        Integer deletedUsers = deleteUsers(accessToken, authServerUrl);
+        Integer deletedUsers = HttpClientHelper.deleteUsers(client, accessToken, authServerUrl);
         Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
 
         assertThat(deletedUsers).as("Deleted users").isPositive();
         assertThat(userCountBeforeCleanup).as("Users before cleanup").isGreaterThan(userCountAfterCleanup);
         assertThat(userCountAfterCleanup).as("Users after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
 
-    }
-
-    private String getAccessToken(String tokenUrl, String username, String password) throws IOException {
-        RequestBody formBody = new FormBody.Builder().add("grant_type", "password").add("client_id", "admin-cli").add("username", username).add("password", password).build();
-
-        Request request = new Request.Builder().url(tokenUrl).post(formBody).build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            Map<String, String> responseBody = JsonSerialization.readValue(response.body().string(), Map.class);
-            return responseBody.get("access_token");
-        }
-    }
-
-    private Integer deleteUsers(String accessToken, String authServerUrl) throws IOException {
-        Request request = new Request.Builder().url(authServerUrl + "/admin/realms/fwu/vidis-custom/users/inactive?max=1000").delete().addHeader("Authorization", "Bearer " + accessToken).build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Failed to cleanUp users. got http: " + response);
-            }
-            Map<String, Integer> responseBody = JsonSerialization.readValue(response.body().string(), Map.class);
-            return responseBody.get("deletedUsers");
-        }
     }
 
     @AfterEach
