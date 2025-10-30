@@ -6,9 +6,7 @@ import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.managers.AppAuthManager;
-import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
 /**
  * Custom rest endpoints exposed via <code>${authUrl}/realms/${realm}/licences/</code>.

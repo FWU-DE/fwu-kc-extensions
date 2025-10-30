@@ -1,19 +1,17 @@
 package de.intension.rest.sanis;
 
-import static de.intension.api.UserInfoAttribute.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import com.google.common.io.Resources;
+import de.intension.rest.IKeycloakApiMapper;
+import org.junit.jupiter.api.Test;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.Test;
-import org.keycloak.broker.provider.BrokeredIdentityContext;
-
-import com.google.common.io.Resources;
-
-import de.intension.rest.IKeycloakApiMapper;
+import static de.intension.api.UserInfoAttribute.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class SanisKeycloakMappingTest
 {
@@ -29,7 +27,7 @@ class SanisKeycloakMappingTest
     {
         URL resource = Resources.getResource("de/intension/rest/sanis/UserInfo.json");
         String userInfoJson = Resources.toString(resource, StandardCharsets.UTF_8);
-        BrokeredIdentityContext context = new BrokeredIdentityContext("12345");
+        BrokeredIdentityContext context = new BrokeredIdentityContext(null);
         IKeycloakApiMapper mapper = new SanisKeycloakMapping();
         mapper.addAttributesToResource(context, userInfoJson);
         assertEquals("Max", context.getUserAttribute(PERSON_VORNAME.getAttributeName()));

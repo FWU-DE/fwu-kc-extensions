@@ -14,8 +14,8 @@ import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import org.keycloak.services.resources.admin.permissions.UserPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.UserPermissionEvaluator;
 
 import java.util.Date;
 import java.util.List;
@@ -29,7 +29,7 @@ public class VidisAdminRealmResourceProvider
 
     private final KeycloakSession session;
     private AdminPermissionEvaluator auth;
-    private Config.Scope config;
+    private final Config.Scope config;
 
     public VidisAdminRealmResourceProvider(KeycloakSession session, Config.Scope config) {
         this.session = session;
@@ -95,6 +95,7 @@ public class VidisAdminRealmResourceProvider
         return numberOfDeletedUsers;
     }
 
+    @SuppressWarnings("unchecked")
     private List<UserEntity> getListOfUsers(int chunkSize, long lastCreationDate, boolean idpOnly) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "

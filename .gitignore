@@ -1,5 +1,4 @@
 target/
-.flattened-pom.xml
 **/.settings/
 .idea
 test/providers

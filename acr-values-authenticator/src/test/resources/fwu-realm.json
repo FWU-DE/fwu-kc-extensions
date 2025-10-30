@@ -2740,7 +2740,6 @@
     "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0"
   },
-  "keycloakVersion": "22.0.4",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []

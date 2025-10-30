@@ -1,7 +1,6 @@
 package de.intension.resources.admin;
 
 import org.keycloak.Config;
-import org.keycloak.common.Profile;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.EnvironmentDependentProviderFactory;
@@ -39,9 +38,7 @@ public class VidisAdminRealmResourceProviderFactory implements AdminRealmResourc
     }
 
     @Override
-    public boolean isSupported() {
-        return Profile.isFeatureEnabled(Profile.Feature.ADMIN2);
+    public boolean isSupported(Config.Scope config) {
+        return true;
     }
-
-
 }

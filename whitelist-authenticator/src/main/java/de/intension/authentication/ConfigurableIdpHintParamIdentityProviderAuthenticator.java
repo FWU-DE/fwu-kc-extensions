@@ -1,9 +1,7 @@
 package de.intension.authentication;
 
-import java.net.URI;
-import java.util.Objects;
-import java.util.Optional;
-
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -17,8 +15,9 @@ import org.keycloak.services.Urls;
 import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.utils.StringUtil;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Same as {@link IdentityProviderAuthenticator} but with configurable IdP hint
@@ -49,7 +48,8 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
         }
     }
 
-    private void redirect(AuthenticationFlowContext context, String providerId)
+    @Override
+    protected void redirect(AuthenticationFlowContext context, String providerId)
     {
         Optional<IdentityProviderModel> idp = context.getRealm().getIdentityProvidersStream()
             .filter(IdentityProviderModel::isEnabled)
@@ -61,14 +61,15 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticator
                 .getOrGenerateCode();
             String clientId = context.getAuthenticationSession().getClient().getClientId();
             String tabId = context.getAuthenticationSession().getTabId();
+            String clientData = AuthenticationProcessor.getClientData(context.getSession(), context.getAuthenticationSession());
+            String loginHint = getLoginHintFromUserAttribute(context);
             URI location = Urls.identityProviderAuthnRequest(context.getUriInfo().getBaseUri(), providerId,
-                                                             context.getRealm().getName(), accessCode, clientId, tabId);
+                                                             context.getRealm().getName(), accessCode, clientId, tabId, clientData, loginHint);
             if (context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY) != null) {
                 location = UriBuilder.fromUri(location).queryParam(OAuth2Constants.DISPLAY,
                                                                    context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
                     .build();
             }
-            String loginHint = getLoginHintFromUserAttribute(context);
             if(loginHint != null){
                 location = UriBuilder.fromUri(location).queryParam(OIDCLoginProtocol.LOGIN_HINT_PARAM, loginHint)
                                      .build();

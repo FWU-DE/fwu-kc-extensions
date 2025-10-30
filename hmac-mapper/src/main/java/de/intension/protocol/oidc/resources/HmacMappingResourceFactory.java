@@ -42,14 +42,6 @@ public class HmacMappingResourceFactory
         return PROVIDER_ID;
     }
 
-    /**
-     * {@link EnvironmentDependentProviderFactory#isSupported()} has been deprecated!
-     */
-    @Override
-    public boolean isSupported() {
-        return this.isSupported(null);
-    }
-
     @Override
     public boolean isSupported(Config.Scope config) {
         return Profile.isFeatureEnabled(Profile.Feature.ADMIN_API);

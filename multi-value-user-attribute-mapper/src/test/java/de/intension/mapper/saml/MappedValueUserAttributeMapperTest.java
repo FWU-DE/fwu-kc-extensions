@@ -1,12 +1,5 @@
 package de.intension.mapper.saml;
 
-import static org.mockito.Mockito.*;
-
-import java.util.*;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -19,6 +12,12 @@ import org.keycloak.dom.saml.v2.assertion.AttributeType;
 import org.keycloak.models.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import java.util.*;
+
+import static org.mockito.Mockito.*;
 
 class MappedValueUserAttributeMapperTest
 {
@@ -268,13 +267,13 @@ class MappedValueUserAttributeMapperTest
     /**
      * Get attribute value mapping configuration.
      */
-    private Map<String, String> getMappedValuesConfig()
+    private Map<String, List<String>> getMappedValuesConfig()
     {
-        HashMap<String, String> config = new HashMap<>();
-        config.put("LERN", ROLE_TEACHER);
-        config.put("school*", ROLE_TEACHER);
-        config.put("REGEX(^landscape.*)", ROLE_LANDSCAPER);
-        config.put("pl?mb*", ROLE_PLUMBER);
+        HashMap<String, List<String>> config = new HashMap<>();
+        config.put("LERN", List.of(ROLE_TEACHER));
+        config.put("school*", List.of(ROLE_TEACHER));
+        config.put("REGEX(^landscape.*)", List.of(ROLE_LANDSCAPER));
+        config.put("pl?mb*", List.of(ROLE_PLUMBER));
         return config;
     }
 
