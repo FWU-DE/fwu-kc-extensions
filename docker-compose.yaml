@@ -44,7 +44,7 @@ services:
       KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE: 5
       KC_FEATURES: admin-api
       DEBUG: "true"
-      DEBUG_PORT: "*:8787"
+      DEBUG_PORT: "8787"
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -55,10 +55,10 @@ services:
       - "./test/idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
       - "./test/management-realm.json:/opt/keycloak/data/import/management-realm.json"
       #    - themes
-      - "../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
-      - "../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
-      - "../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
-      - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
+      #      - "../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
+      #      - "../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
+      #      - "../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
+      #      - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
       #    - extensions
       - "./target:/opt/keycloak/providers/"
       - "./test/lib/keycloak-custom-attribute-idp-linking-2.1.0.jar:/opt/keycloak/providers/keycloak-custom-attribute-idp-linking-2.1.0.jar"
