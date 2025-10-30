@@ -37,9 +37,9 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.14.0</junit.version>
+    <junit.version>5.8.2</junit.version>
     <!-- platform-launcher version starts to match junit version from 6.0.0 onwards -->
-    <junit-launcher.version>1.14.0</junit-launcher.version>
+    <junit-launcher.version>1.8.2</junit-launcher.version>
     <jackson.version>2.20.0</jackson.version>
     <mockito.version>5.2.0</mockito.version>
     <mockserver.version>5.15.0</mockserver.version>
@@ -297,31 +297,6 @@
             <include>**/*Test.java</include>
           </includes>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>flatten-maven-plugin</artifactId>
-        <version>1.7.3</version>
-        <configuration>
-          <updatePomFile>true</updatePomFile>
-          <flattenMode>resolveCiFriendliesOnly</flattenMode>
-        </configuration>
-        <executions>
-          <execution>
-            <id>flatten</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>flatten</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>flatten.clean</id>
-            <phase>clean</phase>
-            <goals>
-              <goal>clean</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
