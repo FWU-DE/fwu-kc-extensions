@@ -289,7 +289,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.4</version>
+        <!-- somehow 3.5.* is not compatible with any JUnit version -->
+        <version>3.4.0</version>
         <configuration>
           <includes>
             <include>**/*IT.java</include>
