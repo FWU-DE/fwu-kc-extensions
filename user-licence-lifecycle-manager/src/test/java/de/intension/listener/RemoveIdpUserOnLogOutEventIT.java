@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
@@ -23,15 +25,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 class RemoveIdpUserOnLogOutEventIT {
 
+    private static final String KEYCLOAK_VERSION = System.getProperty("keycloak.version", "latest");
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final String REALM = "fwu";
 
@@ -44,7 +55,7 @@ class RemoveIdpUserOnLogOutEventIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final KeycloakContainer keycloak = new KeycloakContainer(String.format("quay.io/keycloak/keycloak:%s", KEYCLOAK_VERSION))
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")
@@ -77,7 +88,7 @@ class RemoveIdpUserOnLogOutEventIT {
     @BeforeEach
     void setup()
             throws Exception {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities, false);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
@@ -90,12 +101,57 @@ class RemoveIdpUserOnLogOutEventIT {
      * THEN: user is removed from the Keycloak
      */
     @Test
-    void should_remove_user_on_logout_for_identity_provider_login() {
-        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+    void should_remove_user_on_logout_for_identity_provider_login() throws IOException, InterruptedException {
+
+        String tokenUrl = keycloak.getAuthServerUrl() + "/realms/master/protocol/openid-connect/token";
+
+        // Build form data
+        String formData = "client_id=" + URLEncoder.encode("admin-cli", StandardCharsets.UTF_8)
+            + "&username=" + URLEncoder.encode("admin", StandardCharsets.UTF_8)
+            + "&password=" + URLEncoder.encode("keycloak", StandardCharsets.UTF_8)
+            + "&grant_type=" + URLEncoder.encode("password", StandardCharsets.UTF_8);
+
+        // Create HTTP client and request
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(tokenUrl))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(HttpRequest.BodyPublishers.ofString(formData))
+            .build();
+
+        // Send request
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Response: " + response.body());
+
+        assertEquals(200, response.statusCode());
+
+
+
+
+
+
+
+        assertTrue(keycloak.isRunning());
+//        System.out.println(keycloak.getKeycloakAdminClient().serverInfo().getInfo());
+        Keycloak adminClient = KeycloakBuilder.builder()
+            .serverUrl(keycloak.getAuthServerUrl())
+            .realm("master")
+            .clientId("admin-cli")
+            .username(keycloak.getAdminUsername())
+            .password(keycloak.getAdminPassword())
+            .build();
+        System.out.println(adminClient.serverInfo().getInfo());
+
+
         KeycloakPage kcPage = KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
+
+        UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
+
         int usersCountBeforeLogout = usersResource.count();
 
         kcPage.logout();

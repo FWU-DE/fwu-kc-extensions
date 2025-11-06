@@ -37,11 +37,11 @@ public class KeycloakPage {
 
     public KeycloakPage login(String username, String password) {
         By usernameInput = By.cssSelector("input#username");
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("kc-login")));
+//        wait.until(ExpectedConditions.elementToBeClickable(By.id("kc-login")));
         wait.until(ExpectedConditions.presenceOfElementLocated(usernameInput));
         driver.findElement(usernameInput).sendKeys(username);
         driver.findElement(By.cssSelector("input#password")).sendKeys(password);
-        driver.findElement(By.cssSelector("input#kc-login")).click();
+        driver.findElement(By.cssSelector("#kc-login")).click();
         return this;
     }
 

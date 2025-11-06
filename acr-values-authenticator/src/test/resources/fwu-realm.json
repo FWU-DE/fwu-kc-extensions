@@ -1640,7 +1640,7 @@
         "syncMode": "IMPORT",
         "clientSecret": "WqFa9UHn9cUEN0BpL8Y8HRkWy6Sle8ph",
         "useJwksUrl": "true",
-        "forwardParameters": "audience,origin_client_id"
+        "forwardParameters": "audience,origin_client_id,acr_values"
       }
     },
     {

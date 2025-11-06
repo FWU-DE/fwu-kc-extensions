@@ -32,6 +32,7 @@
   <properties>
     <revision>5.0.0</revision>
     <keycloak.version>26.4.2</keycloak.version>
+    <keycloak.admin.client.version>26.0.7</keycloak.admin.client.version>
     <java.version>21</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -42,9 +43,10 @@
     <junit-launcher.version>1.8.2</junit-launcher.version>
     <jackson.version>2.20.0</jackson.version>
     <mockito.version>5.2.0</mockito.version>
-    <mockserver.version>5.15.0</mockserver.version>
+    <mockserver.version>5.13.2</mockserver.version>
     <testcontainers.version>1.21.3</testcontainers.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    <log4j.version>2.25.2</log4j.version>
   </properties>
 
   <dependencies>
@@ -79,6 +81,30 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.dasniko</groupId>
+      <artifactId>testcontainers-keycloak</artifactId>
+      <version>3.9.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>selenium</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
       <version>3.0</version>
@@ -100,6 +126,25 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>3.27.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.playwright</groupId>
+      <artifactId>playwright</artifactId>
+      <version>1.49.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- LOGGING -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
+      <version>${log4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -129,6 +174,14 @@
         <artifactId>keycloak-services</artifactId>
         <version>${keycloak.version}</version>
         <scope>provided</scope>
+        <exclusions>
+          <!-- Has  to be excluded. If this is not here, Logging does not work for Testcontainers.
+          Normally no package should provide an implementation for slf4j. But Keycloak does, starting from version 26. Might be a bug. -->
+          <exclusion>
+            <groupId>org.jboss.slf4j</groupId>
+            <artifactId>slf4j-jboss-logmanager</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.keycloak</groupId>
@@ -147,6 +200,12 @@
         <artifactId>keycloak-model-jpa</artifactId>
         <version>${keycloak.version}</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-admin-client</artifactId>
+        <version>${keycloak.admin.client.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>jakarta.persistence</groupId>
@@ -172,26 +231,20 @@
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
-        <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>
+        <artifactId>mockserver-junit-jupiter</artifactId>
         <version>${mockserver.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>mockserver</artifactId>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-client-java</artifactId>
         <version>${mockserver.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${testcontainers.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.github.dasniko</groupId>
-        <artifactId>testcontainers-keycloak</artifactId>
-        <version>3.9.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -245,12 +298,6 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>selenium</artifactId>
-        <version>${testcontainers.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>42.7.8</version>
@@ -289,14 +336,35 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <!-- somehow 3.5.* is not compatible with any JUnit version -->
-        <version>3.4.0</version>
+        <version>3.5.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.5.4</version>
         <configuration>
-          <includes>
-            <include>**/*IT.java</include>
-            <include>**/*Test.java</include>
-          </includes>
+          <systemPropertyVariables>
+            <org.jboss.logging.provider>log4j2</org.jboss.logging.provider>
+            <keycloak.version>${keycloak.version}</keycloak.version>
+          </systemPropertyVariables>
+          <statelessTestsetReporter
+              implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+            <disable>false</disable>
+            <version>3.0.2</version>
+            <usePhrasedFileName>false</usePhrasedFileName>
+            <usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
+            <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
+            <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
+          </statelessTestsetReporter>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal> <!-- To discuss, if this is the correct way. On every mvn package, IT will run. -->
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
