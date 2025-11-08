@@ -1,6 +1,7 @@
 package de.intension.listener;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -44,7 +45,7 @@ class RemoveNoneUserOnLogOutEventIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")

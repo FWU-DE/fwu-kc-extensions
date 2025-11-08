@@ -1,6 +1,7 @@
 package de.intension.rest;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.tuple.Pair;
@@ -59,7 +60,7 @@ public class LicenceResourceIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")

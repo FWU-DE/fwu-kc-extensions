@@ -5,6 +5,7 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -18,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,7 +30,7 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticatorIT {
     private static final String IMPORT_DIR = "/opt/keycloak/data/import/";
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withContextPath("/auth")
             .withRealmImportFiles("whitelist_realm.json");
@@ -60,6 +62,7 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticatorIT {
         page.navigate(authUrl);
         // the authenticator should redirect to the external IDP authorization endpoint
         String url = page.url();
+        assertThat(url).contains("facebook.com/oauth/authorize");
         assertTrue(url.contains("facebook.com/oauth/authorize"), () -> "Expected redirect to facebook authorization URL, got: " + url);
         page.close();
     }

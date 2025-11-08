@@ -1,6 +1,7 @@
 package de.intension.authenticator;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -32,7 +33,7 @@ public class ClientIdIdpValuesForwarderAuthIT {
     private static final Capabilities capabilities = new FirefoxOptions();
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withContextPath("/auth")
             .withNetwork(network)

@@ -2,10 +2,16 @@ package de.intension.testhelper;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Container for handling interactions with the Keycloak web pages.
@@ -37,8 +43,7 @@ public class KeycloakPage {
 
     public KeycloakPage login(String username, String password) {
         By usernameInput = By.cssSelector("input#username");
-//        wait.until(ExpectedConditions.elementToBeClickable(By.id("kc-login")));
-        wait.until(ExpectedConditions.presenceOfElementLocated(usernameInput));
+        wait.until(ExpectedConditions.elementToBeClickable(usernameInput));
         driver.findElement(usernameInput).sendKeys(username);
         driver.findElement(By.cssSelector("input#password")).sendKeys(password);
         driver.findElement(By.cssSelector("#kc-login")).click();
@@ -46,20 +51,34 @@ public class KeycloakPage {
     }
 
     public KeycloakPage logout() {
-        By signOutButton = By.xpath("//button[text()='Sign out']");
-        ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
+        // click to open dropdown
+        By userMenuToggle = By.cssSelector("button[data-testid='options-toggle']");
+        wait.until(ExpectedConditions.elementToBeClickable(userMenuToggle));
+        driver.findElement(userMenuToggle).click();
+
+        // 2. Wait for and click the "Sign out" item
+        By signOutButton = By.xpath("//button[.//span[text()='Sign out']]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(signOutButton));
         wait.until(ExpectedConditions.elementToBeClickable(signOutButton));
         driver.findElement(signOutButton).click();
+
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        try {
+            Files.copy(screenshot.toPath(), Paths.get("logout_failure.png"));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
         return this;
     }
 
     public KeycloakPage updateLastName(String lastName) {
         ((RemoteWebDriver) driver).getScreenshotAs(OutputType.FILE);
         wait.until(ExpectedConditions.elementToBeClickable(By.id("save-btn")));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#last-name")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input#lastName")));
 
-        driver.findElement(By.cssSelector("input#last-name")).clear();
-        driver.findElement(By.cssSelector("input#last-name")).sendKeys(lastName);
+        driver.findElement(By.cssSelector("input#lastName")).clear();
+        driver.findElement(By.cssSelector("input#lastName")).sendKeys(lastName);
         driver.findElement(By.id("save-btn")).click();
 
         return this;

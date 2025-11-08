@@ -3,7 +3,7 @@
   "realm": "whitelist",
   "displayName": "POC - IdP whitelist (redirector w/ default)",
   "enabled": true,
-  "sslRequired": "external",
+  "sslRequired": "none",
   "users": [
     {
       "username": "user",

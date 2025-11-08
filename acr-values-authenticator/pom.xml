@@ -11,20 +11,18 @@
     </parent>
 
     <artifactId>acr-values-authenticator</artifactId>
-<!--    <packaging>jar</packaging>-->
+    <packaging>jar</packaging>
 
     <dependencies>
-        <!-- I dont know why, but this module does not take the log4j dep from parent !-->
+        <!-- LOGGING for Testcontainers! -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -67,6 +65,12 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${revision}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

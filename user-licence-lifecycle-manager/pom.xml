@@ -13,6 +13,17 @@
     <artifactId>user-licence-lifecycle-manager</artifactId>
 
     <dependencies>
+        <!-- LOGGING for Testcontainers! -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
@@ -50,6 +61,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>hmac-mapper</artifactId>
             <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${revision}</version>
+            <scope>test</scope>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.mock-server</groupId>-->

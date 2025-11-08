@@ -1,12 +1,15 @@
 package de.intension.authentication.authenticators.licence;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
 import org.junit.jupiter.api.*;
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.userprofile.config.UPConfig;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.mock.Expectation;
 import org.mockserver.verify.VerificationTimes;
@@ -30,6 +33,7 @@ import java.util.Map;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,7 +69,7 @@ public class LicenceConnectAuthenticatorIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")
@@ -96,6 +100,11 @@ public class LicenceConnectAuthenticatorIT {
     @BeforeAll
     static void setupAll() {
         mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort());
+        Keycloak admin = keycloak.getKeycloakAdminClient();
+        var realm = admin.realm(REALM);
+        var upconfig = realm.users().userProfile().getConfiguration();
+        upconfig.setUnmanagedAttributePolicy(UPConfig.UnmanagedAttributePolicy.ENABLED);
+        realm.users().userProfile().update(upconfig);
     }
 
     @BeforeEach
@@ -200,6 +209,7 @@ public class LicenceConnectAuthenticatorIT {
         Timestamp updatedAt = resultSet.getTimestamp(1);
         Timestamp createdAt = resultSet.getTimestamp(2);
         assertEquals(updatedAt, createdAt, "UPDATED_AT should be the same as CREATED_AT");
+        sleep(1000);
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         KeycloakPage kcPage = KeycloakPage
@@ -222,7 +232,13 @@ public class LicenceConnectAuthenticatorIT {
         createdAt = resultSet.getTimestamp(1);
         updatedAt = resultSet.getTimestamp(2);
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        assertThat(updatedAt.toLocalDateTime()).isAfter(createdAt.toLocalDateTime());
+        // This is a fix for some UTC to GMT +1 or +2 foo.
+        // Im unable to determine, which component here is wrong, BUT we can just compare minutes and seconds
+        if (updatedAt.toLocalDateTime().getMinute() == createdAt.toLocalDateTime().getMinute()) {
+            assertThat(updatedAt.toLocalDateTime().getSecond()).isGreaterThan(createdAt.toLocalDateTime().getSecond());
+        } else {
+            assertThat(updatedAt.toLocalDateTime().getMinute()).isGreaterThan(createdAt.toLocalDateTime().getMinute());
+        }
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);

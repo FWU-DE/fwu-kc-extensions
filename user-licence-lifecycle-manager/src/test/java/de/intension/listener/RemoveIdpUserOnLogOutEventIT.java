@@ -1,6 +1,7 @@
 package de.intension.listener;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -42,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 class RemoveIdpUserOnLogOutEventIT {
 
-    private static final String KEYCLOAK_VERSION = System.getProperty("keycloak.version", "latest");
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final String REALM = "fwu";
 
@@ -55,7 +55,7 @@ class RemoveIdpUserOnLogOutEventIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer(String.format("quay.io/keycloak/keycloak:%s", KEYCLOAK_VERSION))
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")
@@ -102,49 +102,7 @@ class RemoveIdpUserOnLogOutEventIT {
      */
     @Test
     void should_remove_user_on_logout_for_identity_provider_login() throws IOException, InterruptedException {
-
-        String tokenUrl = keycloak.getAuthServerUrl() + "/realms/master/protocol/openid-connect/token";
-
-        // Build form data
-        String formData = "client_id=" + URLEncoder.encode("admin-cli", StandardCharsets.UTF_8)
-            + "&username=" + URLEncoder.encode("admin", StandardCharsets.UTF_8)
-            + "&password=" + URLEncoder.encode("keycloak", StandardCharsets.UTF_8)
-            + "&grant_type=" + URLEncoder.encode("password", StandardCharsets.UTF_8);
-
-        // Create HTTP client and request
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(tokenUrl))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .POST(HttpRequest.BodyPublishers.ofString(formData))
-            .build();
-
-        // Send request
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("Status: " + response.statusCode());
-        System.out.println("Response: " + response.body());
-
-        assertEquals(200, response.statusCode());
-
-
-
-
-
-
-
-        assertTrue(keycloak.isRunning());
-//        System.out.println(keycloak.getKeycloakAdminClient().serverInfo().getInfo());
-        Keycloak adminClient = KeycloakBuilder.builder()
-            .serverUrl(keycloak.getAuthServerUrl())
-            .realm("master")
-            .clientId("admin-cli")
-            .username(keycloak.getAdminUsername())
-            .password(keycloak.getAdminPassword())
-            .build();
-        System.out.println(adminClient.serverInfo().getInfo());
-
-
+        System.out.println(keycloak.getKeycloakAdminClient().serverInfo().getInfo());
         KeycloakPage kcPage = KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()

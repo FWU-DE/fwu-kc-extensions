@@ -3,7 +3,7 @@
   "realm": "whitelist",
   "displayName": "POC - IdP whitelist (whitelist flow)",
   "enabled": true,
-  "sslRequired": "external",
+  "sslRequired": "none",
   "users": [
     {
       "username": "user",
