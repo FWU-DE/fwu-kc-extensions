@@ -1,6 +1,5 @@
 package de.intension.listener;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
@@ -8,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
@@ -26,19 +23,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 class RemoveIdpUserOnLogOutEventIT {
@@ -101,8 +90,7 @@ class RemoveIdpUserOnLogOutEventIT {
      * THEN: user is removed from the Keycloak
      */
     @Test
-    void should_remove_user_on_logout_for_identity_provider_login() throws IOException, InterruptedException {
-        System.out.println(keycloak.getKeycloakAdminClient().serverInfo().getInfo());
+    void should_remove_user_on_logout_for_identity_provider_login() {
         KeycloakPage kcPage = KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class WhitelistAuthenticatorIT {
+class WhitelistAuthenticatorIT {
 
     private HttpServer stub;
     private int stubPort;
@@ -57,7 +57,7 @@ public class WhitelistAuthenticatorIT {
         stub.start();
 
         // Start Keycloak with our provider and import realm
-        keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.2")
+        keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.4")
                 .withProviderClassesFrom("target/classes")
                 .withContextPath("/auth")
                 .withRealmImportFiles("whitelist_whitelist_realm.json")

@@ -1,6 +1,5 @@
 package de.intension.resources.admin;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.HttpClientHelper;
 import de.intension.testhelper.KeycloakPage;

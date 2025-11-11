@@ -1,14 +1,11 @@
 package de.intension.resources.admin;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.HttpClientHelper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.mockserver.client.MockServerClient;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -64,15 +61,8 @@ class VidisAdminRealmResourceProviderAllIT {
             .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
             .withNetwork(network);
 
-    private static MockServerClient mockServerClient;
-
     private RemoteWebDriver driver;
     private FluentWait<WebDriver> wait;
-
-    @BeforeAll
-    static void setupAll() {
-        mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort());
-    }
 
     @BeforeEach
     void setup() {
