@@ -13,12 +13,15 @@ import org.keycloak.Config.Scope;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.tracing.NoopTracingProvider;
+import org.keycloak.tracing.TracingProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 class LoginEventListenerProviderTest
 {
@@ -33,6 +36,7 @@ class LoginEventListenerProviderTest
         publisher = new TestPublisher();
         kcSession = KeycloakSessionMock
             .create(RealmModelMock.create("realm-test"), UserModelMock.create("idp-user", Arrays.asList("DE_BY-1234", "DE_BY-4321")));
+        when(kcSession.getProvider(TracingProvider.class)).thenReturn(new NoopTracingProvider());
     }
 
     @Test

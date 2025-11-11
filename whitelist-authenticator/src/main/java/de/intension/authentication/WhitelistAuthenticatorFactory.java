@@ -3,6 +3,7 @@ package de.intension.authentication;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -17,6 +18,7 @@ import de.intension.authentication.rest.IdPAssignmentsClient;
 /**
  * Factory to create custom {@link WhitelistAuthenticator}.
  */
+@AutoService(AuthenticatorFactory.class)
 public class WhitelistAuthenticatorFactory
     implements AuthenticatorFactory, AdapterConstants
 {

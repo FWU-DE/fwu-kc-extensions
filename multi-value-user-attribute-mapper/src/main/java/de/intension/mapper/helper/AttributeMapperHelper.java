@@ -88,7 +88,6 @@ public class AttributeMapperHelper
                     if (key.equalsIgnoreCase(attributeValue)
                             || RegExHelper.isRegularExpression(key) && RegExHelper.matches(RegExHelper.getRegularExpressionFromString(key), attributeValue)
                             || RegExHelper.isWildcardExpression(key) && RegExHelper.matches(RegExHelper.wildcardToJavaRegex(key), attributeValue)) {
-                        // TODO: Add all or only first value?
                         mappedValues.add(entry.getValue().getFirst());
                         break;
                     }

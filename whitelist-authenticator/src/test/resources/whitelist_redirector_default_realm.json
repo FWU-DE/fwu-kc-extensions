@@ -1,0 +1,126 @@
+{
+  "id": "whitelist",
+  "realm": "whitelist",
+  "displayName": "POC - IdP whitelist (redirector w/ default)",
+  "enabled": true,
+  "sslRequired": "none",
+  "users": [
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@example.com",
+      "firstName": "Max",
+      "lastName": "Muster",
+      "credentials": [
+        { "type": "password", "value": "user" }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "account",
+      "name": "account",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/realms/whitelist/account/*",
+        "/realms/whitelist/*"
+      ],
+      "webOrigins": ["+"]
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "facebook",
+      "displayName": "facebook",
+      "providerId": "oidc",
+      "enabled": true,
+      "config": {
+        "authorizationUrl": "https://facebook.com/oauth/authorize",
+        "tokenUrl": "https://facebook.com/oauth/token",
+        "clientId": "dummy",
+        "clientSecret": "dummy",
+        "defaultScope": "openid"
+      }
+    },
+    {
+      "alias": "IDP",
+      "displayName": "DefaultIDP",
+      "providerId": "oidc",
+      "enabled": true,
+      "config": {
+        "authorizationUrl": "https://default.idp.example/authorize",
+        "tokenUrl": "https://default.idp.example/token",
+        "clientId": "dummy",
+        "clientSecret": "dummy",
+        "defaultScope": "openid"
+      }
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "WhiteList",
+      "description": "browser based authentication",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 0,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticatorConfig": "hint",
+          "authenticator": "configurable-hint-idp-redirector",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 1,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 2,
+          "flowAlias": "forms",
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "forms",
+      "description": "Username, password, otp and other auth forms.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": true,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "hint",
+      "config": {
+        "idpHintParamName": "vidis_idp_hint",
+        "defaultProvider": "IDP"
+      }
+    }
+  ],
+  "browserFlow": "WhiteList"
+}
