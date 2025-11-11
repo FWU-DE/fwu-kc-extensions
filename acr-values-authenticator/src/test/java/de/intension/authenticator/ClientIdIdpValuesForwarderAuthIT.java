@@ -1,6 +1,5 @@
 package de.intension.authenticator;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class ClientIdIdpValuesForwarderAuthIT {
+class ClientIdIdpValuesForwarderAuthIT {
 
     private static final Network network = Network.newNetwork();
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";

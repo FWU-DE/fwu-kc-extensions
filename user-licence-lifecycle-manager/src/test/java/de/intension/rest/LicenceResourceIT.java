@@ -1,6 +1,5 @@
 package de.intension.rest;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;

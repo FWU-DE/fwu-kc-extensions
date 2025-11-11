@@ -68,11 +68,6 @@
             <version>${revision}</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.mock-server</groupId>-->
-<!--            <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>

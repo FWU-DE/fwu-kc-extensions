@@ -4,20 +4,17 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,9 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ConfigurableIdpHintParamIdentityProviderAuthenticatorIT {
-
-    private static final String IMPORT_DIR = "/opt/keycloak/data/import/";
+class ConfigurableIdpHintParamIdentityProviderAuthenticatorIT {
 
     @Container
     private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
@@ -91,10 +86,4 @@ public class ConfigurableIdpHintParamIdentityProviderAuthenticatorIT {
                 "&" + paramName + "=" + URLEncoder.encode(paramValue, StandardCharsets.UTF_8);
     }
 
-    private static String resolveFromProjectRoot(String relative) {
-        // module dir is .../whitelist-authenticator; project root is parent directory
-        Path moduleDir = Path.of(System.getProperty("user.dir"));
-        Path root = moduleDir.getParent();
-        return root.resolve(relative).toAbsolutePath().toString();
-    }
 }

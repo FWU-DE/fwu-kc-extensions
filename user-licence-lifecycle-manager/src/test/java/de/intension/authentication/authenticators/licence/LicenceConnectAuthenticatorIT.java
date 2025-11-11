@@ -1,6 +1,5 @@
 package de.intension.authentication.authenticators.licence;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
@@ -29,13 +28,15 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
-import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 /**
  * Please use the test order in the file to avoid changing configurations again and again
@@ -209,7 +210,8 @@ public class LicenceConnectAuthenticatorIT {
         Timestamp updatedAt = resultSet.getTimestamp(1);
         Timestamp createdAt = resultSet.getTimestamp(2);
         assertEquals(updatedAt, createdAt, "UPDATED_AT should be the same as CREATED_AT");
-        sleep(1000);
+
+        await().atMost(2, TimeUnit.SECONDS).until(insertIsDone());
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         KeycloakPage kcPage = KeycloakPage
@@ -243,6 +245,15 @@ public class LicenceConnectAuthenticatorIT {
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
         assertEquals(EXPECTED_LICENCES, persistedLicence, "Licence content does not match");
+    }
+
+    private Callable<Boolean> insertIsDone() {
+        return () -> {
+            Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT 1 FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
+            return resultSet.next();
+        };
     }
 
     /**

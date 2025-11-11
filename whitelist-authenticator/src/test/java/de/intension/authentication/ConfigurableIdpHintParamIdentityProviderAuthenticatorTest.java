@@ -16,7 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.*;
-import org.keycloak.protocol.ClientData;
 import org.keycloak.protocol.LoginProtocol;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.sessions.AuthenticationSessionProvider;
@@ -116,7 +115,7 @@ class ConfigurableIdpHintParamIdentityProviderAuthenticatorTest
         when(authSession.getClient()).thenReturn(client);
         when(authSession.getProtocol()).thenReturn("openid-connect");
         var loginProtocol = mock(LoginProtocol.class);
-        when(session.getProvider(eq(LoginProtocol.class), eq("openid-connect"))).thenReturn(loginProtocol);
+        when(session.getProvider(LoginProtocol.class, "openid-connect")).thenReturn(loginProtocol);
 
 
         return context;

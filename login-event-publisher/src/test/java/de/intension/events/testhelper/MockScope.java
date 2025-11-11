@@ -103,7 +103,6 @@ public class MockScope implements Scope {
 
 	@Override
 	public Scope root() {
-		// TODO: will this work?
 		return null;
 	}
 }

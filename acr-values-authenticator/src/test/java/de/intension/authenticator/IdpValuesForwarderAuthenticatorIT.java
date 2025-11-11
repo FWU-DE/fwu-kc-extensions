@@ -23,10 +23,9 @@ import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class IdpValuesForwarderAuthenticatorIT {
+class IdpValuesForwarderAuthenticatorIT {
     private static final String KEYCLOAK_VERSION = System.getProperty("keycloak.version", "latest");
     private static final Network network = Network.newNetwork();
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
@@ -71,8 +70,7 @@ public class IdpValuesForwarderAuthenticatorIT {
         openAccountConsole();
         idpLoginPage("social-keycloak-oidc");
         String currentUrl = driver.getCurrentUrl();
-        assertThat(currentUrl).contains("audience=securedapp");
-        assertThat(currentUrl).contains("acr_values=securedapp");
+        assertThat(currentUrl).contains("audience=securedapp").contains("acr_values=securedapp");
     }
 
     @Test
