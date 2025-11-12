@@ -1,10 +1,12 @@
 package de.intension.events.testhelper;
 
+import lombok.Getter;
+import org.keycloak.Config.Scope;
+
 import java.util.Properties;
 import java.util.Set;
 
-import org.keycloak.Config.Scope;
-
+@Getter
 public class MockScope implements Scope {
 
 	private final Properties data;
@@ -94,12 +96,13 @@ public class MockScope implements Scope {
 		return this;
 	}
 
-	public Properties getData() {
-		return this.data;
+    @Override
+	public Set<String> getPropertyNames() {
+		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	@Override
-	public Set<String> getPropertyNames() {
-		throw new UnsupportedOperationException("Not implemented");
+	public Scope root() {
+		return null;
 	}
 }

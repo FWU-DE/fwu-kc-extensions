@@ -1,6 +1,6 @@
 package de.intension.authenticator;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -25,14 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class IdpValuesForwarderAuthenticatorTest {
+class ClientIdIdpValuesForwarderAuthIT {
 
     private static final Network network = Network.newNetwork();
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final Capabilities capabilities = new FirefoxOptions();
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withContextPath("/auth")
             .withNetwork(network)
@@ -53,7 +53,7 @@ public class IdpValuesForwarderAuthenticatorTest {
 
     @BeforeEach
     void setup() {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities, false);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
@@ -66,21 +66,21 @@ public class IdpValuesForwarderAuthenticatorTest {
 
     @Test
     @Order(10)
-    void should_add_additional_params_to_idp_request() {
+    void should_add_origin_client_id_params_to_idp_request() {
         openAccountConsole();
         idpLoginPage("social-keycloak-oidc");
         String currentUrl = driver.getCurrentUrl();
         assertTrue(currentUrl.contains("audience=securedapp"));
-        assertTrue(currentUrl.contains("acr_values=securedapp"));
+        assertTrue(currentUrl.contains("origin_client_id=account-console"));
     }
 
     @Test
     @Order(20)
-    void should_not_add_additional_params_to_idp_request() {
+    void should_not_add_origin_client_id_params_to_idp_request() {
         openAccountConsole();
         idpLoginPage("social-keycloak-oidc2");
         String currentUrl = driver.getCurrentUrl();
-        assertFalse(currentUrl.contains("audience=securedapp"));
+        assertFalse(currentUrl.contains("origin_client_id=account-console"));
     }
 
     public void openAccountConsole() {

@@ -1,6 +1,6 @@
 package de.intension.rest;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.tuple.Pair;
@@ -59,7 +59,7 @@ public class LicenceResourceIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")
@@ -94,7 +94,7 @@ public class LicenceResourceIT {
 
     @BeforeEach
     void setup() {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities, false);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));

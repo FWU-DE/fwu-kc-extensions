@@ -1,7 +1,5 @@
 package de.intension.acronym;
 
-import jakarta.validation.constraints.NotNull;
-
 public final class AcronymUtil {
 
     private AcronymUtil() {
@@ -38,7 +36,7 @@ public final class AcronymUtil {
         return value.length() <= 2 ? value : value.substring(0, 2);
     }
 
-    private static String firstCharToUpperCase(@NotNull String value)
+    private static String firstCharToUpperCase(String value)
     {
         if (value.length() == 1) {
             value = value.toUpperCase();

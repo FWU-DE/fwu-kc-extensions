@@ -36,7 +36,7 @@ class HmacPairwisePseudonymListMapperTest
 
     public static final String              NON_EXISTING_CLIENT = "non-existing-client";
     private static final String             EXISTING_CLIENT     = "existing-client";
-    private HmacPairwisePseudonymListMapper classUnderTest      = new HmacPairwisePseudonymListMapper();
+    private final HmacPairwisePseudonymListMapper classUnderTest      = new HmacPairwisePseudonymListMapper();
 
     @Mock
     private KeycloakSession                 sessionMock;
@@ -376,6 +376,6 @@ class HmacPairwisePseudonymListMapperTest
         //then
         assertThat(configProperties.stream().map(ProviderConfigProperty::getName).collect(Collectors.toList()),
                    Matchers.containsInAnyOrder(CLIENTS_PROP_NAME, CLAIM_PROP_NAME, INCLUDE_IN_ACCESS_TOKEN, INCLUDE_IN_ID_TOKEN,
-                                               INCLUDE_IN_USERINFO));
+                                               INCLUDE_IN_USERINFO, INCLUDE_IN_LIGHTWEIGHT_ACCESS_TOKEN));
     }
 }

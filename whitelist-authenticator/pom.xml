@@ -17,6 +17,17 @@
   <packaging>jar</packaging>
 
   <dependencies>
+    <!-- LOGGING for Testcontainers! -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
@@ -43,32 +54,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-junit-jupiter-no-dependencies</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>test-utils</artifactId>
+      <version>${revision}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <!--build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-dependencies-quarkus</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>./target</outputDirectory>
-              <includeArtifactIds>jersey-client</includeArtifactIds>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build-->
 
 </project>

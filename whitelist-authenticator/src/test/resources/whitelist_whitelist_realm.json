@@ -1,0 +1,114 @@
+{
+  "id": "whitelist",
+  "realm": "whitelist",
+  "displayName": "POC - IdP whitelist (whitelist flow)",
+  "enabled": true,
+  "sslRequired": "none",
+  "users": [
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@example.com",
+      "firstName": "Max",
+      "lastName": "Muster",
+      "credentials": [
+        { "type": "password", "value": "user" }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "configured",
+      "name": "configured",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/realms/whitelist/*"
+      ],
+      "webOrigins": ["+"]
+    },
+    {
+      "clientId": "notConfigured",
+      "name": "notConfigured",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/realms/whitelist/*"
+      ],
+      "webOrigins": ["+"]
+    },
+    {
+      "clientId": "configuredNoMatch",
+      "name": "configuredNoMatch",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/realms/whitelist/*"
+      ],
+      "webOrigins": ["+"]
+    },
+    {
+      "clientId": "configuredGoogle",
+      "name": "configuredGoogle",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/realms/whitelist/*"
+      ],
+      "webOrigins": ["+"]
+    }
+  ],
+  "identityProviders": [
+    {"alias": "facebook", "providerId": "oidc", "enabled": true,
+     "config": {"authorizationUrl":"https://facebook.com/oauth/authorize","tokenUrl":"https://facebook.com/oauth/token","clientId":"dummy","clientSecret":"dummy","defaultScope":"openid"}},
+    {"alias": "google", "providerId": "oidc", "enabled": true,
+     "config": {"authorizationUrl":"https://accounts.google.com/o/oauth2/v2/auth","tokenUrl":"https://oauth2.googleapis.com/token","clientId":"dummy","clientSecret":"dummy","defaultScope":"openid"}}
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "WhiteList",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {"authenticator": "auth-cookie", "requirement": "ALTERNATIVE", "priority": 0, "authenticatorFlow": false},
+        {"authenticator": "whitelist-authenticator", "authenticatorConfig": "white-list", "requirement": "REQUIRED", "priority": 1, "authenticatorFlow": false},
+        {"authenticatorFlow": true, "flowAlias": "forms", "requirement": "REQUIRED", "priority": 2, "authenticatorFlow": true}
+      ]
+    },
+    {
+      "alias": "forms",
+      "description": "Username, password",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": true,
+      "authenticationExecutions": [
+        {"authenticator": "auth-username-password-form", "requirement": "REQUIRED", "priority": 10, "authenticatorFlow": false}
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "white-list",
+      "config": {
+        "idpHintParamName": "vidis_idp_hint",
+        "authWhitelistRealm": "test",
+        "authWhiteListClientId": "svc",
+        "authWhiteListClientIdSecret": "secret"
+      }
+    }
+  ],
+  "browserFlow": "WhiteList"
+}

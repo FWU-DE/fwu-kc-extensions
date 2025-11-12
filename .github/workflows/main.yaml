@@ -15,12 +15,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v1
         with:
-          java-version: 17
+          java-version: 21
       - name: Build with Maven
-        run: mvn --batch-mode package
+        run: mvn --batch-mode package failsafe:integration-test failsafe:verify
 
   publish:
     needs: package
@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v1
         with:
-          java-version: 17
+          java-version: 21
       - name: Get maven group
         id: get-group
         uses: mavrosxristoforos/get-xml-info@1.0

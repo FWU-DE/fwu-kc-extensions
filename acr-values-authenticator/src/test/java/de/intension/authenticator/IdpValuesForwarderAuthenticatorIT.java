@@ -21,18 +21,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class ClientIdIdpValuesForwarderAuthTest {
-
+class IdpValuesForwarderAuthenticatorIT {
+    private static final String KEYCLOAK_VERSION = System.getProperty("keycloak.version", "latest");
     private static final Network network = Network.newNetwork();
     private static final String IMPORT_PATH = "/opt/keycloak/data/import/";
     private static final Capabilities capabilities = new FirefoxOptions();
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final KeycloakContainer keycloak = new KeycloakContainer(String.format("quay.io/keycloak/keycloak:%s", KEYCLOAK_VERSION))
             .withProviderClassesFrom("target/classes")
             .withContextPath("/auth")
             .withNetwork(network)
@@ -53,7 +53,7 @@ public class ClientIdIdpValuesForwarderAuthTest {
 
     @BeforeEach
     void setup() {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities, false);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
@@ -66,21 +66,20 @@ public class ClientIdIdpValuesForwarderAuthTest {
 
     @Test
     @Order(10)
-    void should_add_origin_client_id_params_to_idp_request() {
+    void should_add_additional_params_to_idp_request() {
         openAccountConsole();
         idpLoginPage("social-keycloak-oidc");
         String currentUrl = driver.getCurrentUrl();
-        assertTrue(currentUrl.contains("audience=securedapp"));
-        assertTrue(currentUrl.contains("origin_client_id=account-console"));
+        assertThat(currentUrl).contains("audience=securedapp").contains("acr_values=securedapp");
     }
 
     @Test
     @Order(20)
-    void should_not_add_origin_client_id_params_to_idp_request() {
+    void should_not_add_additional_params_to_idp_request() {
         openAccountConsole();
         idpLoginPage("social-keycloak-oidc2");
         String currentUrl = driver.getCurrentUrl();
-        assertFalse(currentUrl.contains("origin_client_id=account-console"));
+        assertFalse(currentUrl.contains("audience=securedapp"));
     }
 
     public void openAccountConsole() {

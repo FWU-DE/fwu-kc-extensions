@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [5.0.0]
+
+- Changed: Upgrade to Java 21 and Keycloak version 26.4.4
+
 ## Version [4.20.4]
 
 - Bugfix: Generate HMAC ID for licence deletion before user is deleted

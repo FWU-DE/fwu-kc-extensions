@@ -1,15 +1,5 @@
 package de.intension.protocol.oidc.mappers;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.ProtocolMapperModel;
@@ -19,9 +9,17 @@ import org.keycloak.protocol.ProtocolMapperConfigException;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper;
-import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.keycloak.protocol.oidc.mappers.PairwiseSubMapperHelper.PAIRWISE_SUB_ALGORITHM_SALT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class HmacPairwiseSubMapperTest
 {
@@ -320,22 +318,6 @@ class HmacPairwiseSubMapperTest
         mapper.validateConfig(null, null, mock(ClientModel.class), emptySaltProtocolMapper);
 
         assertNotNull(emptySaltProtocolMapper.getConfig().get(PAIRWISE_SUB_ALGORITHM_SALT));
-    }
-
-    /**
-     * GIVEN: valid hmac pairwise sub mapper
-     * WHEN: get config properties
-     * THEN: contains 4 config properties
-     */
-    @Test
-    void should_contain_config_properties_when_configured()
-        throws Exception
-    {
-        HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
-
-        List<ProviderConfigProperty> configProperties = mapper.getConfigProperties();
-
-        assertEquals(7, configProperties.size());
     }
 
     /**

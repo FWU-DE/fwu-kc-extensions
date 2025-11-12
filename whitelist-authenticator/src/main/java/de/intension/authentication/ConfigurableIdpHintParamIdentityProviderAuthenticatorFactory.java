@@ -1,6 +1,8 @@
 package de.intension.authentication;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.authenticators.browser.IdentityProviderAuthenticatorFactory;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.models.KeycloakSession;
@@ -8,6 +10,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.List;
 
+@AutoService(AuthenticatorFactory.class)
 public class ConfigurableIdpHintParamIdentityProviderAuthenticatorFactory
         extends IdentityProviderAuthenticatorFactory
 {

@@ -1,12 +1,14 @@
 package de.intension.authentication.authenticators.licence;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.intension.keycloak.IntensionKeycloakContainer;
 import de.intension.testhelper.KeycloakPage;
 import de.intension.testhelper.LicenceMockHelper;
 import org.junit.jupiter.api.*;
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.userprofile.config.UPConfig;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.mock.Expectation;
 import org.mockserver.verify.VerificationTimes;
@@ -23,15 +25,18 @@ import org.testcontainers.utility.DockerImageName;
 import java.io.File;
 import java.sql.*;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 /**
  * Please use the test order in the file to avoid changing configurations again and again
@@ -56,7 +61,9 @@ public class LicenceConnectAuthenticatorIT {
             .withNetworkAliases("postgres")
             .withDatabaseName("keycloak")
             .withUsername("keycloak")
-            .withPassword("test123");
+            .withPassword("test123")
+            .withEnv("TZ", "Europe/Berlin")
+            .withCommand("postgres", "-c", "timezone=Europe/Berlin");;
 
     @Container
     private static final MockServerContainer mockServer = new MockServerContainer(
@@ -65,7 +72,7 @@ public class LicenceConnectAuthenticatorIT {
             .withNetworkAliases("mockserver");
 
     @Container
-    private static final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:22.0.4")
+    private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
             .withContextPath("/auth")
@@ -80,12 +87,15 @@ public class LicenceConnectAuthenticatorIT {
             .withEnv("KC_DB_URL_HOST", "postgres")
             .withEnv("KC_DB_USERNAME", "keycloak")
             .withEnv("KC_DB_PASSWORD", "test123")
+            .withEnv("TZ", "Europe/Berlin")
+            .withEnv("JAVA_OPTS", "-Duser.timezone=Europe/Berlin")
             .dependsOn(postgres, mockServer);
 
     @Container
     private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
             .withCapabilities(capabilities)
             .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
+            .withEnv("TZ", "Europe/Berlin")
             .withNetwork(network);
 
     private static MockServerClient mockServerClient;
@@ -96,11 +106,16 @@ public class LicenceConnectAuthenticatorIT {
     @BeforeAll
     static void setupAll() {
         mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort());
+        Keycloak admin = keycloak.getKeycloakAdminClient();
+        var realm = admin.realm(REALM);
+        var upconfig = realm.users().userProfile().getConfiguration();
+        upconfig.setUnmanagedAttributePolicy(UPConfig.UnmanagedAttributePolicy.ENABLED);
+        realm.users().userProfile().update(upconfig);
     }
 
     @BeforeEach
     void setup() {
-        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities);
+        driver = new RemoteWebDriver(selenium.getSeleniumAddress(), capabilities, false);
         wait = new FluentWait<>(driver);
         wait.withTimeout(Duration.of(5, ChronoUnit.SECONDS));
         wait.pollingEvery(Duration.of(250, ChronoUnit.MILLIS));
@@ -194,12 +209,14 @@ public class LicenceConnectAuthenticatorIT {
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         statement
-                .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+                .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', LOCALTIMESTAMP, LOCALTIMESTAMP)");
         ResultSet resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
-        Timestamp updatedAt = resultSet.getTimestamp(1);
-        Timestamp createdAt = resultSet.getTimestamp(2);
+        LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);
+        LocalDateTime updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
         assertEquals(updatedAt, createdAt, "UPDATED_AT should be the same as CREATED_AT");
+
+        await().atMost(2, TimeUnit.SECONDS).until(insertIsDone());
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         KeycloakPage kcPage = KeycloakPage
@@ -219,14 +236,24 @@ public class LicenceConnectAuthenticatorIT {
         resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT, CONTENT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
         // Assert that UPDATED_AT is not the same as CREATED_AT
-        createdAt = resultSet.getTimestamp(1);
-        updatedAt = resultSet.getTimestamp(2);
+        createdAt = resultSet.getObject("created_at", LocalDateTime.class);
+        updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
+
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        assertThat(updatedAt.toLocalDateTime()).isAfter(createdAt.toLocalDateTime());
+        assertTrue(updatedAt.compareTo(createdAt) > 0, "UPDATED_AT should be after CREATED_AT");
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
         assertEquals(EXPECTED_LICENCES, persistedLicence, "Licence content does not match");
+    }
+
+    private Callable<Boolean> insertIsDone() {
+        return () -> {
+            Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT 1 FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
+            return resultSet.next();
+        };
     }
 
     /**
