@@ -6,7 +6,7 @@ services:
   # Login: misty/test
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:26.4.2
+    image: quay.io/keycloak/keycloak:26.4.4
     ports:
       - 18080:8080
       - 8787:8787

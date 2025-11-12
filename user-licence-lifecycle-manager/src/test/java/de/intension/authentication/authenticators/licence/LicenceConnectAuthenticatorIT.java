@@ -25,6 +25,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.io.File;
 import java.sql.*;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
 import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
@@ -61,7 +61,9 @@ public class LicenceConnectAuthenticatorIT {
             .withNetworkAliases("postgres")
             .withDatabaseName("keycloak")
             .withUsername("keycloak")
-            .withPassword("test123");
+            .withPassword("test123")
+            .withEnv("TZ", "Europe/Berlin")
+            .withCommand("postgres", "-c", "timezone=Europe/Berlin");;
 
     @Container
     private static final MockServerContainer mockServer = new MockServerContainer(
@@ -85,12 +87,15 @@ public class LicenceConnectAuthenticatorIT {
             .withEnv("KC_DB_URL_HOST", "postgres")
             .withEnv("KC_DB_USERNAME", "keycloak")
             .withEnv("KC_DB_PASSWORD", "test123")
+            .withEnv("TZ", "Europe/Berlin")
+            .withEnv("JAVA_OPTS", "-Duser.timezone=Europe/Berlin")
             .dependsOn(postgres, mockServer);
 
     @Container
     private static final BrowserWebDriverContainer<?> selenium = new BrowserWebDriverContainer<>()
             .withCapabilities(capabilities)
             .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.SKIP, null)
+            .withEnv("TZ", "Europe/Berlin")
             .withNetwork(network);
 
     private static MockServerClient mockServerClient;
@@ -204,11 +209,11 @@ public class LicenceConnectAuthenticatorIT {
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         Statement statement = connection.createStatement();
         statement
-                .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+                .executeUpdate("INSERT INTO LICENCE (HMAC_ID, CONTENT, CREATED_AT, UPDATED_AT) VALUES ('aece4884-4b58-391f-b83a-ad268906142a', 'Sample Licence Content', LOCALTIMESTAMP, LOCALTIMESTAMP)");
         ResultSet resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
-        Timestamp updatedAt = resultSet.getTimestamp(1);
-        Timestamp createdAt = resultSet.getTimestamp(2);
+        LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);
+        LocalDateTime updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
         assertEquals(updatedAt, createdAt, "UPDATED_AT should be the same as CREATED_AT");
 
         await().atMost(2, TimeUnit.SECONDS).until(insertIsDone());
@@ -231,16 +236,11 @@ public class LicenceConnectAuthenticatorIT {
         resultSet = statement.executeQuery("SELECT CREATED_AT, UPDATED_AT, CONTENT FROM LICENCE WHERE HMAC_ID = 'aece4884-4b58-391f-b83a-ad268906142a'");
         resultSet.next();
         // Assert that UPDATED_AT is not the same as CREATED_AT
-        createdAt = resultSet.getTimestamp(1);
-        updatedAt = resultSet.getTimestamp(2);
+        createdAt = resultSet.getObject("created_at", LocalDateTime.class);
+        updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
+
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        // This is a fix for some UTC to GMT +1 or +2 foo.
-        // Im unable to determine, which component here is wrong, BUT we can just compare minutes and seconds
-        if (updatedAt.toLocalDateTime().getMinute() == createdAt.toLocalDateTime().getMinute()) {
-            assertThat(updatedAt.toLocalDateTime().getSecond()).isGreaterThan(createdAt.toLocalDateTime().getSecond());
-        } else {
-            assertThat(updatedAt.toLocalDateTime().getMinute()).isGreaterThan(createdAt.toLocalDateTime().getMinute());
-        }
+        assertTrue(updatedAt.compareTo(createdAt) > 0, "UPDATED_AT should be after CREATED_AT");
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
