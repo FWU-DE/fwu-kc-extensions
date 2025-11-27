@@ -57,7 +57,7 @@ class WhitelistAuthenticatorIT {
         stub.start();
 
         // Start Keycloak with our provider and import realm
-        keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.4")
+        keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.4.6")
                 .withProviderClassesFrom("target/classes")
                 .withContextPath("/auth")
                 .withRealmImportFiles("whitelist_whitelist_realm.json")
