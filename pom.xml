@@ -31,8 +31,8 @@
   </modules>
 
   <properties>
-    <revision>5.0.0</revision>
-    <keycloak.version>26.4.4</keycloak.version>
+    <revision>5.0.1</revision>
+    <keycloak.version>26.4.6</keycloak.version>
     <keycloak.admin.client.version>26.0.7</keycloak.admin.client.version>
     <java.version>21</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
