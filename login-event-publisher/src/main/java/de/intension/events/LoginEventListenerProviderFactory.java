@@ -13,8 +13,9 @@ import de.intension.events.publishers.rabbitmq.RabbitMqEventPublisher;
 /**
  * Factory for the user login event listener
  *
- * @author kdeshpande
+ * @deprecated use {@link BMILoginEventListenerProviderFactory} instead
  */
+@Deprecated(since = "5.0.2", forRemoval = true)
 public class LoginEventListenerProviderFactory
     implements EventListenerProviderFactory
 {
