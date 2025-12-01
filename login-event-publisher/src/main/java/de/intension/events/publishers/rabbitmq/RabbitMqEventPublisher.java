@@ -15,10 +15,14 @@ import java.nio.charset.StandardCharsets;
 public class RabbitMqEventPublisher implements EventPublisher {
 
     private RabbitMqConnectionManager connectionManager;
-    
+
     private static final Logger logger = Logger.getLogger(RabbitMqEventPublisher.class);
     public static final String ROUTING_KEY_PREFIX = "KC.EVENT.";
 
+    /**
+     * @deprecated No longer used, routing key for BMI is null
+     */
+    @Deprecated(since = "5.0.2", forRemoval = true)
     // Returns routing key in the format KC.EVENT.EVENT_TYPE
     public static String calculateRoutingKey(LoginEvent event) {
         return event instanceof DetailedLoginEvent ? ROUTING_KEY_PREFIX + ((DetailedLoginEvent) event).getType() : null;

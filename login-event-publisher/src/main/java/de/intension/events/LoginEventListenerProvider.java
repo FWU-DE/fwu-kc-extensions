@@ -17,8 +17,9 @@ import java.util.List;
 /**
  * Provider for the user login event in Keycloak
  *
- * @author kdeshpande
+ * @deprecated Use {@link BMILoginEventListenerProvider} instead
  */
+@Deprecated(since = "5.0.2", forRemoval = true)
 public class LoginEventListenerProvider
     implements EventListenerProvider
 {

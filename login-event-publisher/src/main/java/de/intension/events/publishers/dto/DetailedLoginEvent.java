@@ -9,8 +9,12 @@ import lombok.Setter;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @deprecated since 5.0.2, use {@link BMILoginEvent} instead
+ */
 @Getter
 @Setter
+@Deprecated(since = "5.0.2", forRemoval = true)
 public class DetailedLoginEvent
         implements LoginEvent {
 
