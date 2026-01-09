@@ -30,6 +30,7 @@ import static de.intension.rest.licence.model.LicenseConstants.*;
 public class LicenceConnectAuthenticator
         implements Authenticator {
 
+    private static final String SCHOOLIDS_ATTRIBUTE = "schoolids-attribute";
     private static final Logger logger = Logger.getLogger(LicenceConnectAuthenticator.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final int PART_SIZE = 255;
@@ -60,13 +61,16 @@ public class LicenceConnectAuthenticator
     private void fetchUserLicenses(String licenseType, Map<String, String> queryParams, UserModel user, String client, AuthenticationFlowContext context, LicenceConnectRestClient restClient) {
         String userLicences = null;
         try {
+            String schoolIdsAttribute = getSchoolIdsAttributeName(context);
+            String schoolIds = user.getFirstAttribute(schoolIdsAttribute);
             if (BILO_LICENSE_CLIENTS.equals(licenseType)) {
-                populateUcsQueryParams(queryParams, user, client);
-                userLicences = restClient.getUcsLicences(queryParams);
+                queryParams.put(SCHULKENNUNG, schoolIds);
+                queryParams.put(CLIENT_ID, client);
             } else if (GENERIC_LICENSE_CLIENTS.equals(licenseType)) {
-                populateLicenseConnectQueryParams(queryParams, user, client);
-                userLicences = restClient.getLicences(queryParams);
+                queryParams.put(SCHULNUMMER, schoolIds);
+                queryParams.put(CLIENT_NAME, client);
             }
+            userLicences = restClient.getLicences(queryParams);
         } catch (IllegalArgumentException ex) {
             logger.errorf("User missing parameters %s", ex.getMessage());
         } catch (WebApplicationException | IOException ex) {
@@ -81,6 +85,21 @@ public class LicenceConnectAuthenticator
             this.persistUserLicense(context, user, userLicences);
         }
 
+    }
+
+    private static String getSchoolIdsAttributeName(AuthenticationFlowContext context) {
+        String defaultValue = "prefixedSchools";
+        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
+        if (authenticatorConfig == null) {
+            logger.warnf("No authenticator config found, using default value %s", defaultValue);
+            return defaultValue;
+        }
+        Map<String, String> config = authenticatorConfig.getConfig();
+        if (config == null || config.isEmpty()) {
+            logger.warnf("No config map inside config %s, using default value %s", authenticatorConfig.getAlias(), defaultValue);
+            return defaultValue;
+        }
+        return config.get(SCHOOLIDS_ATTRIBUTE);
     }
 
     private Optional<String> checkLicenseType(AuthenticationFlowContext context, String clientName) {
@@ -100,17 +119,6 @@ public class LicenceConnectAuthenticator
             String userId = idp.get().getUserId();
             queryParams.put(USER_ID, userId);
         }
-    }
-
-    private void populateUcsQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
-        queryParams.put(SCHULKENNUNG, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
-        queryParams.put(CLIENT_ID, clientId);
-    }
-
-    private void populateLicenseConnectQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
-        // TODO: Add the params for the standortnummer
-        queryParams.put(SCHULNUMMER, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
-        queryParams.put(CLIENT_NAME, clientId);
     }
 
     private void persistUserLicense(AuthenticationFlowContext context, UserModel user, String userLicence) {
