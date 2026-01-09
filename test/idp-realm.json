@@ -336,7 +336,7 @@
       "protocol": "openid-connect",
       "protocolMappers": [
         {
-          "name": "Test",
+          "name": "School ids",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
@@ -347,6 +347,21 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "schools",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "Bundesland",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "false",
+            "user.attribute": "bundesland",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "bundesland",
             "jsonType.label": "String"
           }
         },
