@@ -30,7 +30,6 @@ import static de.intension.rest.licence.model.LicenseConstants.*;
 public class LicenceConnectAuthenticator
         implements Authenticator {
 
-    private static final String SCHOOLIDS_ATTRIBUTE = "schoolids-attribute";
     private static final Logger logger = Logger.getLogger(LicenceConnectAuthenticator.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final int PART_SIZE = 255;
@@ -99,7 +98,7 @@ public class LicenceConnectAuthenticator
             logger.warnf("No config map inside config %s, using default value %s", authenticatorConfig.getAlias(), defaultValue);
             return defaultValue;
         }
-        return config.get(SCHOOLIDS_ATTRIBUTE);
+        return config.get(LicenceConnectAuthenticatorFactory.SCHOOLIDS_ATTRIBUTE);
     }
 
     private Optional<String> checkLicenseType(AuthenticationFlowContext context, String clientName) {

@@ -14,14 +14,23 @@ import java.util.List;
 public class LicenceConnectAuthenticatorFactory
         implements AuthenticatorFactory {
 
-    public static final String PROVIDER_ID                = "licence-connect-authenticator";
-    public static final String BILO_LICENSE_CLIENTS    = "bilo-license-clients";
+    public static final String PROVIDER_ID = "licence-connect-authenticator";
+    public static final String SCHOOLIDS_ATTRIBUTE = "schoolids-attribute";
+    public static final String BILO_LICENSE_CLIENTS = "bilo-license-clients";
     public static final String GENERIC_LICENSE_CLIENTS = "license-controller-clients";
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
         ProviderConfigProperty property;
+        property = new ProviderConfigProperty();
+        property.setName(SCHOOLIDS_ATTRIBUTE);
+        property.setLabel("School ID Attribute");
+        property.setDefaultValue("prefixedSchools");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setHelpText("Attribute name which contains school ids.");
+        configProperties.add(property);
+
         property = new ProviderConfigProperty();
         property.setName(BILO_LICENSE_CLIENTS);
         property.setLabel("Clients fetching license from bilo");

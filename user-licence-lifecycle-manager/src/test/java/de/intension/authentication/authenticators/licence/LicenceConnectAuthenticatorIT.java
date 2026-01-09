@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.*;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
@@ -171,11 +170,12 @@ public class LicenceConnectAuthenticatorIT {
         AuthenticatorConfigRepresentation authConfig = keycloak.getKeycloakAdminClient().realms().realm(REALM).flows()
                 .getAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193");
         Map<String, String> config = authConfig.getConfig();
+        config.put(SCHOOLIDS_ATTRIBUTE, "example");
         config.put(GENERIC_LICENSE_CLIENTS, "client1");
         config.put(BILO_LICENSE_CLIENTS, "account-console");
         authConfig.setConfig(config);
         keycloak.getKeycloakAdminClient().realms().realm(REALM).flows().updateAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193", authConfig);
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
@@ -220,7 +220,7 @@ public class LicenceConnectAuthenticatorIT {
         await().atMost(2, TimeUnit.SECONDS).until(insertIsDone());
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 // when
