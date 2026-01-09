@@ -49,11 +49,13 @@ public class LicenceConnectAuthenticator
         var client = context.getAuthenticationSession().getClient().getClientId();
         Optional<String> licenseType = checkLicenseType(context, client);
         if (licenseType.isPresent()) {
+            String licenseTypeValue = licenseType.get();
             LicenceConnectRestClient restClient = context.getSession().getProvider(RestClientProvider.class).getLicenseConnectRestClient();
             UserModel user = context.getUser();
             Map<String, String> queryParams = new HashMap<>();
             populateCommonQueryParams(queryParams, context, user);
-            this.fetchUserLicenses(licenseType.get(), queryParams, user, client, context, restClient);
+            logger.debugf("Fetching user licenses for client '%s' and license type '%s'", client, licenseTypeValue);
+            this.fetchUserLicenses(licenseTypeValue, queryParams, user, client, context, restClient);
         }
     }
 

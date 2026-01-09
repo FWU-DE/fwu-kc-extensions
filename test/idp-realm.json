@@ -20,6 +20,12 @@
           "0815",
           "1337",
           "415"
+        ],
+        "clientName": [
+          "account-console"
+        ],
+        "bundesland": [
+          "BW"
         ]
       }
     }
