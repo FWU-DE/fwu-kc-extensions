@@ -170,7 +170,7 @@ public class LicenceConnectAuthenticatorIT {
         AuthenticatorConfigRepresentation authConfig = keycloak.getKeycloakAdminClient().realms().realm(REALM).flows()
                 .getAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193");
         Map<String, String> config = authConfig.getConfig();
-        config.put(SCHOOLIDS_ATTRIBUTE, "example");
+        config.put(SCHOOLIDS_ATTRIBUTE, "prefixedSchools");
         config.put(GENERIC_LICENSE_CLIENTS, "client1");
         config.put(BILO_LICENSE_CLIENTS, "account-console");
         authConfig.setConfig(config);
