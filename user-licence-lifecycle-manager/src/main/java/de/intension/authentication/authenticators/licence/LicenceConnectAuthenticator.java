@@ -8,14 +8,12 @@ import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.rest.licence.client.LicenceConnectRestClient;
 import de.intension.spi.RestClientProvider;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.*;
-import org.keycloak.services.ErrorPage;
 import org.keycloak.utils.StringUtil;
 
 import java.io.IOException;
@@ -131,14 +129,10 @@ public class LicenceConnectAuthenticator
 
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context) {
         RealmModel realm = context.getRealm();
-        Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
+        IdentityProviderStorageProvider idpProvider = context.getSession().getProvider(IdentityProviderStorageProvider.class);
+        Set<String> idps = idpProvider.getAllStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
         return context.getSession().users().getFederatedIdentitiesStream(realm, user)
                 .filter(identity -> idps.contains(identity.getIdentityProvider()));
-    }
-
-    protected Response createErrorPage(AuthenticationFlowContext context) {
-        return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                Response.Status.FORBIDDEN, "There is no licence associated with user");
     }
 
     @Override
