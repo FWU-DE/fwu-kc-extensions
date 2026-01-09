@@ -63,7 +63,8 @@ public class LicenceConnectAuthenticatorIT {
             .withUsername("keycloak")
             .withPassword("test123")
             .withEnv("TZ", "Europe/Berlin")
-            .withCommand("postgres", "-c", "timezone=Europe/Berlin");;
+            .withCommand("postgres", "-c", "timezone=Europe/Berlin");
+    ;
 
     @Container
     private static final MockServerContainer mockServer = new MockServerContainer(
@@ -133,7 +134,7 @@ public class LicenceConnectAuthenticatorIT {
         // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
@@ -141,10 +142,10 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE + "1");
         assertFalse(attributes.isEmpty());
-        String licenceAttribute = attributes.get(0);
+        String licenceAttribute = attributes.getFirst();
         assertEquals(EXPECTED_LICENCES, licenceAttribute);
         mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -182,10 +183,10 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE + "1");
         assertFalse(attributes.isEmpty());
-        String licenceAttribute = attributes.get(0);
+        String licenceAttribute = attributes.getFirst();
         assertEquals(EXPECTED_LICENCES_BILO, licenceAttribute);
         mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -240,7 +241,7 @@ public class LicenceConnectAuthenticatorIT {
         updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
 
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        assertTrue(updatedAt.compareTo(createdAt) > 0, "UPDATED_AT should be after CREATED_AT");
+        assertTrue(updatedAt.isAfter(createdAt), "UPDATED_AT should be after CREATED_AT");
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
@@ -274,7 +275,7 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE);
         assertNull(attributes);
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -290,7 +291,7 @@ public class LicenceConnectAuthenticatorIT {
         Statement statement = connection.createStatement();
         statement.executeUpdate("DELETE FROM Licence");
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        UserRepresentation idpUser = usersResource.searchByUsername("idpuser", true).get(0);
+        UserRepresentation idpUser = usersResource.searchByUsername("idpuser", true).getFirst();
         usersResource.delete(idpUser.getId());
     }
 
