@@ -89,6 +89,7 @@ public class LicenceConnectAuthenticatorIT {
             .withEnv("KC_DB_PASSWORD", "test123")
             .withEnv("TZ", "Europe/Berlin")
             .withEnv("JAVA_OPTS", "-Duser.timezone=Europe/Berlin")
+            .withEnv("KC_LOG_LEVEL", "INFO,de.intension:debug")
             .dependsOn(postgres, mockServer);
 
     @Container
