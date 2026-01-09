@@ -28,7 +28,7 @@ public class LicenceConnectAuthenticatorFactory
         property.setLabel("School ID Attribute");
         property.setDefaultValue("prefixedSchools");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("Attribute name which contains school ids.");
+        property.setHelpText("User attribute which contains school ids.");
         configProperties.add(property);
 
         property = new ProviderConfigProperty();
