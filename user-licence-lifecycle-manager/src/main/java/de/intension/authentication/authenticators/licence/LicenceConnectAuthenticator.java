@@ -67,11 +67,12 @@ public class LicenceConnectAuthenticator
             if (BILO_LICENSE_CLIENTS.equals(licenseType)) {
                 queryParams.put(SCHULKENNUNG, schoolIds);
                 queryParams.put(CLIENT_ID, client);
+                userLicences = restClient.getUcsLicences(queryParams);
             } else if (GENERIC_LICENSE_CLIENTS.equals(licenseType)) {
                 queryParams.put(SCHULNUMMER, schoolIds);
                 queryParams.put(CLIENT_NAME, client);
+                userLicences = restClient.getLicences(queryParams);
             }
-            userLicences = restClient.getLicences(queryParams);
         } catch (IllegalArgumentException ex) {
             logger.errorf("User missing parameters %s", ex.getMessage());
         } catch (WebApplicationException | IOException ex) {
