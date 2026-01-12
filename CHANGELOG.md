@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [5.1.0]
+
+- Added: Make schoold ids configurable in Licence Connect authenticator
+
 ## Version [5.0.1]
 
 - Changed: Upgrade to Java 21 and Keycloak version 26.4.6
