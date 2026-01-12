@@ -2181,6 +2181,17 @@
       }
     },
     {
+      "id": "05c6476e-27d8-430e-bada-533130dfc152",
+      "name": "Bundesland",
+      "identityProviderAlias": "keycloak-oidc",
+      "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "claim": "bundesland",
+        "user.attribute": "bundesland"
+      }
+    },
+    {
       "id": "f8b8b08c-a08b-4dd8-aa32-0a1f882e150b",
       "name": "Test",
       "identityProviderAlias": "keycloak-saml",
@@ -3552,6 +3563,7 @@
       "id": "a8f647a4-a0dc-4927-b551-bf7317a35398",
       "alias": "License connect",
       "config": {
+        "schoolids-attribute": "prefixedSchools",
         "license-controller-clients": "client3",
         "bilo-license-clients": "client1,client2,account-console"
       }

@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.*;
 import static de.intension.rest.licence.model.LicenseConstants.LICENCE_ATTRIBUTE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
@@ -63,7 +62,8 @@ public class LicenceConnectAuthenticatorIT {
             .withUsername("keycloak")
             .withPassword("test123")
             .withEnv("TZ", "Europe/Berlin")
-            .withCommand("postgres", "-c", "timezone=Europe/Berlin");;
+            .withCommand("postgres", "-c", "timezone=Europe/Berlin");
+    ;
 
     @Container
     private static final MockServerContainer mockServer = new MockServerContainer(
@@ -89,6 +89,7 @@ public class LicenceConnectAuthenticatorIT {
             .withEnv("KC_DB_PASSWORD", "test123")
             .withEnv("TZ", "Europe/Berlin")
             .withEnv("JAVA_OPTS", "-Duser.timezone=Europe/Berlin")
+            .withEnv("KC_LOG_LEVEL", "INFO,de.intension:debug")
             .dependsOn(postgres, mockServer);
 
     @Container
@@ -133,7 +134,7 @@ public class LicenceConnectAuthenticatorIT {
         // given
         Expectation requestLicence = LicenceMockHelper.requestLicenceExpectation(mockServerClient);
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
@@ -141,10 +142,10 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE + "1");
         assertFalse(attributes.isEmpty());
-        String licenceAttribute = attributes.get(0);
+        String licenceAttribute = attributes.getFirst();
         assertEquals(EXPECTED_LICENCES, licenceAttribute);
         mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -170,11 +171,12 @@ public class LicenceConnectAuthenticatorIT {
         AuthenticatorConfigRepresentation authConfig = keycloak.getKeycloakAdminClient().realms().realm(REALM).flows()
                 .getAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193");
         Map<String, String> config = authConfig.getConfig();
+        config.put(SCHOOLIDS_ATTRIBUTE, "prefixedSchools");
         config.put(GENERIC_LICENSE_CLIENTS, "client1");
         config.put(BILO_LICENSE_CLIENTS, "account-console");
         authConfig.setConfig(config);
         keycloak.getKeycloakAdminClient().realms().realm(REALM).flows().updateAuthenticatorConfig("443d2a41-f72a-41fe-af08-a5888ec1c193", authConfig);
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 .idpLogin("idpuser", "test");
@@ -182,10 +184,10 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE + "1");
         assertFalse(attributes.isEmpty());
-        String licenceAttribute = attributes.get(0);
+        String licenceAttribute = attributes.getFirst();
         assertEquals(EXPECTED_LICENCES_BILO, licenceAttribute);
         mockServerClient.verify(requestLicence.getId(), VerificationTimes.once());
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -219,7 +221,7 @@ public class LicenceConnectAuthenticatorIT {
         await().atMost(2, TimeUnit.SECONDS).until(insertIsDone());
 
         LicenceMockHelper.requestLicenceExpectation(mockServerClient);
-        KeycloakPage kcPage = KeycloakPage
+        KeycloakPage
                 .start(driver, wait)
                 .openAccountConsole()
                 // when
@@ -240,7 +242,7 @@ public class LicenceConnectAuthenticatorIT {
         updatedAt = resultSet.getObject("updated_at", LocalDateTime.class);
 
         assertNotEquals(updatedAt, createdAt, "UPDATED_AT should not be the same as CREATED_AT");
-        assertTrue(updatedAt.compareTo(createdAt) > 0, "UPDATED_AT should be after CREATED_AT");
+        assertTrue(updatedAt.isAfter(createdAt), "UPDATED_AT should be after CREATED_AT");
 
         // Assert the content is as expected
         String persistedLicence = resultSet.getString(3);
@@ -274,7 +276,7 @@ public class LicenceConnectAuthenticatorIT {
         // then
         List<UserRepresentation> idpUsers = usersResource.searchByUsername("idpuser", true);
         assertFalse(idpUsers.isEmpty());
-        UserRepresentation idpUser = idpUsers.get(0);
+        UserRepresentation idpUser = idpUsers.getFirst();
         List<String> attributes = idpUser.getAttributes().get(LICENCE_ATTRIBUTE);
         assertNull(attributes);
         Connection connection = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
@@ -290,7 +292,7 @@ public class LicenceConnectAuthenticatorIT {
         Statement statement = connection.createStatement();
         statement.executeUpdate("DELETE FROM Licence");
         UsersResource usersResource = keycloak.getKeycloakAdminClient().realms().realm(REALM).users();
-        UserRepresentation idpUser = usersResource.searchByUsername("idpuser", true).get(0);
+        UserRepresentation idpUser = usersResource.searchByUsername("idpuser", true).getFirst();
         usersResource.delete(idpUser.getId());
     }
 

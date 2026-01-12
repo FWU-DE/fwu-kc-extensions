@@ -1,11 +1,7 @@
 package de.intension.authentication;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import de.intension.authentication.rest.IdPAssignmentsClient;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -22,8 +18,11 @@ import org.keycloak.services.ErrorPage;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.utils.StringUtil;
 
-import de.intension.authentication.rest.IdPAssignmentsClient;
-import jakarta.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Check IdP hint against a configured whitelist.
@@ -187,7 +186,7 @@ public class WhitelistAuthenticator
                 List<String> allowedIdPs = client.getListOfAllowedIdPs(clientId, apiRealm, apiClientId, apiClientSecret);
                 logger.tracef("Retrieve allowed IDPs using client %s, realm %s, secret %s from %s", apiClientId, apiRealm, apiClientSecret.substring(0, 3),
                               client.getUrl());
-                logger.debugf("Retrieved allowed IDPs %s for sp %s from %s", allowedIdPs, providerId);
+                logger.debugf("Retrieved allowed IDPs %s for provider %s", allowedIdPs, providerId);
                 if (allowedIdPs != null && allowedIdPs.contains(providerId)) {
                     isAllowed = true;
                 }

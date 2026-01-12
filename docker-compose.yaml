@@ -6,12 +6,15 @@ services:
   # Login: misty/test
   keycloak:
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:26.4.6
+    build:
+      context: .
+      dockerfile: test/Dockerfile
     ports:
       - 18080:8080
       - 8787:8787
     restart: always
     environment:
+      KC_LOG_LEVEL: INFO,de.intension:debug
       KC_HTTP_RELATIVE_PATH: "/auth"
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: keycloak
@@ -48,20 +51,17 @@ services:
     command: [ "start-dev", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false", "--spi-theme-cache-templates=false" ]
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      #    - realms
+      # realms
       - "./test/fwu-realm.json:/opt/keycloak/data/import/fwu-realm.json"
       - "./test/whitelist_realm.json:/opt/keycloak/data/import/whitelist_realm.json"
       - "./test/idp-realm.json:/opt/keycloak/data/import/idp-realm.json"
       - "./test/idp2_realm.json:/opt/keycloak/data/import/idp2_realm.json"
       - "./test/management-realm.json:/opt/keycloak/data/import/management-realm.json"
-      #    - themes
+      # themes
       #      - "../keycloak-themes/fwu-base-theme:/opt/keycloak/themes/fwu-base-theme"
       #      - "../keycloak-themes/fwu-idp-theme:/opt/keycloak/themes/fwu-idp-theme"
       #      - "../keycloak-themes/fwu-vidis-button-theme:/opt/keycloak/themes/fwu-vidis-button-theme"
       #      - "../keycloak-themes/fwu-vidis-theme:/opt/keycloak/themes/fwu-vidis-theme"
-      #    - extensions
-      - "./target:/opt/keycloak/providers/"
-      - "./test/lib/keycloak-custom-attribute-idp-linking-2.1.0.jar:/opt/keycloak/providers/keycloak-custom-attribute-idp-linking-2.1.0.jar"
     networks:
       - fwunet
     depends_on:

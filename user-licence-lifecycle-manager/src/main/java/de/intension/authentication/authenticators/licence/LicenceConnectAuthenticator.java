@@ -8,14 +8,12 @@ import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapperHelper;
 import de.intension.rest.licence.client.LicenceConnectRestClient;
 import de.intension.spi.RestClientProvider;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.*;
-import org.keycloak.services.ErrorPage;
 import org.keycloak.utils.StringUtil;
 
 import java.io.IOException;
@@ -51,22 +49,28 @@ public class LicenceConnectAuthenticator
         var client = context.getAuthenticationSession().getClient().getClientId();
         Optional<String> licenseType = checkLicenseType(context, client);
         if (licenseType.isPresent()) {
+            String licenseTypeValue = licenseType.get();
             LicenceConnectRestClient restClient = context.getSession().getProvider(RestClientProvider.class).getLicenseConnectRestClient();
             UserModel user = context.getUser();
             Map<String, String> queryParams = new HashMap<>();
             populateCommonQueryParams(queryParams, context, user);
-            this.fetchUserLicenses(licenseType.get(), queryParams, user, client, context, restClient);
+            logger.debugf("Fetching user licenses for client '%s' and license type '%s'", client, licenseTypeValue);
+            this.fetchUserLicenses(licenseTypeValue, queryParams, user, client, context, restClient);
         }
     }
 
     private void fetchUserLicenses(String licenseType, Map<String, String> queryParams, UserModel user, String client, AuthenticationFlowContext context, LicenceConnectRestClient restClient) {
         String userLicences = null;
         try {
+            String schoolIdsAttribute = getSchoolIdsAttributeName(context);
+            String schoolIds = user.getFirstAttribute(schoolIdsAttribute);
             if (BILO_LICENSE_CLIENTS.equals(licenseType)) {
-                populateUcsQueryParams(queryParams, user, client);
+                queryParams.put(SCHULKENNUNG, schoolIds);
+                queryParams.put(CLIENT_ID, client);
                 userLicences = restClient.getUcsLicences(queryParams);
             } else if (GENERIC_LICENSE_CLIENTS.equals(licenseType)) {
-                populateLicenseConnectQueryParams(queryParams, user, client);
+                queryParams.put(SCHULNUMMER, schoolIds);
+                queryParams.put(CLIENT_NAME, client);
                 userLicences = restClient.getLicences(queryParams);
             }
         } catch (IllegalArgumentException ex) {
@@ -83,6 +87,21 @@ public class LicenceConnectAuthenticator
             this.persistUserLicense(context, user, userLicences);
         }
 
+    }
+
+    private static String getSchoolIdsAttributeName(AuthenticationFlowContext context) {
+        String defaultValue = "prefixedSchools";
+        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
+        if (authenticatorConfig == null) {
+            logger.warnf("No authenticator config found, using default value %s", defaultValue);
+            return defaultValue;
+        }
+        Map<String, String> config = authenticatorConfig.getConfig();
+        if (config == null || config.isEmpty()) {
+            logger.warnf("No config map inside config %s, using default value %s", authenticatorConfig.getAlias(), defaultValue);
+            return defaultValue;
+        }
+        return config.get(LicenceConnectAuthenticatorFactory.SCHOOLIDS_ATTRIBUTE);
     }
 
     private Optional<String> checkLicenseType(AuthenticationFlowContext context, String clientName) {
@@ -104,17 +123,6 @@ public class LicenceConnectAuthenticator
         }
     }
 
-    private void populateUcsQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
-        queryParams.put(SCHULKENNUNG, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
-        queryParams.put(CLIENT_ID, clientId);
-    }
-
-    private void populateLicenseConnectQueryParams(Map<String, String> queryParams, UserModel user, String clientId) {
-        // TODO: Add the params for the standortnummer
-        queryParams.put(SCHULNUMMER, user.getFirstAttribute(SCHOOL_IDENTIFICATION_ATTRIBUTE));
-        queryParams.put(CLIENT_NAME, clientId);
-    }
-
     private void persistUserLicense(AuthenticationFlowContext context, UserModel user, String userLicence) {
         var hmacMapper = context.getAuthenticationSession().getClient().getProtocolMappersStream()
                 .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
@@ -131,14 +139,10 @@ public class LicenceConnectAuthenticator
 
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context) {
         RealmModel realm = context.getRealm();
-        Set<String> idps = realm.getIdentityProvidersStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
+        IdentityProviderStorageProvider idpProvider = context.getSession().getProvider(IdentityProviderStorageProvider.class);
+        Set<String> idps = idpProvider.getAllStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
         return context.getSession().users().getFederatedIdentitiesStream(realm, user)
                 .filter(identity -> idps.contains(identity.getIdentityProvider()));
-    }
-
-    protected Response createErrorPage(AuthenticationFlowContext context) {
-        return ErrorPage.error(context.getSession(), context.getAuthenticationSession(),
-                Response.Status.FORBIDDEN, "There is no licence associated with user");
     }
 
     @Override

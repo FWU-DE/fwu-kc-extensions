@@ -2573,6 +2573,7 @@
       "id": "443d2a41-f72a-41fe-af08-a5888ec1c193",
       "alias": "Licence Connect",
       "config": {
+        "schoolids-attribute": "prefixedSchools",
         "license-controller-clients": "client3,account-console",
         "bilo-license-clients": "client1,client2"
       }
