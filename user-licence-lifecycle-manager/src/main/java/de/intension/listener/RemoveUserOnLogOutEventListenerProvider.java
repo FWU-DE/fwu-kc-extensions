@@ -52,36 +52,59 @@ public class RemoveUserOnLogOutEventListenerProvider
      * hava a running jpa-transaction
      */
     private void removeUser(Event event) {
-        KeycloakModelUtils.runJobInTransaction(keycloakSession.getKeycloakSessionFactory(), session -> {
-            RealmModel realm = session.getContext().getRealm();
-            if (realm == null) {
-                realm = session.realms().getRealm(event.getRealmId());
-                session.getContext().setRealm(realm);
-            }
-            if (session.getContext().getClient() == null) {
-                // needed for RemoveLicenceOnLogOutEventListener
-                session.getContext().setClient(keycloakSession.getContext().getClient());
-            }
-            UserManager userManager = new UserManager(session);
-
-            UserModel userToDelete = findUserForDeletion(session, event.getUserId());
-            if (userToDelete != null) {
-                String hmacId = null;
-                String username = userToDelete.getUsername();
-                var hmacMapper = keycloakSession.getContext().getClient().getProtocolMappersStream()
-                        .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
-                if (hmacMapper.isPresent()) {
-                    hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), userToDelete);
-                }
-                if (userManager.removeUser(realm, userToDelete)) {
-                    LOG.infof("User %s removed.", userToDelete.getUsername());
-                    if (hmacId != null) {
-                        keycloakSession.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
-                        LOG.infof("User licence has been removed from the database for user %s", username);
+        try {
+            KeycloakModelUtils.runJobInTransaction(keycloakSession.getKeycloakSessionFactory(), session -> {
+                try {
+                    LOG.debugf("Starting user deletion for userId=%s, realmId=%s, clientId=%s", 
+                               event.getUserId(), event.getRealmId(), event.getClientId());
+                    
+                    RealmModel realm = session.getContext().getRealm();
+                    if (realm == null) {
+                        realm = session.realms().getRealm(event.getRealmId());
+                        if (realm == null) {
+                            LOG.warnf("Realm not found for realmId=%s, cannot delete user", event.getRealmId());
+                            return;
+                        }
+                        session.getContext().setRealm(realm);
                     }
+                    
+                    UserManager userManager = new UserManager(session);
+
+                    UserModel userToDelete = findUserForDeletion(session, event.getUserId());
+                    if (userToDelete != null) {
+                        String hmacId = null;
+                        String username = userToDelete.getUsername();
+                        
+                        // Get client from the new session using clientId from event
+                        var client = session.clients().getClientByClientId(realm, event.getClientId());
+                        if (client != null) {
+                            var hmacMapper = client.getProtocolMappersStream()
+                                    .filter(mapper -> HmacPairwiseSubMapper.PROTOCOL_MAPPER_ID.equals(mapper.getProtocolMapper())).findFirst();
+                            if (hmacMapper.isPresent()) {
+                                hmacId = HmacPairwiseSubMapperHelper.generateIdentifier(hmacMapper.get(), userToDelete);
+                            }
+                        } else {
+                            LOG.warnf("Client not found for clientId=%s, proceeding without HMAC deletion", event.getClientId());
+                        }
+                        
+                        LOG.debugf("Removing user %s from realm %s", username, realm.getName());
+                        if (userManager.removeUser(realm, userToDelete)) {
+                            LOG.infof("User %s removed.", userToDelete.getUsername());
+                            if (hmacId != null) {
+                                session.getProvider(LicenceJpaProvider.class).deleteLicence(hmacId);
+                                LOG.infof("User licence has been removed from the database for user %s", username);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.errorf(e, "Failed to delete user in transaction for userId=%s, realmId=%s, clientId=%s", 
+                               event.getUserId(), event.getRealmId(), event.getClientId());
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to start transaction for user deletion: userId=%s, realmId=%s, clientId=%s", 
+                       event.getUserId(), event.getRealmId(), event.getClientId());
+        }
     }
 
     private UserModel findUserForDeletion(KeycloakSession keycloakSession, String userId) {
