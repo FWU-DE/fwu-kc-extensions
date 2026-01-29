@@ -80,10 +80,6 @@ public class LicenceConnectAuthenticator
         }
         if (!StringUtil.isBlank(userLicences)) {
             logger.infof("User license found for the user %s from the license type %s", user.getUsername(), licenseType);
-/*            for (int i = 0; i < userLicences.length(); i += PART_SIZE) {
-                String partValue = userLicences.substring(i, Math.min(userLicences.length(), i + PART_SIZE));
-                user.setAttribute(LICENCE_ATTRIBUTE + (i / PART_SIZE + 1), List.of(partValue));
-            } */
             this.persistUserLicense(context, user, userLicences);
         }
 
