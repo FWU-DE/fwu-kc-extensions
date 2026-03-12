@@ -72,7 +72,7 @@ public class LicenceConnectRestClient {
         }
 
         String url = String.format("%s/%s", licenceRestUri, LC_REQUEST_PATH);
-        String requestString = url + "&" + String.join("?", queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue()).toList());
+        String requestString = url + "?" + String.join("&", queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue()).toList());
         LOG.debugf("Requesting licenses with url: %s", requestString);
         SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
         addConfig(simpleHttp, queryParams);
