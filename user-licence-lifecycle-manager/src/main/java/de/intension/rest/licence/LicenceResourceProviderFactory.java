@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class LicenceResourceProviderFactory implements RealmResourceProviderFactory {
 
     private String schoolIdsAttribute;
+    private static final String DEFAULT_SCHOOL_IDS_ATTRIBUTE = "prefixedSchools";
     
     @Override
     public RealmResourceProvider create(KeycloakSession keycloakSession) {
@@ -24,7 +25,7 @@ public class LicenceResourceProviderFactory implements RealmResourceProviderFact
 
     @Override
     public void init(Config.Scope scope) {
-            schoolIdsAttribute = scope.get(ConfigConstant.SCHOOL_IDS_ATTRIBUTE.asString());
+        schoolIdsAttribute = scope.get(ConfigConstant.SCHOOL_IDS_ATTRIBUTE.asString(), DEFAULT_SCHOOL_IDS_ATTRIBUTE);
     }
 
     @Override

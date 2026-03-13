@@ -35,23 +35,15 @@ import jakarta.ws.rs.core.MediaType;
 public class LicenceResourceProvider implements RealmResourceProvider {
 
     private static final Logger logger = Logger.getLogger(LicenceResourceProvider.class);
-    private static final String DEFAULT_SCHOOL_IDS_ATTRIBUTE = "prefixedSchools";
 
-    private String                schoolIdsAttribute           = DEFAULT_SCHOOL_IDS_ATTRIBUTE;
+    private String                schoolIdsAttribute;
 
     private final KeycloakSession session;
-
-    public LicenceResourceProvider(KeycloakSession session)
-    {
-        this.session = session;
-    }
 
     public LicenceResourceProvider(KeycloakSession session, String schoolIdsAttribute)
     {
         this.session = session;
-        if (schoolIdsAttribute != null && !schoolIdsAttribute.isBlank()) {
-            this.schoolIdsAttribute = schoolIdsAttribute;
-        }
+        this.schoolIdsAttribute = schoolIdsAttribute;
     }
 
     /**
