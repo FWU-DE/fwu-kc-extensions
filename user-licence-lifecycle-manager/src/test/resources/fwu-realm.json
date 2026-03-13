@@ -34,6 +34,32 @@
           "value": "test"
         }
       ]
+    },
+    {
+      "username": "ash",
+      "enabled": true,
+      "email": "",
+      "firstName": "Ash",
+      "lastName": "",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test"
+        }
+      ],
+      "attributes": {
+        "bundesland": [
+          "de-NI"
+        ],
+        "schulkennung": [
+          "DE-NI-Schullogin.1234"
+        ]
+      },
+      "clientRoles": {
+        "account": [
+          "manage-account"
+        ]
+      }
     }
   ],
   "notBefore": 0,

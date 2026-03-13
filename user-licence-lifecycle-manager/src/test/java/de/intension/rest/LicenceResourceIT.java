@@ -1,24 +1,13 @@
 package de.intension.rest;
 
-import de.intension.keycloak.IntensionKeycloakContainer;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockserver.client.MockServerClient;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.testcontainers.containers.*;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.utility.DockerImageName;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.keycloak.OAuth2Constants.CLIENT_ID;
+import static org.keycloak.OAuth2Constants.GRANT_TYPE;
+import static org.keycloak.OAuth2Constants.PASSWORD;
+import static org.keycloak.OAuth2Constants.USERNAME;
 
 import java.io.File;
 import java.net.URI;
@@ -30,10 +19,31 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static jakarta.ws.rs.core.Response.Status.OK;
-import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.keycloak.OAuth2Constants.*;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockserver.client.MockServerClient;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.containers.MockServerContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.utility.DockerImageName;
+
+import de.intension.keycloak.IntensionKeycloakContainer;
+import de.intension.testhelper.LicenceMockHelper;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 
 @Testcontainers
 public class LicenceResourceIT {
@@ -62,6 +72,8 @@ public class LicenceResourceIT {
     private static final IntensionKeycloakContainer keycloak = new IntensionKeycloakContainer()
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(List.of(new File("../target/hmac-mapper.jar")))
+        .withCustomCommand("--log-level=de.intension.rest.licence:debug")
+        .withDebugFixedPort(9001, false)
             .withContextPath("/auth")
             .withNetwork(network)
             .withNetworkAliases("test")
@@ -70,6 +82,9 @@ public class LicenceResourceIT {
             .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
             .withEnv("KC_SPI_AUTHENTICATOR_LICENCE_CONNECT_AUTHENTICATOR_LICENCE_URL", "http://mockserver:1080/v1/licences/request")
             .withEnv("KC_SPI_AUTHENTICATOR_LICENCE_CONNECT_AUTHENTICATOR_LICENCE_API_KEY", "sample-api-key")
+            .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_BASE_URL", "http://mockserver:1080")
+        .withEnv("KC_SPI_REST_CLIENT_DEFAULT_LICENCE_CONNECT_API_KEY", "sample-api-key")
+        .withEnv("KC_SPI_REALM_RESTAPI_EXTENSION_LICENCES_SCHOOL_IDS_ATTRIBUTE", "schulkennung")
             .withEnv("KC_DB", "postgres")
             .withEnv("KC_DB_URL_HOST", "postgres")
             .withEnv("KC_DB_USERNAME", "keycloak")
@@ -133,6 +148,54 @@ public class LicenceResourceIT {
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
     }
 
+    /**
+     * GIVEN: a user with bundesland and prefixedSchools attributes is authenticated
+     * WHEN: GET /realms/fwu/licences is called
+     * THEN: the licences are fetched from the generic licence connect service and returned
+     */
+    @Test
+    void should_return_licences_for_current_user() throws Exception {
+        LicenceMockHelper.requestLicenceExpectationForCurrentUser(mockServerClient);
+        var accessToken = getAccessTokenForUser("ash");
+        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences"))
+                .GET()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(OK.getStatusCode(), response.statusCode());
+        assertEquals("[{\"licenceCode\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licenceCode\":\"COR-3rw46a45-345c-4237-a451-4333736ex015\"}]", response.body());
+    }
+
+    /**
+     * GIVEN: no access token is provided
+     * WHEN: GET /realms/fwu/licences is called
+     * THEN: 401 Unauthorized is returned
+     */
+    @Test
+    void should_return_401_for_current_user_endpoint_when_no_access_token_is_provided() throws Exception {
+        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences"))
+                .GET()
+                .build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
+    }
+
+    /**
+     * GIVEN: an authenticated user without bundesland and prefixedSchools attributes
+     * WHEN: GET /realms/fwu/licences is called
+     * THEN: 400 Bad Request is returned because the required licence connect parameters are missing
+     */
+    @Test
+    void should_return_400_for_current_user_endpoint_when_user_has_no_licence_attributes() throws Exception {
+        var accessToken = getAccessTokenForUser("misty");
+        var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/licences"))
+                .GET()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(BAD_REQUEST.getStatusCode(), response.statusCode());
+    }
+
     @AfterEach
     void tearDown() {
         driver.quit();
@@ -150,7 +213,11 @@ public class LicenceResourceIT {
     }
 
     private String getAccessToken() throws Exception {
-        var parameters = GRANT_TYPE + "=" + PASSWORD + "&" + USERNAME + "=misty&" + PASSWORD + "=test&" + CLIENT_ID + "=admin-cli";
+        return getAccessTokenForUser("misty");
+    }
+
+    private String getAccessTokenForUser(String username) throws Exception {
+        var parameters = GRANT_TYPE + "=" + PASSWORD + "&" + USERNAME + "=" + username + "&" + PASSWORD + "=test&" + CLIENT_ID + "=admin-cli";
         var request = HttpRequest.newBuilder(URI.create(keycloak.getAuthServerUrl() + "/realms/fwu/protocol/openid-connect/token"))
                 .POST(HttpRequest.BodyPublishers.ofString(parameters))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED)

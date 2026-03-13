@@ -33,6 +33,25 @@ public class LicenceMockHelper {
                                         header(CONTENT_TYPE, MediaType.JSON_UTF_8.getType())))[0];
     }
 
+    public static Expectation requestLicenceExpectationForCurrentUser(MockServerClient mockServerClient) {
+        return mockServerClient
+                .when(
+                        request().withPath("/v1/licences/request")
+                                .withMethod("GET")
+                                .withHeader("X-API-Key", "sample-api-key")
+                                .withQueryStringParameter("clientName", "admin-cli")
+                                .withQueryStringParameter("bundesland", "de-NI")
+                                .withQueryStringParameter("schulnummer", "DE-NI-Schullogin.1234"),
+                        Times.exactly(1))
+                .respond(
+                        response()
+                                .withStatusCode(OK_200.code())
+                                .withReasonPhrase(OK_200.reasonPhrase())
+                                .withBody("[{\"licenceCode\":\"VHT-9234814-fk68-acbj6-3o9jyfilkq2pqdmxy0j\"},{\"licenceCode\":\"COR-3rw46a45-345c-4237-a451-4333736ex015\"}]")
+                                .withHeaders(
+                                        header(CONTENT_TYPE, MediaType.JSON_UTF_8.getType())))[0];
+    }
+
     public static Expectation requestLicenceExpectationBilo(MockServerClient mockServerClient) {
         return mockServerClient
                 .when(

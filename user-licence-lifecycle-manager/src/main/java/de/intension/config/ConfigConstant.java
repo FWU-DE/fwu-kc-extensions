@@ -4,5 +4,6 @@ public enum ConfigConstant
         implements EnumType {
 
     LICENCE_CONNECT_BASE_URL,
-    LICENCE_CONNECT_API_KEY
+    LICENCE_CONNECT_API_KEY,
+    SCHOOL_IDS_ATTRIBUTE
 }
