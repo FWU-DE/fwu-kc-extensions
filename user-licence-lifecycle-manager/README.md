@@ -41,7 +41,11 @@ authentication
 The licence associated with user is managed by a [Licence Connect](https://licenceconnect.schule/), 
 which provides endpoints to gather those information.
 
-There are two endpoint to fetch user license
+There are two primary ways to fetch user licenses. Originally, licenses were fetched during authentication and persisted in a local database, accessible via an `hmac-id`. However, due to performance issues—where loading and storing large sets (e.g., 65,000 license keys) could take several seconds—a more efficient, session-based approach was introduced.
+
+The newer method provides a pass-through endpoint that fetches licenses directly from Licence Connect within the user's session, eliminating the need for pre-fetching and database storage of personal data.
+
+##### Available Endpoints
 
 1. Generic license endpoint
 **Endpoint:** <hostname>/v1/licences/request
@@ -249,8 +253,15 @@ When this endpoint is called, all users who do not have an active session (OFFLI
 to an IdP are deleted.
 The maximum number of data records to be deleted can be specified as a query parameter (limited to 1000 data records)
 
-https://<keycloak-host>/auth/admin/realms/<realm-name>/vidis-custom/users/inactive?max={numberOfUserToDelete}
-e.g. https://keycloak-test.ded/auth/admin/realms/test/users/inactive?max=500
+`https://<keycloak-host>/auth/admin/realms/<realm-name>/vidis-custom/users/inactive?max={numberOfUserToDelete}`
+e.g. `https://keycloak-test.ded/auth/admin/realms/test/users/inactive?max=500`
+
+#### License Retrieval API
+
+The extension exposes REST endpoints to retrieve user licenses:
+
+*   `GET /realms/{realm}/licences/{hmac-id}`: Retrieves licenses from the local database by `hmacId`. This endpoint relies on licenses being pre-fetched and persisted during authentication.
+*   `GET /realms/{realm}/licences`: Fetches licenses directly from Licence Connect as a pass-through using the current user's session and attributes. This avoids the performance overhead of database persistence for large license sets.
 
 Like on the event-listener, you can also configure if only IDP-Users(IDP) are deleted or all users (ALL) by setting an
 environment Variable. Default is no User get's deleted.
