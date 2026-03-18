@@ -4,6 +4,10 @@ All notable changes to this project will be documented here.
 
 ## Version [5.3.0]
 
+- Changed: Use bilo endpoint /v1/bilo/request instead of ucs endpoint v1/ucs/request which doesn't exxist any more
+
+## Version [5.3.0]
+
 - Added: New webservice endpoint to request licences with bearer token of user but without hmac-id. Request is directly forwarded to LC
 
 ## Version [5.2.0]
