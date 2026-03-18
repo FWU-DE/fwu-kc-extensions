@@ -21,9 +21,9 @@ import jakarta.ws.rs.WebApplicationException;
 public class LicenceConnectRestClient {
 
     private static final Logger LOG                = getLogger(LicenceConnectRestClient.class);
-    private final List<String>  biloRequiredParams      = List.of(USER_ID, CLIENT_ID, BUNDESLAND_ATTRIBUTE);
+    private final List<String>    biloRequiredParams      = List.of(USER_ID, CLIENT_ID);
     private final List<String>  genericLcRequiredParams = List.of(CLIENT_NAME, BUNDESLAND_ATTRIBUTE);
-    private static final String UCS_REQUEST_PATH        = "v1/ucs/request";
+    private static final String   UCS_REQUEST_PATH        = "v1/bilo/request";
     private static final String LC_REQUEST_PATH = "v1/licences/request";
     private final String licenceRestUri;
     private final String licenceAPIKey;
@@ -47,13 +47,18 @@ public class LicenceConnectRestClient {
             throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
         }
 
-        String url = String.format("%s/%s", licenceRestUri, UCS_REQUEST_PATH);
+        String url = String.format("%s/%s/%s", licenceRestUri, UCS_REQUEST_PATH, queryParams.get(USER_ID));
+        String requestString = url + "?clientName" + queryParams.get(CLIENT_ID);
+        LOG.debugf("Requesting bilo licenses with url: %s", requestString);
         SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
-        addConfig(simpleHttp, queryParams);
+        addConfig(simpleHttp, Map.of("clientName", queryParams.get(CLIENT_ID)));
 
         try (SimpleHttp.Response response = simpleHttp.asResponse()) {
             if (response.getStatus() == 200) {
-                LOG.debugf("Received success response for the user for the license type UCS");
+                LOG.debugf("Received success response for the user for the license type bilo");
+                String responseString = response.asString();
+                LOG.debugf("Response content length: %d starting with %s", responseString.length(),
+                    responseString.substring(0, Math.min(100, responseString.length())));
                 return response.asString();
             }
             throw new WebApplicationException(response.getStatus());

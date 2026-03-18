@@ -1,15 +1,15 @@
 package de.intension.testhelper;
 
-import org.mockserver.client.MockServerClient;
-import org.mockserver.matchers.Times;
-import org.mockserver.mock.Expectation;
-import org.mockserver.model.MediaType;
-
 import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static org.mockserver.model.Header.header;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.HttpStatusCode.OK_200;
+
+import org.mockserver.client.MockServerClient;
+import org.mockserver.matchers.Times;
+import org.mockserver.mock.Expectation;
+import org.mockserver.model.MediaType;
 
 public class LicenceMockHelper {
 
@@ -55,13 +55,10 @@ public class LicenceMockHelper {
     public static Expectation requestLicenceExpectationBilo(MockServerClient mockServerClient) {
         return mockServerClient
                 .when(
-                        request().withPath("/v1/ucs/request")
+                        request().withPath("/v1/bilo/request/9c7e5634-5021-4c3e-9bea-53f54c299a0f")
                                 .withMethod("GET")
                                 .withHeader("X-API-Key", "sample-api-key")
-                                .withQueryStringParameter("userId", "9c7e5634-5021-4c3e-9bea-53f54c299a0f")
-                                .withQueryStringParameter("clientId", "account-console")
-                                .withQueryStringParameter("bundesland", "de-DE")
-                                .withQueryStringParameter("schulkennung", "DE-SN-Schullogin.0815"),
+                    .withQueryStringParameter("clientName", "account-console"),
                         Times.exactly(1))
                 .respond(
                         response()
