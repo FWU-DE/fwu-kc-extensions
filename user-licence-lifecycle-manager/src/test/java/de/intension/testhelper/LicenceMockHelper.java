@@ -55,7 +55,7 @@ public class LicenceMockHelper {
     public static Expectation requestLicenceExpectationBilo(MockServerClient mockServerClient) {
         return mockServerClient
                 .when(
-                        request().withPath("/v1/bilo/request/9c7e5634-5021-4c3e-9bea-53f54c299a0f")
+                request().withPath("/v1/bilo/request/idpuser")
                                 .withMethod("GET")
                                 .withHeader("X-API-Key", "sample-api-key")
                     .withQueryStringParameter("clientName", "account-console"),
