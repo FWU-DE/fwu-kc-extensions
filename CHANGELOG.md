@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented here.
 
-## Version [5.3.0]
+## Version [5.5.0]
+
+- Changed: Use userName in bilo request instead of userId
+
+## Version [5.4.0]
 
 - Changed: Use bilo endpoint /v1/bilo/request instead of ucs endpoint v1/ucs/request which doesn't exxist any more
 

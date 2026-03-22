@@ -4,6 +4,7 @@ import static de.intension.rest.licence.model.LicenseConstants.BUNDESLAND_ATTRIB
 import static de.intension.rest.licence.model.LicenseConstants.CLIENT_ID;
 import static de.intension.rest.licence.model.LicenseConstants.CLIENT_NAME;
 import static de.intension.rest.licence.model.LicenseConstants.USER_ID;
+import static de.intension.rest.licence.model.LicenseConstants.USER_NAME;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.jboss.logging.Logger.getLogger;
 
@@ -47,7 +48,7 @@ public class LicenceConnectRestClient {
             throw new IllegalArgumentException("Missing required parameters: " + String.join(", ", missing));
         }
 
-        String url = String.format("%s/%s/%s", licenceRestUri, UCS_REQUEST_PATH, queryParams.get(USER_ID));
+        String url = String.format("%s/%s/%s", licenceRestUri, UCS_REQUEST_PATH, queryParams.get(USER_NAME));
         String requestString = url + "?clientName" + queryParams.get(CLIENT_ID);
         LOG.debugf("Requesting bilo licenses with url: %s", requestString);
         SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);

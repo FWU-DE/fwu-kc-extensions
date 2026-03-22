@@ -1,6 +1,38 @@
 package de.intension.authentication.authenticators.licence;
 
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
+import static de.intension.rest.licence.model.LicenseConstants.BUNDESLAND_ATTRIBUTE;
+import static de.intension.rest.licence.model.LicenseConstants.CLIENT_ID;
+import static de.intension.rest.licence.model.LicenseConstants.CLIENT_NAME;
+import static de.intension.rest.licence.model.LicenseConstants.SCHULKENNUNG;
+import static de.intension.rest.licence.model.LicenseConstants.SCHULNUMMER;
+import static de.intension.rest.licence.model.LicenseConstants.USER_ID;
+import static de.intension.rest.licence.model.LicenseConstants.USER_NAME;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.jboss.logging.Logger;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.Authenticator;
+import org.keycloak.models.AuthenticatorConfigModel;
+import org.keycloak.models.FederatedIdentityModel;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.IdentityProviderStorageProvider;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.utils.StringUtil;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import de.intension.authentication.authenticators.jpa.entity.LicenceEntity;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
@@ -10,20 +42,6 @@ import de.intension.spi.RestClientProvider;
 import jakarta.ws.rs.WebApplicationException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.jboss.logging.Logger;
-import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.models.*;
-import org.keycloak.utils.StringUtil;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
-import static de.intension.rest.licence.model.LicenseConstants.*;
 
 @Getter
 @NoArgsConstructor
@@ -67,6 +85,7 @@ public class LicenceConnectAuthenticator
             if (BILO_LICENSE_CLIENTS.equals(licenseType)) {
                 queryParams.put(SCHULKENNUNG, schoolIds);
                 queryParams.put(CLIENT_ID, client);
+                queryParams.put(USER_NAME, user.getUsername());
                 userLicences = restClient.getUcsLicences(queryParams);
             } else if (GENERIC_LICENSE_CLIENTS.equals(licenseType)) {
                 queryParams.put(SCHULNUMMER, schoolIds);
