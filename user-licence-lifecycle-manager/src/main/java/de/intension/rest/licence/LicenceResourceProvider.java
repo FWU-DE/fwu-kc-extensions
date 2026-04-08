@@ -63,6 +63,23 @@ public class LicenceResourceProvider implements RealmResourceProvider {
     }
 
     /**
+     * Get licences via their ID, which is the user's ID hashed with HMAC.
+     *
+     * <pre>
+     *     GET ${authUrl}/realms/${realm}/licences/${tenantId}/user/${hmacId}
+     * </pre>
+     * 
+     * where tenantId is something like 'USR__OOC_TST_LicenseConnectFWU'
+     */
+    @Path("/{tenantId}/user/{hmac-id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getLicenceWithTenant(@PathParam("tenantId") String tenantID, @PathParam("hmac-id") String hmacID)
+    {
+        return getLicence(hmacID);
+    }
+
+    /**
      * Get licences for the currently authenticated user by calling the generic licence connect
      * service directly. User attributes are used to populate the required query parameters.
      *

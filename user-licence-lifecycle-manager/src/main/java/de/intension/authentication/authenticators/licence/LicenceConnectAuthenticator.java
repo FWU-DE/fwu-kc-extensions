@@ -148,6 +148,7 @@ public class LicenceConnectAuthenticator
         } else {
             licence = new LicenceEntity(user.getId(), userLicence);
         }
+        licence.anonymize();
         context.getSession().getProvider(LicenceJpaProvider.class).persistLicence(licence);
         logger.infof("User licence has been persisted in the database for user %s", user.getUsername());
     }
