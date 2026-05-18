@@ -2,3 +2,4 @@ de.intension.authenticator.IdpValuesForwarderAuthenticatorFactory
 de.intension.authenticator.AcrDenyingAuthenticatorFactory
 de.intension.authenticator.AcrValuesAuthenticatorFactory
 de.intension.authenticator.ClientIdIdpValuesForwarderAuthFactory
+de.intension.authenticator.ClientIdVerifierAuthenticatorFactory
