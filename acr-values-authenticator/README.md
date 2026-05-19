@@ -167,3 +167,26 @@ Please note that this will never set the `context.failure()` because this is som
 by every client.
 
 Also, if there comes the need to add more non-standard parameters we can use this authenticator for it.
+
+## Client id verifier authenticator
+
+This authenticator checks the client id sent back from the IdP in case it was added as a param in the request to the IDP 
+by the Non-standard IDP values forwarder authenticator (see above).
+
+### Configuration
+
+Select th IdP of your choice and add a mapper of type "User Attribute". Configure the name of the claim which contains the client id sent back from the IdP
+and the name of a user attribute which should be used by the mapper. Default is `vidis_client_id`.
+
+<img src="../docs/acr-values-authenticator/Client-id-mapper.png" width="70%"/>
+
+Select the authentication flow which is configured as post login flow for this IdP. Add a Client id verifier authenticator as required step in this flow.
+Configure the same attribute name as used in the mapper in the previous step (or leave blank to use default `vidis_client_id`).
+
+### Behaviour
+
+When configured correctly, this extension makes sure the client id sent back from the IdP is the same as the one sent in the request to the IdP. 
+This is done by comparing the value of the user attribute set by the mapper with the client id of the client which is trying to authenticate. 
+If they do not match, access is denied.
+In case no client id is sent to the IdP because the Non-standard IDP values forwarder authenticator is not configured, 
+this authenticator will not do anything and just allow the flow to continue.

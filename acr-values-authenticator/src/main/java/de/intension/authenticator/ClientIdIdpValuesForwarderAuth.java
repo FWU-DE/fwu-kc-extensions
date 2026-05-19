@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static de.intension.authenticator.ClientIdIdpValuesForwarderAuthFactory.ORIGIN_CLIENT_ID_NOTE;
 import static de.intension.authenticator.ClientIdIdpValuesForwarderAuthFactory.ORIGIN_CLIENT_PARAM_NAME;
 import static org.keycloak.protocol.oidc.endpoints.AuthorizationEndpoint.LOGIN_SESSION_NOTE_ADDITIONAL_REQ_PARAMS_PREFIX;
 
@@ -34,6 +35,10 @@ public class ClientIdIdpValuesForwarderAuth implements Authenticator {
 
         context.getAuthenticationSession().setClientNote(noteKey, paramValue);
         logger.infof("Set origin client ID '%s' to client note key '%s' for client '%s'", paramValue, noteKey, client.getClientId());
+
+        context.getAuthenticationSession().setClientNote(ORIGIN_CLIENT_ID_NOTE, paramValue);
+        logger.infof("Also stored origin client ID '%s' under note key '%s' for post-login flow access", paramValue, ORIGIN_CLIENT_ID_NOTE);
+
         context.success();
     }
 

@@ -16,6 +16,7 @@ public class ClientIdIdpValuesForwarderAuthFactory implements AuthenticatorFacto
     public static final String PROVIDER_ID = "non-standard-idp-value-forwarder";
     public static final String ORIGIN_CLIENT_PARAM_NAME = "originClientId";
     public static final String ORIGIN_CLIENT_PARAM_NAME_DEFAULT = "origin_client_id";
+    public static final String ORIGIN_CLIENT_ID_NOTE = "origin_client_id";
 
     @Override
     public String getDisplayType() {
