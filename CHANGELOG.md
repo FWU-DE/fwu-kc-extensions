@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented here.
 
+## Version [5.7.0]
+
+Added: Authenticator to check client id sent to IdP
+
+## Version [5.6.0]
+
+- Changed: licence endpoint with tenant id, lc response anonymized
+
 ## Version [5.5.0]
 
 - Changed: Use userName in bilo request instead of userId
