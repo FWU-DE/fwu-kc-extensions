@@ -1,4 +1,4 @@
-Vpackage de.intension.resources.admin;
+package de.intension.resources.admin;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
