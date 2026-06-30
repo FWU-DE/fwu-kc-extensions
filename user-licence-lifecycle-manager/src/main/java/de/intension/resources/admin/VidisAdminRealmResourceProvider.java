@@ -1,6 +1,7 @@
-package de.intension.resources.admin;
+Vpackage de.intension.resources.admin;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -17,7 +18,6 @@ import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
 import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.fgap.UserPermissionEvaluator;
 
-import java.util.Date;
 import java.util.List;
 
 public class VidisAdminRealmResourceProvider
@@ -74,22 +74,29 @@ public class VidisAdminRealmResourceProvider
         RealmModel realmModel = session.getContext().getRealm();
         UserSessionProvider sessionProvider = session.sessions();
         int numberOfDeletedUsers = 0;
-        Long lastCreationDate = new Date().toInstant().getEpochSecond()
-                - config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS);
+        long lastCreationDate = System.currentTimeMillis()
+                - (long) config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS) * 1000L;
         do {
-            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete), lastCreationDate, idpOnly);
+            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete - numberOfDeletedUsers), lastCreationDate, idpOnly);
             LOG.debugf("Found %s users in realm %s", idpUsers.size(), realmModel.getName());
             if (idpUsers.isEmpty()) {
                 break;
             }
             for (UserEntity ue : idpUsers) {
-                lastCreationDate = ue.getCreatedTimestamp() != null ? ue.getCreatedTimestamp() : lastCreationDate;
+                if (ue.getCreatedTimestamp() != null) {
+                    lastCreationDate = ue.getCreatedTimestamp();
+                }
+                try {
+                    em.lock(ue, LockModeType.PESSIMISTIC_WRITE);
+                } catch (Exception e) {
+                    LOG.warnf("Could not lock user %s, skipping", ue.getId());
+                    continue;
+                }
                 UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
                 if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
                     session.users().removeUser(realmModel, ua);
                     numberOfDeletedUsers++;
                 }
-
             }
         } while (numberOfDeletedUsers < maxNoOfUserToDelete);
         return numberOfDeletedUsers;
