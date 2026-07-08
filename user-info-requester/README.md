@@ -30,8 +30,9 @@ This attribute importer calls the IdPs SANIS endpoint and stores user metadata i
 If an IdP provides the SANIS "/personInfo"-Endpoint, a mapper can be configured to retrieve and store this
 data into standardized user attributes.
 1. Go to "Identity Providers" and select the IdP to configure
-2. Go to Tab "Mappers" and click on Button "create" adding a new mapper
-3. Select "Attribute Importer SANIS API" as mapper type
-4. Enter the SANIS "personInfo" endpoint URL
+2. Ensure "store tokens" is enabled
+3. Go to Tab "Mappers" and click on Button "create" adding a new mapper
+4. Select "Attribute Importer SANIS API" as mapper type
+5. Enter the SANIS "personInfo" endpoint URL
 
 <img src="../docs/userinfo/IdP_Mapper_SANIS.png" width="70%"/>
