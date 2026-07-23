@@ -166,6 +166,50 @@ class HmacPairwiseSubMapperTest
     }
 
     /**
+     * GIVEN: mapper configured with an external sub attribute name
+     * AND user has a non-blank value for that attribute
+     * WHEN: sub created for access token
+     * THEN: resulting subject is exactly the external attribute's value, not HMAC-derived
+     */
+    @Test
+    void should_use_external_sub_attribute_value_when_present()
+    {
+        HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
+        String externalPseudonym = "idp-provided-pseudonym-value";
+
+        ProtocolMapperModel mapperModel = createMapperModel(USERNAME);
+        mapperModel.getConfig().put(HmacPairwiseSubMapperHelper.EXTERNAL_SUB_ATTRIBUTE_PROP_NAME, "externalPseudonym");
+        UserSessionModel userSession = mockUserSessionModelWithExternalSub(USER_ID, USERNAME, "tim", "externalPseudonym", externalPseudonym);
+
+        AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), mapperModel, null, userSession, null);
+
+        assertEquals(externalPseudonym, accessToken.getSubject());
+    }
+
+    /**
+     * GIVEN: mapper configured with an external sub attribute name
+     * AND user has only a blank value for that attribute
+     * WHEN: sub created for access token
+     * THEN: resulting subject falls back to the HMAC-derived value, same as if the attribute was
+     * not configured at all
+     */
+    @Test
+    void should_fall_back_to_hmac_when_external_sub_attribute_blank()
+    {
+        HmacPairwiseSubMapper mapper = new HmacPairwiseSubMapper();
+
+        ProtocolMapperModel mapperModel = createMapperModel(USERNAME);
+        mapperModel.getConfig().put(HmacPairwiseSubMapperHelper.EXTERNAL_SUB_ATTRIBUTE_PROP_NAME, "externalPseudonym");
+        UserSessionModel userSession = mockUserSessionModelWithExternalSub(USER_ID, USERNAME, "tim", "externalPseudonym", "   ");
+
+        AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), mapperModel, null, userSession, null);
+        AccessToken expectedToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME), null,
+                                                                mockUserSessionModel(USER_ID, USERNAME, "tim"), null);
+
+        assertEquals(expectedToken.getSubject(), accessToken.getSubject());
+    }
+
+    /**
      * GIVEN: hmac pairwise sub mapper without salt config
      * WHEN: sub is generated
      * THEN: IllegalStateException is thrown with expected message
@@ -420,6 +464,22 @@ class HmacPairwiseSubMapperTest
         when(userModel.getAttributeStream(localSubIdentifier))
             .thenReturn(localSubIdentifierValue != null ? Stream.of(localSubIdentifierValue)
                     : Stream.empty());
+        when(userSessionModel.getUser()).thenReturn(userModel);
+        return userSessionModel;
+    }
+
+    static UserSessionModel mockUserSessionModelWithExternalSub(String id, String localSubIdentifier,
+                                                                 String localSubIdentifierValue,
+                                                                 String externalSubAttribute, String externalSubValue)
+    {
+        UserSessionModel userSessionModel = mock(UserSessionModel.class);
+        UserModel userModel = mock(UserModel.class);
+        when(userModel.getId()).thenReturn(id);
+        when(userModel.getAttributeStream(localSubIdentifier))
+            .thenReturn(localSubIdentifierValue != null ? Stream.of(localSubIdentifierValue)
+                    : Stream.empty());
+        when(userModel.getAttributeStream(externalSubAttribute))
+            .thenReturn(externalSubValue != null ? Stream.of(externalSubValue) : Stream.empty());
         when(userSessionModel.getUser()).thenReturn(userModel);
         return userSessionModel;
     }

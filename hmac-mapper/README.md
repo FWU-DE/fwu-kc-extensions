@@ -3,6 +3,10 @@
 1. There are two mappers available for pseudonymizing OIDC token claims with HMAC.
 2. Also endpoints have been added for pseudonymization related requests
 
+For a full end-to-end setup guide of using an IdP-provided pseudonym (via the *external sub attribute* config
+described below) together with the `acr-values-authenticator` module, see
+[`SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md`](../SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md).
+
 # HMAC Pairwise subject with static sectorIdentifier
 
 This mapper sets the claim value `sub`.
@@ -18,10 +22,13 @@ Create a mapper for the desired client and enter your desired values.
 3. The Salt is the second factor used when hashing the user ID with SHA-256. When no salt is configured on creation a random one will be generated.
 4. Finally, the selected algorithm defines the length of the generated hash.
 5. Local sub identifier which gives the unique identifier whose value is to be used during the pseudonymized sub generation. It should be one of the attributes of user like `id`, `username`, etc.
+6. External sub attribute (optional). Name of a user attribute that may already hold a pseudonymized sub value, e.g. one provided by an IdP via a mapped claim (see e.g. [account-linking-authenticator](../account-linking-authenticator) or a "User Attribute" IdP mapper). If left blank, behaviour is unchanged.
 
 ## How it's working
 
 The *HMAC Pairwise subject with static sectorIdentifier* mapper always hashes the selected attribute with a host and the configured salt based on the algorithm selected. This value is then mapped to the `sub` attribute in the returned token.
+
+If an *external sub attribute* is configured and the user has a non-blank value for it, that value is used directly as the `sub` (and, for the *HMAC pairwise email* mapper below, as the basis for the generated email) instead of computing it via HMAC. This is meant for cases where an upstream IdP already sends back a pseudonymized sub in a claim that is mapped to a user attribute - in that case we want to keep using the IdP-provided pseudonym rather than re-pseudonymizing it. If the attribute is not configured, or the user has no value for it, the mapper falls back to the HMAC-based generation described above - existing mapper configurations keep working exactly as before after upgrading.
 
 <img src="../docs/pseudo/ppid_sector_id.svg" width="70%"/>
 

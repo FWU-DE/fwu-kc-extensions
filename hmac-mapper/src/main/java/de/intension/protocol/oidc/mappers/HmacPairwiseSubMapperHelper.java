@@ -25,6 +25,11 @@ public class HmacPairwiseSubMapperHelper {
     private static final String LOCAL_SUB_IDENTIFIER_PROP_LABEL = "Local sub identifier";
     private static final String LOCAL_SUB_IDENTIFIER_PROP_HELP = "Local sub identifier is used when calculating the pairwise subject identifier. The identifier should match the attribute name of the keycloak user.";
 
+    public static final String EXTERNAL_SUB_ATTRIBUTE_PROP_NAME = "pairwiseExternalSubAttribute";
+    private static final String EXTERNAL_SUB_ATTRIBUTE_PROP_LABEL = "External sub attribute";
+    private static final String EXTERNAL_SUB_ATTRIBUTE_PROP_HELP = "Optional. Name of a user attribute that already holds a pseudonymized sub value, e.g. one provided by an IdP via a mapped claim. "
+            + "If set and the user has a non-blank value for this attribute, that value is used as the sub instead of computing it via HMAC. Leave blank to keep the default HMAC-based behaviour.";
+
     private HmacPairwiseSubMapperHelper() {
     }
 
@@ -73,6 +78,22 @@ public class HmacPairwiseSubMapperHelper {
     }
 
     /**
+     * Retrieve the already-pseudonymized sub value from the user attribute configured via
+     * {@link #EXTERNAL_SUB_ATTRIBUTE_PROP_NAME}, if any. Returns {@code null} when no such
+     * attribute is configured, or when the user has no non-blank value for it.
+     */
+    static String getExternalSubValue(UserModel user, ProtocolMapperModel mappingModel) {
+        String externalSubAttribute = mappingModel.getConfig().get(EXTERNAL_SUB_ATTRIBUTE_PROP_NAME);
+        if (externalSubAttribute == null || externalSubAttribute.isBlank()) {
+            return null;
+        }
+        return user.getAttributeStream(externalSubAttribute)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Creates the mapper's configuration property for the HMAC hash algorithm.
      *
      * @return Config property item
@@ -103,6 +124,21 @@ public class HmacPairwiseSubMapperHelper {
         property.setLabel(LOCAL_SUB_IDENTIFIER_PROP_LABEL);
         property.setHelpText(LOCAL_SUB_IDENTIFIER_PROP_HELP);
         property.setDefaultValue("username");
+        return property;
+    }
+
+    /**
+     * Creates the mapper's configuration property for the external sub attribute
+     * config to use.
+     *
+     * @return Config property item
+     */
+    static ProviderConfigProperty createExternalSubAttributeConfig() {
+        var property = new ProviderConfigProperty();
+        property.setName(EXTERNAL_SUB_ATTRIBUTE_PROP_NAME);
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setLabel(EXTERNAL_SUB_ATTRIBUTE_PROP_LABEL);
+        property.setHelpText(EXTERNAL_SUB_ATTRIBUTE_PROP_HELP);
         return property;
     }
 }

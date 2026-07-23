@@ -91,6 +91,49 @@ class HmacPairwiseEmailMapperTest {
 
     /**
      * GIVEN a fresh access token
+     * AND the user has a non-blank value for the configured external sub attribute
+     * WHEN transforming it with {@link HmacPairwiseEmailMapper}
+     * THEN the email is generated using that external value directly, not an HMAC-derived one
+     */
+    @Test
+    void should_use_external_sub_attribute_value_for_email_when_present() {
+        HmacPairwiseEmailMapper mapper = new HmacPairwiseEmailMapper();
+        var token = new AccessToken();
+        String externalPseudonym = "idp-provided-pseudonym";
+
+        ProtocolMapperModel mapperModel = createMapperModel(USERNAME, EMAIL_DOMAIN);
+        mapperModel.getConfig().put(HmacPairwiseSubMapperHelper.EXTERNAL_SUB_ATTRIBUTE_PROP_NAME, "externalPseudonym");
+
+        AccessToken accessToken = mapper.transformAccessToken(token, mapperModel, null,
+                mockUserSessionModelWithExternalSub(null, USERNAME, "tim", "externalPseudonym", externalPseudonym), null);
+
+        assertThat(accessToken.getEmail(), equalTo(externalPseudonym + "@" + EMAIL_DOMAIN));
+    }
+
+    /**
+     * GIVEN a fresh access token
+     * AND the user only has a blank value for the configured external sub attribute
+     * WHEN transforming it with {@link HmacPairwiseEmailMapper}
+     * THEN the email falls back to the HMAC-derived value, same as if the attribute was not
+     * configured at all
+     */
+    @Test
+    void should_fall_back_to_hmac_for_email_when_external_sub_attribute_blank() {
+        HmacPairwiseEmailMapper mapper = new HmacPairwiseEmailMapper();
+
+        ProtocolMapperModel mapperModel = createMapperModel(USERNAME, EMAIL_DOMAIN);
+        mapperModel.getConfig().put(HmacPairwiseSubMapperHelper.EXTERNAL_SUB_ATTRIBUTE_PROP_NAME, "externalPseudonym");
+
+        AccessToken accessToken = mapper.transformAccessToken(new AccessToken(), mapperModel, null,
+                mockUserSessionModelWithExternalSub(null, USERNAME, "tim", "externalPseudonym", "   "), null);
+        AccessToken expectedToken = mapper.transformAccessToken(new AccessToken(), createMapperModel(USERNAME, EMAIL_DOMAIN), null,
+                mockUserSessionModel(null, USERNAME, "tim"), null);
+
+        assertThat(accessToken.getEmail(), equalTo(expectedToken.getEmail()));
+    }
+
+    /**
+     * GIVEN a fresh access token
      * WHEN transforming it with {@link HmacPairwiseEmailMapper}
      * AND the local sub identifier is null
      * THEN the email in the access token is unchanged
@@ -186,6 +229,21 @@ class HmacPairwiseEmailMapperTest {
         when(userModel.getEmail()).thenReturn(email);
         when(userModel.getAttributeStream(localSubIdentifier))
                 .thenReturn(localSubIdentifierValue != null ? Arrays.asList(localSubIdentifierValue).stream()
+                        : Collections.<String>emptyList().stream());
+        when(userSessionModel.getUser()).thenReturn(userModel);
+        return userSessionModel;
+    }
+
+    private static UserSessionModel mockUserSessionModelWithExternalSub(String id, String localSubIdentifier,
+            String localSubIdentifierValue, String externalSubAttribute, String externalSubValue) {
+        UserSessionModel userSessionModel = mock(UserSessionModel.class);
+        UserModel userModel = mock(UserModel.class);
+        when(userModel.getId()).thenReturn(id);
+        when(userModel.getAttributeStream(localSubIdentifier))
+                .thenReturn(localSubIdentifierValue != null ? Arrays.asList(localSubIdentifierValue).stream()
+                        : Collections.<String>emptyList().stream());
+        when(userModel.getAttributeStream(externalSubAttribute))
+                .thenReturn(externalSubValue != null ? Arrays.asList(externalSubValue).stream()
                         : Collections.<String>emptyList().stream());
         when(userSessionModel.getUser()).thenReturn(userModel);
         return userSessionModel;

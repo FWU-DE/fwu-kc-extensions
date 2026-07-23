@@ -91,6 +91,14 @@ Additionally, it holds the customization to remove inactive users and remove the
 on logout.
 For more details please check [here](./user-licence-lifecycle-manager/README.md).
 
+## Guides
+
+### Sector identifier pseudonym pass-through
+
+Step-by-step guide to configure an IdP-provided pseudonym as the `sub`/`email` claim, using the ACR values
+authenticator's forwarder/verifier authenticators together with the HMAC mappers' external sub attribute.
+See [`SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md`](SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md).
+
 ## Contributing
 
 To learn more about how you can contribute to this project, check out [`CONTRIBUTING.md`](CONTRIBUTING.md).

@@ -168,6 +168,39 @@ by every client.
 
 Also, if there comes the need to add more non-standard parameters we can use this authenticator for it.
 
+## Sector identifier URI IDP values forwarder authenticator
+
+This authenticator adds the `sectorIdentifierUri` configured on the client's "HMAC Pairwise subject with static
+sectorIdentifier" mapper (see hmac-mapper module) as a request parameter forwarded to the IDP. This is done via
+Client Note, following the same mechanism as the Non-standard IDP values forwarder authenticator (see above).
+
+### Configuration
+
+In the authentication flow of your choice select the option to add authenticator and search for 'Sector identifier
+URI IDP values params appender'.
+
+Add it as a required step in the authentication flow and configure the param name which should be forwarded to the
+IDP, example `sector_identifier_uri`.
+
+As with the other forwarder authenticators, bind the flow as the browser flow and add the configured param name to
+the Forwarded query params section of the desired IDP's advanced settings.
+
+### Behaviour
+
+If the user tries to login to a specific client and
+
+* the client has a "HMAC Pairwise subject with static sectorIdentifier" mapper configured with a
+  `sectorIdentifierUri`, then that value is passed in the request to the IDP as the param configured in the
+  authenticator
+* the client has no such mapper configured, or the mapper has no `sectorIdentifierUri` set, nothing is forwarded
+
+Please note that this will never set the `context.failure()` because this is something which is optional and not
+requested by every client.
+
+Whenever a `sectorIdentifierUri` is found, it is also stored under a dedicated session note (independent of whether
+the forwarding param name above is configured), so that the Sector identifier URI verifier authenticator (see below)
+can check it in the post-login flow.
+
 ## Client id verifier authenticator
 
 This authenticator checks the client id sent back from the IdP in case it was added as a param in the request to the IDP 
@@ -190,3 +223,39 @@ This is done by comparing the value of the user attribute set by the mapper with
 If they do not match, access is denied.
 In case no client id is sent to the IdP because the Non-standard IDP values forwarder authenticator is not configured, 
 this authenticator will not do anything and just allow the flow to continue.
+
+## Sector identifier URI verifier authenticator
+
+This authenticator checks the sector identifier URI sent back from the IdP against the one sent in the request to the
+IDP by the Sector identifier URI IDP values forwarder authenticator (see above).
+
+### Configuration
+
+Select the IdP of your choice and add a mapper of type "User Attribute". Configure the name of the claim which
+contains the sector identifier URI sent back from the IdP and the name of a user attribute which should be used by
+the mapper. Default is `vidis_sector_identifier_uri`.
+
+Select the authentication flow which is configured as post login flow for this IdP. Add a Sector identifier URI
+verifier authenticator as required step in this flow. Configure the same attribute name as used in the mapper in the
+previous step (or leave blank to use default `vidis_sector_identifier_uri`).
+
+### Behaviour
+
+When configured correctly, this extension makes sure the sector identifier URI sent back from the IdP is the same as
+the one sent in the request to the IdP (based on the client's HMAC pairwise subject mapper configuration). This is
+done by comparing the value of the user attribute set by the mapper with the value stored by the Sector identifier
+URI IDP values forwarder authenticator. If they do not match, access is denied.
+In case no sector identifier URI was sent to the IdP (e.g. the client has no HMAC pairwise subject mapper
+configured), this authenticator will not do anything and just allow the flow to continue.
+
+There is one additional exception: if the user has no value for the sector identifier attribute **and** the client's
+HMAC pairwise subject mapper either has no external sub attribute configured, or the user has no value for that
+attribute either, access is still allowed. This means the IdP did not send back anything related to the sector
+identifier at all, so it is treated as if the IdP ignored it entirely - Keycloak then falls back to generating its
+own pseudonym as usual. If, however, a pseudonym *was* sent back (i.e. the external sub attribute has a value) but
+the sector identifier URI attribute does not match, this is considered an inconsistent/suspicious state and access
+is denied.
+
+For a full end-to-end setup guide combining this authenticator with the `hmac-mapper` module (so that an
+IdP-provided pseudonym can be used as the `sub`/`email` claim), see
+[`SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md`](../SECTOR_IDENTIFIER_PSEUDONYM_SETUP.md).
