@@ -60,11 +60,11 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper
             return token;
         }
         UserModel user = userSession.getUser();
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, mappingModel);
-        if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
+        String pseudonymSub = resolveSub(mappingModel, user);
+        if (!checkPrerequisites(pseudonymSub, mappingModel, token.getEmail())) {
             return token;
         }
-        token.setEmail(generateEmail(mappingModel, localSub, user.getEmail()));
+        token.setEmail(generateEmail(pseudonymSub, mappingModel, user.getEmail()));
         return token;
     }
 
@@ -76,11 +76,11 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper
             return token;
         }
         UserModel user = userSession.getUser();
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, mappingModel);
-        if (!checkPrerequisites(localSub, mappingModel, token.getEmail())) {
+        String pseudonymSub = resolveSub(mappingModel, user);
+        if (!checkPrerequisites(pseudonymSub, mappingModel, token.getEmail())) {
             return token;
         }
-        token.setEmail(generateEmail(mappingModel, localSub, user.getEmail()));
+        token.setEmail(generateEmail(pseudonymSub, mappingModel, user.getEmail()));
         return token;
     }
 
@@ -92,21 +92,21 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper
             return token;
         }
         UserModel user = userSession.getUser();
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, mappingModel);
-        if (!checkPrerequisites(localSub, mappingModel,
+        String pseudonymSub = resolveSub(mappingModel, user);
+        if (!checkPrerequisites(pseudonymSub, mappingModel,
                                 String.valueOf(token.getOtherClaims().get("email")))) {
             return token;
         }
-        token.getOtherClaims().put("email", generateEmail(mappingModel, localSub, user.getEmail()));
+        token.getOtherClaims().put("email", generateEmail(pseudonymSub, mappingModel, user.getEmail()));
         return token;
     }
 
     /**
      * Checks whether to execute the mapper.
      */
-    private boolean checkPrerequisites(String localSub, ProtocolMapperModel mappingModel, String email)
+    private boolean checkPrerequisites(String pseudonymSub, ProtocolMapperModel mappingModel, String email)
     {
-        if (localSub == null) {
+        if (pseudonymSub == null) {
             return false;
         }
         boolean overrideEmail = Boolean.parseBoolean(mappingModel.getConfig().get(OVERRIDE_PROP_NAME));
@@ -114,12 +114,12 @@ public class HmacPairwiseEmailMapper extends HmacPairwiseSubMapper
     }
 
     /**
-     * Generate the HMAC identifier like in {@link HmacPairwiseSubMapper} but add an
-     * email domain to it.
+     * Generate the email using the resolved pseudonymized sub (see {@link HmacPairwiseSubMapper#resolveSub})
+     * and appends an email domain to it.
      */
-    private String generateEmail(ProtocolMapperModel mappingModel, String localSub, String email)
+    private String generateEmail(String pseudonymSub, ProtocolMapperModel mappingModel, String email)
     {
-        var pseudoEmail = HmacPairwiseSubMapperHelper.generateIdentifier(mappingModel, localSub);
+        var pseudoEmail = pseudonymSub;
         var emailDomain = mappingModel.getConfig().get(EMAIL_DOMAIN_PROP_NAME);
         if (StringUtil.isBlank(emailDomain)) {
             if (!ObjectUtil.isBlank(email)) {

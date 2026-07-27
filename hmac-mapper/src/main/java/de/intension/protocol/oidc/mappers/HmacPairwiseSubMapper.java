@@ -47,11 +47,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInIDToken(mappingModel)) {
             return token;
         }
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        String sub = resolveSub(mappingModel, userSession.getUser());
+        if (sub == null) {
             return token;
         }
-        setIDTokenValue(mappingModel, token, generateIdentifier(mappingModel, localSub));
+        setIDTokenValue(mappingModel, token, sub);
         return token;
     }
 
@@ -62,11 +62,11 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInAccessToken(mappingModel)) {
             return token;
         }
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        String sub = resolveSub(mappingModel, userSession.getUser());
+        if (sub == null) {
             return token;
         }
-        setAccessTokenValue(mappingModel, token, generateIdentifier(mappingModel, localSub));
+        setAccessTokenValue(mappingModel, token, sub);
         return token;
     }
 
@@ -77,12 +77,33 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         if (!OIDCAttributeMapperHelper.includeInUserInfo(mappingModel)) {
             return token;
         }
-        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(userSession.getUser(), mappingModel);
-        if (localSub == null) {
+        String sub = resolveSub(mappingModel, userSession.getUser());
+        if (sub == null) {
             return token;
         }
-        setUserInfoTokenValue(mappingModel, token, generateIdentifier(mappingModel, localSub));
+        setUserInfoTokenValue(mappingModel, token, sub);
         return token;
+    }
+
+    /**
+     * Resolves the pseudonymized sub for the given user: if the user has a non-blank value for
+     * the configured {@link HmacPairwiseSubMapperHelper#EXTERNAL_SUB_ATTRIBUTE_PROP_NAME} attribute
+     * (e.g. a pseudonym already provided by an IdP), that value is used as-is. Otherwise, the sub
+     * is computed via HMAC from the configured local sub identifier, as before.
+     *
+     * @return the resolved sub, or {@code null} if neither an external attribute value nor a local
+     * sub identifier value is available.
+     */
+    protected String resolveSub(ProtocolMapperModel mappingModel, UserModel user) {
+        String externalSub = HmacPairwiseSubMapperHelper.getExternalSubValue(user, mappingModel);
+        if (externalSub != null) {
+            return externalSub;
+        }
+        String localSub = HmacPairwiseSubMapperHelper.getLocalIdentifierValue(user, mappingModel);
+        if (localSub == null) {
+            return null;
+        }
+        return generateIdentifier(mappingModel, localSub);
     }
 
     /**
@@ -129,6 +150,7 @@ public class HmacPairwiseSubMapper extends AbstractOIDCProtocolMapper
         configProperties.add(PairwiseSubMapperHelper.createSaltConfig());
         configProperties.add(createHashAlgorithmConfig());
         configProperties.add(createLocalSubIdentifierConfig());
+        configProperties.add(createExternalSubAttributeConfig());
         return configProperties;
     }
 

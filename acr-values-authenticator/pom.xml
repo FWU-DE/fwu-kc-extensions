@@ -14,6 +14,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hmac-mapper</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- LOGGING for Testcontainers! -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

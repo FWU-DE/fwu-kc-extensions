@@ -5,6 +5,9 @@ All notable changes to this project will be documented here.
 ## Version [5.7.0]
 
 Added: Authenticator to check client id sent to IdP
+Added: Authenticator to forward the sectorIdentifierUri configured on the client's HMAC pairwise subject mapper to the IdP
+Added: Post-login authenticator to verify the sectorIdentifierUri sent back by the IdP matches the one originally forwarded, allowing silent fallback to the local pseudonym when the IdP sends back neither the sectorIdentifierUri nor a pseudonym
+Added: Optional external sub attribute on HMAC pairwise subject/email mappers to use an IdP-provided pseudonymized sub instead of computing it via HMAC
 
 ## Version [5.6.0]
 
