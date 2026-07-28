@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SectorIdentifierIdpValuesForwarderAuthFactory implements AuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "sector-identifier-idp-value-forwarder";
+    public static final String PROVIDER_ID = "sector-identifier-uri-forwarder";
     public static final String SECTOR_IDENTIFIER_PARAM_NAME = "sectorIdentifierParamName";
     public static final String SECTOR_IDENTIFIER_PARAM_NAME_DEFAULT = "sector_identifier_uri";
     public static final String SECTOR_IDENTIFIER_URI_NOTE = "sector_identifier_uri";
