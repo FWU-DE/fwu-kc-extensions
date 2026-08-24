@@ -1,9 +1,9 @@
 package de.intension.mapper.user;
 
-import java.util.Optional;
-
 import org.keycloak.models.*;
 import org.keycloak.utils.StringUtil;
+
+import java.util.Optional;
 
 public class IdpHelper
 {
@@ -27,9 +27,8 @@ public class IdpHelper
             }
         }
         if (StringUtil.isNotBlank(idpAlias)) {
-            idpModel = session.getRealm().getIdentityProviderByAlias(idpAlias);
+            idpModel = keycloakSession.identityProviders().getByAlias(idpAlias);
         }
         return idpModel;
     }
-
 }
