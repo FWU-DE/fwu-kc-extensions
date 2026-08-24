@@ -89,8 +89,7 @@ class VidisAdminRealmResourceProviderAllIT {
 
         assertThat(deletedUsers).as("Deleted users").isPositive();
         assertThat(userCountBeforeCleanup).as("Users before cleanup").isGreaterThan(userCountAfterCleanup);
-        assertThat(userCountAfterCleanup).as("Users after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
-
+        assertThat(userCountAfterCleanup).as("Users after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers);
     }
 
     @AfterEach

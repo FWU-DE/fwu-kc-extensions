@@ -1,38 +1,6 @@
 package de.intension.authentication.authenticators.licence;
 
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
-import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
-import static de.intension.rest.licence.model.LicenseConstants.BUNDESLAND_ATTRIBUTE;
-import static de.intension.rest.licence.model.LicenseConstants.CLIENT_ID;
-import static de.intension.rest.licence.model.LicenseConstants.CLIENT_NAME;
-import static de.intension.rest.licence.model.LicenseConstants.SCHULKENNUNG;
-import static de.intension.rest.licence.model.LicenseConstants.SCHULNUMMER;
-import static de.intension.rest.licence.model.LicenseConstants.USER_ID;
-import static de.intension.rest.licence.model.LicenseConstants.USER_NAME;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.jboss.logging.Logger;
-import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.models.AuthenticatorConfigModel;
-import org.keycloak.models.FederatedIdentityModel;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.IdentityProviderStorageProvider;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.utils.StringUtil;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.intension.authentication.authenticators.jpa.LicenceJpaProvider;
 import de.intension.authentication.authenticators.jpa.entity.LicenceEntity;
 import de.intension.protocol.oidc.mappers.HmacPairwiseSubMapper;
@@ -42,6 +10,20 @@ import de.intension.spi.RestClientProvider;
 import jakarta.ws.rs.WebApplicationException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jboss.logging.Logger;
+import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.Authenticator;
+import org.keycloak.models.*;
+import org.keycloak.utils.StringUtil;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.BILO_LICENSE_CLIENTS;
+import static de.intension.authentication.authenticators.licence.LicenceConnectAuthenticatorFactory.GENERIC_LICENSE_CLIENTS;
+import static de.intension.rest.licence.model.LicenseConstants.*;
 
 @Getter
 @NoArgsConstructor
@@ -156,7 +138,7 @@ public class LicenceConnectAuthenticator
     private Stream<FederatedIdentityModel> fetchFederatedIdentityModels(UserModel user, AuthenticationFlowContext context) {
         RealmModel realm = context.getRealm();
         IdentityProviderStorageProvider idpProvider = context.getSession().getProvider(IdentityProviderStorageProvider.class);
-        Set<String> idps = idpProvider.getAllStream().map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
+        Set<String> idps = idpProvider.getAllStream(IdentityProviderQuery.any()).map(IdentityProviderModel::getAlias).collect(Collectors.toSet());
         return context.getSession().users().getFederatedIdentitiesStream(realm, user)
                 .filter(identity -> idps.contains(identity.getIdentityProvider()));
     }

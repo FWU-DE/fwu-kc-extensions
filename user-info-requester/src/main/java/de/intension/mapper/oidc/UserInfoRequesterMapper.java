@@ -1,15 +1,11 @@
 package de.intension.mapper.oidc;
 
-import static de.intension.mapper.RequesterMapperConstants.*;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import de.intension.rest.IKeycloakApiMapper;
+import de.intension.rest.RestClient;
+import de.intension.rest.sanis.SanisKeycloakMapping;
 import org.jboss.logging.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.mappers.UserAttributeMapper;
@@ -18,13 +14,16 @@ import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.utils.StringUtil;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
-import de.intension.rest.IKeycloakApiMapper;
-import de.intension.rest.RestClient;
-import de.intension.rest.sanis.SanisKeycloakMapping;
+import static de.intension.mapper.RequesterMapperConstants.*;
 
 public class UserInfoRequesterMapper extends UserAttributeMapper
 {
@@ -111,7 +110,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
         String userInfo = null;
         if (StringUtil.isNotBlank(endpointUrl)) {
             try {
-                URL url = new URL(endpointUrl);
+                URL url = new URI(endpointUrl).toURL();
                 String accessToken = getAccessToken(context);
                 if (accessToken != null) {
                     userInfo = RestClient.get(url, accessToken);
@@ -119,7 +118,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                 else {
                     logger.errorf("Access Token is null inside BrokeredIdentityContext for IdP %s", context.getIdpConfig().getAlias());
                 }
-            } catch (MalformedURLException e) {
+            } catch (URISyntaxException e) {
                 logger.errorf("%s - Malformed URL: %s", REST_API_URL_LABEL, endpointUrl);
             } catch (IOException e) {
                 logger.errorf(e, "Error while calling rest endpoint %s", endpointUrl);
