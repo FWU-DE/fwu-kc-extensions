@@ -5,7 +5,6 @@ import de.intension.testhelper.HttpClientHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;

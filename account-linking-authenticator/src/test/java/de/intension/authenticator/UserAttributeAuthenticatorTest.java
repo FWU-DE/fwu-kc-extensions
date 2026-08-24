@@ -1,11 +1,7 @@
 package de.intension.authenticator;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.util.HashMap;
-import java.util.stream.Stream;
-
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.junit.jupiter.api.Test;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -13,8 +9,10 @@ import org.keycloak.http.HttpRequest;
 import org.keycloak.models.*;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
+import java.util.HashMap;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class UserAttributeAuthenticatorTest
 {
@@ -150,7 +148,9 @@ class UserAttributeAuthenticatorTest
         IdentityProviderModel idpModel = new IdentityProviderModel();
         idpModel.setAlias("oidc-test");
         idpModel.setDisplayName("OIDC Test IdP");
-        when(realm.getIdentityProvidersStream()).thenReturn(Stream.of(idpModel));
+        IdentityProviderStorageProvider idpProvider = mock(IdentityProviderStorageProvider.class);
+        when(session.identityProviders()).thenReturn(idpProvider);
+        when(idpProvider.getByAlias("oidc-test")).thenReturn(idpModel);
         when(session.getProvider(any())).thenReturn(provider);
         when(provider.setAuthenticationSession(any())).thenReturn(provider);
         when(provider.setError(any())).thenReturn(provider);

@@ -1,13 +1,7 @@
 package de.intension.authenticator;
 
-import static de.intension.authenticator.UserAttributeAuthenticatorFactory.CONF_ACCOUNT_LINK_ATTRIBUTE;
-import static de.intension.authenticator.UserAttributeAuthenticatorFactory.CONF_IDP_NAME;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -20,8 +14,12 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.services.ErrorPage;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static de.intension.authenticator.UserAttributeAuthenticatorFactory.CONF_ACCOUNT_LINK_ATTRIBUTE;
+import static de.intension.authenticator.UserAttributeAuthenticatorFactory.CONF_IDP_NAME;
 
 public class UserAttributeAuthenticator
     implements Authenticator
@@ -99,10 +97,9 @@ public class UserAttributeAuthenticator
     private String getIdpName(AuthenticationFlowContext context, String idpAlias)
     {
         if (idpAlias != null) {
-            Optional<IdentityProviderModel> identityProvider = context.getRealm().getIdentityProvidersStream().filter(idp -> idp.getAlias().equals(idpAlias))
-                .findFirst();
-            if (identityProvider.isPresent() && identityProvider.get().getDisplayName() != null) {
-                return identityProvider.get().getDisplayName();
+            IdentityProviderModel identityProvider = context.getSession().identityProviders().getByAlias(idpAlias);
+            if (identityProvider != null && identityProvider.getDisplayName() != null) {
+                return identityProvider.getDisplayName();
             }
         }
         return idpAlias;

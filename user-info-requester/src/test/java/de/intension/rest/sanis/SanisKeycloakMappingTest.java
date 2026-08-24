@@ -4,6 +4,7 @@ import com.google.common.io.Resources;
 import de.intension.rest.IKeycloakApiMapper;
 import org.junit.jupiter.api.Test;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
+import org.keycloak.models.IdentityProviderModel;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,7 +28,9 @@ class SanisKeycloakMappingTest
     {
         URL resource = Resources.getResource("de/intension/rest/sanis/UserInfo.json");
         String userInfoJson = Resources.toString(resource, StandardCharsets.UTF_8);
-        BrokeredIdentityContext context = new BrokeredIdentityContext(null);
+        IdentityProviderModel idpModel = new IdentityProviderModel();
+        idpModel.setEnabled(true);
+        BrokeredIdentityContext context = new BrokeredIdentityContext(idpModel);
         IKeycloakApiMapper mapper = new SanisKeycloakMapping();
         mapper.addAttributesToResource(context, userInfoJson);
         assertEquals("Max", context.getUserAttribute(PERSON_VORNAME.getAttributeName()));
