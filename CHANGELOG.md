@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented here.
 
+## Version [7.0.0]
+
+- Changed: Upgrade to Keycloak version 26.7.2
+
+## Version [6.0.0]
+
+- IdPs can create pseudonyms instead of vidis
+
 ## Version [5.7.0]
 
 Added: Authenticator to check client id sent to IdP
