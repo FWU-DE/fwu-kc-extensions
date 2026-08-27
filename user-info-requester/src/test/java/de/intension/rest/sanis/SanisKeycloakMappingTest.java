@@ -45,6 +45,10 @@ class SanisKeycloakMappingTest
         assertEquals("NI_12345", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_KENNUNG.getAttributeName().replace("#", "0")));
         assertEquals("Muster-Schule", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_NAME.getAttributeName().replace("#", "0")));
         assertEquals("SCHULE", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_TYP.getAttributeName().replace("#", "0")));
+        assertEquals("29614", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_PLZ.getAttributeName().replace("#", "0")));
+        assertEquals("Soltau", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORT.getAttributeName().replace("#", "0")));
+        assertEquals("Ahlften", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORTSTEIL.getAttributeName().replace("#", "0")));
+        assertEquals("03", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_BUNDESLAND.getAttributeName().replace("#", "0")));
         assertEquals("LERN", context.getUserAttribute(PERSON_KONTEXT_ARRAY_ROLLE.getAttributeName().replace("#", "0")));
         assertEquals("AKTIV", context.getUserAttribute(PERSON_KONTEXT_ARRAY_STATUS.getAttributeName().replace("#", "0")));
         assertEquals("2099-12-31T23:59Z", context.getUserAttribute(PERSON_KONTEXT_ARRAY_LOESCHUNG.getAttributeName().replace("#", "0")));
@@ -55,6 +59,6 @@ class SanisKeycloakMappingTest
         assertEquals("renzgruppen\":[{\"id\":\"21252996-7a5d-47b5-9c62-c416460908f0\",\"rollen\":[\"LERN\",\"LEHR\"]}],\"laufzeit\":{\"von\":\"2023-08-01\",\"bis\":\"2024-01-31\",\"sichtfreigabe\":\"JA\"},\"revision\":\"1\"},\"gruppenzugehoerigkeit\":{\"rollen\":[\"LEHR\"]}}",
                      context.getUserAttribute(PERSON_KONTEXT_ARRAY_GRUPPEN.getAttributeName().replace("#", "0") + "[0]_2"));
         assertNotEquals("", context.getUserAttribute(PERSON_KONTEXT_GRUPPEN.getAttributeName().replace('#', '0') + "[1]"));
-        assertEquals(24, context.getContextData().size());
+        assertEquals(28, context.getContextData().size());
     }
 }

@@ -23,7 +23,15 @@
         "orgid": "15685758-d18e-49c1-a644-f9996eb0bf08",
         "kennung": "NI_12345",
         "name": "Muster-Schule",
-        "typ": "SCHULE"
+        "typ": "SCHULE",
+        "anschrift": {
+          "postleitzahl": "29614",
+          "ort": "Soltau",
+          "ortsteil": "Ahlften",
+          "verwaltungspolitischekodierung": {
+            "bundesland": "03"
+          }
+        }
       },
       "rolle": "LERN",
       "personenstatus": "AKTIV",

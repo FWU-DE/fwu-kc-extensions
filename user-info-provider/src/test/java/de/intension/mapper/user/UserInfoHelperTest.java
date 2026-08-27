@@ -107,7 +107,7 @@ class UserInfoHelperTest
             "1242,null,Musterschule,SCHULE,''"}, nullValues = {"null"})
     void should_mark_as_empty_organisation(String orgid, String kennung, String name, OrganisationsTyp typ, String vidisSchulidentifikator)
     {
-        Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator);
+        Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator, null);
         Assertions.assertTrue(org.isEmpty());
     }
 
@@ -125,8 +125,29 @@ class UserInfoHelperTest
             "1242,'','',SCHULE,0815",}, nullValues = {"null"})
     void should_mark_as_not_empty_organisation(String orgid, String kennung, String name, OrganisationsTyp typ, String vidisSchulidentifikator)
     {
-        Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator);
+        Organisation org = new Organisation(orgid, kennung, name, typ, vidisSchulidentifikator, null);
         Assertions.assertFalse(org.isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"'','','',''", "null,null,null,null"}, nullValues = {"null"})
+    void should_mark_as_empty_anschrift(String postleitzahl, String ort, String ortsteil, String bundesland)
+    {
+        VerwaltungspolitischeKodierung kodierung = bundesland == null ? null : new VerwaltungspolitischeKodierung(bundesland);
+        Anschrift anschrift = new Anschrift(postleitzahl, ort, ortsteil, kodierung);
+        Assertions.assertTrue(anschrift.isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"29614,null,null,null",
+            "null,Soltau,null,null",
+            "null,null,Ahlften,null",
+            "null,null,null,03"}, nullValues = {"null"})
+    void should_mark_as_not_empty_anschrift(String postleitzahl, String ort, String ortsteil, String bundesland)
+    {
+        VerwaltungspolitischeKodierung kodierung = bundesland == null ? null : new VerwaltungspolitischeKodierung(bundesland);
+        Anschrift anschrift = new Anschrift(postleitzahl, ort, ortsteil, kodierung);
+        Assertions.assertFalse(anschrift.isEmpty());
     }
 
     private HeimatOrganisation getHeimatorganisation(boolean empty)

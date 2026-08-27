@@ -29,6 +29,11 @@ public class UserInfoAttributeNames
     public static final String    ORG_KENNUNG                       = "kennung";
     public static final String    ORG_TYP                           = "typ";
     public static final String    VIDIS_SCHULIDENTIFIKATOR          = "vidis_schulidentifikator";
+    public static final String    ORG_ANSCHRIFT                     = "anschrift";
+    public static final String    ORG_ANSCHRIFT_POSTLEITZAHL        = "postleitzahl";
+    public static final String    ORG_ANSCHRIFT_ORT                 = "ort";
+    public static final String    ORG_ANSCHRIFT_ORTSTEIL            = "ortsteil";
+    public static final String    ORG_ANSCHRIFT_VERWALTUNGSPOLITISCHE_KODIERUNG = "verwaltungspolitischekodierung";
     public static final String    ID                                = "id";
     public static final String    GRUPPEN                           = "gruppen";
     public static final String    GRUPPE                            = "gruppe";
@@ -95,11 +100,23 @@ public class UserInfoAttributeNames
     protected static final String PERSON_KONTEXT_ORG_KENNUNG        = String.format(CONCAT, PERSON_KONTEXT_ORG, ORG_KENNUNG);
     protected static final String PERSON_KONTEXT_ORG_NAME           = String.format(CONCAT, PERSON_KONTEXT_ORG, NAME);
     protected static final String PERSON_KONTEXT_ORG_TYP            = String.format(CONCAT, PERSON_KONTEXT_ORG, ORG_TYP);
+    protected static final String PERSON_KONTEXT_ORG_ANSCHRIFT              = String.format(CONCAT, PERSON_KONTEXT_ORG, ORG_ANSCHRIFT);
+    protected static final String PERSON_KONTEXT_ORG_ANSCHRIFT_PLZ          = String.format(CONCAT, PERSON_KONTEXT_ORG_ANSCHRIFT, ORG_ANSCHRIFT_POSTLEITZAHL);
+    protected static final String PERSON_KONTEXT_ORG_ANSCHRIFT_ORT          = String.format(CONCAT, PERSON_KONTEXT_ORG_ANSCHRIFT, ORG_ANSCHRIFT_ORT);
+    protected static final String PERSON_KONTEXT_ORG_ANSCHRIFT_ORTSTEIL     = String.format(CONCAT, PERSON_KONTEXT_ORG_ANSCHRIFT, ORG_ANSCHRIFT_ORTSTEIL);
+    protected static final String PERSON_KONTEXT_ORG_ANSCHRIFT_BUNDESLAND   = String.format(CONCAT, PERSON_KONTEXT_ORG_ANSCHRIFT, BUNDESLAND);
     protected static final String PERSON_KONTEXT_ROLLE              = String.format(CONCAT, PERSON_KONTEXT, ROLLE);
     protected static final String PERSON_KONTEXT_ARRAY_ORG_VIDIS_ID = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG, VIDIS_SCHULIDENTIFIKATOR);
     protected static final String PERSON_KONTEXT_ARRAY_ORG_KENNUNG  = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG, ORG_KENNUNG);
     protected static final String PERSON_KONTEXT_ARRAY_ORG_NAME     = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG, NAME);
     protected static final String PERSON_KONTEXT_ARRAY_ORG_TYP      = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG, ORG_TYP);
+    protected static final String PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT            = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG, ORG_ANSCHRIFT);
+    protected static final String PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_PLZ        = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT,
+            ORG_ANSCHRIFT_POSTLEITZAHL);
+    protected static final String PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORT       = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT, ORG_ANSCHRIFT_ORT);
+    protected static final String PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORTSTEIL  = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT,
+            ORG_ANSCHRIFT_ORTSTEIL);
+    protected static final String PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_BUNDESLAND = String.format(CONCAT, PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT, BUNDESLAND);
     protected static final String PERSON_KONTEXT_ARRAY_ROLLE        = String.format(CONCAT, PERSON_KONTEXT_ARRAY, ROLLE);
 
     private UserInfoAttributeNames()

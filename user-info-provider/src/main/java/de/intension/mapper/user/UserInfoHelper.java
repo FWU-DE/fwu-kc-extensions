@@ -127,6 +127,7 @@ public class UserInfoHelper
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
             addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, kennung, -1);
         }
+        addAnschrift(mappingModel, user, organisation, -1);
         return organisation;
     }
 
@@ -374,6 +375,7 @@ public class UserInfoHelper
         if (isActive(PERSON_KONTEXT_ORG_VIDIS_ID, mappingModel)) {
             addVidisSchulIdentifikator(mappingModel, user, userInfo, organisation, kennung, i);
         }
+        addAnschrift(mappingModel, user, organisation, i);
         return organisation;
     }
 
@@ -396,6 +398,40 @@ public class UserInfoHelper
             else if (vidisId != null) {
                 org.setVidisSchulidentifikator(vidisId);
             }
+        }
+    }
+
+    /**
+     * Add {@link Anschrift} json structure to {@link Organisation}.
+     */
+    private void addAnschrift(ProtocolMapperModel mappingModel, UserModel user, Organisation organisation, Integer index)
+    {
+        boolean isArray = index != -1;
+        UserInfoAttribute plzAttribute = isArray ? PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_PLZ : PERSON_KONTEXT_ORG_ANSCHRIFT_PLZ;
+        UserInfoAttribute ortAttribute = isArray ? PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORT : PERSON_KONTEXT_ORG_ANSCHRIFT_ORT;
+        UserInfoAttribute ortsteilAttribute = isArray ? PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORTSTEIL : PERSON_KONTEXT_ORG_ANSCHRIFT_ORTSTEIL;
+        UserInfoAttribute bundeslandAttribute = isArray ? PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_BUNDESLAND : PERSON_KONTEXT_ORG_ANSCHRIFT_BUNDESLAND;
+
+        Anschrift anschrift = new Anschrift();
+        if (isActive(PERSON_KONTEXT_ORG_ANSCHRIFT_PLZ, mappingModel)) {
+            anschrift.setPostleitzahl(resolveSingleAttributeValue(user, plzAttribute, index));
+        }
+        if (isActive(PERSON_KONTEXT_ORG_ANSCHRIFT_ORT, mappingModel)) {
+            anschrift.setOrt(resolveSingleAttributeValue(user, ortAttribute, index));
+        }
+        if (isActive(PERSON_KONTEXT_ORG_ANSCHRIFT_ORTSTEIL, mappingModel)) {
+            anschrift.setOrtsteil(resolveSingleAttributeValue(user, ortsteilAttribute, index));
+        }
+        if (isActive(PERSON_KONTEXT_ORG_ANSCHRIFT_BUNDESLAND, mappingModel)) {
+            String bundesland = resolveSingleAttributeValue(user, bundeslandAttribute, index);
+            if (StringUtil.isNotBlank(bundesland)) {
+                VerwaltungspolitischeKodierung kodierung = new VerwaltungspolitischeKodierung();
+                kodierung.setBundesland(bundesland);
+                anschrift.setVerwaltungspolitischeKodierung(kodierung);
+            }
+        }
+        if (!anschrift.isEmpty()) {
+            organisation.setAnschrift(anschrift);
         }
     }
 

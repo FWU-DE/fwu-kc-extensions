@@ -5,6 +5,10 @@ public enum OrganisationsTyp
 
     SCHULE,
     ANBIETER,
+    MEDIENZENTRUM,
+    BEHOERDE,
+    SCHTRAE,
+    STUDIENSEMINAR,
     SONSTIGE,
     UNBEST;
 

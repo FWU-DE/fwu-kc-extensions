@@ -38,6 +38,10 @@ The following attributes are used as an input for this mapper:
 | person.kontext.org.vidis_schulidentifikator | String      | Vidis Schulidentifikator                     |
 | person.kontext.org.name                     | String      | Name der Schule                              |
 | person.kontext.org.typ                      | String      | Typ der Organisation                         |
+| person.kontext.org.anschrift.postleitzahl   | String      | Postleitzahl der Organisation                |
+| person.kontext.org.anschrift.ort            | String      | Amtlicher Gemeindename der Organisation      |
+| person.kontext.org.anschrift.ortsteil       | String      | Ortsteil der Organisation                    |
+| person.kontext.org.anschrift.bundesland     | String      | Bundesland der Organisation (ISO 3166-2:DE)  |
 | person.kontext.rolle                        | String      | Rolle der Person                             |
 | person.kontext.status                       | String      | Status                                       |
 | person.kontext.gruppe[\<**number**>]        | JSON-Objekt | Gruppen und Zugehörigkeiten des Users        |
@@ -64,6 +68,10 @@ Context array
 | person.kontext.\<**number**>.org.vidis_schulidentifikator | String | Vidis Schulidentifikator                |
 | person.kontext.\<**number**>.org.name                     | String | Name der Schule                         |
 | person.kontext.\<**number**>.org.typ                      | String | Typ der Organisation                    |
+| person.kontext.\<**number**>.org.anschrift.postleitzahl   | String | Postleitzahl der Organisation           |
+| person.kontext.\<**number**>.org.anschrift.ort            | String | Amtlicher Gemeindename der Organisation |
+| person.kontext.\<**number**>.org.anschrift.ortsteil       | String | Ortsteil der Organisation                |
+| person.kontext.\<**number**>.org.anschrift.bundesland     | String | Bundesland der Organisation (ISO 3166-2:DE) |
 | person.kontext.\<**number**>.rolle                        | String | Rolle der Person                        |
 | person.kontext.\<**number**>.status                       | String | Status                                  |
 | person.kontext.\<**number**>.loeschung                    | String | Zeitpunkt der Löschung des Kontextets   |
@@ -96,6 +104,10 @@ Context array
 | personenkontexte.organisation.vidis_schulidentifikator | String                           | Vidis Schulidentifikator                                                                                               | heimatorganisation.id + personenkontexte.organisation.kennung (getrennt mit einem Punkt)     |
 | personenkontexte.organisation.name                     | String                           | Name der Schule                                                                                                        |                                                                                              |
 | personenkontexte.organisation.type                     | ENUM                             | Typ der Organisation                                                                                                   | SCHULE                                                                                       |
+| personenkontexte.organisation.anschrift.postleitzahl   | String                           | Postleitzahl der Organisation                                                                                          |                                                                                              |
+| personenkontexte.organisation.anschrift.ort            | String                           | Amtlicher Gemeindename der Organisation                                                                                |                                                                                              |
+| personenkontexte.organisation.anschrift.ortsteil       | String                           | Ortsteil der Organisation                                                                                              |                                                                                              |
+| personenkontexte.organisation.anschrift.verwaltungspolitischekodierung.bundesland | String          | Bundesland der Organisation (ISO 3166-2:DE)                                                                            |                                                                                              |
 | personenkontexte.rolle                                 | ENUM                             | Rolle der Person                                                                                                       |                                                                                              |
 | personenkontexte.personenstatus                        | ENUM                             | Status                                                                                                                 | AKTIV                                                                                        |
 | personenkontexte.gruppen                               | JSON-Array (String)              | Gruppe und Zugehörigkeit eines PersonenKontextes siehe SANIS V1.0003                                                   |                                                                                              |

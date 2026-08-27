@@ -56,6 +56,11 @@ public class SanisKeycloakMapping
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_KENNUNG, new BaseMapper("$.personenkontexte[#].organisation.kennung"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_NAME, new BaseMapper("$.personenkontexte[#].organisation.name"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_TYP, new UpperCaseMapper("$.personenkontexte[#].organisation.typ"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_PLZ, new BaseMapper("$.personenkontexte[#].organisation.anschrift.postleitzahl"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORT, new BaseMapper("$.personenkontexte[#].organisation.anschrift.ort"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_ORTSTEIL, new BaseMapper("$.personenkontexte[#].organisation.anschrift.ortsteil"));
+        kontextMapping.put(PERSON_KONTEXT_ARRAY_ORG_ANSCHRIFT_BUNDESLAND,
+                new BaseMapper("$.personenkontexte[#].organisation.anschrift.verwaltungspolitischekodierung.bundesland"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_ROLLE, new UpperCaseMapper("$.personenkontexte[#].rolle"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_STATUS, new UpperCaseMapper("$.personenkontexte[#].personenstatus"));
         kontextMapping.put(PERSON_KONTEXT_ARRAY_LOESCHUNG, new UpperCaseMapper("$.personenkontexte[#].loeschung.zeitpunkt"));

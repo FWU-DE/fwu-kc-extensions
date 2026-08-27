@@ -2,12 +2,24 @@
 
 All notable changes to this project will be documented here.
 
-## Version [5.7.0]
+## Version [6.1.0]
 
-Added: Authenticator to check client id sent to IdP
+Changed: Update SchulConnex implementation to version 1.8 (which is still release candidate at the time of this release)
+
+## Version [6.0.1]
+
+Bugfix: Provider id of authenticator to forward the sectorIdentifierUri was too long
+
+## Version [6.0.0]
+
 Added: Authenticator to forward the sectorIdentifierUri configured on the client's HMAC pairwise subject mapper to the IdP
 Added: Post-login authenticator to verify the sectorIdentifierUri sent back by the IdP matches the one originally forwarded, allowing silent fallback to the local pseudonym when the IdP sends back neither the sectorIdentifierUri nor a pseudonym
 Added: Optional external sub attribute on HMAC pairwise subject/email mappers to use an IdP-provided pseudonymized sub instead of computing it via HMAC
+Added: Restrained cookie authenticator which forwards requests to IdPs even if there is already a SSO session active
+
+## Version [5.7.0]
+
+Added: Authenticator to check client id sent to IdP
 
 ## Version [5.6.0]
 

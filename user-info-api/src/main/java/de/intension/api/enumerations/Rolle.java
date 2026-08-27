@@ -5,10 +5,13 @@ public enum Rolle
 
     LERN("Lernende/r"),
     LEHR("Lehrende/r"),
+    SORGBER("Sorgeberechtigte/r"),
     EXTERN("Externe Person"),
     ORGADMIN("Organisationsadministrator"),
     LEIT("Organisationsleitung"),
-    SYSADMIN("Systemadministrator");
+    SYSADMIN("Systemadministrator"),
+    SCHB("Schulbegleiter/in"),
+    NLEHR("Nicht-lehrendes Personal");
 
     private static String prettyPrint;
     private final String  description;

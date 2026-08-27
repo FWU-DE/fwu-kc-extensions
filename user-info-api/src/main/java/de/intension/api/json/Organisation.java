@@ -31,6 +31,8 @@ public class Organisation
     private OrganisationsTyp typ;
     @JsonProperty(UserInfoAttributeNames.VIDIS_SCHULIDENTIFIKATOR)
     private String           vidisSchulidentifikator;
+    @JsonProperty(UserInfoAttributeNames.ORG_ANSCHRIFT)
+    private Anschrift        anschrift;
 
     @JsonIgnore
     public boolean isEmpty()
