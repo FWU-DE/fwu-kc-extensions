@@ -115,6 +115,7 @@ public class UserInfoRequesterMapper extends UserAttributeMapper
                 String accessToken = getAccessToken(context);
                 if (accessToken != null) {
                     userInfo = RestClient.get(url, accessToken);
+                    logger.infof("Read user info: %s", userInfo);
                 }
                 else {
                     logger.errorf("Access Token is null inside BrokeredIdentityContext for IdP %s", context.getIdpConfig().getAlias());
