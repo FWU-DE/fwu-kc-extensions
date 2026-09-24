@@ -593,6 +593,25 @@ public class UserInfoHelper
         return negateOutput;
     }
 
+    /**
+     * Find the first role configured via user attributes, checking the default context before any indexed contexts.
+     * Returns {@code null} if no role attribute is set at all.
+     */
+    public Rolle findRolle(UserModel user)
+    {
+        Rolle rolle = getRolle(user, -1);
+        if (rolle != null) {
+            return rolle;
+        }
+        for (Integer i : getPersonenKontexteIndizes(user)) {
+            rolle = getRolle(user, i);
+            if (rolle != null) {
+                return rolle;
+            }
+        }
+        return null;
+    }
+
     private static List<String> splitAndTrimUsingStreams(String inputString)
     {
         return Arrays.stream(inputString.split(COMMA_DELIMITER))
