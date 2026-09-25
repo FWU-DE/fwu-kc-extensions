@@ -54,16 +54,23 @@ jobs:
           xpath: "//*[local-name()='project']/*[local-name()='properties']/*[local-name()='keycloak.version']"
       - name: Check release exists
         id: check-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG=${{ steps.get-version.outputs.info }}
           echo "TAG: $TAG"
-          response=$(curl --silent -H 'Accept: application/vnd.github.v3+json' "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
-          message=$(echo $response | jq -r .message)
-          echo "Message: $message"
-          if [ "$message" = "Not Found" ]; then
+          http_status=$(curl --silent -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H 'Accept: application/vnd.github.v3+json' \
+            "https://api.github.com/repos/FWU-DE/fwu-kc-extensions/releases/tags/$TAG")
+          echo "HTTP status: $http_status"
+          if [ "$http_status" = "404" ]; then
             echo "version=$TAG" >> $GITHUB_OUTPUT
-          else
+          elif [ "$http_status" = "200" ]; then
             echo "Release $TAG already exists!"
+          else
+            echo "::error::Unexpected response checking for release $TAG (HTTP $http_status)"
+            exit 1
           fi
       - name: Deploy to GitHub and GitLab packages
         if: ${{ steps.check-release.outputs.version != '' }}
@@ -108,7 +115,7 @@ jobs:
 
   startImageBuild:
     needs: publish
-    if: ${{ needs.publish.outputs.published_version }} != ""
+    if: ${{ needs.publish.outputs.published_version != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger image build and deployment on Gitlab

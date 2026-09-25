@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented here.
 
+## Version [6.1.0]
+
+Added: Client mapper which creates random SchulConnex data
+
+## Version [6.0.2]
+
+Changed: added some log output to SchulConnex requester
+
+## Version [6.0.1]
+
+Changed: Fixed provider id which was too long
+
+## Version [6.0.0]
+
+Added: Authenticator to forward sector identifier of current client
+Added: Authenticator to check sector identifier claim against forwarded value
+Added: Mofidied cookie authenticator which always forwards to brokered IdP if some user attribute exists for current user (pseudonym by IdP)
+Changed: Mapper to create pseudonyms for sub and email whether there is a pseudonym already provided by IdP
+
 ## Version [5.7.0]
 
 Added: Authenticator to check client id sent to IdP
