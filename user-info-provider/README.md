@@ -153,7 +153,67 @@ an option to use negate output feature which will just negate the output after c
 
 <img src="../docs/userinfo/Vidis-role-based-info-mapper.png" width="70%"/>
 
-# Role based info Mapper
+# Random User Info Mapper (Test)
+
+Test-only variant of the [Vidis Info Mapper](#vidis-info-mapper). It produces the same standardized userInfo
+JSON structure, but instead of relying on a Service Provider (or the [user-info-requester](./../user-info-requester/README.md))
+having populated all user attributes beforehand, it makes up whatever data is missing. This makes it possible to
+test a Service Provider's integration against realistic-looking `personenkontexte`/`gruppen` payloads without having
+to configure a full IdP/broker flow and set dozens of user attributes by hand.
+
+It shows up in the client's mapper list as **"Vidis Info Mapper (Test)"**, distinct from the regular **"Vidis Info Mapper"**,
+so it is easy to tell apart in the admin console and should not accidentally end up in a production client.
+
+## How it works
+
+1. It only produces a claim at all if the user has a role configured, i.e. one of the attributes `person.kontext.rolle`
+   or `person.kontext.<number>.rolle` is set (see [user-info-api](./../user-info-api/README.md) for details on these
+   attributes). If no role is present, the mapper adds nothing to the token - same as if the mapper wasn't configured.
+2. If a role is found, every real user attribute that exists is mapped exactly like the regular Vidis Info Mapper does
+   (heimatorganisation, person, personenkontexte, gruppen, ...) - real data always takes precedence and is never
+   overwritten.
+3. Anything that is still missing afterwards is filled in with plausible, made-up data (name, birthdate, school,
+   Organisationstyp, Bundesland, a Gruppe, ...). In most setups - e.g. a user that was only assigned a role for testing
+   and has no other attributes - this means (almost) the entire payload is made up.
+4. The resulting userInfo object always contains **exactly one** `personenkontext`, carrying the role found in step 1
+   (if multiple roles/contexts exist on the user, the first one found is used and turned into the single context).
+
+### Determinism
+
+The made-up data is not random on every request. It is derived from a hash of the user's Keycloak ID together with
+whatever real data was found in step 2, and used to seed the random generator. This means:
+- The **same user** gets the **same** made-up data on every login/token request, as long as their real attributes
+  don't change - so refreshing a token or logging in again in a test doesn't shuffle the data around.
+- **Different users** get different made-up data.
+- If a user's real attributes change (e.g. a different role is assigned, or a real name is set), the made-up data is
+  recomputed and may change too, since it is only meant to fill gaps around the current real data.
+
+## Configuration
+
+Setup is the same as for the regular Vidis Info Mapper, just with a different mapper type:
+1. Go to "Clients" and select the client to configure
+2. Go to Tab "Mappers" and click on Button "create" adding a new mapper
+3. Select "Vidis Info Mapper (Test)" as mapper type
+4. Set "Token Claim Name" for the metadata JSON structure
+5. Define which token should contain this data
+
+There are no per-field checkboxes to de-/activate individual attributes like on the regular mapper - since the whole
+point of this mapper is to always produce a complete object, every attribute that can be resolved is always included.
+
+## Controlling which data is sent
+
+Since there is no field-by-field configuration, the only way to influence the content is via the user's real attributes
+(see [user-info-api](./../user-info-api/README.md) for the full list of supported attribute keys):
+- **A role attribute is required.** Set `person.kontext.rolle` (or an indexed `person.kontext.<number>.rolle`) to the
+  desired role to make the mapper produce a claim at all, and to control which role the single personenkontext gets.
+- **Any other attribute you set is used as-is** and never replaced by made-up data - e.g. set `person.vorname` /
+  `person.familienname` if a test needs a specific, stable name, or `person.kontext.org.kennung` /
+  `person.kontext.org.typ` to pin down the organisation.
+- Everything you don't set is made up, deterministically, as described above.
+
+This mapper is intended for test/staging realms only - it fabricates person and organisation data, so it should not
+be added to mappers of a production client.
+
 
 Service Provider Mapper similar to the user property mapper provided by Keycloak, which reads provided property from the
 user attribute based on the role which is assigned to the user and adds them to the token. Role is checked in the following
