@@ -82,6 +82,29 @@ jobs:
           replacesArtifacts: true
           bodyFile: "CHANGELOG.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy selected extensions to secondary GitLab project
+        if: ${{ steps.check-release.outputs.version != '' }}
+        env:
+          GITLAB_EXTRA_HOST: ${{ secrets.GITLAB_EXTRA_HOST }}
+          GITLAB_EXTRA_TOKEN: ${{ secrets.GITLAB_EXTRA_TOKEN }}
+          GITLAB_EXTRA_PROJECT_ID: ${{ secrets.GITLAB_EXTRA_PROJECT_ID }}
+          GROUP_ID: ${{ steps.get-group.outputs.info }}
+          VERSION: ${{ steps.get-version.outputs.info }}
+        run: |
+          # Module directories (== artifactId) to also publish to the secondary GitLab project.
+          # Fill in the extensions that should be mirrored there, e.g. "hmac-mapper whitelist-authenticator".
+          EXTRA_MODULES="user-info-api user-info-provider"
+          for module in $EXTRA_MODULES; do
+            mvn --batch-mode deploy:deploy-file \
+              -s ci_settings.xml \
+              -Dfile="target/${module}.jar" \
+              -DgroupId="${GROUP_ID}" \
+              -DartifactId="${module}" \
+              -Dversion="${VERSION}" \
+              -Dpackaging=jar \
+              -DrepositoryId=gitlab-extra \
+              -Durl="https://${GITLAB_EXTRA_HOST}/api/v4/projects/${GITLAB_EXTRA_PROJECT_ID}/packages/maven"
+          done
 
   startImageBuild:
     needs: publish

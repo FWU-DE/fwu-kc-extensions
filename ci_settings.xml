@@ -13,5 +13,16 @@
         </httpHeaders>
       </configuration>
     </server>
+    <server>
+      <id>gitlab-extra</id>
+      <configuration>
+        <httpHeaders>
+          <property>
+            <name>Deploy-Token</name>
+            <value>${env.GITLAB_EXTRA_TOKEN}</value>
+          </property>
+        </httpHeaders>
+      </configuration>
+    </server>
   </servers>
 </settings>
