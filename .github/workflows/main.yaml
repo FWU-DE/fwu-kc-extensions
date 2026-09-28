@@ -100,7 +100,7 @@ jobs:
         run: |
           # Module directories (== artifactId) to also publish to the secondary GitLab project.
           # Fill in the extensions that should be mirrored there, e.g. "hmac-mapper whitelist-authenticator".
-          EXTRA_MODULES="user-info-api user-info-provider"
+          EXTRA_MODULES="fwu-base user-info-api user-info-provider"
           for module in $EXTRA_MODULES; do
             mvn --batch-mode deploy:deploy-file \
               -s ci_settings.xml \
