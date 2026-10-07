@@ -53,6 +53,7 @@ class VidisAdminRealmResourceProviderAllIT {
             .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
             .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
             .withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "ALL")
+            .withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE", "0")
             .dependsOn(mockServer);
 
     @Container
