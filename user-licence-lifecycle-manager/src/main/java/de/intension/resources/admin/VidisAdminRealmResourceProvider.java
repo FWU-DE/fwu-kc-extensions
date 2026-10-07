@@ -74,18 +74,19 @@ public class VidisAdminRealmResourceProvider
         RealmModel realmModel = session.getContext().getRealm();
         UserSessionProvider sessionProvider = session.sessions();
         int numberOfDeletedUsers = 0;
-        long lastCreationDate = System.currentTimeMillis()
+        // users created after the cutoff may still be in the middle of their login and do not have a session yet
+        long createdBefore = System.currentTimeMillis()
                 - (long) config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS) * 1000L;
+        // users with an active session are not deleted, so page by id to not fetch them again
+        String lastUserId = "";
         do {
-            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete - numberOfDeletedUsers), lastCreationDate, idpOnly);
+            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete - numberOfDeletedUsers), lastUserId, createdBefore, idpOnly);
             LOG.debugf("Found %s users in realm %s", idpUsers.size(), realmModel.getName());
             if (idpUsers.isEmpty()) {
                 break;
             }
             for (UserEntity ue : idpUsers) {
-                if (ue.getCreatedTimestamp() != null) {
-                    lastCreationDate = ue.getCreatedTimestamp();
-                }
+                lastUserId = ue.getId();
                 try {
                     em.lock(ue, LockModeType.PESSIMISTIC_WRITE);
                 } catch (Exception e) {
@@ -103,18 +104,20 @@ public class VidisAdminRealmResourceProvider
     }
 
     @SuppressWarnings("unchecked")
-    private List<UserEntity> getListOfUsers(int chunkSize, long lastCreationDate, boolean idpOnly) {
+    private List<UserEntity> getListOfUsers(int chunkSize, String lastUserId, long createdBefore, boolean idpOnly) {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
                 : " ";
         Query userQuery = em.createNativeQuery("select ue.* "
                 + "from user_entity ue "
-                + "where ue.created_timestamp > :lastTimeStamp "
-                + "and ue.realm_id = :realmId "
+                + "where ue.realm_id = :realmId "
+                + "and ue.id > :lastUserId "
+                + "and (ue.created_timestamp <= :createdBefore or ue.created_timestamp is null) "
                 + idpOnlyClause
-                + "order by ue.created_timestamp asc "
+                + "order by ue.id asc "
                 + "LIMIT :chunkSize", UserEntity.class);
-        userQuery.setParameter("lastTimeStamp", lastCreationDate);
+        userQuery.setParameter("lastUserId", lastUserId);
+        userQuery.setParameter("createdBefore", createdBefore);
         userQuery.setParameter("chunkSize", chunkSize);
         userQuery.setParameter("realmId", session.getContext().getRealm().getId());
         return userQuery.getResultList();

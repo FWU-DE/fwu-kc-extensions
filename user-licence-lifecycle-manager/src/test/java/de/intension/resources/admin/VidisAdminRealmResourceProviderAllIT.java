@@ -5,6 +5,7 @@ import de.intension.testhelper.HttpClientHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
@@ -53,6 +54,7 @@ class VidisAdminRealmResourceProviderAllIT {
             .withClasspathResourceMapping("idp-realm.json", IMPORT_PATH + "idp-realm.json", BindMode.READ_ONLY)
             .withRealmImportFiles("/fwu-realm.json", "/idp-realm.json")
             .withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_FWU", "ALL")
+            .withEnv("KC_SPI_ADMIN_REALM_RESTAPI_EXTENSION_VIDIS_CUSTOM_DELETIONTOLERANCE", "0")
             .dependsOn(mockServer);
 
     @Container
@@ -73,24 +75,28 @@ class VidisAdminRealmResourceProviderAllIT {
     }
 
     @Test
-    void shouldDeleteUsersWithCreatedTimestamp_whenAllConfigured() throws Exception {
+    void shouldDeleteUsersWithoutSession_whenAllConfigured() throws Exception {
+        RealmResource realm = keycloak.getKeycloakAdminClient().realm("fwu");
         UserRepresentation user = new UserRepresentation();
         user.setId("sampleUserId");
         user.setEmail("test@intension.de");
         user.setUsername("test");
-        keycloak.getKeycloakAdminClient().realm("fwu").users().create(user);
+        realm.users().create(user);
 
-        Integer userCountBeforeCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
         String authServerUrl = keycloak.getAuthServerUrl();
+        // creates a user session for misty, so misty must not be deleted
+        HttpClientHelper.getAccessToken(client, authServerUrl + "/realms/fwu/protocol/openid-connect/token", "misty", "test");
+
+        Integer userCountBeforeCleanup = realm.users().count();
         String accessToken = HttpClientHelper.getAccessToken(client, authServerUrl + "/realms/master/protocol/openid-connect/token", keycloak.getAdminUsername(), keycloak.getAdminPassword());
 
         Integer deletedUsers = HttpClientHelper.deleteUsers(client, accessToken, authServerUrl);
-        Integer userCountAfterCleanup = keycloak.getKeycloakAdminClient().realm("fwu").users().count();
+        Integer userCountAfterCleanup = realm.users().count();
 
         assertThat(deletedUsers).as("Deleted users").isPositive();
-        assertThat(userCountBeforeCleanup).as("Users before cleanup").isGreaterThan(userCountAfterCleanup);
-        assertThat(userCountAfterCleanup).as("Users after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers).isPositive();
-
+        assertThat(userCountAfterCleanup).as("Users after cleanup").isEqualTo(userCountBeforeCleanup - deletedUsers);
+        assertThat(realm.users().searchByUsername("test", true)).as("User without session").isEmpty();
+        assertThat(realm.users().searchByUsername("misty", true)).as("User with session").hasSize(1);
     }
 
     @AfterEach
