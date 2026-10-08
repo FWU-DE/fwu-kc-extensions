@@ -1,32 +1,19 @@
 package de.intension.mapper.oidc;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.base.Splitter;
+import com.google.common.io.Resources;
+import de.intension.api.UserInfoAttribute;
+import de.intension.api.json.GruppeWithZugehoerigkeit;
+import de.intension.mapper.user.UserInfoHelper;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.ClientSessionContext;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperModel;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserSessionModel;
+import org.keycloak.models.*;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.IDToken;
@@ -35,21 +22,21 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Splitter;
-import com.google.common.io.Resources;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import de.intension.api.UserInfoAttribute;
-import de.intension.api.json.GruppeWithZugehoerigkeit;
-import de.intension.mapper.user.UserInfoHelper;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UserInfoProviderMapperTest
 {
 
-    private static final String       SUB          = "af3a88fc-d766-11ec-9d64-0242ac120002";
+    private static final String SUB = "af3a88fc-d766-11ec-9d64-0242ac120002";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,29 +48,29 @@ class UserInfoProviderMapperTest
 
     @Test
     void should_map_all_user_attributes_to_userInfo_claim()
-        throws URISyntaxException, IOException, JSONException
+            throws URISyntaxException, IOException, JSONException
     {
         UserInfoProviderMapper mapper = new UserInfoProviderMapper();
         IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
         mapper.transformIDToken(idToken, createMapperModel(mapper, false, null), session, createUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
         Assertions.assertNotNull(userInfo);
         JSONAssert.assertEquals(getJsonResourceAsString("de/intension/mapper/oidc/UserInfo.json"), userInfo,
                                 new CustomComparator(JSONCompareMode.STRICT,
-                                        new Customization("**.alter", new AgeValueMatcher())));
+                                                     new Customization("**.alter", new AgeValueMatcher())));
     }
 
     @Test
     void should_map_all_default_user_attributes_to_userInfo_claim()
-        throws URISyntaxException, IOException, JSONException
+            throws URISyntaxException, IOException, JSONException
     {
         UserInfoProviderMapper mapper = new UserInfoProviderMapper();
         IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
         mapper.transformIDToken(idToken, createMapperModel(mapper, true, null), session, createDefaultUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
@@ -93,12 +80,12 @@ class UserInfoProviderMapperTest
 
     @Test
     void should_remove_person_tag_in_userInfo_claim()
-        throws URISyntaxException, IOException, JSONException
+            throws URISyntaxException, IOException, JSONException
     {
         UserInfoProviderMapper mapper = new UserInfoProviderMapper();
         IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
         mapper.transformIDToken(idToken, createMapperModel(mapper, false, "EXTERN"), session, createDefaultUserModel(), context);
         String userInfo = (String)idToken.getOtherClaims().get("userInfo");
@@ -145,10 +132,10 @@ class UserInfoProviderMapperTest
     }
 
     private UserSessionModel createUserModel()
-        throws IOException
+            throws IOException
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
-        RealmModel realm = getTestRealm();
+        RealmModel realm = mock(RealmModel.class);
         TestUserModel userModel = new TestUserModel(null, realm, "224");
         userModel.setSingleAttribute(UserModel.IDP_ALIAS, "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
@@ -199,10 +186,13 @@ class UserInfoProviderMapperTest
     }
 
     private List<String> getGruppenAsJson()
-        throws IOException
+            throws IOException
     {
         List<GruppeWithZugehoerigkeit> gruppen = objectMapper.readValue(Resources.getResource("de/intension/mapper/oidc/gruppen.json"),
-                                                                        new TypeReference<>() {});
+                                                                        new TypeReference<>()
+                                                                        {
+
+                                                                        });
         return gruppen.stream().map(value -> {
             try {
                 return objectMapper.writeValueAsString(value);
@@ -215,7 +205,7 @@ class UserInfoProviderMapperTest
     private UserSessionModel createDefaultUserModel()
     {
         UserSessionModel userSessionModel = mock(UserSessionModel.class);
-        RealmModel realm = getTestRealm();
+        RealmModel realm = mock(RealmModel.class);
         TestUserModel userModel = new TestUserModel(null, realm, "224");
         userModel.setSingleAttribute(UserModel.IDP_ALIAS, "DE-SN-Schullogin");
         userModel.setSingleAttribute(UserInfoAttribute.HEIMATORGANISATION_BUNDESLAND.getAttributeName(), "DE-BY");
@@ -236,19 +226,21 @@ class UserInfoProviderMapperTest
      * Get JSON string from resource path.
      */
     private String getJsonResourceAsString(String path)
-        throws URISyntaxException, IOException
+            throws URISyntaxException, IOException
     {
         URL url = getClass().getClassLoader().getResource(path);
         return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 
-    private RealmModel getTestRealm()
+    private KeycloakSession getMockSession()
     {
-        RealmModel realm = mock(RealmModel.class);
+        KeycloakSession session = mock(KeycloakSession.class);
+        IdentityProviderStorageProvider idpProvider = mock(IdentityProviderStorageProvider.class);
+        when(session.identityProviders()).thenReturn(idpProvider);
         IdentityProviderModel idpModel = mock(IdentityProviderModel.class);
         when(idpModel.getAlias()).thenReturn("DE-SN-Schullogin");
         when(idpModel.getDisplayName()).thenReturn("Musterschule");
-        when(realm.getIdentityProviderByAlias(anyString())).thenReturn(idpModel);
-        return realm;
+        when(idpProvider.getByAlias("DE-SN-Schullogin")).thenReturn(idpModel);
+        return session;
     }
 }

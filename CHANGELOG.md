@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [7.0.0]
+
+- Changed: Upgrade to Keycloak version 26.6.4
+
 ## Version [6.1.0]
 
 Added: Client mapper which creates random SchulConnex data

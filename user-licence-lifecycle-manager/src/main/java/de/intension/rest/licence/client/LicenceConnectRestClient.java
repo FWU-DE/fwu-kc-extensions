@@ -1,23 +1,20 @@
 package de.intension.rest.licence.client;
 
-import static de.intension.rest.licence.model.LicenseConstants.BUNDESLAND_ATTRIBUTE;
-import static de.intension.rest.licence.model.LicenseConstants.CLIENT_ID;
-import static de.intension.rest.licence.model.LicenseConstants.CLIENT_NAME;
-import static de.intension.rest.licence.model.LicenseConstants.USER_ID;
-import static de.intension.rest.licence.model.LicenseConstants.USER_NAME;
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.jboss.logging.Logger.getLogger;
+import jakarta.ws.rs.WebApplicationException;
+import org.apache.http.HttpHeaders;
+import org.jboss.logging.Logger;
+import org.keycloak.http.simple.SimpleHttp;
+import org.keycloak.http.simple.SimpleHttpRequest;
+import org.keycloak.http.simple.SimpleHttpResponse;
+import org.keycloak.models.KeycloakSession;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpHeaders;
-import org.jboss.logging.Logger;
-import org.keycloak.broker.provider.util.SimpleHttp;
-import org.keycloak.models.KeycloakSession;
-
-import jakarta.ws.rs.WebApplicationException;
+import static de.intension.rest.licence.model.LicenseConstants.*;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.jboss.logging.Logger.getLogger;
 
 public class LicenceConnectRestClient {
 
@@ -51,10 +48,10 @@ public class LicenceConnectRestClient {
         String url = String.format("%s/%s/%s", licenceRestUri, UCS_REQUEST_PATH, queryParams.get(USER_NAME));
         String requestString = url + "?clientName" + queryParams.get(CLIENT_ID);
         LOG.debugf("Requesting bilo licenses with url: %s", requestString);
-        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        SimpleHttpRequest simpleHttp = SimpleHttp.create(session).doGet(url);
         addConfig(simpleHttp, Map.of("clientName", queryParams.get(CLIENT_ID)));
 
-        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+        try (SimpleHttpResponse response = simpleHttp.asResponse()) {
             if (response.getStatus() == 200) {
                 LOG.debugf("Received success response for the user for the license type bilo");
                 String responseString = response.asString();
@@ -80,10 +77,10 @@ public class LicenceConnectRestClient {
         String url = String.format("%s/%s", licenceRestUri, LC_REQUEST_PATH);
         String requestString = url + "?" + String.join("&", queryParams.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue()).toList());
         LOG.debugf("Requesting licenses with url: %s", requestString);
-        SimpleHttp simpleHttp = SimpleHttp.doGet(url, session);
+        SimpleHttpRequest simpleHttp = SimpleHttp.create(session).doGet(url);
         addConfig(simpleHttp, queryParams);
 
-        try (SimpleHttp.Response response = simpleHttp.asResponse()) {
+        try (SimpleHttpResponse response = simpleHttp.asResponse()) {
             if (response.getStatus() == 200) {
                 LOG.debugf("Received success response for the user for the license type LC");
                 String responseString = response.asString();
@@ -95,7 +92,7 @@ public class LicenceConnectRestClient {
         }
     }
 
-    private void addConfig(SimpleHttp simpleHttp, Map<String,String> queryParams) {
+    private void addConfig(SimpleHttpRequest simpleHttp, Map<String,String> queryParams) {
         simpleHttp.header("X-API-KEY", this.licenceAPIKey).header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).header(HttpHeaders.ACCEPT, APPLICATION_JSON);
         queryParams.forEach(simpleHttp::param);
     }

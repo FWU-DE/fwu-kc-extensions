@@ -1,4 +1,4 @@
-ARG keycloak_version=26.4.6
+ARG keycloak_version=26.6.4
 FROM quay.io/keycloak/keycloak:${keycloak_version} AS builder
 
 # Enable health and metrics support
