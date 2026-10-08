@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.IdentityProviderStorageProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
@@ -37,7 +38,7 @@ class RandomUserInfoProviderMapperTest
         RandomUserInfoProviderMapper mapper = new RandomUserInfoProviderMapper();
         IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
         TestUserModel user = createBaseUser();
         mapper.transformIDToken(idToken, createMapperModel(mapper), session, createUserSession(user), context);
@@ -51,7 +52,7 @@ class RandomUserInfoProviderMapperTest
         RandomUserInfoProviderMapper mapper = new RandomUserInfoProviderMapper();
         IDToken idToken = new IDToken();
         idToken.setSubject(SUB);
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
         TestUserModel user = createBaseUser();
         user.setSingleAttribute(UserInfoAttribute.PERSON_KONTEXT_ROLLE.getAttributeName(), "LERN");
@@ -71,7 +72,7 @@ class RandomUserInfoProviderMapperTest
         throws Exception
     {
         RandomUserInfoProviderMapper mapper = new RandomUserInfoProviderMapper();
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
 
         TestUserModel user = createBaseUser();
@@ -98,7 +99,7 @@ class RandomUserInfoProviderMapperTest
         throws Exception
     {
         RandomUserInfoProviderMapper mapper = new RandomUserInfoProviderMapper();
-        KeycloakSession session = mock(KeycloakSession.class);
+        KeycloakSession session = getMockSession();
         ClientSessionContext context = mock(ClientSessionContext.class);
 
         TestUserModel userA = createBaseUser();
@@ -155,13 +156,20 @@ class RandomUserInfoProviderMapperTest
         return userSessionModel;
     }
 
-    private RealmModel getTestRealm()
+    private KeycloakSession getMockSession()
     {
-        RealmModel realm = mock(RealmModel.class);
+        KeycloakSession session = mock(KeycloakSession.class);
+        IdentityProviderStorageProvider idpProvider = mock(IdentityProviderStorageProvider.class);
+        when(session.identityProviders()).thenReturn(idpProvider);
         IdentityProviderModel idpModel = mock(IdentityProviderModel.class);
         when(idpModel.getAlias()).thenReturn("DE-SN-Schullogin");
         when(idpModel.getDisplayName()).thenReturn("Musterschule");
-        when(realm.getIdentityProviderByAlias(anyString())).thenReturn(idpModel);
-        return realm;
+        when(idpProvider.getByAlias(anyString())).thenReturn(idpModel);
+        return session;
+    }
+
+    private RealmModel getTestRealm()
+    {
+        return mock(RealmModel.class);
     }
 }
