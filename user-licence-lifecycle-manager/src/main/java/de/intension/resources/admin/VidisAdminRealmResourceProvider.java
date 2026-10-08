@@ -13,19 +13,24 @@ import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.ext.AdminRealmResourceProvider;
 import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.fgap.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.Map;
 
 public class VidisAdminRealmResourceProvider
         implements AdminRealmResourceProvider {
 
     private static final Logger LOG = Logger.getLogger(VidisAdminRealmResourceProvider.class);
     private static final int DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 30;
+    private static final int DEFAULT_MAX_RUNTIME_IN_SECONDS = 60;
+    private static final String LOCK_TIMEOUT_HINT = "jakarta.persistence.lock.timeout";
     public static final String DELETION_TOLERANCE_CONFIG = "deletiontolerance";
+    public static final String MAX_RUNTIME_CONFIG = "maxruntime";
 
     private final KeycloakSession session;
     private AdminPermissionEvaluator auth;
@@ -70,56 +75,81 @@ public class VidisAdminRealmResourceProvider
     }
 
     private int deleteUsersWithoutSession(int maxNoOfUserToDelete, boolean idpOnly) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        RealmModel realmModel = session.getContext().getRealm();
-        UserSessionProvider sessionProvider = session.sessions();
+        KeycloakSessionFactory sessionFactory = session.getKeycloakSessionFactory();
+        KeycloakContext context = session.getContext();
         int numberOfDeletedUsers = 0;
         // users created after the cutoff may still be in the middle of their login and do not have a session yet
         long createdBefore = System.currentTimeMillis()
                 - (long) config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS) * 1000L;
+        // stop in time, so a run never overlaps with the next scheduled one
+        long deadline = System.currentTimeMillis() + config.getInt(MAX_RUNTIME_CONFIG, DEFAULT_MAX_RUNTIME_IN_SECONDS) * 1000L;
         // users with an active session are not deleted, so page by id to not fetch them again
         String lastUserId = "";
-        do {
-            List<UserEntity> idpUsers = getListOfUsers(Math.min(250, maxNoOfUserToDelete - numberOfDeletedUsers), lastUserId, createdBefore, idpOnly);
-            LOG.debugf("Found %s users in realm %s", idpUsers.size(), realmModel.getName());
-            if (idpUsers.isEmpty()) {
+        while (numberOfDeletedUsers < maxNoOfUserToDelete && System.currentTimeMillis() < deadline) {
+            String cursor = lastUserId;
+            int chunkSize = Math.min(250, maxNoOfUserToDelete - numberOfDeletedUsers);
+            List<String> userIds = KeycloakModelUtils.runJobInTransactionWithResult(sessionFactory, context,
+                    s -> getUserIds(s, chunkSize, cursor, createdBefore, idpOnly), "vidis user cleanup scan");
+            LOG.debugf("Found %s users in realm %s", userIds.size(), context.getRealm().getName());
+            if (userIds.isEmpty()) {
                 break;
             }
-            for (UserEntity ue : idpUsers) {
-                lastUserId = ue.getId();
-                try {
-                    em.lock(ue, LockModeType.PESSIMISTIC_WRITE);
-                } catch (Exception e) {
-                    LOG.warnf("Could not lock user %s, skipping", ue.getId());
-                    continue;
+            for (String userId : userIds) {
+                if (System.currentTimeMillis() >= deadline) {
+                    LOG.infof("User cleanup stopped after reaching max runtime");
+                    break;
                 }
-                UserAdapter ua = new UserAdapter(session, realmModel, em, ue);
-                if (sessionProvider.getUserSessionsStream(realmModel, ua).noneMatch(userSession -> true)) {
-                    session.users().removeUser(realmModel, ua);
-                    numberOfDeletedUsers++;
+                // every user is deleted in its own short transaction, so a failure does not roll back the whole run
+                try {
+                    if (KeycloakModelUtils.runJobInTransactionWithResult(sessionFactory, context,
+                            s -> deleteUserWithoutSession(s, userId), "vidis user cleanup delete")) {
+                        numberOfDeletedUsers++;
+                    }
+                } catch (RuntimeException e) {
+                    LOG.warnf("Could not delete user %s, skipping: %s", userId, e.getMessage());
                 }
             }
-        } while (numberOfDeletedUsers < maxNoOfUserToDelete);
+            lastUserId = userIds.get(userIds.size() - 1);
+        }
         return numberOfDeletedUsers;
     }
 
+    private boolean deleteUserWithoutSession(KeycloakSession s, String userId) {
+        RealmModel realm = s.getContext().getRealm();
+        EntityManager em = s.getProvider(JpaConnectionProvider.class).getEntityManager();
+        // a user locked by a login or a concurrent cleanup run fails immediately and is skipped instead of blocking
+        UserEntity ue = em.find(UserEntity.class, userId, LockModeType.PESSIMISTIC_WRITE, Map.of(LOCK_TIMEOUT_HINT, 0));
+        if (ue == null) {
+            return false;
+        }
+        UserAdapter user = new UserAdapter(s, realm, em, ue);
+        if (s.sessions().getUserSessionsStream(realm, user).findAny().isPresent()) {
+            return false;
+        }
+        s.users().removeUser(realm, user);
+        return true;
+    }
+
     @SuppressWarnings("unchecked")
-    private List<UserEntity> getListOfUsers(int chunkSize, String lastUserId, long createdBefore, boolean idpOnly) {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    private static List<String> getUserIds(KeycloakSession s, int chunkSize, String lastUserId, long createdBefore, boolean idpOnly) {
+        EntityManager em = s.getProvider(JpaConnectionProvider.class).getEntityManager();
         String idpOnlyClause = idpOnly ? " and exists (select 1 from federated_identity fi where fi.user_id = ue.id) "
                 : " ";
-        Query userQuery = em.createNativeQuery("select ue.* "
+        // pre-filter on persisted online sessions, the authoritative session check is done before deletion
+        Query userQuery = em.createNativeQuery("select ue.id "
                 + "from user_entity ue "
                 + "where ue.realm_id = :realmId "
                 + "and ue.id > :lastUserId "
                 + "and (ue.created_timestamp <= :createdBefore or ue.created_timestamp is null) "
+                + "and not exists (select 1 from offline_user_session us "
+                + "where us.user_id = ue.id and us.realm_id = ue.realm_id and us.offline_flag = '0') "
                 + idpOnlyClause
                 + "order by ue.id asc "
-                + "LIMIT :chunkSize", UserEntity.class);
+                + "LIMIT :chunkSize");
         userQuery.setParameter("lastUserId", lastUserId);
         userQuery.setParameter("createdBefore", createdBefore);
         userQuery.setParameter("chunkSize", chunkSize);
-        userQuery.setParameter("realmId", session.getContext().getRealm().getId());
+        userQuery.setParameter("realmId", s.getContext().getRealm().getId());
         return userQuery.getResultList();
     }
 }

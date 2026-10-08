@@ -1,8 +1,11 @@
 package de.intension.resources.admin;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PessimisticLockException;
 import jakarta.persistence.Query;
 import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +13,12 @@ import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.fgap.UserPermissionEvaluator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -24,6 +29,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -47,6 +53,7 @@ class VidisAdminRealmResourceProviderTest {
     @Mock
     private UserProvider userProvider;
 
+    private MockedStatic<KeycloakModelUtils> modelUtils;
     private VidisAdminRealmResourceProvider provider;
 
     @BeforeEach
@@ -61,10 +68,18 @@ class VidisAdminRealmResourceProviderTest {
         when(realm.getId()).thenReturn("realm-id");
         when(session.sessions()).thenReturn(sessionProvider);
         when(session.users()).thenReturn(userProvider);
-        when(em.createNativeQuery(anyString(), eq(UserEntity.class))).thenReturn(query);
+        when(em.createNativeQuery(anyString())).thenReturn(query);
         when(query.setParameter(anyString(), any())).thenReturn(query);
+        when(em.find(eq(UserEntity.class), anyString(), eq(LockModeType.PESSIMISTIC_WRITE), anyMap()))
+                .thenAnswer(inv -> user(inv.getArgument(1)));
         when(config.get("fwu", DeletableUserType.NONE.name())).thenReturn(DeletableUserType.IDP.name());
         when(config.getInt(VidisAdminRealmResourceProvider.DELETION_TOLERANCE_CONFIG, 30)).thenReturn(30);
+        when(config.getInt(VidisAdminRealmResourceProvider.MAX_RUNTIME_CONFIG, 60)).thenReturn(60);
+
+        // run the jobs directly with the mocked session instead of opening new sessions and transactions
+        modelUtils = mockStatic(KeycloakModelUtils.class);
+        modelUtils.when(() -> KeycloakModelUtils.runJobInTransactionWithResult(any(), any(), any(), anyString()))
+                .thenAnswer(inv -> inv.<KeycloakSessionTaskWithResult<?>>getArgument(2).run(session));
 
         AdminPermissionEvaluator auth = mock(AdminPermissionEvaluator.class);
         when(auth.users()).thenReturn(mock(UserPermissionEvaluator.class));
@@ -72,24 +87,62 @@ class VidisAdminRealmResourceProviderTest {
         provider.getResource(session, realm, auth, null);
     }
 
+    @AfterEach
+    void tearDown() {
+        modelUtils.close();
+    }
+
     @Test
     void shouldPageByUserIdAndSkipUsersWithSession() {
-        when(query.getResultList()).thenReturn(List.of(user("a"), user("b")), List.of(user("c")), List.of());
+        when(query.getResultList()).thenReturn(List.of("a", "b"), List.of("c"), List.of());
         usersWithSession("a", "c");
 
         Response response = provider.deleteUsers(1000);
 
         assertThat(deletedUsers(response)).isEqualTo(1);
-        ArgumentCaptor<UserModel> removed = ArgumentCaptor.forClass(UserModel.class);
-        verify(userProvider).removeUser(eq(realm), removed.capture());
-        assertThat(removed.getValue().getId()).isEqualTo("b");
+        assertThat(removedUserIds()).containsExactly("b");
         ArgumentCaptor<Object> lastUserIds = ArgumentCaptor.forClass(Object.class);
         verify(query, times(3)).setParameter(eq("lastUserId"), lastUserIds.capture());
         assertThat(lastUserIds.getAllValues()).as("cursor must move past users that were kept").containsExactly("", "b", "c");
     }
 
     @Test
-    void shouldOnlySelectUsersCreatedBeforeTolerance() {
+    void shouldSkipUser_whenLockFails() {
+        when(query.getResultList()).thenReturn(List.of("a", "b"), List.of());
+        usersWithSession();
+        when(em.find(eq(UserEntity.class), eq("a"), eq(LockModeType.PESSIMISTIC_WRITE), anyMap()))
+                .thenThrow(new PessimisticLockException("locked"));
+
+        Response response = provider.deleteUsers(1000);
+
+        assertThat(deletedUsers(response)).isEqualTo(1);
+        assertThat(removedUserIds()).containsExactly("b");
+    }
+
+    @Test
+    void shouldSkipUser_whenAlreadyDeleted() {
+        when(query.getResultList()).thenReturn(List.of("a"), List.of());
+        when(em.find(eq(UserEntity.class), eq("a"), eq(LockModeType.PESSIMISTIC_WRITE), anyMap())).thenReturn(null);
+
+        Response response = provider.deleteUsers(1000);
+
+        assertThat(deletedUsers(response)).isZero();
+        verify(userProvider, never()).removeUser(any(), any());
+    }
+
+    @Test
+    void shouldStop_whenMaxRuntimeReached() {
+        when(config.getInt(VidisAdminRealmResourceProvider.MAX_RUNTIME_CONFIG, 60)).thenReturn(0);
+        when(query.getResultList()).thenReturn(List.of("a"));
+
+        Response response = provider.deleteUsers(1000);
+
+        assertThat(deletedUsers(response)).isZero();
+        verify(userProvider, never()).removeUser(any(), any());
+    }
+
+    @Test
+    void shouldOnlySelectUsersCreatedBeforeToleranceAndWithoutPersistedSession() {
         when(config.getInt(VidisAdminRealmResourceProvider.DELETION_TOLERANCE_CONFIG, 30)).thenReturn(60);
         when(query.getResultList()).thenReturn(List.of());
 
@@ -101,8 +154,8 @@ class VidisAdminRealmResourceProviderTest {
         verify(query).setParameter(eq("createdBefore"), createdBefore.capture());
         assertThat((Long) createdBefore.getValue()).isBetween(before - 60_000L, after - 60_000L);
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(em).createNativeQuery(sql.capture(), eq(UserEntity.class));
-        assertThat(sql.getValue()).contains("ue.created_timestamp <= :createdBefore", "federated_identity");
+        verify(em).createNativeQuery(sql.capture());
+        assertThat(sql.getValue()).contains("ue.created_timestamp <= :createdBefore", "offline_user_session", "federated_identity");
     }
 
     @Test
@@ -113,13 +166,13 @@ class VidisAdminRealmResourceProviderTest {
         provider.deleteUsers(1000);
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(em).createNativeQuery(sql.capture(), eq(UserEntity.class));
+        verify(em).createNativeQuery(sql.capture());
         assertThat(sql.getValue()).doesNotContain("federated_identity");
     }
 
     @Test
     void shouldStopAtMax() {
-        when(query.getResultList()).thenReturn(List.of(user("a"), user("b")), List.of(user("c")));
+        when(query.getResultList()).thenReturn(List.of("a", "b"), List.of("c"));
         usersWithSession();
 
         Response response = provider.deleteUsers(2);
@@ -145,6 +198,12 @@ class VidisAdminRealmResourceProviderTest {
                 .thenAnswer(inv -> ids.contains(inv.<UserModel>getArgument(1).getId())
                         ? Stream.of(mock(UserSessionModel.class))
                         : Stream.empty());
+    }
+
+    private List<String> removedUserIds() {
+        ArgumentCaptor<UserModel> removed = ArgumentCaptor.forClass(UserModel.class);
+        verify(userProvider, atLeast(0)).removeUser(eq(realm), removed.capture());
+        return removed.getAllValues().stream().map(UserModel::getId).toList();
     }
 
     private static UserEntity user(String id) {
