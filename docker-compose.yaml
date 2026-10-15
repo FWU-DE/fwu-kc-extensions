@@ -15,6 +15,7 @@ services:
     restart: always
     environment:
       KC_LOG_LEVEL: INFO,de.intension:debug
+      KC_LOG_CONSOLE_FORMAT: "%d{yyyy-MM-dd HH:mm:ss,SSS} (%t) [%X{trace-id}] %-5p [%c] %s%e%n"
       KC_HTTP_RELATIVE_PATH: "/auth"
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: keycloak

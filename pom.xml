@@ -29,10 +29,11 @@
     <module>acr-values-authenticator</module>
     <module>user-licence-lifecycle-manager</module>
     <module>restrained-cookie-authenticator</module>
+    <module>trace-id-filter</module>
   </modules>
 
   <properties>
-    <revision>7.0.0</revision>
+    <revision>7.1.0</revision>
     <keycloak.version>26.6.4</keycloak.version>
     <keycloak.admin.client.version>26.0.12</keycloak.admin.client.version>
     <java.version>21</java.version>
