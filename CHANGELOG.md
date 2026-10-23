@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [7.1.1]
+
+Changed: VidisAdminRealmResourceProvider never deletes service accounts
+
 ## Version [7.1.0]
 
 Added: Request filter which adds a trace ID (header/query parameter `x-trace-id` or generated) to the logging MDC

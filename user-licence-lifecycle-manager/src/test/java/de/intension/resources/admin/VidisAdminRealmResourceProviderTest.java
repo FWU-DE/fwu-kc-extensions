@@ -24,7 +24,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,10 +106,11 @@ class VidisAdminRealmResourceProviderTest {
         ArgumentCaptor<Object> lastUserIds = ArgumentCaptor.forClass(Object.class);
         verify(query, times(3)).setParameter(eq("lastUserId"), lastUserIds.capture());
         assertThat(lastUserIds.getAllValues()).as("cursor must move past users that were kept").containsExactly("", "b", "c");
+        verify(em).find(UserEntity.class, "b", LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout", -2));
     }
 
     @Test
-    void shouldSkipUser_whenLockFails() {
+    void shouldContinue_whenDeletionOfSingleUserFails() {
         when(query.getResultList()).thenReturn(List.of("a", "b"), List.of());
         usersWithSession();
         when(em.find(eq(UserEntity.class), eq("a"), eq(LockModeType.PESSIMISTIC_WRITE), anyMap()))
@@ -120,7 +123,21 @@ class VidisAdminRealmResourceProviderTest {
     }
 
     @Test
-    void shouldSkipUser_whenAlreadyDeleted() {
+    void shouldAbort_whenDeletionsKeepFailing() {
+        List<String> ids = IntStream.range(0, 50).mapToObj(i -> "u" + i).toList();
+        when(query.getResultList()).thenReturn(ids, List.of());
+        when(em.find(eq(UserEntity.class), anyString(), eq(LockModeType.PESSIMISTIC_WRITE), anyMap()))
+                .thenThrow(new ModelException("database unavailable"));
+
+        Response response = provider.deleteUsers(1000);
+
+        assertThat(deletedUsers(response)).isZero();
+        verify(em, times(10)).find(eq(UserEntity.class), anyString(), eq(LockModeType.PESSIMISTIC_WRITE), anyMap());
+        verify(query).getResultList();
+    }
+
+    @Test
+    void shouldSkipUser_whenLockedOrAlreadyDeleted() {
         when(query.getResultList()).thenReturn(List.of("a"), List.of());
         when(em.find(eq(UserEntity.class), eq("a"), eq(LockModeType.PESSIMISTIC_WRITE), anyMap())).thenReturn(null);
 
@@ -155,7 +172,8 @@ class VidisAdminRealmResourceProviderTest {
         assertThat((Long) createdBefore.getValue()).isBetween(before - 60_000L, after - 60_000L);
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(em).createNativeQuery(sql.capture());
-        assertThat(sql.getValue()).contains("ue.created_timestamp <= :createdBefore", "offline_user_session", "federated_identity");
+        assertThat(sql.getValue()).contains("ue.created_timestamp <= :createdBefore", "offline_user_session", "federated_identity",
+                "ue.service_account_client_link is null");
     }
 
     @Test
@@ -167,7 +185,22 @@ class VidisAdminRealmResourceProviderTest {
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(em).createNativeQuery(sql.capture());
-        assertThat(sql.getValue()).doesNotContain("federated_identity");
+        assertThat(sql.getValue()).doesNotContain("federated_identity").contains("ue.service_account_client_link is null");
+    }
+
+    @Test
+    void shouldNotDeleteServiceAccount() {
+        when(config.get("fwu", DeletableUserType.NONE.name())).thenReturn(DeletableUserType.ALL.name());
+        when(query.getResultList()).thenReturn(List.of("a", "b"), List.of());
+        usersWithSession();
+        UserEntity serviceAccount = user("a");
+        serviceAccount.setServiceAccountClientLink("client-id");
+        when(em.find(eq(UserEntity.class), eq("a"), eq(LockModeType.PESSIMISTIC_WRITE), anyMap())).thenReturn(serviceAccount);
+
+        Response response = provider.deleteUsers(1000);
+
+        assertThat(deletedUsers(response)).isEqualTo(1);
+        assertThat(removedUserIds()).containsExactly("b");
     }
 
     @Test
