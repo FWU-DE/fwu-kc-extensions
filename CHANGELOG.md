@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [7.1.0]
+
+Added: Request filter which adds a trace ID (header/query parameter `x-trace-id` or generated) to the logging MDC
+
 ## Version [7.0.0]
 
 - Changed: Upgrade to Keycloak version 26.6.4

@@ -91,6 +91,12 @@ Additionally, it holds the customization to remove inactive users and remove the
 on logout.
 For more details please check [here](./user-licence-lifecycle-manager/README.md).
 
+### Trace ID filter
+
+Request filter which takes the trace ID from header or query parameter `x-trace-id` (or generates one), keeps it
+consistent during an authentication flow and adds it to the logging MDC as `trace-id`.
+For more details please check [here](./trace-id-filter/README.md).
+
 ## Guides
 
 ### Sector identifier pseudonym pass-through
