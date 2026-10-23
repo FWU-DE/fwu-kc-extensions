@@ -28,7 +28,9 @@ public class VidisAdminRealmResourceProvider
     private static final Logger LOG = Logger.getLogger(VidisAdminRealmResourceProvider.class);
     private static final int DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS = 30;
     private static final int DEFAULT_MAX_RUNTIME_IN_SECONDS = 60;
+    private static final int MAX_CONSECUTIVE_FAILURES = 10;
     private static final String LOCK_TIMEOUT_HINT = "jakarta.persistence.lock.timeout";
+    private static final int SKIP_LOCKED = -2;
     public static final String DELETION_TOLERANCE_CONFIG = "deletiontolerance";
     public static final String MAX_RUNTIME_CONFIG = "maxruntime";
 
@@ -78,6 +80,7 @@ public class VidisAdminRealmResourceProvider
         KeycloakSessionFactory sessionFactory = session.getKeycloakSessionFactory();
         KeycloakContext context = session.getContext();
         int numberOfDeletedUsers = 0;
+        int consecutiveFailures = 0;
         // users created after the cutoff may still be in the middle of their login and do not have a session yet
         long createdBefore = System.currentTimeMillis()
                 - (long) config.getInt(DELETION_TOLERANCE_CONFIG, DEFAULT_TOLERANCE_FOR_USER_IN_CREATION_IN_SECONDS) * 1000L;
@@ -96,7 +99,7 @@ public class VidisAdminRealmResourceProvider
             }
             for (String userId : userIds) {
                 if (System.currentTimeMillis() >= deadline) {
-                    LOG.infof("User cleanup stopped after reaching max runtime");
+                    LOG.info("User cleanup stopped after reaching max runtime");
                     break;
                 }
                 // every user is deleted in its own short transaction, so a failure does not roll back the whole run
@@ -105,8 +108,14 @@ public class VidisAdminRealmResourceProvider
                             s -> deleteUserWithoutSession(s, userId), "vidis user cleanup delete")) {
                         numberOfDeletedUsers++;
                     }
+                    consecutiveFailures = 0;
                 } catch (RuntimeException e) {
                     LOG.warnf("Could not delete user %s, skipping: %s", userId, e.getMessage());
+                    // e.g. database overloaded or unavailable, leave it to the next run
+                    if (++consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                        LOG.warnf("User cleanup aborted after %s consecutive failures", consecutiveFailures);
+                        return numberOfDeletedUsers;
+                    }
                 }
             }
             lastUserId = userIds.get(userIds.size() - 1);
@@ -117,9 +126,14 @@ public class VidisAdminRealmResourceProvider
     private boolean deleteUserWithoutSession(KeycloakSession s, String userId) {
         RealmModel realm = s.getContext().getRealm();
         EntityManager em = s.getProvider(JpaConnectionProvider.class).getEntityManager();
-        // a user locked by a login or a concurrent cleanup run fails immediately and is skipped instead of blocking
-        UserEntity ue = em.find(UserEntity.class, userId, LockModeType.PESSIMISTIC_WRITE, Map.of(LOCK_TIMEOUT_HINT, 0));
+        // a user locked by a login or a concurrent cleanup run is skipped instead of waiting for the lock
+        UserEntity ue = em.find(UserEntity.class, userId, LockModeType.PESSIMISTIC_WRITE, Map.of(LOCK_TIMEOUT_HINT, SKIP_LOCKED));
         if (ue == null) {
+            LOG.debugf("User %s is locked or already deleted, skipping", userId);
+            return false;
+        }
+        if (ue.getServiceAccountClientLink() != null) {
+            LOG.debugf("User %s is a service account, skipping", userId);
             return false;
         }
         UserAdapter user = new UserAdapter(s, realm, em, ue);
@@ -141,6 +155,8 @@ public class VidisAdminRealmResourceProvider
                 + "where ue.realm_id = :realmId "
                 + "and ue.id > :lastUserId "
                 + "and (ue.created_timestamp <= :createdBefore or ue.created_timestamp is null) "
+                // service accounts never have a user session, but must never be deleted
+                + "and ue.service_account_client_link is null "
                 + "and not exists (select 1 from offline_user_session us "
                 + "where us.user_id = ue.id and us.realm_id = ue.realm_id and us.offline_flag = '0') "
                 + idpOnlyClause
