@@ -33,7 +33,7 @@
   </modules>
 
   <properties>
-    <revision>7.1.1</revision>
+    <revision>7.1.2</revision>
     <keycloak.version>26.6.4</keycloak.version>
     <keycloak.admin.client.version>26.0.12</keycloak.admin.client.version>
     <java.version>21</java.version>
@@ -47,7 +47,7 @@
     <jackson.version>2.20.0</jackson.version>
     <mockito.version>5.2.0</mockito.version>
     <mockserver.version>5.13.2</mockserver.version>
-    <testcontainers.version>1.21.3</testcontainers.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     <maven.compiler.version>3.14.1</maven.compiler.version>
     <log4j.version>2.25.2</log4j.version>
@@ -302,7 +302,10 @@
       <dependency>
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
-        <version>5.27.0</version>
+        <!-- Do not upgrade to 5.27.0+: these versions depend on Netty 4.2, which ends up in 3rd-party-libs next to
+        Keycloak's own Netty and caused a direct buffer memory leak in production. Netty can't simply be excluded,
+        because ConnectionFactory references it in its constructor. -->
+        <version>5.26.0</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>

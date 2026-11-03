@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## Version [7.1.2]
+
+Fixed: Downgrade amqp-client to 5.26.0, so 3rd-party-libs no longer bundles Netty 4.2 next to Keycloak's own Netty (caused a direct buffer memory leak)
+
 ## Version [7.1.1]
 
 Changed: VidisAdminRealmResourceProvider never deletes service accounts
